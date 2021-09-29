@@ -1,22 +1,14 @@
 package Data_Structures.HashTables;
 
-class InvalidPrimeNumberException extends Exception {
-  int num;
-
-  <T extends Number>InvalidPrimeNumberException(T p) { num = p.intValue(); }
-
-  public String toString() {
-    return "\nNumber: " + num + " is not a valid prime number";
-  }
-}
+import Data_Structures.HashTables.HashTableExceptions.*;
 
 public final class HashTableFunctions {
   /**
    * Given a valid {@code Number} type, determines if it is a prime number.
    * 
    * @param <T> {@code Number}
-   * @param p The number to check if prime or not
-   * @return Is number prime
+   * @param p number to check if prime or not
+   * @return is number prime
    */
   public static <T extends Number> boolean isPrime(T p) {
     int x = p.intValue();
@@ -38,23 +30,25 @@ public final class HashTableFunctions {
   }
 
   /**
-   * Creates values that will be injective for the given set, table size, and prime number
+   * Recursive function that creates values that will be injective for 
+   * the given set, table size, and prime number.
    * 
    * @param <T> {@code Number}
-   * @param S The set or list of elements to create the hash function for
-   * @param m The maximal size of the subtable
-   * @param p The prime number of the hash table T 
-   * @throws InvalidPrimeNumberException when given an invalid prime number
+   * @param S set or list of elements to create the hash function for
+   * @param m maximal size of the subtable
+   * @param p prime number of the hash table T 
+   * @throws InvalidPrimeException when given an invalid prime number
    * @return [a, b] int constants for table hash function
    */
-  public static <T extends Number> int[] injectiveIntegers(T[] S, T m, T p) 
-    throws InvalidPrimeNumberException {
-    if (HashTableFunctions.isPrime(p) == false) {
-      throw new InvalidPrimeNumberException(p);
-    }
+  public static <T extends Number> int[] injectiveIntegers(T[] S, int m, int p) throws HashTableException {
+    // Sanity checks on prime number and subtable size
+    if (HashTableFunctions.isPrime(p) == false)
+      throw new InvalidPrimeException(p);
+    else if (m < 0)
+      throw new InvalidSubtableSizeException(m);
 
     int[] used = new int[100];
-    int a = (int) (Math.random() * p.intValue() - 2) + 1;
+    int a = (int) (Math.random() * p - 2) + 1;
     int b = S.length;
     int used_idx = 0;
     int hash;
@@ -62,7 +56,7 @@ public final class HashTableFunctions {
     // Iterate through every value in the set
     for (T k : S) {
       // Get the hash value
-      hash = ((a * k.intValue() + b) % p.intValue() % m.intValue());
+      hash = ((a * k.intValue() + b) % p % m);
 
       if (used_idx == 0) {
         used[used_idx++] = hash;
@@ -105,7 +99,7 @@ class HashTableFunctionsDemo {
 
       for (int x : constants) System.out.println(x);
       
-    } catch (InvalidPrimeNumberException err) {
+    } catch (HashTableException err) {
       System.out.println(err);
     }
   }

@@ -1,9 +1,11 @@
 package Data_Structures.HashTables.PerfectHashing;
 
-import Data_Structures.HashTables.Entry;
-import Data_Structures.HashTables.DuplicateKeyException;
+import java.util.Hashtable;
 
-// TODO: import functions to verify prime numbers
+import Data_Structures.HashTables.Entry;
+import Data_Structures.HashTables.HashTableFunctions;
+import Data_Structures.HashTables.HashTableExceptions.*;
+
 // TODO: add the delete and get methods
 final class CuckooHashSubtable<K extends Number, V> {
   private int m, p, a, b;
@@ -64,42 +66,52 @@ final class CuckooHashSubtable<K extends Number, V> {
  * @since 1.0
  */
 public final class CuckooHashTable<K extends Number, V> {
-  private int T = 3;
-  private int p = 1277;
-  private int m = 1;
-  private int c = 4;
-  private int n = 0;
-  private float loadFactor = 0.9f;
+  private final int T = 3, c = 4;
+  private int p, m, n = 0;
+  private float loadFactor;
   private CuckooHashSubtable<?, ?> tables[] = new CuckooHashSubtable<?, ?>[T];
 
-  // Construct an empty table
+  // Construct an empty table with a given prime and subtable size
+  CuckooHashTable(int p, int m, float loadFactor) {
+    if (HashTableFunctions.isPrime(p) == false)
+      throw new InvalidPrimeException(p);
+    else if (m < 1) 
+      throw new InvalidSubtableSizeException(m);
+    else if (Float.isNaN(loadFactor) || Float.compare(loadFactor, 0) <= 0)
+      throw new InvalidLoadFactorException(loadFactor);
+
+    this.p = p;
+    this.m = m;
+
+    for (int i=0; i<T; ++i) {
+      tables[i] = new CuckooHashSubtable<K, V>(p, m);
+    }   
+  }
+
+  // Construct an empty table with default values
   CuckooHashTable() {
-    initSubtables(p, m);
+    this(1277, 1, 0.9f);
   }
 
   // Construct an empty table with a given prime
   CuckooHashTable(int p) {
-    this.p = p;
-
-    initSubtables(p, m);
+    this(p, 1, 0.9f);
   }
 
-  // Construct an empty table with a given prime and subtable size
   CuckooHashTable(int p, int m) {
-    this.p = p;
-    this.m = m;
+    this(p, m, 0.9f);
+  }
 
-    initSubtables(p, m);
+  CuckooHashTable(int p, float loadFactor) {
+    this(p, 1, loadFactor);
+  }
+
+  CuckooHashTable(float loadFactor, int m) {
+    this(1277, m, loadFactor);
   }
   
   // Construct a table from a given set
   // CuckooHashTable()
-  
-  private void initSubtables(int p, int m) {
-    for (int i=0; i<T; ++i) {
-      tables[i] = new CuckooHashSubtable<K, V>(p, m);
-    }  
-  }
 
   // Supress type safety check for when the prevEntry is type casted because
   // it can only be inserted as a new Entry<K, V> so we know when we retrieve
