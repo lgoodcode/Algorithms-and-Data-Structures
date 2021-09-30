@@ -1,8 +1,6 @@
 package Data_Structures.HashTables.PerfectHashing;
 
-import java.util.Arrays;
-import java.util.Comparator;
-
+// TODO: complete this entire thing
 class TableTooLargeException extends Exception {
   private int s;
   private int p;
@@ -43,11 +41,6 @@ public final class DynPerfHash<T extends Number> {
     // int array K will hold the hash value 
     int[][] K = new int[m/2][m/4];
     K[4][1] = 100;
-  }
-
-
-
-    
   }
 
 }

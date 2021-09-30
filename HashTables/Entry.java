@@ -11,6 +11,12 @@ public final class Entry<K extends Number, V> {
     this.value = value;
   }
 
+  public Entry(K key, V value) {
+    this.hash = -1;
+    this.key = key;
+    this.value = value;
+  }
+
   @SuppressWarnings("unchecked")
   public Entry(int hash, int key, V value) {
     this.hash = hash;

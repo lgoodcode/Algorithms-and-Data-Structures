@@ -1,4 +1,4 @@
-package Data_Structures.HashTables;
+package Data_Structures.HashTables.DoubleHashing;
 
 public class DoubleHashingDemo {
   public static void main(String[] args) {

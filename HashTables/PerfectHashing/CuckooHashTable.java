@@ -1,124 +1,222 @@
 package Data_Structures.HashTables.PerfectHashing;
 
-import java.util.Hashtable;
-
 import Data_Structures.HashTables.Entry;
 import Data_Structures.HashTables.HashTableFunctions;
-import Data_Structures.HashTables.HashTableExceptions.*;
-
-// TODO: add the delete and get methods
-final class CuckooHashSubtable<K extends Number, V> {
-  private int m, p, a, b;
-  private Entry<?, ?>[] table;
-
-  CuckooHashSubtable(int p, int m) {
-    this.p = p;
-    this.m = m;
-    a = (int) (Math.random() * p - 2) + 1;
-    b = (int) (Math.random() * p) - 1;
-    table = new Entry<?, ?>[m];
-  }
-
-  public int hash(int k) {
-    return ((this.a * k + this.b) % this.p) % this.m;
-  }
-
-  public Entry<?, ?> [] getTable() {
-    return table;
-  }
-
-  public boolean contains(int hash) {
-    return table[hash] != null;
-  }
-
-  public void insert(Entry<?, ?> entry) {
-    table[entry.getHash()] = entry;
-  }
-
-  // public void insert(int hash, K key, V value) {
-  //   table[hash] = new Entry<K, V>(hash, key, value);
-  // }
-
-  public Entry<?, ?> remove(int hash) {
-    Entry<?, ?> entry = table[hash];
-
-    table[hash] = null;
-
-    return entry;
-  }  
-}
+import Data_Structures.HashTables.HashTableExceptions.DuplicateKeyException;
 
 /**
- * CuckooHashTable
+ * This class implements a high performance dynamic hashtable where the size
+ * is initialized to the current needs and updates its size when needed as it
+ * reaches a certain load threshold. Any {@code Number} class or subclass is
+ * used as the key while any non-{@code null} object can be used as the value.
+ * 
+ * <h3>Important</h3>
+ * <p>The prime number must be larger than the expected total table size
+ * otherwise the hash function will not work properly and may cause the table
+ * to break.</p>
+ * 
+ * <hr/>
+ *  
+ * <p>An instance of {@code CuckooHashTable} uses a prime number {@code p} within 
+ * the hash function and will also construct {@code CuckooHashSubtable} for the 
+ * subtables which is an inner class, to hold the actual entries. The entries 
+ * themselves are of the {@code Entry} class.</p>
+ * 
+ * <p>The default values are: <ul><li>{@code p} 1277</li><li>{@code T} 3</li>
+ * <li>{@code m} 1</li><li>{@code c} 4</li><li>{@code loadFactor} 0.9</li></ul>
+ * 
+ * <p>*Some concepts are similar to the java.util.Hashtable implementation by 
+ * <i>Arthur van Hoff, Josh Bloch, and Neal Gafter</i>.</p>
  * 
  * @param <K> number type to hold the entry key
  * @param <V> type to hold the value
- * @param T number of subtables
- * @param p prime number for subtables hash function
- * @param m subtable size
- * @param c constant for recalulating {@code m}
- * @param n number of entries
- * @param loadFactor maximum percentage of entries before rebuilding subtables
- * @param tables {@code CuckooHashSubtable<K, V>[T]} to hash and hold entries
  * 
  * @author Lawrence Good
- * 
+ * @see CuckooHashSubtable
+ * @see Entry
  * @since 1.0
  */
 public final class CuckooHashTable<K extends Number, V> {
-  private final int T = 3, c = 4;
-  private int p, m, n = 0;
-  private float loadFactor;
+  /**
+   * The number of subtables. According to a calculation (I can't remember from
+   * where but I'm sure the source is a google away) three subtables has a load
+   * capacity of 91% versus 50% with two tables.
+   */
+  private final int T = 3;
+
+  /**
+   * The constant used to recalculate the subtable size {@code m}.
+   */
+  private final int c = 4;
+
+  /**
+   * The prime number for the hash function. Must be larger than the total table
+   * size.
+   */
+  private int p;
+
+  /**
+   * The subtable size.
+   */
+  private int m;
+
+  /**
+   * The counter to track the number of entries total in the hashtable.
+   */
+  private int n = 0;
+
+  /**
+   * The maximum threshold for the capacity of the hashtable before rebuilding.
+   */
+  private float loadFactor;  
+
+  /**
+   * The hashtable subtables that hold the entries.
+   */
   private CuckooHashSubtable<?, ?> tables[] = new CuckooHashSubtable<?, ?>[T];
 
-  // Construct an empty table with a given prime and subtable size
-  CuckooHashTable(int p, int m, float loadFactor) {
+  /**
+   * Constructs a new, empty hashtable with the specified inital prime number,
+   * subtable size, and load factor.
+   * 
+   * @param p prime number for subtables hash function
+   * @param m subtable size
+   * @param loadFactor maximum percentage of entries before rebuilding subtables.
+   * Must be greater than or equal to 0.5f.
+   * @throws IllegalArgumentException when given a prime number that isn't prime,
+   * a subtable size smaller than 1, or a load factor less then 0.5f.
+   */
+  public CuckooHashTable(int p, int m, float loadFactor) throws IllegalArgumentException {
     if (HashTableFunctions.isPrime(p) == false)
-      throw new InvalidPrimeException(p);
+      throw new IllegalArgumentException("Illegal prime number: " + p);
     else if (m < 1) 
-      throw new InvalidSubtableSizeException(m);
-    else if (Float.isNaN(loadFactor) || Float.compare(loadFactor, 0) <= 0)
-      throw new InvalidLoadFactorException(loadFactor);
+      throw new IllegalArgumentException("Illegal subtable size: " + m);
+    else if (Float.isNaN(loadFactor) || Float.compare(loadFactor, 0.5f) < 0)
+      throw new IllegalArgumentException("Illegal load factor: " + loadFactor);
 
     this.p = p;
     this.m = m;
+    this.loadFactor = loadFactor;
 
-    for (int i=0; i<T; ++i) {
-      tables[i] = new CuckooHashSubtable<K, V>(p, m);
-    }   
+    buildSubtables();
   }
 
-  // Construct an empty table with default values
-  CuckooHashTable() {
+  /**
+   * Constructs a new, empty hashtable with all default values: prime (1277),
+   * subtable size (1), and load factor (0.9).
+   */
+  public CuckooHashTable() {
     this(1277, 1, 0.9f);
   }
 
-  // Construct an empty table with a given prime
-  CuckooHashTable(int p) {
+  /**
+   * Constructs a new, empty hashtable with the specified prime number and
+   * default subtable size (1) and load factor (0.9).
+   * 
+   * @param p prime number
+   * @throws IllegalArgumentException if the number isn't prime
+   */
+  public CuckooHashTable(int p) {
     this(p, 1, 0.9f);
   }
 
-  CuckooHashTable(int p, int m) {
+  /**
+   * Constructs a new, empty hashtable with the specified prime number and
+   * subtable size, and default load factor(0.9).
+   * @param p prime number
+   * @param m subtable size
+   * @throws IllegalArgumentException if the number isn't prime or the subtable 
+   * size is less than 1.
+   */
+  public CuckooHashTable(int p, int m) {
     this(p, m, 0.9f);
   }
 
-  CuckooHashTable(int p, float loadFactor) {
+  /**
+   * Constructs a new, empty hashtable with the specified prime number and
+   * load factor, and default subtable size(1).
+   * 
+   * @param p prime number
+   * @param loadFactor load factor
+   * @throws IllegalArgumentException if the number isn't prime or the load factor
+   * is less than 0.5.
+   */
+  public CuckooHashTable(int p, float loadFactor) {
     this(p, 1, loadFactor);
   }
 
-  CuckooHashTable(float loadFactor, int m) {
+  /**
+   * Constructs a new, empty hashtable with the specified load factor and
+   * subtable size, and default prime (1277).
+   * 
+   * @param loadFactor load factor
+   * @param m subtable size
+   * @throws IllegalArgumentException if the load factor is less than 0.5 or the
+   * subtable size is less than 1.
+   */
+  public CuckooHashTable(float loadFactor, int m) {
     this(1277, m, loadFactor);
   }
   
-  // Construct a table from a given set
-  // CuckooHashTable()
+  // TODO: add constructor to initalize a predefined set
 
-  // Supress type safety check for when the prevEntry is type casted because
-  // it can only be inserted as a new Entry<K, V> so we know when we retrieve
-  // an entry, it will always be of type <K, V>
+  /**
+   * Used within insert() and determines whether the incremented size counter
+   * is equal to or exceeds the load capacity.
+   * 
+   * @return if the new entry cause the table size to exceed load capacity
+   */
+  private boolean capacityReached() {
+    return ++n >= (m * T) * loadFactor;
+  }
+
+  /**
+   * Rebuilds the subtables by setting the table index to point to the new
+   * {@code CuckooHashSubtable} thereby removing the references to the 
+   * previous tables to allow them to be garbage collected.
+   */
+  private synchronized void buildSubtables() {
+    for (int i=0; i<T; ++i) {
+      tables[i] = new CuckooHashSubtable<K, V>(p, m);
+    } 
+  }
+
+  /**
+   * Inserts the given value into the table using the hashed value of the key.
+   * Neither the key nor the value can be {@code null}.
+   * 
+   * <p>Supressed type safety check for when the prevEntry is type casted because
+   * it can only be inserted as a new Entry<K, V> so we know when we retrieve
+   * an entry, it will always be of type <K, V></p>
+   * 
+   * <hr>
+   * 
+   * <h3>Internal operations</h3>
+   * 
+   * <p>Cycles through all the tables until new value is inserted or reach a cycle.
+   * {@code i % 3} keeps the counter in the range {@code [0, 2]} for the tables 
+   * and ommited the conditional statement for infinite looping. The for-loop is chosen
+   * over the while-loop due to the fact an index {@code i} is required to continuously
+   * loop through the tables.</p>
+   * 
+   * <p>A boolean value {@code first} is used to check the key from the first swap, if 
+   * any, is equal to the argument {@code key}. If so, then it is a duplicate key 
+   * because the hash function is deterministic, in that a given input will output
+   * the same value every time. So that means that the keys are the same and hashed
+   * to the same slot. This will throw an exception because duplicates will break the 
+   * hashtable.</p>
+   * 
+   * @param key the hashtable key
+   * @param value the value
+   * @throws NullPointerException if the key or value is null
+   * @throws DuplicateKeyException if the key already exists in the hashtable
+   */
   @SuppressWarnings("unchecked")
-  public void insert(K key, V value) throws DuplicateKeyException {
-    if (++n >= (m * T) * loadFactor) {
+  public synchronized void insert(K key, V value) throws NullPointerException, DuplicateKeyException {
+    if (key == null || value == null)
+      throw new NullPointerException();
+    
+    if (capacityReached()) {
       fullRehash(key, value);
     }
     else {
@@ -129,19 +227,14 @@ public final class CuckooHashTable<K extends Number, V> {
       boolean first = true;
       int hash;
 
-      // Cycle through all the tables until new value is inserted or reach a cycle
-      // i % 3 to keeps the counter {0-2} for the tables and ommited the conditional 
-      // statement for looping
       for (int i=0, z = intKey.intValue();; i = ++i % 3, z = intKey.intValue()) { 
         Tj = tables[i];
         hash = Tj.hash(z);
         newEntry = new Entry<K, V>(hash, intKey, intVal);
 
-        // If the position is empty, insert new entry
+        // If the position is empty, insert new entry and return.
         if (Tj.contains(hash) == false) {    
           Tj.insert(newEntry);
-          // Tj.insert(hjx, intKey, intVal);
-
           return;
         }
 
@@ -153,9 +246,10 @@ public final class CuckooHashTable<K extends Number, V> {
         intKey = prevEntry.getKey();
         intVal = prevEntry.getValue();
         
-        // Check if the key we swapped was the original, we are in a cycle - rebuild the tables
+        // If the key we swapped was the argument key, we are in a cycle - rebuild the tables
         if (intKey.equals(key)) {
-          if (first) throw new DuplicateKeyException(key.intValue());
+          if (first) 
+            throw new DuplicateKeyException(key.intValue());
 
           fullRehash(key, value);
         }
@@ -165,11 +259,24 @@ public final class CuckooHashTable<K extends Number, V> {
     }
   }
 
-  // Suppress the type safety warning when re-inserting the entries
-  // and casting the type parameters because the entries we added
-  // with the type parameter so we know it's safe.
+  /**
+   * Rebuilds the hashtable by iterating through all the entries in the subtables
+   * and placing them in a single array, recaclulate the new subtable size, reset
+   * the size counter, and re-insert all the entries into the hashtable.
+   * 
+   * <hr/>
+   * 
+   * Suppresses the type safety warning when re-inserting the entries
+   * and casting the type parameters because the entries we added
+   * with the type parameter so we know it's safe.
+   * 
+   * @param key the key of the last item before capacity was exceeded or a cycle
+   * was reached.
+   * @param value the value of the last item
+   * @throws DuplicateKeyException if the entries contains a duplicate key
+   */
   @SuppressWarnings("unchecked")
-  private void fullRehash(K key, V value) {
+  private synchronized void fullRehash(K key, V value) throws DuplicateKeyException {
     int maxNumEntries = T * m;
     int entryIdx = 0;
     Entry<?, ?> entries[] = new Entry<?, ?>[maxNumEntries];
@@ -182,17 +289,15 @@ public final class CuckooHashTable<K extends Number, V> {
       }
     }
 
-    // Add the newest item to entries
-    entries[entryIdx++] = new Entry<K, V>(-1, key, value);
+    // Add the newest item to entries without a hash
+    entries[entryIdx++] = new Entry<K, V>(key, value);
 
     // Calculate the new m and reset the counter
     m = (1 + c) * Math.max(entries.length, 4);
     n = 0;
 
-    // Build new subtables
-    for (int i=0; i<T; ++i) {
-      tables[i] = new CuckooHashSubtable<K, V>(p, m);
-    }
+    // Re-create the subtables
+    buildSubtables();
 
     // Re-insert the entries
     try {
@@ -203,8 +308,121 @@ public final class CuckooHashTable<K extends Number, V> {
       System.out.println("Duplicate detected in fullRehash(): " + err);
     }
   }
+
+  /**
+   * The CuckooHashTable subtable class which contains the table of 
+   * {@code Entry} objects that hold the actual key/value pair. An 
+   * instance of {@code CuckooHashSubtable} contains the prime number 
+   * {@code p} and subtable size {@code m} denoted from the  primary 
+   * {@code CuckooHashTable}. It also contains two constants, {@code a} 
+   * and {@code b} which are random integers derived within the range of 
+   * {@code [0, p-1]}.
+   * 
+   * <p>The class is static so it can be used within the outerclass,
+   * primarily when creating the array of this class in
+   * {@code CuckooHashTable.tables}</p>
+   * 
+   * <p>Randomly choosing the constants a and b from a set that differs 
+   * by one value, gives us {@code p(p-1)} hash functions. Given a universal 
+   * collection of hash functions, a singlepair of keys collides with probablity 
+   * at most {@code 1/m}, which gives us {@code Pr of h(k) = h(l) ≤ 1/m}.</p>
+   * 
+   * @param <K> key type parameter is derived from the main {@code CuckooHashTable}
+   * @param <V> value type parameter is dervied from the main {@code CuckooHashTable}
+   * @see CuckooHashTable
+   * @see CuckooHashTable#tables
+   */
+  static class CuckooHashSubtable<K, V> {
+    private int m, p, a, b;
+    private Entry<?, ?>[] table;
+  
+    /**
+     * Constructs a new, empty hashtable given a specified prime number {@code p}
+     * and subtable size {@code m}, which is given from the {@code CuckooHashTable}.
+     * The sanity checks on the parameters are done in the constructor of the parent
+     * hashtable.
+     * 
+     * <p>An instance of {@code CuckooHashSubtable} contains an array of {@code Entry}
+     * objects as the actual hashtable where the key is hashed to derive the index
+     * where the {@code Entry} is inserted.</p>
+     * 
+     * @param p prime number
+     * @param m subtable size
+     */
+    public CuckooHashSubtable(int p, int m) {
+      this.p = p;
+      this.m = m;
+      a = (int) (Math.random() * p - 2) + 1;
+      b = (int) (Math.random() * p) - 1;
+      table = new Entry<?, ?>[m];
+    }
+  
+    /**
+     * The deterministic hash function to derive a index slot for a given key {@code k}.
+     * 
+     * @param k the key
+     * @return integer index slot to insert an entry for this subtable
+     */
+    public int hash(int k) {
+      return ((this.a * k + this.b) % this.p) % this.m;
+    }
+  
+    /**
+     * Retrieves the table reference. Used in the {@code CuckooHashTable.fullRehash()}
+     * method to iterate through the and pull all entries to rebuild subtables.
+     * 
+     * @return the table of {@code Entry} objects
+     * @see CuckooHashTable#fullRehash()
+     * @see Entry
+     */
+    public synchronized Entry<?, ?> [] getTable() {
+      return table;
+    }
+  
+    /**
+     * Returns a boolean value indicating whether a given hash index slot
+     * is occupied or not.
+     * 
+     * @param hash the hash index slot from a key
+     * @return whether the given hash slot is occupied or not for this subtable
+     * @see CuckooHashTable#insert()
+     */
+    public synchronized boolean contains(int hash) {
+      return table[hash] != null;
+    }
+  
+    /**
+     * Inserts a new {@code Entry} into the subtable. The hash index slot is
+     * retrieved from the actual {@code Entry} object.
+     * 
+     * @param entry the {@code Entry} object
+     * @see Entry#getHash()
+     */
+    public synchronized void insert(Entry<?, ?> entry) {
+      table[entry.getHash()] = entry;
+    }
+  
+    /**
+     * Removes an {@code Entry} from the hashtable, sets that hash slot to null
+     * so it can be used again, and returns the removed {@code Entry}.
+     * 
+     * @param hash the derived hash index slot from a key
+     * @return desired {@code Entry} for either normal removal or swapping entries
+     * in the {@code CuckooHashTable.insert()} process.
+     * @see CuckooHashTable#insert()
+     */
+    public synchronized Entry<?, ?> remove(int hash) {
+      Entry<?, ?> entry = table[hash];
+  
+      table[hash] = null;
+  
+      return entry;
+    }  
+  }
 }
 
+
+  
 class HashDemo {
   public static void main(String[] args) {
     CuckooHashTable<Integer, String> test = new CuckooHashTable<>();

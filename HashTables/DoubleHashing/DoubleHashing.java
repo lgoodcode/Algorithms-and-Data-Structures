@@ -1,4 +1,4 @@
-package Data_Structures.HashTables;
+package Data_Structures.HashTables.DoubleHashing;
 
 interface IDoubleHashing<T> {
   public abstract int hash(int k, int i);
