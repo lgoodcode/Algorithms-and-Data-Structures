@@ -1,15 +1,14 @@
 package Data_Structures.HashTables.PerfectHashing;
 
-import Data_Structures.HashTables.Entry;
 import Data_Structures.HashTables.HashTableFunctions;
 
 /**
  * This class implements a high performance dynamic hashtable where the size is
  * initialized to the current needs and updates its size when needed as it
  * reaches a certain load threshold. Any non-{@code null} object can be used as
- * the key and value. This is accomplished by using the {@code Object.hashCode()}
- * method which creates a determinstic integer value for any object and can be used
- * by the hash function to derive the index slot.
+ * the key and value. This is accomplished by using the
+ * {@code Object.hashCode()} method which creates a determinstic integer value
+ * for any object and can be used by the hash function to derive the index slot.
  * 
  * <h3>Important</h3>
  * <p>
@@ -174,6 +173,14 @@ public final class CuckooHashTable<K, V> {
   }
 
   // TODO: add constructor to initalize a predefined set
+
+  // TODO: add enumeration for the keys in the table
+  // public synchronized Enumeration<K> keys() {
+  // if (n == 0)
+  // return Collections.emptyEnumeration();
+  // else
+  // return new Enumerator<>(0, false);
+  // }
 
   /**
    * Used within insert() and determines whether the incremented size counter is
@@ -378,179 +385,209 @@ public final class CuckooHashTable<K, V> {
     return false;
   }
 
-}
-
-/**
- * The CuckooHashTable subtable class which contains the table of {@code Entry}
- * objects that hold the actual key/value pair. An instance of
- * {@code CuckooHashSubtable} contains the prime number {@code p} and subtable
- * size {@code m} denoted from the primary {@code CuckooHashTable}. It also
- * contains two constants, {@code a} and {@code b} which are random integers
- * derived within the range of {@code [0, p-1]}.
- * 
- * <p>
- * The class is static so it can be used within the outerclass, primarily when
- * creating the array of this class in {@code CuckooHashTable.tables}
- * </p>
- * 
- * <p>
- * Randomly choosing the constants a and b from a set that differs by one value,
- * gives us {@code p(p-1)} hash functions. Given a universal collection of hash
- * functions, a singlepair of keys collides with probablity at most {@code 1/m},
- * which gives us {@code Pr of h(k) = h(l) ≤ 1/m}.
- * </p>
- * 
- * @param <K> key type parameter derived from the main type parameter
- * @param <V> value type parameter dervied from the main type parameter
- *            {@code CuckooHashTable}
- * @see CuckooHashTable
- * @see CuckooHashTable#tables
- */
-final class CuckooHashSubtable<K, V> {
-  private int m, p, a, b;
-  private Entry<?, ?>[] table;
-
   /**
-   * Constructs a new, empty hashtable given a specified prime number {@code p}
-   * and subtable size {@code m}, which is given from the {@code CuckooHashTable}.
-   * The sanity checks on the parameters are done in the constructor of the parent
-   * hashtable.
+   * The CuckooHashTable subtable class which contains the table of {@code Entry}
+   * objects that hold the actual key/value pair. An instance of
+   * {@code CuckooHashSubtable} contains the prime number {@code p} and subtable
+   * size {@code m} denoted from the primary {@code CuckooHashTable}. It also
+   * contains two constants, {@code a} and {@code b} which are random integers
+   * derived within the range of {@code [0, p-1]}.
    * 
    * <p>
-   * An instance of {@code CuckooHashSubtable} contains an array of {@code Entry}
-   * objects as the actual hashtable where the key is hashed to derive the index
-   * where the {@code Entry} is inserted.
+   * The class is static so it can be used within the outerclass, primarily when
+   * creating the array of this class in {@code CuckooHashTable.tables}
    * </p>
    * 
-   * @param p prime number
-   * @param m subtable size
-   */
-  public CuckooHashSubtable(int p, int m) {
-    this.p = p;
-    this.m = m;
-    a = (int) (Math.random() * p - 2) + 1;
-    b = (int) (Math.random() * p) - 1;
-    table = new Entry<?, ?>[m];
-  }
-
-  /**
-   * The deterministic hash function to derive a index slot for a given key
-   * {@code k}.
+   * <p>
+   * Randomly choosing the constants a and b from a set that differs by one value,
+   * gives us {@code p(p-1)} hash functions. Given a universal collection of hash
+   * functions, a singlepair of keys collides with probablity at most {@code 1/m},
+   * which gives us {@code Pr of h(k) = h(l) ≤ 1/m}.
+   * </p>
    * 
-   * @param k the key hash code
-   * @return integer index slot to insert an entry for this subtable
+   * @param <K> key type parameter derived from the main type parameter
+   * @param <V> value type parameter dervied from the main type parameter
+   *            {@code CuckooHashTable}
+   * @see CuckooHashTable
+   * @see CuckooHashTable#tables
    */
-  public int hash(int k) {
-    return ((a * k + b) % p) % m;
-  }
+  private static class CuckooHashSubtable<K, V> {
+    private int m, p, a, b;
+    private Entry<?, ?>[] table;
 
-  /**
-   * Retrieves the table reference. Used in the
-   * {@code CuckooHashTable.fullRehash()} method to iterate through the and pull
-   * all entries to rebuild subtables.
-   * 
-   * @return the table of {@code Entry} objects
-   * @see CuckooHashTable#fullRehash()
-   * @see Entry
-   */
-  @SuppressWarnings("unchecked")
-  public synchronized Entry<K, V>[] getTable() {
-    return (Entry<K, V>[]) table;
-  }
-
-  /**
-   * Returns a boolean value indicating whether a given hash index slot is
-   * occupied or not.
-   * 
-   * @param hash the hash index slot from a key
-   * @return whether the given hash slot is occupied or not for this subtable
-   * @see CuckooHashTable#insert()
-   */
-  public synchronized boolean hasHash(int hash) {
-    return table[hash] != null;
-  }
-
-  /**
-   * Checks whether the given key has an entry in this table by hashing the key
-   * and if the slot is occupied, if the key matches.
-   * 
-   * @param key the key
-   * @return does the given key exist in the table
-   */
-  public synchronized boolean has(K key) {
-    final int keyHash = hash(key.hashCode());
-
-    if (table[keyHash] != null) {
-      return table[keyHash].getKey().equals(key);
+    /**
+     * Constructs a new, empty hashtable given a specified prime number {@code p}
+     * and subtable size {@code m}, which is given from the {@code CuckooHashTable}.
+     * The sanity checks on the parameters are done in the constructor of the parent
+     * hashtable.
+     * 
+     * <p>
+     * An instance of {@code CuckooHashSubtable} contains an array of {@code Entry}
+     * objects as the actual hashtable where the key is hashed to derive the index
+     * where the {@code Entry} is inserted.
+     * </p>
+     * 
+     * @param p prime number
+     * @param m subtable size
+     */
+    public CuckooHashSubtable(int p, int m) {
+      this.p = p;
+      this.m = m;
+      a = (int) (Math.random() * p - 2) + 1;
+      b = (int) (Math.random() * p) - 1;
+      table = new Entry<?, ?>[m];
     }
 
-    return false;
-  }
-
-  /**
-   * Inserts a new {@code Entry} into the subtable. The hash index slot is
-   * retrieved from the actual {@code Entry} object.
-   * 
-   * @param entry the {@code Entry} object
-   * @see Entry#getHash()
-   */
-  public synchronized void insert(int hash, Entry<K, V> entry) {
-    table[hash] = entry;
-  }
-
-  /**
-   * Retrieves the value for the entry of the given key.
-   * 
-   * @param key the key to retrieve the corresponding value
-   * @return the value if the given key entry exists or {@code null} if not
-   */
-  @SuppressWarnings("unchecked")
-  public synchronized V get(K key) {
-    final Entry<K, V> entry = (Entry<K, V>) table[hash(key.hashCode())];
-
-    if (entry != null && entry.getKey().equals(key)) {
-      return entry.getValue();
+    /**
+     * The deterministic hash function to derive a index slot for a given key
+     * {@code k}.
+     * 
+     * @param k the key hash code
+     * @return integer index slot to insert an entry for this subtable
+     */
+    public int hash(int k) {
+      return ((a * k + b) % p) % m;
     }
 
-    return null;
-  }
-
-  /**
-   * Removes an {@code Entry} from the hashtable, sets that hash slot to null so
-   * it can be used again, and returns the removed {@code Entry}.
-   * 
-   * @param hash the derived hash index slot from a key
-   * @return desired {@code Entry} for either normal removal or swapping entries
-   *         in the {@code CuckooHashTable.insert()} process.
-   * @see CuckooHashTable#insert()
-   */
-  @SuppressWarnings("unchecked")
-  public synchronized Entry<K, V> remove(int hash) {
-    Entry<K, V> entry = (Entry<K, V>) table[hash];
-
-    table[hash] = null;
-
-    return entry;
-  }
-
-  /**
-   * Deletes an entry for the given key if it exists and the occupied slot key
-   * matches the specified key to know it is correct.
-   * 
-   * @param key the key
-   * @return whether the operation was successful or not
-   */
-  public synchronized boolean delete(K key) {
-    final int keyHash = hash(key.hashCode());
-
-    if (table[keyHash] != null && table[keyHash].getKey().equals(key)) {
-      table[keyHash] = null;
-
-      return true;
+    /**
+     * Retrieves the table reference. Used in the
+     * {@code CuckooHashTable.fullRehash()} method to iterate through the and pull
+     * all entries to rebuild subtables.
+     * 
+     * @return the table of {@code Entry} objects
+     * @see CuckooHashTable#fullRehash()
+     * @see Entry
+     */
+    @SuppressWarnings("unchecked")
+    public synchronized Entry<K, V>[] getTable() {
+      return (Entry<K, V>[]) table;
     }
 
-    return false;
+    /**
+     * Returns a boolean value indicating whether a given hash index slot is
+     * occupied or not.
+     * 
+     * @param hash the hash index slot from a key
+     * @return whether the given hash slot is occupied or not for this subtable
+     * @see CuckooHashTable#insert()
+     */
+    public synchronized boolean hasHash(int hash) {
+      return table[hash] != null;
+    }
+
+    /**
+     * Checks whether the given key has an entry in this table by hashing the key
+     * and if the slot is occupied, if the key matches.
+     * 
+     * @param key the key
+     * @return does the given key exist in the table
+     */
+    public synchronized boolean has(K key) {
+      final int keyHash = hash(key.hashCode());
+
+      if (table[keyHash] != null) {
+        return table[keyHash].getKey().equals(key);
+      }
+
+      return false;
+    }
+
+    /**
+     * Inserts a new {@code Entry} into the subtable. The hash index slot is
+     * retrieved from the actual {@code Entry} object.
+     * 
+     * @param entry the {@code Entry} object
+     * @see Entry#getHash()
+     */
+    public synchronized void insert(int hash, Entry<K, V> entry) {
+      table[hash] = entry;
+    }
+
+    /**
+     * Retrieves the value for the entry of the given key.
+     * 
+     * @param key the key to retrieve the corresponding value
+     * @return the value if the given key entry exists or {@code null} if not
+     */
+    @SuppressWarnings("unchecked")
+    public synchronized V get(K key) {
+      final Entry<K, V> entry = (Entry<K, V>) table[hash(key.hashCode())];
+
+      if (entry != null && entry.getKey().equals(key)) {
+        return entry.getValue();
+      }
+
+      return null;
+    }
+
+    /**
+     * Removes an {@code Entry} from the hashtable, sets that hash slot to null so
+     * it can be used again, and returns the removed {@code Entry}.
+     * 
+     * @param hash the derived hash index slot from a key
+     * @return desired {@code Entry} for either normal removal or swapping entries
+     *         in the {@code CuckooHashTable.insert()} process.
+     * @see CuckooHashTable#insert()
+     */
+    @SuppressWarnings("unchecked")
+    public synchronized Entry<K, V> remove(int hash) {
+      Entry<K, V> entry = (Entry<K, V>) table[hash];
+
+      table[hash] = null;
+
+      return entry;
+    }
+
+    /**
+     * Deletes an entry for the given key if it exists and the occupied slot key
+     * matches the specified key to know it is correct.
+     * 
+     * @param key the key
+     * @return whether the operation was successful or not
+     */
+    public synchronized boolean delete(K key) {
+      final int keyHash = hash(key.hashCode());
+
+      if (table[keyHash] != null && table[keyHash].getKey().equals(key)) {
+        table[keyHash] = null;
+
+        return true;
+      }
+
+      return false;
+    }
   }
+
+  /**
+   * This class creates entries that hold a key/value pair. It allows any object
+   * of subclass {@code Object} to be used as a key or value, which works for
+   * everything since all {@code Object} is the superclass of any object.
+   * 
+   * @param <K> type parameter for the key. Can hold any {@code Object}.
+   * @param <V> type parameter for the value. Can hold any {@code Object}
+   */
+  private static class Entry<K, V> {
+    private final K key;
+    private final V value;
+
+    public Entry(K key, V value) {
+      this.key = key;
+      this.value = value;
+    }
+
+    public K getKey() {
+      return key;
+    }
+
+    public V getValue() {
+      return value;
+    }
+
+    public String toString() {
+      return "\nEntry key: " + key + " value: " + value;
+    }
+  }
+
 }
 
 class HashDemo {
