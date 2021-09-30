@@ -7,8 +7,9 @@ import Data_Structures.HashTables.HashTableExceptions.DuplicateKeyException;
 /**
  * This class implements a high performance dynamic hashtable where the size is
  * initialized to the current needs and updates its size when needed as it
- * reaches a certain load threshold. Any {@code Number} class or subclass is
- * used as the key while any non-{@code null} object can be used as the value.
+ * reaches a certain load threshold. An integer is used as the key which is
+ * requried for the hash function and any non-{@code null} object can be used as 
+ * the value.
  * 
  * <h3>Important</h3>
  * <p>
@@ -247,17 +248,17 @@ public final class CuckooHashTable<V> {
       for (int i = 0, z = intKey;; i = ++i % 3, z = intKey) {
         Tj = tables[i];
         keyHash = Tj.hash(z);
-        newEntry = new Entry<V>(keyHash, intKey, intVal);
+        newEntry = new Entry<V>(intKey, intVal);
 
         // If the position is empty, insert new entry and return.
         if (Tj.hasHash(keyHash) == false) {
-          Tj.insert(newEntry);
+          Tj.insert(keyHash, newEntry);
           return;
         }
 
         // Otherwise, a key already exists here, swap it
         prevEntry = (Entry<V>) Tj.remove(keyHash);
-        Tj.insert(newEntry);
+        Tj.insert(keyHash, newEntry);
 
         // Set the key and value from the old entry to use for next subtable
         intKey = prevEntry.getKey();
@@ -490,8 +491,8 @@ public final class CuckooHashTable<V> {
      * @param entry the {@code Entry} object
      * @see Entry#getHash()
      */
-    public synchronized void insert(Entry<?> entry) {
-      table[entry.getHash()] = entry;
+    public synchronized void insert(int hash, Entry<?> entry) {
+      table[hash] = entry;
     }
 
     /**
@@ -578,9 +579,45 @@ class HashDemo {
 
       System.out.println("deleted key 345: " + test.delete(345));
 
+      System.out.println(Integer.valueOf("1").hashCode());
+
+      // Entry<String> e = new Entry<>(12, "test is this long ass string for hascode");
+      // Entry<String> e2 = new Entry<>(2, "tes for hascode");
+      // Entry<String> e3 = new Entry<>(2, "tes for hascode");
+
+      // int eHash = e.hashCode();
+      // int eIdx = (eHash & 0x7FFFFFFF) % 1;
+      // int eIdx2 = (eHash & 0x7FFFFFFF) % 20;
+
+      // System.out.println("hash  " + eHash);
+      // System.out.println("idx  " + eIdx);
+      // System.out.println("idxw  " + eIdx2);
+
+      // int e2Hash = e2.hashCode();
+      // int e2Idx = (e2Hash & 0x7FFFFFFF) % 1;
+      // int e2Idx2 = (e2Hash & 0x7FFFFFFF) % 20;
+
+      // System.out.println("hash  " + e2Hash);
+      // System.out.println("idx  " + e2Idx);
+      // System.out.println("idxw  " + e2Idx2);
+
+
+      // int e3Hash = e3.hashCode();
+      // int e3Idx = (e3Hash & 0x7FFFFFFF) % 1;
+      // int e3Idx2 = (e3Hash & 0x7FFFFFFF) % 20;
+
+      // System.out.println("hash  " + e3Hash);
+      // System.out.println("idx  " + e3Idx);
+      // System.out.println("idxw  " + e3Idx2);
+
+
+      
+      // System.out.println(Integer.MAX_VALUE < e.hashCode());
+
     } catch (DuplicateKeyException err) {
       System.out.println(err);
     }
+
 
     System.out.println("Done");
 

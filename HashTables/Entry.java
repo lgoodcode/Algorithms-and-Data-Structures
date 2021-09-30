@@ -1,23 +1,17 @@
 package Data_Structures.HashTables;
 
+/**
+ * This class creates entries that hold a key/value pair.
+ * 
+ * @param <V> type parameter for the value to hold any {@code Object}
+ */
 public final class Entry<V> {
-  private final int hash, key;
+  private final int key;
   private final V value;
 
-  public Entry(int hash, int key, V value) {
-    this.hash = hash;
-    this.key = key;
-    this.value = value;
-  }
-
   public Entry(int key, V value) {
-    this.hash = -1;
     this.key = key;
     this.value = value;
-  }
-
-  public int getHash() {
-    return hash;
   }
 
   public int getKey() {
@@ -29,6 +23,6 @@ public final class Entry<V> {
   }
 
   public String toString() {
-    return "\nEntry hash: " + hash + " key: " + key + " value: " + value;
+    return "\nEntry key: " + key + " value: " + value;
   }
 }
