@@ -1,20 +1,24 @@
 package Data_Structures.HashTables;
 
 /**
- * This class creates entries that hold a key/value pair.
+ * This class creates entries that hold a key/value pair. It allows 
+ * any object of subclass {@code Object} to be used as a key or value,
+ * which works for everything since all {@code Object} is the superclass
+ * of any object.
  * 
- * @param <V> type parameter for the value to hold any {@code Object}
+ * @param <K> type parameter for the key. Can hold any {@code Object}.
+ * @param <V> type parameter for the value. Can hold any {@code Object}
  */
-public final class Entry<V> {
-  private final int key;
+public final class Entry<K, V> {
+  private final K key;
   private final V value;
 
-  public Entry(int key, V value) {
+  public Entry(K key, V value) {
     this.key = key;
     this.value = value;
   }
 
-  public int getKey() {
+  public K getKey() {
     return key;
   }
 
