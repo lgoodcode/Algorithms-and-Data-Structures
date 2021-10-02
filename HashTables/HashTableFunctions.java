@@ -44,7 +44,7 @@ public final class HashTableFunctions {
   // TODO: update expcetions and document format
   public static <T extends Number> int[] injectiveIntegers(T[] S, int m, int p) throws HashTableException {
     // Sanity checks on prime number and subtable size
-    if (HashTableFunctions.isPrime(p) == false)
+    if (isPrime(p) == false)
       throw new InvalidPrimeException(p);
     else if (m < 0)
       throw new InvalidSubtableSizeException(m);

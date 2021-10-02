@@ -1,6 +1,6 @@
 package Data_Structures.HashTables.PerfectHashing;
 
-import Data_Structures.HashTables.HashTableFunctions;
+import static Data_Structures.HashTables.HashTableFunctions.isPrime;
 
 /**
  * This class implements a high performance dynamic hashtable where the size is
@@ -46,7 +46,7 @@ import Data_Structures.HashTables.HashTableFunctions;
  * @author Lawrence Good
  * @see CuckooHashSubtable
  * @see Entry
- * @since 1.0
+ * @version 1.0
  */
 public final class CuckooHashTable<K, V> {
   /**
@@ -89,7 +89,11 @@ public final class CuckooHashTable<K, V> {
 
   /**
    * Constructs a new, empty hashtable with the specified inital prime number,
-   * subtable size, and load factor.
+   * subtable size, and load factor. 
+   * 
+   * <p>
+   * The constructor is overloaded and uses {@code this} to reduce redundant code.
+   * </p>
    * 
    * @param p          prime number for subtables hash function
    * @param m          subtable size
@@ -100,7 +104,7 @@ public final class CuckooHashTable<K, V> {
    *                                  factor less then 0.5f.
    */
   public CuckooHashTable(int p, int m, float loadFactor) throws IllegalArgumentException {
-    if (HashTableFunctions.isPrime(p) == false)
+    if (isPrime(p) == false)
       throw new IllegalArgumentException("Illegal prime number: " + p);
     else if (m < 1)
       throw new IllegalArgumentException("Illegal subtable size: " + m);
@@ -243,7 +247,7 @@ public final class CuckooHashTable<K, V> {
   @SuppressWarnings("unchecked")
   public synchronized void insert(K key, V value) throws NullPointerException, IllegalArgumentException {
     if (key == null || value == null)
-      throw new NullPointerException();
+      throw new NullPointerException("Key and value cannot be null values.");
 
     if (capacityReached()) {
       fullRehash(key, value);
@@ -319,6 +323,9 @@ public final class CuckooHashTable<K, V> {
     // Re-create the subtables
     buildSubtables();
 
+    // Garbage collect the old removed tables
+    System.gc();
+
     // Re-insert the entries
     try {
       for (int i = 0; i < entryIdx; ++i)
@@ -375,6 +382,7 @@ public final class CuckooHashTable<K, V> {
    * @param key the key
    * @return whether the entry exists and was deleted or not
    */
+
   @SuppressWarnings("unchecked")
   public synchronized boolean delete(K key) {
     for (CuckooHashSubtable<K, V> Tj : (CuckooHashSubtable<K, V>[]) tables) {
@@ -410,6 +418,7 @@ public final class CuckooHashTable<K, V> {
    *            {@code CuckooHashTable}
    * @see CuckooHashTable
    * @see CuckooHashTable#tables
+   * @version 1.0
    */
   private static class CuckooHashSubtable<K, V> {
     private int m, p, a, b;
@@ -485,9 +494,8 @@ public final class CuckooHashTable<K, V> {
     public synchronized boolean has(K key) {
       final int keyHash = hash(key.hashCode());
 
-      if (table[keyHash] != null) {
+      if (table[keyHash] != null)
         return table[keyHash].getKey().equals(key);
-      }
 
       return false;
     }
@@ -513,9 +521,8 @@ public final class CuckooHashTable<K, V> {
     public synchronized V get(K key) {
       final Entry<K, V> entry = (Entry<K, V>) table[hash(key.hashCode())];
 
-      if (entry != null && entry.getKey().equals(key)) {
+      if (entry != null && entry.getKey().equals(key))
         return entry.getValue();
-      }
 
       return null;
     }
@@ -563,8 +570,9 @@ public final class CuckooHashTable<K, V> {
    * of subclass {@code Object} to be used as a key or value, which works for
    * everything since all {@code Object} is the superclass of any object.
    * 
-   * @param <K> type parameter for the key. Can hold any {@code Object}.
+   * @param <K> type parameter for the key. Can hold any {@code Object}
    * @param <V> type parameter for the value. Can hold any {@code Object}
+   * @version 1.0
    */
   private static class Entry<K, V> {
     private final K key;
@@ -590,7 +598,7 @@ public final class CuckooHashTable<K, V> {
 
 }
 
-class HashDemo {
+class CuckooHashTableDemo {
   public static void main(String[] args) {
     CuckooHashTable<Integer, String> test = new CuckooHashTable<>();
 
