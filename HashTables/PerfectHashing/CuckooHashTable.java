@@ -54,7 +54,7 @@ import static Data_Structures.HashTables.HashTableFunctions.isPrime;
  * @see CuckooHashSubtable
  * @see Entry
  * @see Enumerator
- * @version 1.1
+ * @version 1.2
  */
 public final class CuckooHashtable<K, V> {
   /**
@@ -88,9 +88,9 @@ public final class CuckooHashtable<K, V> {
   /**
    * The number of times this Hashtable has been structurally modified Structural
    * modifications are those that change the number of entries in the Hashtable or
-   * otherwise modify its internal structure (e.g., fullRehash). This field is
-   * used to make iterators on Collection-views of the Hashtable fail-fast. (See
-   * ConcurrentModificationException).
+   * otherwise modify its internal structure (e.g., fullRehash, delete).  This field 
+   * is used to make iterators on Collection-views of the Hashtable fail-fast. 
+   * (See ConcurrentModificationException).
    */
   private int modCount = 0;
 
@@ -116,9 +116,9 @@ public final class CuckooHashtable<K, V> {
    * @param size       subtable size
    * @param loadFactor maximum percentage of entries before rebuilding subtables.
    *                   Must be greater than or equal to 0.75f.
+   * 
    * @throws IllegalArgumentException when given a prime number that isn't prime,
-   *                                  a subtable size smaller than 1, or a load
-   *                                  factor less then 0.75f.
+   *         a subtable size smaller than 1, or a load factor less then 0.75f.
    */
   public CuckooHashtable(int prime, int size, float loadFactor) throws IllegalArgumentException {
     if (isPrime(prime) == false)
@@ -265,7 +265,7 @@ public final class CuckooHashtable<K, V> {
    * equal to or exceeds the load capacity.
    * 
    * @return if the new entry cause the table size to exceed load capacity
-   * @see #fullRehash
+   * @see #fullRehash()
    */
   private boolean capacityReached() {
     return ++n >= (m * T) * loadFactor;
@@ -276,12 +276,30 @@ public final class CuckooHashtable<K, V> {
    * {@code CuckooHashSubtable} thereby removing the references to the previous
    * tables to allow them to be garbage collected.
    * 
-   * @see #fullRehash
+   * @see #fullRehash()
    */
   private synchronized void buildSubtables() {
     for (int i = 0; i < T; ++i) {
       tables[i] = new CuckooHashSubtable<K, V>(p, m);
     }
+  }
+
+  /**
+   * Returns the number of entries in the hashtable.
+   * 
+   * @return the number of entries in the hashtable
+   */
+  public synchronized int size() {
+    return n;
+  }
+
+  /**
+   * Returns a boolean indicating whether the hashtable is empty or not.
+   * 
+   * @return is the hashtable empty or not
+   */
+  public synchronized boolean isEmpty() {
+    return size() != 0;
   }
 
   /**
@@ -317,9 +335,11 @@ public final class CuckooHashtable<K, V> {
    * 
    * @param key   the hashtable key
    * @param value the value
-   * @throws NullPointerException     if the key or value is null
+   * 
+   * @throws NullPointerException if the key or value is null
+   * 
    * @throws IllegalArgumentException if the specified key already exists in the
-   *                                  hashtable
+   *         hashtable
    */
   @SuppressWarnings("unchecked")
   public synchronized void insert(K key, V value) {
@@ -360,6 +380,8 @@ public final class CuckooHashtable<K, V> {
         first = false;
       }
     }
+
+    modCount++;
   }
 
   /**
@@ -376,8 +398,9 @@ public final class CuckooHashtable<K, V> {
    * @param key   the key of the last item before capacity was exceeded or a cycle
    *              was reached.
    * @param value the value of the last item
+   * 
    * @throws IllegalArgumentException if the specified key already exists in the
-   *                                  table
+   *         table
    */
   @SuppressWarnings("unchecked")
   private synchronized void fullRehash(K key, V value) throws IllegalArgumentException {
@@ -406,8 +429,9 @@ public final class CuckooHashtable<K, V> {
 
     // Re-insert the entries
     try {
-      for (int i = 0; i < entryIdx; ++i)
+      for (int i = 0; i < entryIdx; ++i) {
         insert((K) entries[i].getKey(), (V) entries[i].getValue());
+      }
 
       insert(key, value);
     } catch (IllegalArgumentException err) {
@@ -418,11 +442,16 @@ public final class CuckooHashtable<K, V> {
   /**
    * Determines whether the given key has an entry in the hashtable.
    * 
-   * @param key the key
-   * @return whether the key exists in the hashtable
+   * @param key the key to check if exists
+   * @return whether the key exists in the hashtable or not
+   * 
+   * @throws NullPointerException if the key is {@code null}
    */
   @SuppressWarnings("unchecked")
   public synchronized boolean has(K key) {
+    if (key == null)
+      throw new NullPointerException();
+
     for (CuckooHashSubtable<K, V> Tj : (CuckooHashSubtable<K, V>[]) tables) {
       if (Tj.has(key))
         return true;
@@ -432,17 +461,36 @@ public final class CuckooHashtable<K, V> {
   }
 
   /**
+   * Overloaded method for the entry object.
+   * 
+   * @param entry the entry to check if exists
+   * @return whether the entry exists in the hashtable or not
+   * 
+   * @throws NullPointerException if the entry is {@code null}
+   * @see #has(K key)
+   */
+  public synchronized boolean has(Entry<K, V> entry) {
+    if (entry == null)
+      throw new NullPointerException();
+    return has(entry.getKey());
+  }
+
+  /**
    * Retrieves the value of the entry for the given key if it exists or
    * {@code null} if it doesn't.
    * 
    * @param key
    * @return the value of the specified key entry if it exists or {@code null} if
    *         not
+   * 
+   * @throws NullPointerException if the key is {@code null}
    */
   @SuppressWarnings("unchecked")
   public synchronized V get(K key) {
-    V value;
+    if (key == null)
+      throw new NullPointerException();
 
+    V value;
     for (CuckooHashSubtable<K, V> Tj : (CuckooHashSubtable<K, V>[]) tables) {
       value = (V) Tj.get(key);
 
@@ -455,20 +503,48 @@ public final class CuckooHashtable<K, V> {
 
   /**
    * Deletes the entry for the specified key if it exists and returns a boolean if
-   * the operation was successful or not.
+   * the operation was successful or not. If successful, it will increment the modCount
+   * and decrement the size counter.
    * 
-   * @param key the key
-   * @return whether the entry exists and was deleted or not
+   * @param key the key of the entry to delete
+   * @return whether the entry was successfully deleted or not
+   * 
+   * @throws NullPointerException if the key is {@code null}
    */
 
   @SuppressWarnings("unchecked")
   public synchronized boolean delete(K key) {
+    if (key == null)
+      throw new NullPointerException();
+
     for (CuckooHashSubtable<K, V> Tj : (CuckooHashSubtable<K, V>[]) tables) {
-      if (Tj.has(key))
-        return Tj.delete(key);
+      if (Tj.has(key)) {
+        if (Tj.delete(key)) {
+          modCount++;
+          n--;
+          return true;
+        }
+
+        return false;
+      }
     }
 
     return false;
+  }
+
+  /**
+   * Overloaded delete method for the entry object.
+   * 
+   * @param entry the entry to delete
+   * @return whether the entry was successfully deleted or not
+   * 
+   * @throws NullPointerException if the entry is {@code null}
+   * @see #delete(K key)
+   */
+  public synchronized boolean delete(Entry<K, V> entry) {
+    if (entry == null)
+      throw new NullPointerException();
+    return delete(entry.getKey());
   }
 
   /**
@@ -652,7 +728,7 @@ public final class CuckooHashtable<K, V> {
    * @param <V> type parameter for the value. Can hold any {@code Object}
    * @since 1.0
    */
-  private static class Entry<K, V> {
+  static class Entry<K, V> {
     private final K key;
     private final V value;
 
@@ -672,6 +748,39 @@ public final class CuckooHashtable<K, V> {
     public String toString() {
       return "Key: " + key + ", Value: " + value;
     }
+  }
+
+  /**
+   * Returns a string representation of this {@code CuckooHashtable} object in the
+   * form of a set of entries, seperated by new lines with the key, an equals sign
+   * {@code =}, and the associated element, where the {@code toString} method is
+   * used to convert the key and element to strings.
+   *
+   * @return a string representation of this hashtable
+   * @since 1.2
+   */
+  public synchronized String toString() {
+    if (n == 0)
+      return "{}";
+
+    StringBuilder sb = new StringBuilder();
+    Iterable<Entry<K, V>> entries = entries();
+
+    sb.append("{\n");
+
+    for (Entry<K, V> e : entries) {
+      K key = e.getKey();
+      V value = e.getValue();
+      sb.append("  ");
+      sb.append(key == this ? "(this Map)" : key.toString());
+      sb.append(" = ");
+      sb.append(value == this ? "(this Map)" : value.toString());
+      sb.append(",\n");
+    }
+
+    sb.append('}').toString();
+
+    return sb.toString();
   }
 
   // Types of Enumerations/Iterations
@@ -763,10 +872,11 @@ public final class CuckooHashtable<K, V> {
    * 
    * @param <T> the type of the object in the table that is being enumerated
    * @see CuckooHashtable#getIterable
+   * @since 1.1
    */
   private class Enumerator<T> implements Enumeration<T>, Iterator<T>, Iterable<T> {
     final Entry<?, ?>[] table = new Entry<?, ?>[T * m];
-    Entry<?, ?> entry;
+    Entry<?, ?> entry, last;
     final int type;
     int index;
 
@@ -780,7 +890,7 @@ public final class CuckooHashtable<K, V> {
      * The expected value of modCount when instantiating the iterator. If this
      * expectation is violated, the iterator has detected concurrent modification.
      */
-    protected final int expectedModCount = CuckooHashtable.this.modCount;
+    protected int expectedModCount = CuckooHashtable.this.modCount;
 
     Enumerator(int type, boolean iterator) {
       this.type = type;
@@ -824,6 +934,7 @@ public final class CuckooHashtable<K, V> {
      * Returns the next element if it has one to provide.
      * 
      * @return the next element
+     * 
      * @throws NoSuchElementException if no more elements exist
      */
     @SuppressWarnings("unchecked")
@@ -841,7 +952,7 @@ public final class CuckooHashtable<K, V> {
       index = i;
 
       if (e != null) {
-        Entry<?, ?> next = entry;
+        Entry<?, ?> next = last = entry;
         entry = null;
 
         return type == KEYS ? (T) next.key : (type == VALUES ? (T) next.value : (T) e);
@@ -862,7 +973,7 @@ public final class CuckooHashtable<K, V> {
      * 
      * @return the next element in the iteration
      * @throws ConcurrentModificationException if the fullRehash function modified
-     *                                         this map during computation.
+     *         this map during computation.
      */
     public T next() {
       if (CuckooHashtable.this.modCount != expectedModCount)
@@ -870,7 +981,54 @@ public final class CuckooHashtable<K, V> {
       return nextElement();
     }
 
-    // TODO: implement remove() maybe?
+    /**
+     * {@inheritDoc}
+     * 
+     * Removes from the underlying collection the last element returned
+     * by this iterator (optional operation).  This method can be called
+     * only once per call to {@link #next}.
+     * <p>
+     * The behavior of an iterator is unspecified if the underlying collection
+     * is modified while the iteration is in progress in any way other than by
+     * calling this method, unless an overriding class has specified a
+     * concurrent modification policy.
+     * <p>
+     * The behavior of an iterator is unspecified if this method is called
+     * after a call to the {@link #forEachRemaining forEachRemaining} method.
+     * 
+     * @throws UnsupportedOperationException if the {@code remove} operation is
+     *         not supported by this iterator, e.g., if the object is an
+     *         {@code Enumeration}.
+     *
+     * @throws IllegalStateException if the {@code next} method has not yet been 
+     *         called, or the {@code remove} method has already been called after 
+     *         the last call to the {@code next} method.
+     * 
+     * @throws ConcurrentModificationException if function such as fullRehash modified
+     *         this map during computation.
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public void remove() {
+      if (!iterator)
+        throw new UnsupportedOperationException();
+      if (last == null)
+        throw new IllegalStateException("Hashtable Enumerator");
+      if (modCount != expectedModCount)
+        throw new ConcurrentModificationException();
+
+      // Synchronized block to lock the hashtable object while removing entry
+      synchronized (CuckooHashtable.this) {
+        if (CuckooHashtable.this.delete((Entry<K, V>) last)) {
+          expectedModCount++;
+          last = null;
+
+          return;
+        }
+
+        throw new ConcurrentModificationException();
+      }
+    }
   }
 
 }
@@ -879,7 +1037,8 @@ class CuckooHashTableDemo {
   public static void main(String[] args) {
     CuckooHashtable<Integer, String> test = new CuckooHashtable<>();
 
-    Iterable<Integer> keys = test.keys();
+    // System.out.println(test.toString());
+    // Iterable<Integer> keys = test.keys();
 
     // for (var x : keys) {
     // System.out.println(x);
@@ -914,10 +1073,17 @@ class CuckooHashTableDemo {
     // System.out.println(err);
     // }
 
-    Iterable<?> entries = test.entries();
+    System.out.println(test.toString());
 
-    for (var e : entries) {
+    // Iterable<CuckooHashtable.Entry<Integer, String>> entries = test.entries();
+    Iterator<CuckooHashtable.Entry<Integer, String>> entries = test.entriesIterator();
+
+    for (CuckooHashtable.Entry<Integer, String> e = entries.next(); entries.hasNext(); e = entries.next()) {
       System.out.println(e);
+
+      if (e.getKey() == 324) {
+        entries.remove();
+      }
     }
 
     // Iterable<Integer> keys = test.keys();
