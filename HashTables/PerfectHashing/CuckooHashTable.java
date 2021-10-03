@@ -299,18 +299,12 @@ public final class CuckooHashtable<K, V> {
    * @return is the hashtable empty or not
    */
   public synchronized boolean isEmpty() {
-    return size() != 0;
+    return size() == 0;
   }
 
   /**
    * Inserts the given value into the table using the hashed value of the key.
    * Neither the key nor the value can be {@code null}.
-   * 
-   * <p>
-   * Supressed type safety check for when the prevEntry is type casted because it
-   * can only be inserted as a new Entry<V> so we know when we retrieve an entry,
-   * it will always be of type <V>
-   * </p>
    * 
    * <hr>
    * 
@@ -350,27 +344,26 @@ public final class CuckooHashtable<K, V> {
       fullRehash(key, value);
     } else {
       CuckooHashSubtable<K, V> Tj;
-      Entry<K, V> prevEntry, newEntry = new Entry<K, V>(key, value);
-      int keyHash;
+      Entry<K, V> newEntry = new Entry<K, V>(key, value), prevEntry;
       boolean first = true;
+      K newKey;
 
       for (int i = 0;; i = ++i % 3, newEntry = prevEntry) {
         Tj = (CuckooHashSubtable<K, V>) tables[i];
-        keyHash = Tj.hash(newEntry.getKey().hashCode());
+        newKey = newEntry.getKey();
 
         // If the position is empty, insert new entry and return.
-        if (Tj.hasHash(keyHash) == false) {
-          Tj.insert(keyHash, newEntry);
+        if (Tj.contains(newKey) == false) {
+          Tj.insert(newEntry);
 
           return;
         }
 
         // Otherwise, a key already exists here, swap it
-        prevEntry = (Entry<K, V>) Tj.remove(keyHash);
-        Tj.insert(keyHash, newEntry);
+        prevEntry = (Entry<K, V>) Tj.remove(newKey);
+        Tj.insert(newEntry);
 
-        // If the key we swapped was the argument key, we are in a cycle - rebuild the
-        // tables
+        // Check for duplicate key and cycle
         if (prevEntry.getKey().equals(key)) {
           if (first)
             throw new IllegalArgumentException("Duplicate key used: " + key);
@@ -411,7 +404,7 @@ public final class CuckooHashtable<K, V> {
 
     // Place entries from all subtables into a single array
     for (CuckooHashSubtable<K, V> Tj : (CuckooHashSubtable<K, V>[]) tables) {
-      for (Entry<?, ?> e : Tj.getTable()) {
+      for (Entry<K, V> e : Tj.getTable()) {
         if (e != null)
           entries[entryIdx++] = e;
       }
@@ -462,25 +455,10 @@ public final class CuckooHashtable<K, V> {
   }
 
   /**
-   * Overloaded method for the entry object.
-   * 
-   * @param entry the entry to check if exists
-   * @return whether the entry exists in the hashtable or not
-   * 
-   * @throws NullPointerException if the entry is {@code null}
-   * @see #has(K key)
-   */
-  public synchronized boolean has(Entry<K, V> entry) {
-    if (entry == null)
-      throw new NullPointerException();
-    return has(entry.getKey());
-  }
-
-  /**
    * Retrieves the value of the entry for the given key if it exists or
    * {@code null} if it doesn't.
    * 
-   * @param key
+   * @param key the key of the entry whose value we want to retrieve
    * @return the value of the specified key entry if it exists or {@code null} if
    *         not
    * 
@@ -493,7 +471,7 @@ public final class CuckooHashtable<K, V> {
 
     V value;
     for (CuckooHashSubtable<K, V> Tj : (CuckooHashSubtable<K, V>[]) tables) {
-      value = (V) Tj.get(key);
+      value = Tj.get(key);
 
       if (value != null)
         return value;
@@ -550,6 +528,20 @@ public final class CuckooHashtable<K, V> {
   }
 
   /**
+   * Iterates over the subtables and uses the {@code CuckooHashSubtable.delete()}
+   * method to directly remove all entries.
+   */
+  @SuppressWarnings("unchecked")
+  public void clear() {
+    for (CuckooHashSubtable<K, V> Tj : (CuckooHashSubtable<K, V>[]) tables) {
+      for (Entry<K, V> e : (Entry<K, V>[]) Tj.table) {
+        if (e != null)
+          Tj.delete(e);
+      }
+    }
+  }
+
+  /**
    * The CuckooHashTable subtable class which contains the table of {@code Entry}
    * objects that hold the actual key/value pair. An instance of
    * {@code CuckooHashSubtable} contains the prime number {@code p} and subtable
@@ -571,7 +563,6 @@ public final class CuckooHashtable<K, V> {
    * 
    * @param <K> key type parameter derived from the main type parameter
    * @param <V> value type parameter dervied from the main type parameter
-   *            {@code CuckooHashTable}
    * @see CuckooHashtable
    * @see CuckooHashtable#tables
    * @since 1.0
@@ -607,11 +598,15 @@ public final class CuckooHashtable<K, V> {
      * The deterministic hash function to derive a index slot for a given key
      * {@code k}.
      * 
-     * @param k the key hash code
-     * @return integer index slot to insert an entry for this subtable
+     * @param k the key to hash
+     * @return integer index for this subtable
+     * 
+     * @throws NullPointerException if the key is {@code null}
      */
-    public int hash(int k) {
-      return ((a * k + b) % p) % m;
+    public int hash(K key) {
+      if (key == null)
+        throw new NullPointerException();
+      return ((a * key.hashCode() + b) % p) % m;
     }
 
     /**
@@ -629,15 +624,17 @@ public final class CuckooHashtable<K, V> {
     }
 
     /**
-     * Returns a boolean value indicating whether a given hash index slot is
-     * occupied or not.
+     * Checkes whether the given key when hashed, occupies a slot.
      * 
-     * @param hash the hash index slot from a key
-     * @return whether the given hash slot is occupied or not for this subtable
-     * @see CuckooHashtable#insert()
+     * @param key the key to check if occupies a slot
+     * @return whether the key hash occupies a slot in the table
+     * 
+     * @throws NullPointerException if the key is {@code null}
      */
-    public synchronized boolean hasHash(int hash) {
-      return table[hash] != null;
+    public synchronized boolean contains(K key) {
+      if (key == null)
+        throw new NullPointerException();
+      return table[hash(key)] != null;
     }
 
     /**
@@ -646,25 +643,45 @@ public final class CuckooHashtable<K, V> {
      * 
      * @param key the key
      * @return does the given key exist in the table
+     * 
+     * @throws NullPointerException if the key is {@code null}
      */
     public synchronized boolean has(K key) {
-      final int keyHash = hash(key.hashCode());
+      if (key == null)
+        throw new NullPointerException();
+        
+      int hash = hash(key);
 
-      if (table[keyHash] != null)
-        return table[keyHash].getKey().equals(key);
+      if (table[hash] != null)
+        return table[hash].getKey().equals(key);
 
       return false;
     }
 
+    // /**
+    //  * TODO: checks if key and value of entry exists
+    //  * 
+    //  * @param entry
+    //  * @return whether the given entry exists in the table
+    //  */
+    // public synchronized boolean has(Entry<K, V> entry) {
+    //   if (entry == null)
+    //     throw new NullPointerException();
+    //   return has(entry.getKey());
+    // }
+
     /**
-     * Inserts a new {@code Entry} into the subtable. The hash index slot is
-     * retrieved from the actual {@code Entry} object.
+     * Inserts a new {@code Entry} into the subtable by getting its' key, deriving
+     * the index slot from hashing it, then inserting it.
      * 
-     * @param entry the {@code Entry} object
-     * @see Entry#getHash()
+     * @param entry the {@code Entry} object to insert
+     * 
+     * @throws NullPointerException if the entry is {@code null}
      */
-    public synchronized void insert(int hash, Entry<K, V> entry) {
-      table[hash] = entry;
+    public synchronized void insert(Entry<K, V> entry) {
+      if (entry == null)
+        throw new NullPointerException();
+      table[hash(entry.getKey())] = entry;
     }
 
     /**
@@ -672,10 +689,15 @@ public final class CuckooHashtable<K, V> {
      * 
      * @param key the key to retrieve the corresponding value
      * @return the value if the given key entry exists or {@code null} if not
+     * 
+     * @throws NullPointerException if the key is {@code null}
      */
     @SuppressWarnings("unchecked")
     public synchronized V get(K key) {
-      final Entry<K, V> entry = (Entry<K, V>) table[hash(key.hashCode())];
+      if (key == null)
+        throw new NullPointerException();
+
+      Entry<K, V> entry = (Entry<K, V>) table[hash(key)];
 
       if (entry != null && entry.getKey().equals(key))
         return entry.getValue();
@@ -693,7 +715,8 @@ public final class CuckooHashtable<K, V> {
      * @see CuckooHashtable#insert()
      */
     @SuppressWarnings("unchecked")
-    public synchronized Entry<K, V> remove(int hash) {
+    public synchronized Entry<K, V> remove(K key) {
+      int hash = hash(key);
       Entry<K, V> entry = (Entry<K, V>) table[hash];
 
       table[hash] = null;
@@ -701,23 +724,50 @@ public final class CuckooHashtable<K, V> {
       return entry;
     }
 
+    // TODO: implement this or remove the subtable remove(Entry)
+    // public synchronized Entry<K, V> remove(Entry<K, V> entry) {
+    //   if (entry == null)
+    //     throw new NullPointerException();
+    //   return remove(entry.getKey());
+    // }
+
     /**
      * Deletes an entry for the given key if it exists and the occupied slot key
      * matches the specified key to know it is correct.
      * 
-     * @param key the key
+     * @param key the key of the entry to delete
      * @return whether the operation was successful or not
+     * 
+     * @throws NullPointerException if key is {@code null}
      */
     public synchronized boolean delete(K key) {
-      final int keyHash = hash(key.hashCode());
+      if (key == null)
+        throw new NullPointerException();
 
-      if (table[keyHash] != null && table[keyHash].getKey().equals(key)) {
-        table[keyHash] = null;
+      int hash = hash(key);
+
+      if (table[hash] != null && table[hash].getKey().equals(key)) {
+        table[hash] = null;
 
         return true;
       }
 
       return false;
+    }
+
+    /**
+     * Overloaded method that receives an {@code Entry<K, V>} object and gets
+     * the key and passes it into the {@code delete(K key)}.
+     * 
+     * @param entry the entry to delete
+     * @return whether the operation was successful or not
+     * 
+     * @throws NullPointerException if the entry is {@code null}
+     */
+    public synchronized boolean delete(Entry<K, V> entry) {
+      if (entry == null)
+        throw new NullPointerException();
+      return delete(entry.getKey());
     }
   }
 
@@ -924,7 +974,7 @@ public final class CuckooHashtable<K, V> {
       /* Use locals for faster loop iteration */
       while (e == null && i > 0) {
         e = t[--i];
-      } 
+      }
 
       entry = e;
       index = i;
@@ -954,18 +1004,10 @@ public final class CuckooHashtable<K, V> {
       index = i;
 
       if (e != null) {
-        Entry<?, ?> next = last = entry;
-        e = entry = null;
+        last = e;
+        entry = null;
 
-        /* Use locals for faster loop iteration */
-        while (e == null && i > 0) {
-          e = t[--i];
-        }
-
-        entry = e;
-        index = i;
-
-        return type == KEYS ? (T) next.key : (type == VALUES ? (T) next.value : (T) next);
+        return type == KEYS ? (T) e.key : (type == VALUES ? (T) e.value : (T) e);
       }
 
       throw new NoSuchElementException("Hashtable Enumerator");
@@ -1057,6 +1099,8 @@ class CuckooHashTableDemo {
       System.out.println(x);
     }
 
+    System.out.println();
+
     try {
       test.insert(953, "one");
       test.insert(326, "two");
@@ -1102,13 +1146,18 @@ class CuckooHashTableDemo {
     Iterator<CuckooHashtable.Entry<Integer, String>> entries = test.entriesIterator();
 
     System.out.println("\nIterator with a remove() on key 324: ");
-    for (CuckooHashtable.Entry<Integer, String> e = entries.next(); e != null || entries.hasNext(); e = entries.next()) {
-      System.out.println(e);
 
-      if (e.getKey() == 324) {
-        entries.remove();
+    try {
+      for (CuckooHashtable.Entry<Integer, String> e = entries.next(); e != null || entries.hasNext(); e = entries.next()) {
+        System.out.println(e);
+
+        if (e.getKey() == 324) {
+          entries.remove();
+        }
       }
-    }
+    } catch (NoSuchElementException e) {}
+
+    System.out.println("\n toString() after the removal of 324: " + test.toString());
 
     System.out.println("\nDone");
 
