@@ -361,6 +361,7 @@ public final class CuckooHashtable<K, V> {
         // If the position is empty, insert new entry and return.
         if (Tj.hasHash(keyHash) == false) {
           Tj.insert(keyHash, newEntry);
+
           return;
         }
 
@@ -522,6 +523,7 @@ public final class CuckooHashtable<K, V> {
         if (Tj.delete(key)) {
           modCount++;
           n--;
+
           return true;
         }
 
@@ -922,7 +924,7 @@ public final class CuckooHashtable<K, V> {
       /* Use locals for faster loop iteration */
       while (e == null && i > 0) {
         e = t[--i];
-      }
+      } 
 
       entry = e;
       index = i;
@@ -953,9 +955,17 @@ public final class CuckooHashtable<K, V> {
 
       if (e != null) {
         Entry<?, ?> next = last = entry;
-        entry = null;
+        e = entry = null;
 
-        return type == KEYS ? (T) next.key : (type == VALUES ? (T) next.value : (T) e);
+        /* Use locals for faster loop iteration */
+        while (e == null && i > 0) {
+          e = t[--i];
+        }
+
+        entry = e;
+        index = i;
+
+        return type == KEYS ? (T) next.key : (type == VALUES ? (T) next.value : (T) next);
       }
 
       throw new NoSuchElementException("Hashtable Enumerator");
@@ -1037,48 +1047,62 @@ class CuckooHashTableDemo {
   public static void main(String[] args) {
     CuckooHashtable<Integer, String> test = new CuckooHashtable<>();
 
-    // System.out.println(test.toString());
-    // Iterable<Integer> keys = test.keys();
+    System.out.println("toString() on empty hashtable: " + test.toString());
 
-    // for (var x : keys) {
-    // System.out.println(x);
-    // }
+    Iterable<Integer> keys = test.keys();
 
-    // try {
-    test.insert(953, "one");
-    test.insert(326, "two");
-    test.insert(452, "three");
-    test.insert(324, "four");
-    test.insert(444, "five");
-    test.insert(555, "six");
-    test.insert(425, "seven");
-    test.insert(345, "eight");
-    test.insert(466, "nine");
-    // test.insert(466, "ten");
+    System.out.println("\nIterable on keys:");
 
-    // System.out.println("contains key 953: " + test.has(953));
-    // System.out.println("contains key 495: " + test.has(495));
-    // System.out.println("contains key 345: " + test.has(345));
+    for (var x : keys) {
+      System.out.println(x);
+    }
 
-    // System.out.println("value of key 345: " + test.get(345));
+    try {
+      test.insert(953, "one");
+      test.insert(326, "two");
+      test.insert(452, "three");
+      test.insert(324, "four");
+      test.insert(444, "five");
+      test.insert(555, "six");
+      test.insert(425, "seven");
+      test.insert(345, "eight");
+      test.insert(466, "nine");
 
-    // System.out.println("deleted key 345: " + test.delete(345));
-    // System.out.println("contains key 345: " + test.has(345));
+      // Duplicate key
+//    test.insert(466, "ten");
 
-    // System.out.println("value of key 345: " + test.get(345));
+      System.out.println("contains key 953: " + test.has(953));
+      System.out.println("contains key 495: " + test.has(495));
+      System.out.println("contains key 345: " + test.has(345));
 
-    // System.out.println("deleted key 345: " + test.delete(345));
+      System.out.println("value of key 345: " + test.get(345));
 
-    // } catch (IllegalArgumentException err) {
-    // System.out.println(err);
-    // }
+      System.out.println("deleted key 345: " + test.delete(345));
+      System.out.println("contains key 345: " + test.has(345));
 
-    System.out.println(test.toString());
+      System.out.println("value of key 345: " + test.get(345));
 
-    // Iterable<CuckooHashtable.Entry<Integer, String>> entries = test.entries();
+      System.out.println("deleted key 345: " + test.delete(345));
+
+    } catch (IllegalArgumentException e) {
+      System.out.println(e);
+    }
+
+    System.out.println("\ntoString(): " + test.toString());
+
+
+    System.out.println("\nIterable:");
+    Iterable<CuckooHashtable.Entry<Integer, String>> iter = test.entries();
+
+    for (var e : iter) {
+      System.out.println(e);
+    }
+
+
     Iterator<CuckooHashtable.Entry<Integer, String>> entries = test.entriesIterator();
 
-    for (CuckooHashtable.Entry<Integer, String> e = entries.next(); entries.hasNext(); e = entries.next()) {
+    System.out.println("\nIterator with a remove() on key 324: ");
+    for (CuckooHashtable.Entry<Integer, String> e = entries.next(); e != null || entries.hasNext(); e = entries.next()) {
       System.out.println(e);
 
       if (e.getKey() == 324) {
@@ -1086,13 +1110,7 @@ class CuckooHashTableDemo {
       }
     }
 
-    // Iterable<Integer> keys = test.keys();
-
-    // for (Integer v : keys) {
-    // System.out.println(v);
-    // }
-
-    System.out.println("Done");
+    System.out.println("\nDone");
 
   }
 }
