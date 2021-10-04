@@ -1,14 +1,22 @@
 package Data_Structures.HashTables.HashTableExceptions;
 
 public final class DuplicateKeyException extends HashTableException {
-  int key;
+  Object key;
+  String str;
 
-  public DuplicateKeyException(int k) { 
+  public DuplicateKeyException(Object key) { 
     super();
-    key = k;
+    this.key = key;
+  }
+
+  public DuplicateKeyException(String str) {
+    super();
+    this.str = str;
   }
 
   public String toString() {
-    return "\nDuplicate key used: " + key;
+    if (key != null)
+      return "\nDuplicate key used: " + key;
+    return str;
   }
 }

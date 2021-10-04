@@ -1,12 +1,16 @@
 package Data_Structures.HashTables.PerfectHashing;
 
 import java.util.Objects;
+import java.util.Map;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.function.Consumer;
 import java.util.NoSuchElementException;
 import java.util.ConcurrentModificationException;
+import Data_Structures.HashTables.HashTableExceptions.DuplicateKeyException;
+
 import static Data_Structures.HashTables.HashTableFunctions.isPrime;
 
 /**
@@ -193,7 +197,25 @@ public final class CuckooHashtable<K, V> {
     this(1277, size, loadFactor);
   }
 
-  // TODO: add constructor to initalize a predefined set
+  /**
+   * Constructs a new hashtable with the default values and a specified set
+   * of entries of a {@code Map}.
+   * 
+   * @param S the set of entries
+   * 
+   * @throws DuplicateKeyException if a duplicate key is used
+   */
+  public CuckooHashtable(Map<K, V> S) {
+    this(1277, 1, 0.9f);
+
+    for (Map.Entry<K, V> entry : S.entrySet()) {
+      try {
+        insert(entry.getKey(), entry.getValue());
+      } catch (DuplicateKeyException e) {
+        System.out.println("Duplicate key used in CuckooHashTable(): " + entry.getKey());
+      }
+    }
+  }
 
   /**
    * Returns an iterable of the keys in this hashtable. Use the {@code Iterator}
@@ -332,11 +354,11 @@ public final class CuckooHashtable<K, V> {
    * 
    * @throws NullPointerException if the key or value is null
    * 
-   * @throws IllegalArgumentException if the specified key already exists in the
+   * @throws DuplicateKeyException if the specified key already exists in the
    *         hashtable
    */
   @SuppressWarnings("unchecked")
-  public synchronized void insert(K key, V value) {
+  public synchronized void insert(K key, V value) throws DuplicateKeyException {
     if (key == null || value == null)
       throw new NullPointerException("Key and value cannot be null values.");
 
@@ -353,7 +375,7 @@ public final class CuckooHashtable<K, V> {
         newKey = newEntry.getKey();
 
         // If the position is empty, insert new entry and return.
-        if (Tj.contains(newKey) == false) {
+        if (Tj.isOccupied(newKey) == false) {
           Tj.insert(newEntry);
 
           return;
@@ -366,7 +388,7 @@ public final class CuckooHashtable<K, V> {
         // Check for duplicate key and cycle
         if (prevEntry.getKey().equals(key)) {
           if (first)
-            throw new IllegalArgumentException("Duplicate key used: " + key);
+            throw new DuplicateKeyException(key);
 
           fullRehash(key, value);
         }
@@ -383,6 +405,10 @@ public final class CuckooHashtable<K, V> {
    * and placing them in a single array, recaclulate the new subtable size, reset
    * the size counter, and re-insert all the entries into the hashtable.
    * 
+   * <p>
+   * The new subtable size, m, is calcluated 
+   * </p>
+   * 
    * <hr/>
    * 
    * Suppresses the type safety warning when re-inserting the entries and casting
@@ -395,11 +421,13 @@ public final class CuckooHashtable<K, V> {
    * 
    * @throws IllegalArgumentException if the specified key already exists in the
    *         table
+   * 
+   * @throws DuplicateKeyException if a key already exists in the hashtable
    */
   @SuppressWarnings("unchecked")
   private synchronized void fullRehash(K key, V value) throws IllegalArgumentException {
     int maxNumEntries = T * m;
-    int entryIdx = 0;
+    int i = 0, entryIdx = 0;
     Entry<?, ?> entries[] = new Entry<?, ?>[maxNumEntries];
 
     // Place entries from all subtables into a single array
@@ -410,6 +438,9 @@ public final class CuckooHashtable<K, V> {
       }
     }
 
+    // Add the newest entry
+    entries[entryIdx++] = new Entry<K, V>(key, value);
+
     // Calculate new m, reset size counter, increment modified counter
     m = (1 + c) * Math.max(entries.length, 4);
     n = 0;
@@ -418,19 +449,17 @@ public final class CuckooHashtable<K, V> {
     // Re-create the subtables
     buildSubtables();
 
-    // Garbage collect the old removed tables
+    // Garbage collect the removed tables
     System.gc();
 
-    // Re-insert the entries
-    try {
-      for (int i = 0; i < entryIdx; ++i) {
+    // Re-insert the entries, will skip any duplicate keyed entry
+    do {
+      try {
         insert((K) entries[i].getKey(), (V) entries[i].getValue());
+      } catch (DuplicateKeyException err) {
+        System.out.println("Duplicate detected in fullRehash(): " + err);
       }
-
-      insert(key, value);
-    } catch (IllegalArgumentException err) {
-      System.out.println("Duplicate detected in fullRehash(): " + err);
-    }
+    } while (++i < entryIdx);
   }
 
   /**
@@ -442,12 +471,34 @@ public final class CuckooHashtable<K, V> {
    * @throws NullPointerException if the key is {@code null}
    */
   @SuppressWarnings("unchecked")
-  public synchronized boolean has(K key) {
+  public synchronized boolean hasKey(K key) {
     if (key == null)
       throw new NullPointerException();
 
     for (CuckooHashSubtable<K, V> Tj : (CuckooHashSubtable<K, V>[]) tables) {
-      if (Tj.has(key))
+      if (Tj.hasKey(key))
+        return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Determines whether a key in any of the subtable maps into the
+   * specified value.
+   * 
+   * @param value the value to check if exists
+   * @return whether the value exists in the hashtable or not
+   * 
+   * @throws NullPointerException if the value is {@code null}
+   */
+  @SuppressWarnings("unchecked")
+  public synchronized boolean hasValue(V value) {
+    if (value == null)
+      throw new NullPointerException();
+
+    for (CuckooHashSubtable<K, V> Tj : (CuckooHashSubtable<K, V>[]) tables) {
+      if (Tj.hasValue(value))
         return true;
     }
 
@@ -497,7 +548,7 @@ public final class CuckooHashtable<K, V> {
       throw new NullPointerException();
 
     for (CuckooHashSubtable<K, V> Tj : (CuckooHashSubtable<K, V>[]) tables) {
-      if (Tj.has(key)) {
+      if (Tj.hasKey(key)) {
         if (Tj.delete(key)) {
           modCount++;
           n--;
@@ -631,7 +682,7 @@ public final class CuckooHashtable<K, V> {
      * 
      * @throws NullPointerException if the key is {@code null}
      */
-    public synchronized boolean contains(K key) {
+    public synchronized boolean isOccupied(K key) {
       if (key == null)
         throw new NullPointerException();
       return table[hash(key)] != null;
@@ -646,7 +697,7 @@ public final class CuckooHashtable<K, V> {
      * 
      * @throws NullPointerException if the key is {@code null}
      */
-    public synchronized boolean has(K key) {
+    public synchronized boolean hasKey(K key) {
       if (key == null)
         throw new NullPointerException();
         
@@ -658,17 +709,24 @@ public final class CuckooHashtable<K, V> {
       return false;
     }
 
-    // /**
-    //  * TODO: checks if key and value of entry exists
-    //  * 
-    //  * @param entry
-    //  * @return whether the given entry exists in the table
-    //  */
-    // public synchronized boolean has(Entry<K, V> entry) {
-    //   if (entry == null)
-    //     throw new NullPointerException();
-    //   return has(entry.getKey());
-    // }
+    /**
+     * Checks whether a given key in the subtable maps to the specified value.
+     * 
+     * @param value the value
+     * @return whether the given value exists in the table
+     */
+    @SuppressWarnings("unchecked")
+    public synchronized boolean hasValue(V value) {
+      if (value == null)
+        throw new NullPointerException();
+    
+      for (Entry<K, V> e : (Entry<K, V>[]) table) {
+        if (e.getValue().equals(value))
+          return true;
+      }
+
+      return false;    
+    }
 
     /**
      * Inserts a new {@code Entry} into the subtable by getting its' key, deriving
@@ -723,13 +781,6 @@ public final class CuckooHashtable<K, V> {
 
       return entry;
     }
-
-    // TODO: implement this or remove the subtable remove(Entry)
-    // public synchronized Entry<K, V> remove(Entry<K, V> entry) {
-    //   if (entry == null)
-    //     throw new NullPointerException();
-    //   return remove(entry.getKey());
-    // }
 
     /**
      * Deletes an entry for the given key if it exists and the occupied slot key
@@ -1113,22 +1164,22 @@ class CuckooHashTableDemo {
       test.insert(466, "nine");
 
       // Duplicate key
-//    test.insert(466, "ten");
+      // test.insert(466, "ten");
 
-      System.out.println("contains key 953: " + test.has(953));
-      System.out.println("contains key 495: " + test.has(495));
-      System.out.println("contains key 345: " + test.has(345));
-
-      System.out.println("value of key 345: " + test.get(345));
-
-      System.out.println("deleted key 345: " + test.delete(345));
-      System.out.println("contains key 345: " + test.has(345));
+      System.out.println("contains key 953: " + test.hasKey(953));
+      System.out.println("contains key 495: " + test.hasKey(495));
+      System.out.println("contains key 345: " + test.hasKey(345));
 
       System.out.println("value of key 345: " + test.get(345));
 
       System.out.println("deleted key 345: " + test.delete(345));
+      System.out.println("contains key 345: " + test.hasKey(345));
 
-    } catch (IllegalArgumentException e) {
+      System.out.println("value of key 345: " + test.get(345));
+
+      System.out.println("deleted key 345: " + test.delete(345));
+
+    } catch (DuplicateKeyException e) {
       System.out.println(e);
     }
 
@@ -1147,17 +1198,18 @@ class CuckooHashTableDemo {
 
     System.out.println("\nIterator with a remove() on key 324: ");
 
-    try {
-      for (CuckooHashtable.Entry<Integer, String> e = entries.next(); e != null || entries.hasNext(); e = entries.next()) {
-        System.out.println(e);
 
-        if (e.getKey() == 324) {
-          entries.remove();
-        }
+    while (entries.hasNext()) {
+      CuckooHashtable.Entry<Integer, String> e = entries.next();
+      
+      if (e.getKey() == 324) {
+        entries.remove();
       }
-    } catch (NoSuchElementException e) {}
 
-    System.out.println("\n toString() after the removal of 324: " + test.toString());
+      System.out.println(e);
+    }
+
+    System.out.println("\ntoString() after the removal of 324: " + test.toString());
 
     System.out.println("\nDone");
 
