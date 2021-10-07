@@ -2,7 +2,6 @@ package Data_Structures.HashTables.PerfectHashing;
 
 import java.util.Objects;
 import java.util.Map;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -208,13 +207,8 @@ public final class CuckooHashtable<K, V> {
   public CuckooHashtable(Map<K, V> S) {
     this(1277, 1, 0.9f);
 
-    for (Map.Entry<K, V> entry : S.entrySet()) {
-      try {
-        insert(entry.getKey(), entry.getValue());
-      } catch (DuplicateKeyException e) {
-        System.out.println("Duplicate key used in CuckooHashTable(): " + entry.getKey());
-      }
-    }
+    for (Map.Entry<K, V> entry : S.entrySet())
+      insert(entry.getKey(), entry.getValue());
   }
 
   /**
@@ -358,7 +352,7 @@ public final class CuckooHashtable<K, V> {
    *         hashtable
    */
   @SuppressWarnings("unchecked")
-  public synchronized void insert(K key, V value) throws DuplicateKeyException {
+  public synchronized void insert(K key, V value) {
     if (key == null || value == null)
       throw new NullPointerException("Key and value cannot be null values.");
 
@@ -388,7 +382,7 @@ public final class CuckooHashtable<K, V> {
         // Check for duplicate key and cycle
         if (prevEntry.getKey().equals(key)) {
           if (first)
-            throw new DuplicateKeyException(key);
+            throw new IllegalArgumentException("Key already exists in table: " + key.toString());
 
           fullRehash(key, value);
         }
@@ -418,17 +412,12 @@ public final class CuckooHashtable<K, V> {
    * @param key   the key of the last item before capacity was exceeded or a cycle
    *              was reached.
    * @param value the value of the last item
-   * 
-   * @throws IllegalArgumentException if the specified key already exists in the
-   *         table
-   * 
-   * @throws DuplicateKeyException if a key already exists in the hashtable
    */
   @SuppressWarnings("unchecked")
-  private synchronized void fullRehash(K key, V value) throws IllegalArgumentException {
+  private synchronized void fullRehash(K key, V value) {
     int maxNumEntries = T * m;
-    int i = 0, entryIdx = 0;
     Entry<?, ?> entries[] = new Entry<?, ?>[maxNumEntries];
+    int entryIdx = 0;
 
     // Place entries from all subtables into a single array
     for (CuckooHashSubtable<K, V> Tj : (CuckooHashSubtable<K, V>[]) tables) {
@@ -439,7 +428,6 @@ public final class CuckooHashtable<K, V> {
     }
 
     // Add the newest entry
-    entries[entryIdx++] = new Entry<K, V>(key, value);
 
     // Calculate new m, reset size counter, increment modified counter
     m = (1 + c) * Math.max(entries.length, 4);
@@ -453,13 +441,8 @@ public final class CuckooHashtable<K, V> {
     System.gc();
 
     // Re-insert the entries, will skip any duplicate keyed entry
-    do {
-      try {
-        insert((K) entries[i].getKey(), (V) entries[i].getValue());
-      } catch (DuplicateKeyException err) {
-        System.out.println("Duplicate detected in fullRehash(): " + err);
-      }
-    } while (++i < entryIdx);
+    for (Entry<K, V> e : (Entry<K, V>[]) entries)
+      insert(e.getKey(), e.getValue());
   }
 
   /**
@@ -648,13 +631,13 @@ public final class CuckooHashtable<K, V> {
     /**
      * The deterministic hash function to derive a index slot for a given key
      * {@code k}.
-     * 
+     *  
      * @param k the key to hash
      * @return integer index for this subtable
      * 
      * @throws NullPointerException if the key is {@code null}
      */
-    public int hash(K key) {
+    private int hash(K key) {
       if (key == null)
         throw new NullPointerException();
       return ((a * key.hashCode() + b) % p) % m;
@@ -770,10 +753,15 @@ public final class CuckooHashtable<K, V> {
      * @param hash the derived hash index slot from a key
      * @return desired {@code Entry} for either normal removal or swapping entries
      *         in the {@code CuckooHashTable.insert()} process.
+     * 
+     * @throws NullPointerException if the key is {@code null}
      * @see CuckooHashtable#insert()
      */
     @SuppressWarnings("unchecked")
     public synchronized Entry<K, V> remove(K key) {
+      if (key == null)
+        throw new NullPointerException();
+
       int hash = hash(key);
       Entry<K, V> entry = (Entry<K, V>) table[hash];
 
@@ -823,12 +811,15 @@ public final class CuckooHashtable<K, V> {
   }
 
   /**
-   * This class creates entries that hold a key/value pair. It allows any object
-   * of subclass {@code Object} to be used as a key or value, which works for
-   * everything since all {@code Object} is the superclass of any object.
+   * This class creates entries that hold a key/value pair. It allows any
+   * non-{@code null} object of subclass {@code Object} to be used as a key or
+   * value, which works for everything since all {@code Object} is the superclass
+   * of any object.
    * 
    * @param <K> type parameter for the key. Can hold any {@code Object}
    * @param <V> type parameter for the value. Can hold any {@code Object}
+   * 
+   * @throws NullPointerException if the key or value is {@code null}
    * @since 1.0
    */
   static class Entry<K, V> {
@@ -836,6 +827,11 @@ public final class CuckooHashtable<K, V> {
     private final V value;
 
     public Entry(K key, V value) {
+      if (key == null)
+        throw new NullPointerException();
+      if (value == null)
+        throw new NullPointerException();
+
       this.key = key;
       this.value = value;
     }
@@ -1134,84 +1130,4 @@ public final class CuckooHashtable<K, V> {
     }
   }
 
-}
-
-class CuckooHashTableDemo {
-  public static void main(String[] args) {
-    CuckooHashtable<Integer, String> test = new CuckooHashtable<>();
-
-    System.out.println("toString() on empty hashtable: " + test.toString());
-
-    Iterable<Integer> keys = test.keys();
-
-    System.out.println("\nIterable on keys:");
-
-    for (var x : keys) {
-      System.out.println(x);
-    }
-
-    System.out.println();
-
-    try {
-      test.insert(953, "one");
-      test.insert(326, "two");
-      test.insert(452, "three");
-      test.insert(324, "four");
-      test.insert(444, "five");
-      test.insert(555, "six");
-      test.insert(425, "seven");
-      test.insert(345, "eight");
-      test.insert(466, "nine");
-
-      // Duplicate key
-      // test.insert(466, "ten");
-
-      System.out.println("contains key 953: " + test.hasKey(953));
-      System.out.println("contains key 495: " + test.hasKey(495));
-      System.out.println("contains key 345: " + test.hasKey(345));
-
-      System.out.println("value of key 345: " + test.get(345));
-
-      System.out.println("deleted key 345: " + test.delete(345));
-      System.out.println("contains key 345: " + test.hasKey(345));
-
-      System.out.println("value of key 345: " + test.get(345));
-
-      System.out.println("deleted key 345: " + test.delete(345));
-
-    } catch (DuplicateKeyException e) {
-      System.out.println(e);
-    }
-
-    System.out.println("\ntoString(): " + test.toString());
-
-
-    System.out.println("\nIterable:");
-    Iterable<CuckooHashtable.Entry<Integer, String>> iter = test.entries();
-
-    for (var e : iter) {
-      System.out.println(e);
-    }
-
-
-    Iterator<CuckooHashtable.Entry<Integer, String>> entries = test.entriesIterator();
-
-    System.out.println("\nIterator with a remove() on key 324: ");
-
-
-    while (entries.hasNext()) {
-      CuckooHashtable.Entry<Integer, String> e = entries.next();
-      
-      if (e.getKey() == 324) {
-        entries.remove();
-      }
-
-      System.out.println(e);
-    }
-
-    System.out.println("\ntoString() after the removal of 324: " + test.toString());
-
-    System.out.println("\nDone");
-
-  }
 }

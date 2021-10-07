@@ -1,5 +1,7 @@
 package Data_Structures.HashTables.HashTableExceptions;
 
-public class HashTableException extends Exception {
+public abstract class HashTableException extends Exception {
   protected HashTableException() {}
+
+  public abstract String toString();
 }
