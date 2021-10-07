@@ -1,6 +1,6 @@
-package Data_Structures.HashTables;
+package HashTables;
 
-import Data_Structures.HashTables.HashTableExceptions.*;
+import HashTables.HashTableExceptions.*;
 
 public class HashSubtable {
   private int m, p, a, b;

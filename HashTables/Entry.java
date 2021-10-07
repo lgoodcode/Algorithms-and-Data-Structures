@@ -1,4 +1,4 @@
-package Data_Structures.HashTables;
+package HashTables;
 
 /**
  * This class creates entries that hold a key/value pair. It allows 

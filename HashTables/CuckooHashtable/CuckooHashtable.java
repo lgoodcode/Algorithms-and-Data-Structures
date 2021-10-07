@@ -1,4 +1,4 @@
-package Data_Structures.HashTables.PerfectHashing;
+package HashTables.CuckooHashtable;
 
 import java.util.Objects;
 import java.util.Map;
@@ -8,9 +8,9 @@ import java.util.Iterator;
 import java.util.function.Consumer;
 import java.util.NoSuchElementException;
 import java.util.ConcurrentModificationException;
-import Data_Structures.HashTables.HashTableExceptions.DuplicateKeyException;
+import HashTables.HashTableExceptions.DuplicateKeyException;
 
-import static Data_Structures.HashTables.HashTableFunctions.isPrime;
+import static HashTables.HashTableFunctions.isPrime;
 
 /**
  * This class implements a high performance dynamic hashtable where the size is
@@ -353,8 +353,12 @@ public final class CuckooHashtable<K, V> {
    */
   @SuppressWarnings("unchecked")
   public synchronized void insert(K key, V value) {
-    if (key == null || value == null)
+    if (key == null  || value == null)
       throw new NullPointerException("Key and value cannot be null values.");
+    if (key instanceof String && key.toString().isBlank())
+      throw new IllegalArgumentException("Key string cannot be blank.");
+    if (value instanceof String && value.toString().isBlank())
+      throw new IllegalArgumentException("Value string cannot be blank.");
 
     if (capacityReached()) {
       fullRehash(key, value);
@@ -417,6 +421,7 @@ public final class CuckooHashtable<K, V> {
   private synchronized void fullRehash(K key, V value) {
     int maxNumEntries = T * m;
     Entry<?, ?> entries[] = new Entry<?, ?>[maxNumEntries];
+    Entry<K, V> entry;
     int entryIdx = 0;
 
     // Place entries from all subtables into a single array
@@ -428,6 +433,7 @@ public final class CuckooHashtable<K, V> {
     }
 
     // Add the newest entry
+    entries[entryIdx++] = new Entry<K,V>(key, value);
 
     // Calculate new m, reset size counter, increment modified counter
     m = (1 + c) * Math.max(entries.length, 4);
@@ -441,8 +447,10 @@ public final class CuckooHashtable<K, V> {
     System.gc();
 
     // Re-insert the entries, will skip any duplicate keyed entry
-    for (Entry<K, V> e : (Entry<K, V>[]) entries)
-      insert(e.getKey(), e.getValue());
+    for (int i=0; i < entryIdx; i++) {
+      entry = (Entry<K, V>) entries[i];
+      insert(entry.getKey(), entry.getValue());
+    } 
   }
 
   /**

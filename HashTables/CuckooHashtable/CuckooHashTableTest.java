@@ -1,4 +1,4 @@
-package Data_Structures.HashTables.PerfectHashing;
+package HashTables.CuckooHashtable;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
@@ -108,18 +108,19 @@ public class CuckooHashTableTest implements TestLifecycleLogger {
     void throws_NullPointerException_for_null_and_empty_keys(String key) {
       table2 = new CuckooHashtable<>();
 
-      assertThrows(NullPointerException.class, () -> table2.insert(key, "test"));
+      // Throws NullPointerException for null value and IllegalArgumentException
+      assertThrows(Exception.class, () -> table2.insert(key, "test"));
     }
 
     @Nested
     @Tag("inserted")
     class After_Inserting {
-      int key = 123;
-      String value = "test";
+      int[] keys = { 1, 2, 3 };
+      String[] values = { "one", "two", "three" };
 
       @BeforeEach
       void insert_key_value() {
-        table.insert(key, value);
+        assertDoesNotThrow(() -> table.insert(keys[0], values[0]));
       }
 
       @Test
@@ -130,18 +131,33 @@ public class CuckooHashTableTest implements TestLifecycleLogger {
       @Test
       void has_get_and_delete_inserted_key() {
         assertAll("has(), get(), and delete() key", 
-          () -> assertTrue(table.hasKey(key)),
+          () -> assertTrue(table.hasKey(keys[0])),
           () -> {
-            String val = table.get(key);
+            String val = table.get(keys[0]);
             assertNotNull(val);
-            assertEquals(value, val);
+            assertEquals(values[0], val);
           },
-          () -> assertTrue(table.delete(key)),
+          () -> assertTrue(table.delete(keys[0])),
           () -> assertTrue(table.isEmpty())
         );
       }
-    }
 
+      @Test
+      void insert_to_trigger_fullRehash() {
+        assertDoesNotThrow(() -> {
+          table.insert(keys[1], values[1]);
+          table.insert(keys[2], values[2]);
+        }, "insert two key/value pairs");
+
+        assertAll("values are retrieved",
+          () -> assertEquals(3, table.size()),
+          () -> assertEquals(values[1], table.get(keys[1])),
+          () -> assertEquals(values[2], table.get(keys[2]))
+        );
+      }
+
+    }
+    
   }
 
 }

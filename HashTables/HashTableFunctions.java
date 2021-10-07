@@ -1,6 +1,6 @@
-package Data_Structures.HashTables;
+package HashTables;
 
-import Data_Structures.HashTables.HashTableExceptions.*;
+import HashTables.HashTableExceptions.*;
 
 public final class HashTableFunctions {
   /**

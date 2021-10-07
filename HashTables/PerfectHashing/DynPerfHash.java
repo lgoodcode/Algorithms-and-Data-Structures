@@ -1,4 +1,4 @@
-package Data_Structures.HashTables.PerfectHashing;
+package HashTables.PerfectHashing;
 
 // TODO: complete this entire thing
 class TableTooLargeException extends Exception {

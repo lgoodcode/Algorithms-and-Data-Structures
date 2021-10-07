@@ -1,4 +1,4 @@
-package Data_Structures.Stacks;
+package Stacks;
 
 class GenericStackDemo {
   public static void main(String args[]) {

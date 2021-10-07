@@ -1,4 +1,4 @@
-package Data_Structures.HashTables.HashTableExceptions;
+package HashTables.HashTableExceptions;
 
 public final class InvalidLoadFactorException extends HashTableException {
   float lf;

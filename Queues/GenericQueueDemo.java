@@ -1,4 +1,4 @@
-package Data_Structures.Queues;
+package Queues;
 
 public class GenericQueueDemo {
   public static void main(String[] args) {

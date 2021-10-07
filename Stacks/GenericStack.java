@@ -1,4 +1,4 @@
-package Data_Structures.Stacks;
+package Stacks;
 
 interface IGenStack<T> {
   public abstract void push(T x) throws StackFullException;

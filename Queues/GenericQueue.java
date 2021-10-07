@@ -1,4 +1,4 @@
-package Data_Structures.Queues;
+package Queues;
 
 interface IGenQueue<T> {
   public abstract void enqueue(T o) throws QueueFullException;
