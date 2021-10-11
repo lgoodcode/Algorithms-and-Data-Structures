@@ -85,74 +85,58 @@ public class CircularDoublyLinkedList<K, V> extends DoublyLinkedList<K, V> {
   }
 
   /**
-   * Retrieves the value of the node with the specified key or {@code null} if not
-   * found. Required to override the method with the exact duplicatation of code
-   * due to the fact that this method will be using the overridden
-   * {@code search()} which is necessary due to the nature of the circular
-   * structure. Otherwise, it would infinitely loop as there are no {@code null}
-   * pointers for the nodes.
+   * {@inheritDoc}
    * 
-   * @param key the key of the desired nodes' value to retrieve
-   * @return the value or {@code null} if not node not found
-   * 
-   * @throws IllegalArgumentException if the key is {@code null} or blank
+   * <p>
+   * The internal process of retrieving a value from a node is identical to the
+   * superclass {@code DoublyLinkedList} definition.
+   * </p>
    */
   @Override
   public V get(K key) {
-    if (key == null || key.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or blank");
-
-    DoublyNode<K, V> node = search(key);
-
-    if (node != null && node.getKey().equals(key))
-      return node.getValue();
-    return null;
+    return super._get(FORWARD, key);
   }
 
   /**
-   * Retrieves the value of the node with the specified key or {@code null} if not
-   * found but, starts iterating from the tail and goes in reverse. Required to
-   * override the method with the exact duplicatation of code due to the fact that
-   * this method will be using the overridden {@code rSearch()} which is necessary
-   * due to the nature of the circular structure. Otherwise, it would infinitely
-   * loop as there are no {@code null} pointers for the nodes.
+   * {@inheritDoc}
    * 
-   * @param key the key of the desired nodes' value to retrieve
-   * @return the value or {@code null} if not node not found
-   * 
-   * @throws IllegalArgumentException if the key is {@code null} or blank
+   * <p>
+   * The internal process of retrieving a value from a node is identical to the
+   * superclass {@code DoublyLinkedList} definition.
+   * </p>
    */
   @Override
   public V rGet(K key) {
-    if (key == null || key.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or blank");
-
-    DoublyNode<K, V> node = rSearch(key);
-
-    if (node != null && node.getKey().equals(key))
-      return node.getValue();
-    return null;
+    return super._get(REVERSE, key);
   }
 
   /**
-   * Removes a {@code DoublyNode} containing the specified key. It starts
-   * at the head and then continues down the list looking ahead an additional
-   * node. This is so when the next node is the desired node with the 
-   * corresponding key we can dereference the node by changing the pointers.
-   * Due to the circular nature, there is a slight difference between this and
-   * the {@code DoublyLinkedList} implementation; there are no {@code null}
-   * pointers, so the removed nodes' previous pointer will point to the nodes
-   * next and vice versa for the removed nodes next pointer. This is required
-   * to retain the circular structure.
+   * Removes a {@code DoublyNode} containing the specified key. Due to the
+   * circular nature, there is a slight difference between this and the
+   * {@code DoublyLinkedList} implementation; there are no {@code null} pointers,
+   * so the removed nodes' previous pointer will point to the nodes next and vice
+   * versa for the removed nodes next pointer. This is required to retain the
+   * circular structure.
+   * 
+   * <p>
+   * This is an internal method that is used for both normal {@code remove()} and
+   * the reverse iteration {@code rRemove()}. The process is identical except for
+   * the type of {@code search()} method used. Simply passing the type allows for
+   * reduced boilerplating.
+   * </p>
+   * 
+   * <p>
+   * Because of the circular structure, a different implementation is required
+   * that the superclass definition.
+   * </p>
    * 
    * @param key the key of the desired node to remove
    */
-  @Override
-  public void remove(K key) {
+  private void _remove(int type, K key) {
     if (key == null || key.toString().isBlank())
       throw new IllegalArgumentException("Key cannot be null or blank");
 
-    DoublyNode<K, V> node = search(key);
+    DoublyNode<K, V> node = type == FORWARD ? search(key) : rSearch(key);
 
     if (node == null)
       return;
@@ -165,6 +149,11 @@ public class CircularDoublyLinkedList<K, V> extends DoublyLinkedList<K, V> {
 
     node.prev.next = node.next;
     node.next.prev = node.prev;
+  }
+
+  @Override
+  public void remove(K key) {
+    _remove(FORWARD, key);
   }
 
   /**
@@ -175,22 +164,7 @@ public class CircularDoublyLinkedList<K, V> extends DoublyLinkedList<K, V> {
    */
   @Override
   public void rRemove(K key) {
-    if (key == null || key.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or blank");
-
-    DoublyNode<K, V> node = rSearch(key);
-
-    if (node == null)
-      return;
-    if (node == head && node == tail)
-      head = tail = null;
-    else if (node == head)
-      head = node.next;
-    else if (node == tail)
-      tail = node.prev;
-
-    node.prev.next = node.next;
-    node.next.prev = node.prev;
+    _remove(REVERSE, key);
   }
 
   /**

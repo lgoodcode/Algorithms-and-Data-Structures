@@ -3,6 +3,9 @@ package LinkedLists;
 public class DoublyLinkedList<K, V> {
   protected DoublyNode<K, V> head = null;
   protected DoublyNode<K, V> tail = null;
+  // Iteration types
+  protected int FORWARD = 0;
+  protected int REVERSE = 1;
 
   /**
    * Empty contructor because there is no initialization.
@@ -90,20 +93,40 @@ public class DoublyLinkedList<K, V> {
    * Retrieves the value of the node with the specified key or {@code null}
    * if not found.
    * 
+   * <p>
+   * This is an internal method that is used for both normal {@code get()} and
+   * the reverse iteration {@code rGet()}. The process is identical except for
+   * the type of {@code search()} method used. Simply passing the type allows for
+   * reduced boilerplating.
+   * </p>
+   * 
+   * @param key the key of the desired nodes' value to retrieve
+   * @return the value or {@code null} if not node not found
+   * 
+   * @throws IllegalArgumentException if the key is {@code null} or blank
+   */
+  protected V _get(int type, K key) {
+    if (key == null || key.toString().isBlank())
+      throw new IllegalArgumentException("Key cannot be null or blank");
+
+    DoublyNode<K, V> node = type == FORWARD ? search(key) : rSearch(key);
+
+    if (node != null && node.getKey().equals(key))
+      return node.getValue();
+    return null;
+  }
+
+  /**
+   * Retrieves the value of the node with the specified key or {@code null}
+   * if not found.
+   * 
    * @param key the key of the desired nodes' value to retrieve
    * @return the value or {@code null} if not node not found
    * 
    * @throws IllegalArgumentException if the key is {@code null} or blank
    */
   public V get(K key) {
-    if (key == null || key.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or blank");
-
-    DoublyNode<K, V> node = search(key);
-
-    if (node != null && node.getKey().equals(key))
-      return node.getValue();
-    return null;
+    return _get(FORWARD, key);
   }
 
   /**
@@ -116,14 +139,48 @@ public class DoublyLinkedList<K, V> {
    * @throws IllegalArgumentException if the key is {@code null} or blank
    */
   public V rGet(K key) {
+    return _get(REVERSE, key);
+  }
+
+  /**
+   * Removes a {@code DoublyNode} containing the specified key. When the desired
+   * node with the corresponding key is found, we want to simply dereference the
+   * node by setting the current node {@code next} pointer to the node that
+   * follows the desired node to remove.
+   * 
+   * <p>
+   * This is an internal method that is used for both normal {@code remove()} and
+   * the reverse iteration {@code rRemove()}. The process is identical except for
+   * the type of {@code search()} method used. Simply passing the type allows for
+   * reduced boilerplating.
+   * </p>
+   * 
+   * @param key the key of the desired node to remove
+   */
+  private void _remove(int type, K key) {
     if (key == null || key.toString().isBlank())
       throw new IllegalArgumentException("Key cannot be null or blank");
 
-    DoublyNode<K, V> node = rSearch(key);
+    DoublyNode<K, V> node = type == FORWARD ? search(key) : rSearch(key);
 
-    if (node != null && node.getKey().equals(key))
-      return node.getValue();
-    return null;
+    if (node == null)
+      return;
+    if (node == head && node == tail) {
+      head = tail = null;
+      return;
+    }
+    else if (node == head) {
+      head = node.next;
+      head.prev = null;
+    }
+    else if (node == tail) {
+      tail = node.prev;
+      tail.next = null;
+    }
+    else {
+      node.prev.next = node.next;
+      node.next.prev = node.prev;
+    }
   }
 
   /**
@@ -137,29 +194,7 @@ public class DoublyLinkedList<K, V> {
    * @param key the key of the desired node to remove
    */
   public void remove(K key) {
-    if (key == null || key.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or blank");
-
-    DoublyNode<K, V> node = search(key);
-
-    if (node == null)
-      return;
-    if (node == head && node == tail) {
-      head = tail = null;
-      return;
-    }
-    else if (node == head) {
-      head = node.next;
-      head.prev = null;
-    }
-    else if (node == tail) {
-      tail = node.prev;
-      tail.next = null;
-    }
-    else {
-      node.prev.next = node.next;
-      node.next.prev = node.prev;
-    }
+    _remove(FORWARD, key);
   }
 
   /**
@@ -173,29 +208,7 @@ public class DoublyLinkedList<K, V> {
    * @param key the key of the desired node to remove
    */
   public void rRemove(K key) {
-    if (key == null || key.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or blank");
-
-    DoublyNode<K, V> node = search(key);
-
-    if (node == null)
-      return;
-    if (node == head && node == tail) {
-      head = tail = null;
-      return;
-    }
-    else if (node == head) {
-      head = node.next;
-      head.prev = null;
-    }
-    else if (node == tail) {
-      tail = node.prev;
-      tail.next = null;
-    }
-    else {
-      node.prev.next = node.next;
-      node.next.prev = node.prev;
-    }
+    _remove(REVERSE, key);
   }
 
   /**
