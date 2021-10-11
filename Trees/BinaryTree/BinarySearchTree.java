@@ -1,21 +1,7 @@
-package Trees;
+package Trees.BinaryTree;
 
-/**
- * A functional interface to compare two objects.
- */
-@FunctionalInterface
-interface Compare<T> {
-  abstract public boolean isLessThan(T x, T y);
-}
-
-/**
- * A functional interface to trigger a callback function when traversing the
- * tree.
- */
-@FunctionalInterface
-interface Callback<T> {
-  abstract public void action(T x);
-}
+import Trees.TreeNode;
+import Trees.util.*;
 
 public class BinarySearchTree<K, V> {
   private TreeNode<K, V> root = null;
@@ -28,14 +14,15 @@ public class BinarySearchTree<K, V> {
    * 
    * @param compareFn an anonymous function that compares two {@TreeNode}s
    */
-  BinarySearchTree(Compare<K> compareFn) {
+  public BinarySearchTree(Compare<K> compareFn) {
     this.compareFn = compareFn;
   }
 
   /**
-   * The default constructor that uses a general compare function.
+   * The default constructor that uses a general compare function and calls
+   * the main constructor.
    */
-  BinarySearchTree() {
+  public BinarySearchTree() {
     this((K x, K y) -> x.hashCode() < y.hashCode());
   }
 

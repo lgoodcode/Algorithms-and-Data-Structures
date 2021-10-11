@@ -1,13 +1,15 @@
 package Trees;
 
-public class TreeNode<K, V> {
-  TreeNode<K, V> parent = null;
-  TreeNode<K, V> left = null;
-  TreeNode<K, V> right = null;
+public class TreeNode<K, V> extends AbstractTreeNode<K, V> {
+  public TreeNode<K, V> parent = null;
+  public TreeNode<K, V> left = null;
+  public TreeNode<K, V> right = null;
   private K key;
   private V value;
 
-  TreeNode(K key, V value) {
+  public TreeNode(K key, V value) {
+    super();
+
     if (key.equals(null) || key.toString().isBlank())
       throw new IllegalArgumentException("Key cannot be null or empty.");
     if (value.equals(null) || value.toString().isBlank())
@@ -18,11 +20,11 @@ public class TreeNode<K, V> {
   }
 
   public K getKey() {
-    return this.key;
+    return key;
   }
 
   public V getValue() {
-    return this.value;
+    return value;
   }
 
   public String toString() {

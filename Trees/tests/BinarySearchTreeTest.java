@@ -1,4 +1,4 @@
-package Trees;
+package Trees.tests;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -10,14 +10,24 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import Trees.TreeNode;
+import Trees.BinaryTree.BinarySearchTree;
+
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 public class BinarySearchTreeTest {
   BinarySearchTree<Integer, String> tree;
   BinarySearchTree<String, String> tree2;
+  TreeNode<Integer, String> node;
+  TreeNode<Integer, String> node2;
 
   @Test
   void is_instantiated() {
     tree  = new BinarySearchTree<>();
+  }
+
+  @Test
+  void tree_node_instantiates() {
+    node = new TreeNode<>(1, "one");
   }
 
   @Nested 
@@ -106,6 +116,15 @@ public class BinarySearchTreeTest {
         () -> assertEquals("four", tree.get(4)),
         () -> assertEquals("five", tree.get(5))
       );
+    }
+
+    @Test
+    void search() {
+      node = new TreeNode<>(4, "four");
+      node2 = tree.search(4);
+
+      assertEquals(node.getKey(), node2.getKey());
+      assertEquals(node.getValue(), node2.getValue());
     }
 
     @Test
