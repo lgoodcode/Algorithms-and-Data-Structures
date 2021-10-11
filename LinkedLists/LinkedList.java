@@ -14,6 +14,15 @@ public class LinkedList<K, V> {
   public LinkedList() {}
 
   /**
+   * Returns the node at the head of list.
+   * 
+   * @return the {@code LinkedListNode} at the head or {@code null} if none
+   */
+  public LinkedListNode<K, V> getHead() {
+    return head;
+  }
+
+  /**
    * Inserts a new {@code LinkedListNode} with the specified key and value pair.
    * If there is no {@code head}, then it will simply set the head as the new
    * node. Otherwise, the new node's {@code next} will point to the current head
@@ -108,12 +117,12 @@ public class LinkedList<K, V> {
    * @return the string format of the object
    */
   public String toString() {
-    StringBuilder str = new StringBuilder();
-
     if (head == null)
       return "{}";
-
+    
+    StringBuilder str = new StringBuilder();
     LinkedListNode<K, V> node = head;
+    
     str.append("{");
 
     while (node != null) {

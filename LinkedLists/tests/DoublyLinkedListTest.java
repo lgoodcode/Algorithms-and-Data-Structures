@@ -10,24 +10,24 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import LinkedLists.LinkedList;
-import LinkedLists.LinkedListNode;
+import LinkedLists.DoublyLinkedList;
+import LinkedLists.DoublyNode;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-public class LinkedListTest {
-  LinkedList<Integer, String> list;
-  LinkedList<String, String> list2;
-  LinkedListNode<Integer, String> node;
-  LinkedListNode<Integer, String> node2;
+public class DoublyLinkedListTest {
+  DoublyLinkedList<Integer, String> list;
+  DoublyLinkedList<String, String> list2;
+  DoublyNode<Integer, String> node;
+  DoublyNode<Integer, String> node2;
 
   @Test
   void is_instantiated() {
-    list = new LinkedList<>();
+    list = new DoublyLinkedList<>();
   }
 
   @Test
   void node_is_instantiated() {
-    node = new LinkedListNode<>(1, "one");
+    node = new DoublyNode<>(1, "one");
   }
 
   @Nested
@@ -35,7 +35,7 @@ public class LinkedListTest {
 
     @BeforeEach
     void create_list() {
-      list = new LinkedList<>();
+      list = new DoublyLinkedList<>();
     }
 
     @Test
@@ -49,8 +49,18 @@ public class LinkedListTest {
     }
 
     @Test
+    void rSearch_null_on_nonexistent_key() {
+      assertNull(list.rSearch(1));
+    }
+
+    @Test
     void get_returns_null() {
       assertNull(list.get(1));
+    }
+
+    @Test
+    void rGet_returns_null() {
+      assertNull(list.rGet(1));
     }
 
     @Test
@@ -62,7 +72,7 @@ public class LinkedListTest {
     @NullAndEmptySource
     @ValueSource(strings = { " ", "  ", "\t", "\n" })
     void insert_throws_on_bad_keys(String key) {
-      list2 = new LinkedList<>();
+      list2 = new DoublyLinkedList<>();
 
       assertThrows(IllegalArgumentException.class, () -> list2.insert(key, "test"));
     }
@@ -71,9 +81,27 @@ public class LinkedListTest {
     @NullAndEmptySource
     @ValueSource(strings = { " ", "  ", "\t", "\n" })
     void search_throws_on_bad_keys(String key) {
-      list2 = new LinkedList<>();
+      list2 = new DoublyLinkedList<>();
 
       assertThrows(IllegalArgumentException.class, () -> list2.search(key));
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = { " ", "  ", "\t", "\n" })
+    void remove_throws_on_bad_keys(String key) {
+      list2 = new DoublyLinkedList<>();
+
+      assertThrows(IllegalArgumentException.class, () -> list2.remove(key));
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = { " ", "  ", "\t", "\n" })
+    void rRemove_throws_on_bad_keys(String key) {
+      list2 = new DoublyLinkedList<>();
+
+      assertThrows(IllegalArgumentException.class, () -> list2.rRemove(key));
     }
 
     @ParameterizedTest
@@ -89,7 +117,7 @@ public class LinkedListTest {
 
     @BeforeEach
     void create_and_insert() {
-      list = new LinkedList<>();
+      list = new DoublyLinkedList<>();
 
       list.insert(1, "one");
       list.insert(2, "two");
@@ -111,7 +139,7 @@ public class LinkedListTest {
 
     @Test
     void search() {
-      node = new LinkedListNode<>(4, "four");
+      node = new DoublyNode<>(4, "four");
       node2 = list.search(4);
 
       assertEquals(node.getKey(), node2.getKey());
@@ -119,8 +147,39 @@ public class LinkedListTest {
     }
 
     @Test
+    void rSearch() {
+      node = new DoublyNode<>(4, "four");
+      node2 = list.rSearch(4);
+
+      assertEquals(node.getKey(), node2.getKey());
+      assertEquals(node.getValue(), node2.getValue());
+    }
+
+    @Test 
+    void get() {
+      assertEquals("four", list.get(4));
+    }
+
+    @Test 
+    void rGet() {
+      assertEquals("four", list.rGet(4));
+    }
+
+    @Test
     void remove() {
       list.remove(3);
+
+      assertAll(
+        () -> assertEquals("one", list.get(1)),
+        () -> assertEquals("two", list.get(2)),
+        () -> assertEquals("four", list.get(4)),
+        () -> assertEquals("five", list.get(5))
+      );
+    }
+
+    @Test
+    void rRemove() {
+      list.rRemove(3);
 
       assertAll(
         () -> assertEquals("one", list.get(1)),

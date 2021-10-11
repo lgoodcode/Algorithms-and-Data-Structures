@@ -527,13 +527,15 @@ public class BinarySearchTree<K, V> {
    * @return the tree string 
    */
   public String toString() {
-    StringBuilder str = new StringBuilder();
-
     if (count == 0)
       return "{}";
     
+    StringBuilder str = new StringBuilder();
+    
     str.append("{");
+    
     inorderTreeWalk((TreeNode<K, V> x) -> str.append("\n\"" + x.toString() + "\""));
+    
     str.append("\n}");
 
     return str.toString();
