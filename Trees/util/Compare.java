@@ -5,5 +5,5 @@ package Trees.util;
  */
 @FunctionalInterface
 public interface Compare<T> {
-  abstract public boolean isLessThan(T x, T y);
+  abstract public boolean compare(T x, T y);
 }

@@ -72,7 +72,7 @@ public class BinarySearchTreeTest {
 
     @Test
     void delete_throws() {
-      assertThrows(NullPointerException.class, () -> tree.delete(null));
+      assertThrows(IllegalArgumentException.class, () -> tree.delete(null));
     }
 
     @ParameterizedTest
@@ -172,11 +172,11 @@ public class BinarySearchTreeTest {
     @Test
     void to_string() {
       assertEquals("{"
-          + "\nKey: 1, value: one"  
-          + "\nKey: 2, value: two"  
-          + "\nKey: 3, value: three"  
-          + "\nKey: 4, value: four"  
-          + "\nKey: 5, value: five"
+          + "\n\"Key: 1, value: one\""  
+          + "\n\"Key: 2, value: two\""  
+          + "\n\"Key: 3, value: three\""  
+          + "\n\"Key: 4, value: four\""  
+          + "\n\"Key: 5, value: five\""
           + "\n}", 
         tree.toString()
       );

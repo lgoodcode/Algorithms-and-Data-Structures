@@ -35,7 +35,7 @@ public class BinarySearchTree<K, V> {
    * @return whether the first node key is smaller than the other node key
    */ 
   private boolean isLessThan(TreeNode<K, V> x, TreeNode<K, V> y) {
-    return compareFn.isLessThan(x.getKey(), y.getKey());
+    return compareFn.compare(x.getKey(), y.getKey());
   }
 
   /**
@@ -47,7 +47,7 @@ public class BinarySearchTree<K, V> {
    * @return whether the first key is smaller than the other key
    */
   private boolean isLessThan(K x, K y) {
-    return compareFn.isLessThan(x, y);
+    return compareFn.compare(x, y);
   }
 
   /**
@@ -87,6 +87,9 @@ public class BinarySearchTree<K, V> {
    * 
    * @param key   the key of the new key/value node to insert
    * @param value the value of the new key/value node to insert
+   * 
+   * @throws IllegalArgumentException if the key or value is {@code null} or 
+   *                                  blank.
    */
   public void insert(K key, V value) {
     if (key == null || key.toString().isBlank())
@@ -204,8 +207,13 @@ public class BinarySearchTree<K, V> {
    * @param x   the current tree node
    * @param key the key of the node to find
    * @return the tree node or {@code null} if not found
+   * 
+   * @throws IllegalArgumentException if the key is {@code null}
    */
   public TreeNode<K, V> search(TreeNode<K, V> x, K key) {
+    if (key == null || key.toString().isBlank())
+      throw new IllegalArgumentException("Key cannot be null or blank.");
+      
     if (x == null || key.equals(x.getKey()))
       return x;
     if (isLessThan(key, x.getKey()))
@@ -219,10 +227,12 @@ public class BinarySearchTree<K, V> {
    * 
    * @param key the key of the node to find
    * @return the tree node or {@code null} if not found
+   * 
+   * @throws IllegalArgumentException if the key is {@code null} or blank
    */
   public TreeNode<K, V> search(K key) {
-    if (key == null) 
-      throw new NullPointerException("Key cannot be null.");
+    if (key == null || key.toString().isBlank()) 
+      throw new IllegalArgumentException("Key cannot be null or blank.");
     return search(root, key);
   }
 
@@ -232,10 +242,12 @@ public class BinarySearchTree<K, V> {
    * 
    * @param key the key of the tree node
    * @return the value or {@code null} if not found
+   * 
+   * @throws IllegalArgumentException if the key is {@code null}
    */
   public V get(K key) {
-    if (key == null)
-      throw new NullPointerException("Key cannot be null.");
+    if (key == null || key.toString().isBlank())
+      throw new IllegalArgumentException("Key cannot be null or blank.");
 
     TreeNode<K, V> node = search(key);
 
@@ -266,7 +278,9 @@ public class BinarySearchTree<K, V> {
    */
 
   /**
-   * Rotates nodes around.
+   * Subroutine to move subtrees around the tree. Replaces one subtree as a child
+   * of its parent with another subtree. x's parent becomes y's parent and x's
+   * parent ends up having y as its child.
    * 
    * @param x {@code TreeNode}
    * @param y {@code TreeNode}
@@ -312,6 +326,8 @@ public class BinarySearchTree<K, V> {
    * 
    * @param z the {@code TreeNode} to remove
    * @see #transplant()
+   * 
+   * @throws NullPointerException if the {@code TreeNode} is {@code null}
    */
   public void deleteNode(TreeNode<K, V> z) {
     if (z == null)
@@ -380,8 +396,12 @@ public class BinarySearchTree<K, V> {
    * corresponding node and then passing it to the {@code delete()} method
    * 
    * @param key the key of the {@code TreeNode} to delete
+   * 
+   * @throws IllegalArgumentException if the key is {@code null}
    */
   public void delete(K key) {
+    if (key == null || key.toString().isBlank())
+      throw new IllegalArgumentException("Key cannot be null or blank.");
     deleteNode(search(key));
   }
 
@@ -502,6 +522,8 @@ public class BinarySearchTree<K, V> {
    * a string of all the {@code TreeNode} entries in the tree in order
    * by key.
    * 
+   * Displays the object string in JSON format.
+   * 
    * @return the tree string 
    */
   public String toString() {
@@ -510,9 +532,9 @@ public class BinarySearchTree<K, V> {
     if (count == 0)
       return "{}";
     
-    str.append("{\n");
-    inorderTreeWalk((TreeNode<K, V> x) -> str.append(x.toString() + "\n"));
-    str.append("}");
+    str.append("{");
+    inorderTreeWalk((TreeNode<K, V> x) -> str.append("\n\"" + x.toString() + "\""));
+    str.append("\n}");
 
     return str.toString();
   }
