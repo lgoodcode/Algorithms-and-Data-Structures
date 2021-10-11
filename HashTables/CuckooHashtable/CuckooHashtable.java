@@ -421,7 +421,6 @@ public final class CuckooHashtable<K, V> {
   private synchronized void fullRehash(K key, V value) {
     int maxNumEntries = T * m;
     Entry<?, ?> entries[] = new Entry<?, ?>[maxNumEntries];
-    Entry<K, V> entry;
     int entryIdx = 0;
 
     // Place entries from all subtables into a single array
@@ -446,10 +445,9 @@ public final class CuckooHashtable<K, V> {
     // Garbage collect the removed tables
     System.gc();
 
-    // Re-insert the entries, will skip any duplicate keyed entry
+    // Re-insert the entries
     for (int i=0; i < entryIdx; i++) {
-      entry = (Entry<K, V>) entries[i];
-      insert(entry.getKey(), entry.getValue());
+      insert((K) entries[i].getKey(), (V) entries[i].getValue());
     } 
   }
 
