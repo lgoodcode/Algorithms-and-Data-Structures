@@ -1,4 +1,4 @@
-package HashTables.HashTableExceptions;
+package HashTables.exceptions;
 
 public abstract class HashTableException extends Exception {
   protected HashTableException() {}

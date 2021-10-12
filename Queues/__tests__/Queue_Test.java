@@ -28,7 +28,7 @@ public class Queue_Test {
   void throws_when_instantiated_with_empty_array() {
     Integer[] arr = {};
     assertThrows(IllegalArgumentException.class, () -> {
-      Queue<Integer> queue = new Queue<>(arr);
+      queue = new Queue<>(arr);
     });
   }
 
@@ -51,7 +51,7 @@ public class Queue_Test {
     int size = 10;
     
     @BeforeEach
-    void create_tree() {
+    void create_queue() {
       queue = new Queue<>(size);
     }
 

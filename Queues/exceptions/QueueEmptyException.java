@@ -1,6 +1,6 @@
 package Queues.exceptions;
 
-public class QueueEmptyException extends Exception {
+public final class QueueEmptyException extends Exception {
   public QueueEmptyException() { super(); }
 
   public String toString() {

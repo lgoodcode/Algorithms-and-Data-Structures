@@ -1,4 +1,4 @@
-package HashTables.CuckooHashtable;
+package HashTables.__tests__;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.logging.Logger;
+import HashTables.CuckooHashtable.CuckooHashtable;
 
 @TestInstance(Lifecycle.PER_CLASS)
 interface TestLifecycleLogger {
@@ -46,7 +47,7 @@ interface TestLifecycleLogger {
 }
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-public class CuckooHashTable_Test implements TestLifecycleLogger {
+public class CuckooHashtable_Test implements TestLifecycleLogger {
   CuckooHashtable<Integer, String> table;
   CuckooHashtable<String, String> table2;
   Iterable<Integer> intKeys;

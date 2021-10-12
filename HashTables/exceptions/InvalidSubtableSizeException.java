@@ -1,4 +1,4 @@
-package HashTables.HashTableExceptions;
+package HashTables.exceptions;
 
 public final class InvalidSubtableSizeException extends HashTableException {
   int size;

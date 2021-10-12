@@ -1,6 +1,6 @@
 package Queues.exceptions;
 
-public class QueueFullException extends Exception {
+public final class QueueFullException extends Exception {
   private int size;
 
   public QueueFullException(int size) { 

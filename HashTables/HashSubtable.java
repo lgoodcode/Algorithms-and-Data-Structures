@@ -1,6 +1,6 @@
 package HashTables;
 
-import HashTables.HashTableExceptions.*;
+import HashTables.exceptions.*;
 
 public class HashSubtable {
   private int m, p, a, b;

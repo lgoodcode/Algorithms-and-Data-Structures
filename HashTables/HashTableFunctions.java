@@ -1,6 +1,6 @@
 package HashTables;
 
-import HashTables.HashTableExceptions.*;
+import HashTables.exceptions.*;
 
 public final class HashTableFunctions {
   /**
