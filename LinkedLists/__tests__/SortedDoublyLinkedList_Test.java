@@ -1,4 +1,4 @@
-package LinkedLists.tests;
+package LinkedLists.__tests__;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -14,7 +14,7 @@ import LinkedLists.SortedDoublyLinkedList;
 import LinkedLists.DoublyNode;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-public class SortedDoublyLinkedListTest {
+public class SortedDoublyLinkedList_Test {
   SortedDoublyLinkedList<Integer, String> list;
   SortedDoublyLinkedList<String, String> list2;
   DoublyNode<Integer, String> node;

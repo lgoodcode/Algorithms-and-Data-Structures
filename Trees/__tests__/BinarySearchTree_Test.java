@@ -1,4 +1,4 @@
-package Trees.tests;
+package Trees.__tests__;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -14,7 +14,7 @@ import Trees.TreeNode;
 import Trees.BinaryTree.BinarySearchTree;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-public class BinarySearchTreeTest {
+public class BinarySearchTree_Test {
   BinarySearchTree<Integer, String> tree;
   BinarySearchTree<String, String> tree2;
   TreeNode<Integer, String> node;

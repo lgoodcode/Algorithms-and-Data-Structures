@@ -1,28 +1,30 @@
-package LinkedLists.tests;
+package LinkedLists.__tests__;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import static org.junit.Assert.assertSame;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import LinkedLists.DoublyLinkedList;
+import LinkedLists.CircularDoublyLinkedList;
 import LinkedLists.DoublyNode;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-public class DoublyLinkedListTest {
-  DoublyLinkedList<Integer, String> list;
-  DoublyLinkedList<String, String> list2;
+public class CircularDoublyLinkedList_Test {
+  CircularDoublyLinkedList<Integer, String> list;
+  CircularDoublyLinkedList<String, String> list2;
   DoublyNode<Integer, String> node;
   DoublyNode<Integer, String> node2;
 
   @Test
   void is_instantiated() {
-    list = new DoublyLinkedList<>();
+    list = new CircularDoublyLinkedList<>();
   }
 
   @Test
@@ -35,12 +37,16 @@ public class DoublyLinkedListTest {
 
     @BeforeEach
     void create_list() {
-      list = new DoublyLinkedList<>();
+      list = new CircularDoublyLinkedList<>();
     }
 
     @Test
     void insertion() {
       list.insert(1, "one");
+
+      assertSame(list.getHead(), list.getTail());
+
+      assertNotNull(list.search(1));
     }
 
     @Test 
@@ -72,7 +78,7 @@ public class DoublyLinkedListTest {
     @NullAndEmptySource
     @ValueSource(strings = { " ", "  ", "\t", "\n" })
     void insert_throws_on_bad_keys(String key) {
-      list2 = new DoublyLinkedList<>();
+      list2 = new CircularDoublyLinkedList<>();
 
       assertThrows(IllegalArgumentException.class, () -> list2.insert(key, "test"));
     }
@@ -81,7 +87,7 @@ public class DoublyLinkedListTest {
     @NullAndEmptySource
     @ValueSource(strings = { " ", "  ", "\t", "\n" })
     void search_throws_on_bad_keys(String key) {
-      list2 = new DoublyLinkedList<>();
+      list2 = new CircularDoublyLinkedList<>();
 
       assertThrows(IllegalArgumentException.class, () -> list2.search(key));
     }
@@ -90,7 +96,7 @@ public class DoublyLinkedListTest {
     @NullAndEmptySource
     @ValueSource(strings = { " ", "  ", "\t", "\n" })
     void remove_throws_on_bad_keys(String key) {
-      list2 = new DoublyLinkedList<>();
+      list2 = new CircularDoublyLinkedList<>();
 
       assertThrows(IllegalArgumentException.class, () -> list2.remove(key));
     }
@@ -99,7 +105,7 @@ public class DoublyLinkedListTest {
     @NullAndEmptySource
     @ValueSource(strings = { " ", "  ", "\t", "\n" })
     void rRemove_throws_on_bad_keys(String key) {
-      list2 = new DoublyLinkedList<>();
+      list2 = new CircularDoublyLinkedList<>();
 
       assertThrows(IllegalArgumentException.class, () -> list2.rRemove(key));
     }
@@ -117,7 +123,7 @@ public class DoublyLinkedListTest {
 
     @BeforeEach
     void create_and_insert() {
-      list = new DoublyLinkedList<>();
+      list = new CircularDoublyLinkedList<>();
 
       list.insert(1, "one");
       list.insert(2, "two");
@@ -153,6 +159,16 @@ public class DoublyLinkedListTest {
 
       assertEquals(node.getKey(), node2.getKey());
       assertEquals(node.getValue(), node2.getValue());
+    }
+
+    @Test
+    void search_returns_null_on_nonexistent_key() {
+      assertNull(list.search(9));
+    }
+
+    @Test
+    void rSearch_returns_null_on_nonexistent_key() {
+      assertNull(list.rSearch(9));
     }
 
     @Test 

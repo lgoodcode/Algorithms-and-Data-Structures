@@ -46,7 +46,7 @@ interface TestLifecycleLogger {
 }
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-public class CuckooHashTableTest implements TestLifecycleLogger {
+public class CuckooHashTable_Test implements TestLifecycleLogger {
   CuckooHashtable<Integer, String> table;
   CuckooHashtable<String, String> table2;
   Iterable<Integer> intKeys;

@@ -1,4 +1,4 @@
-package LinkedLists.tests;
+package LinkedLists.__tests__;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -14,7 +14,7 @@ import LinkedLists.LinkedList;
 import LinkedLists.LinkedListNode;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-public class LinkedListTest {
+public class LinkedList_Test {
   LinkedList<Integer, String> list;
   LinkedList<String, String> list2;
   LinkedListNode<Integer, String> node;
