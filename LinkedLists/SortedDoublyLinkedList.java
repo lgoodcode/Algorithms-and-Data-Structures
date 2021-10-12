@@ -29,7 +29,7 @@ public class SortedDoublyLinkedList<K, V> extends DoublyLinkedList<K, V> {
     return compareFn.compare(x.getKey(), y.getKey());
   }
 
-  public void insert(K key, V value) {
+  public synchronized void insert(K key, V value) {
     if (key == null || key.toString().isBlank())
       throw new IllegalArgumentException("Key cannot be null or empty.");
     if (value == null || value.toString().isBlank())

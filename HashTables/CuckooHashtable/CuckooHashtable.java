@@ -294,7 +294,7 @@ public final class CuckooHashtable<K, V> {
    * 
    * @see #fullRehash()
    */
-  private synchronized void buildSubtables() {
+  private void buildSubtables() {
     for (int i = 0; i < T; ++i) {
       tables[i] = new CuckooHashSubtable<K, V>(p, m);
     }
@@ -572,7 +572,7 @@ public final class CuckooHashtable<K, V> {
    * method to directly remove all entries.
    */
   @SuppressWarnings("unchecked")
-  public void clear() {
+  public synchronized void clear() {
     for (CuckooHashSubtable<K, V> Tj : (CuckooHashSubtable<K, V>[]) tables) {
       for (Entry<K, V> e : (Entry<K, V>[]) Tj.table) {
         if (e != null)

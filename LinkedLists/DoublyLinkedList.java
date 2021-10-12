@@ -17,7 +17,7 @@ public class DoublyLinkedList<K, V> {
    * 
    * @return the {@code DoublyNode} at the head or {@code null} if none
    */
-  public DoublyNode<K, V> getHead() {
+  public synchronized DoublyNode<K, V> getHead() {
     return head;
   }
 
@@ -26,11 +26,11 @@ public class DoublyLinkedList<K, V> {
    * 
    * @return the {@code DoublyNode} at the tail or {@code null} if none
    */
-  public DoublyNode<K, V> getTail() {
+  public synchronized DoublyNode<K, V> getTail() {
     return tail;
   }
 
-  public void insert(K key, V value) {
+  public synchronized void insert(K key, V value) {
     if (key == null || key.toString().isBlank())
       throw new IllegalArgumentException("Key cannot be null or empty.");
     if (value == null || value.toString().isBlank())
@@ -57,7 +57,7 @@ public class DoublyLinkedList<K, V> {
    * 
    * @throws IllegalArgumentException if the key is {@code null} or blank
    */
-  public DoublyNode<K, V> search(K key) {
+  public synchronized DoublyNode<K, V> search(K key) {
     if (key == null || key.toString().isBlank())
       throw new IllegalArgumentException("Key cannot be null or blank");
 
@@ -78,7 +78,7 @@ public class DoublyLinkedList<K, V> {
    * 
    * @throws IllegalArgumentException if the key is {@code null} or blank
    */
-  public DoublyNode<K, V> rSearch(K key) {
+  public synchronized DoublyNode<K, V> rSearch(K key) {
     if (key == null || key.toString().isBlank())
       throw new IllegalArgumentException("Key cannot be null or blank");
 
@@ -125,7 +125,7 @@ public class DoublyLinkedList<K, V> {
    * 
    * @throws IllegalArgumentException if the key is {@code null} or blank
    */
-  public V get(K key) {
+  public synchronized V get(K key) {
     return _get(FORWARD, key);
   }
 
@@ -138,7 +138,7 @@ public class DoublyLinkedList<K, V> {
    * 
    * @throws IllegalArgumentException if the key is {@code null} or blank
    */
-  public V rGet(K key) {
+  public synchronized V rGet(K key) {
     return _get(REVERSE, key);
   }
 
@@ -193,7 +193,7 @@ public class DoublyLinkedList<K, V> {
    * 
    * @param key the key of the desired node to remove
    */
-  public void remove(K key) {
+  public synchronized void remove(K key) {
     _remove(FORWARD, key);
   }
 
@@ -207,7 +207,7 @@ public class DoublyLinkedList<K, V> {
    * 
    * @param key the key of the desired node to remove
    */
-  public void rRemove(K key) {
+  public synchronized void rRemove(K key) {
     _remove(REVERSE, key);
   }
 
@@ -216,7 +216,7 @@ public class DoublyLinkedList<K, V> {
    * 
    * @return the string format of the object
    */
-  public String toString() {
+  public synchronized String toString() {
     if (head == null && tail == null)
       return "{}";
 

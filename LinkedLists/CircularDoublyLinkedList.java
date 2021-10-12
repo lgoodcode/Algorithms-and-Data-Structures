@@ -7,7 +7,7 @@ public class CircularDoublyLinkedList<K, V> extends DoublyLinkedList<K, V> {
   public CircularDoublyLinkedList() { super(); }
 
   @Override
-  public void insert(K key, V value) {
+  public synchronized void insert(K key, V value) {
     if (key == null || key.toString().isBlank())
       throw new IllegalArgumentException("Key cannot be null or empty.");
     if (value == null || value.toString().isBlank())
@@ -38,7 +38,7 @@ public class CircularDoublyLinkedList<K, V> extends DoublyLinkedList<K, V> {
    * @throws IllegalArgumentException if the key is {@code null} or blank
    */
   @Override
-  public DoublyNode<K, V> search(K key) {
+  public synchronized DoublyNode<K, V> search(K key) {
     if (key == null || key.toString().isBlank())
       throw new IllegalArgumentException("Key cannot be null or blank");
 
@@ -67,7 +67,7 @@ public class CircularDoublyLinkedList<K, V> extends DoublyLinkedList<K, V> {
    * @throws IllegalArgumentException if the key is {@code null} or blank
    */
   @Override
-  public DoublyNode<K, V> rSearch(K key) {
+  public synchronized DoublyNode<K, V> rSearch(K key) {
     if (key == null || key.toString().isBlank())
       throw new IllegalArgumentException("Key cannot be null or blank");
 
@@ -93,7 +93,7 @@ public class CircularDoublyLinkedList<K, V> extends DoublyLinkedList<K, V> {
    * </p>
    */
   @Override
-  public V get(K key) {
+  public synchronized V get(K key) {
     return super._get(FORWARD, key);
   }
 
@@ -106,7 +106,7 @@ public class CircularDoublyLinkedList<K, V> extends DoublyLinkedList<K, V> {
    * </p>
    */
   @Override
-  public V rGet(K key) {
+  public synchronized V rGet(K key) {
     return super._get(REVERSE, key);
   }
 
@@ -152,7 +152,7 @@ public class CircularDoublyLinkedList<K, V> extends DoublyLinkedList<K, V> {
   }
 
   @Override
-  public void remove(K key) {
+  public synchronized void remove(K key) {
     _remove(FORWARD, key);
   }
 
@@ -163,7 +163,7 @@ public class CircularDoublyLinkedList<K, V> extends DoublyLinkedList<K, V> {
    * @param key the key of the desired node to remove
    */
   @Override
-  public void rRemove(K key) {
+  public synchronized void rRemove(K key) {
     _remove(REVERSE, key);
   }
 
@@ -176,7 +176,7 @@ public class CircularDoublyLinkedList<K, V> extends DoublyLinkedList<K, V> {
    * @return the object string in JSON format
    */
   @Override
-  public String toString() {
+  public synchronized String toString() {
     if (head == null && tail == null)
       return "{}";
 
