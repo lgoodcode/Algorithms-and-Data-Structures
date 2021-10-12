@@ -9,8 +9,8 @@ package LinkedLists;
  * @see DoublyLinkedList
  */
 public class DoublyNode<K, V> extends LinkedListNode<K, V> {
-  DoublyNode<K, V> next = null;
-  DoublyNode<K, V> prev = null;
+  protected DoublyNode<K, V> next = null;
+  protected DoublyNode<K, V> prev = null;
 
   public DoublyNode(K key, V value) {
     super(key, value);
