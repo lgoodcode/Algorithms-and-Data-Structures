@@ -6,7 +6,7 @@ package LinkedLists;
  * through the list until either the desired node is found or the end is reached.
  */
 public class LinkedList<K, V> {
-  private LinkedListNode<K, V> head = null;
+  protected LinkedListNode<K, V> head = null;
 
   /**
    * Empty constructor because there is no initialization.

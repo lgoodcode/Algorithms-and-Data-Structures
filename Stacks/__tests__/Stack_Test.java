@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import Stacks.Stack;
 import Stacks.exceptions.*;
 
+@DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 public class Stack_Test {
   Stack<Integer> stack;
   Stack<String> stack2;
@@ -22,6 +23,12 @@ public class Stack_Test {
   @Test
   void is_instantiated() {
     stack = new Stack<>(10);
+  }
+
+  @ParameterizedTest
+  @ValueSource(ints = { -1, 0 })
+  void throws_when_size_is_invalid(int size) {
+    assertThrows(IllegalArgumentException.class, () -> new Stack<>(size));
   }
 
   @Test 

@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import Queues.Queue;
 import Queues.exceptions.*;
 
+@DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 public class Queue_Test {
   Queue<Integer> queue;
   Queue<String> queue2;

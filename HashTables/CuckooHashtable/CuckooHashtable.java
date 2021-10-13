@@ -982,16 +982,15 @@ public final class CuckooHashtable<K, V> {
    * @since 1.1
    */
   private class Enumerator<T> implements Enumeration<T>, Iterator<T>, Iterable<T> {
-    final Entry<?, ?>[] table = new Entry<?, ?>[T * m];
-    Entry<?, ?> entry, last;
-    final int type;
-    int index;
+    private Entry<?, ?>[] table = new Entry<?, ?>[T * m];
+    private Entry<?, ?> entry, last;
+    private int type, index;
 
     /**
      * Indicates whether this Enumerator is serving as an Iterator or an
      * Enumeration.
      */
-    final boolean iterator;
+    private final boolean iterator;
 
     /**
      * The expected value of modCount when instantiating the iterator. If this

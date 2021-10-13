@@ -1,6 +1,6 @@
 package LinkedLists;
 
-public class DoublyLinkedList<K, V> {
+public class DoublyLinkedList<K, V> extends LinkedList<K, V> {
   protected DoublyNode<K, V> head = null;
   protected DoublyNode<K, V> tail = null;
   // Iteration types
@@ -8,9 +8,10 @@ public class DoublyLinkedList<K, V> {
   protected int REVERSE = 1;
 
   /**
-   * Empty contructor because there is no initialization.
+   * Empty contructor because there is no initialization besides the call to
+   * super() because it extends {@link LinkedList}.
    */
-  public DoublyLinkedList() {}
+  public DoublyLinkedList() { super(); }
 
   /**
    * Returns the node at the head of list.
@@ -30,6 +31,14 @@ public class DoublyLinkedList<K, V> {
     return tail;
   }
 
+  /**
+   * Inserts a new item into the linked list.
+   * 
+   * @param key   the key of the new node
+   * @param value the value of the new node
+   * 
+   * @throws IllegalArgumentException if the key or value is {@code null} or blank
+   */
   public synchronized void insert(K key, V value) {
     if (key == null || key.toString().isBlank())
       throw new IllegalArgumentException("Key cannot be null or empty.");

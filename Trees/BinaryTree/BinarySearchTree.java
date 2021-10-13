@@ -55,7 +55,7 @@ public class BinarySearchTree<K, V> {
    * 
    * @return the number of nodes
    */
-  public int size() {
+  public synchronized int size() {
     return count;
   }
 
@@ -91,7 +91,7 @@ public class BinarySearchTree<K, V> {
    * @throws IllegalArgumentException if the key or value is {@code null} or 
    *                                  blank.
    */
-  public void insert(K key, V value) {
+  public synchronized void insert(K key, V value) {
     if (key == null || key.toString().isBlank())
       throw new IllegalArgumentException("Key cannot be null or blank value.");
     if (value == null || value.toString().isBlank())
@@ -140,7 +140,7 @@ public class BinarySearchTree<K, V> {
    * @param x the {@code TreeNode} the tree node to start traversing at
    * @return the {@code TreeNode} with the smallest key or {@null} if none
    */
-  public TreeNode<K, V> minimum(TreeNode<K, V> x) {
+  public synchronized TreeNode<K, V> minimum(TreeNode<K, V> x) {
     if (x == null)
       return null;
 
@@ -155,7 +155,7 @@ public class BinarySearchTree<K, V> {
    *
    * @return the {@code TreeNode} with the smallest key or {@null} if none
    */
-  public TreeNode<K, V> minimum() {
+  public synchronized TreeNode<K, V> minimum() {
     return minimum(root);
   }
 
@@ -166,7 +166,7 @@ public class BinarySearchTree<K, V> {
    * @param x the {@code TreeNode} the tree node to start traversing at
    * @return the {@code TreeNode} with the largest key or {@null} if none
    */
-  public TreeNode<K, V> maximum(TreeNode<K, V> x) {
+  public synchronized TreeNode<K, V> maximum(TreeNode<K, V> x) {
     if (x == null)
       return null;
 
@@ -181,7 +181,7 @@ public class BinarySearchTree<K, V> {
    *
    * @return the {@code TreeNode} with the largest key or {@null} if none
    */
-  public TreeNode<K, V> maximum() {
+  public synchronized TreeNode<K, V> maximum() {
     return maximum(root);
   }
 
@@ -210,7 +210,7 @@ public class BinarySearchTree<K, V> {
    * 
    * @throws IllegalArgumentException if the key is {@code null}
    */
-  public TreeNode<K, V> search(TreeNode<K, V> x, K key) {
+  public synchronized TreeNode<K, V> search(TreeNode<K, V> x, K key) {
     if (key == null || key.toString().isBlank())
       throw new IllegalArgumentException("Key cannot be null or blank.");
       
@@ -230,7 +230,7 @@ public class BinarySearchTree<K, V> {
    * 
    * @throws IllegalArgumentException if the key is {@code null} or blank
    */
-  public TreeNode<K, V> search(K key) {
+  public synchronized TreeNode<K, V> search(K key) {
     if (key == null || key.toString().isBlank()) 
       throw new IllegalArgumentException("Key cannot be null or blank.");
     return search(root, key);
@@ -245,7 +245,7 @@ public class BinarySearchTree<K, V> {
    * 
    * @throws IllegalArgumentException if the key is {@code null}
    */
-  public V get(K key) {
+  public synchronized V get(K key) {
     if (key == null || key.toString().isBlank())
       throw new IllegalArgumentException("Key cannot be null or blank.");
 
@@ -285,7 +285,7 @@ public class BinarySearchTree<K, V> {
    * @param x {@code TreeNode}
    * @param y {@code TreeNode}
    */
-  private void transplant(TreeNode<K, V> x, TreeNode<K, V> y) {
+  private synchronized void transplant(TreeNode<K, V> x, TreeNode<K, V> y) {
     // If x is the root of the tree, make y the root
     if (x.parent == null)
       root = y;
@@ -329,7 +329,7 @@ public class BinarySearchTree<K, V> {
    * 
    * @throws NullPointerException if the {@code TreeNode} is {@code null}
    */
-  public void deleteNode(TreeNode<K, V> z) {
+  public synchronized void deleteNode(TreeNode<K, V> z) {
     if (z == null)
       throw new NullPointerException("Node to delete cannot be null.");
 
@@ -399,7 +399,7 @@ public class BinarySearchTree<K, V> {
    * 
    * @throws IllegalArgumentException if the key is {@code null}
    */
-  public void delete(K key) {
+  public synchronized void delete(K key) {
     if (key == null || key.toString().isBlank())
       throw new IllegalArgumentException("Key cannot be null or blank.");
     deleteNode(search(key));
@@ -430,7 +430,7 @@ public class BinarySearchTree<K, V> {
    * @param x the {@code TreeNode} to find the successor of
    * @return the successor or {@code null} if none
    */
-  public TreeNode<K, V> successor(TreeNode<K, V> x) {
+  public synchronized TreeNode<K, V> successor(TreeNode<K, V> x) {
     if (x.right != null)
       return minimum(x.right);
 
@@ -452,7 +452,7 @@ public class BinarySearchTree<K, V> {
    * @param x the {@code TreeNode} to find the predecessor of
    * @return the predecessor or {@code null} if none
    */
-  public TreeNode<K, V> predecessor(TreeNode<K, V> x) {
+  public synchronized TreeNode<K, V> predecessor(TreeNode<K, V> x) {
     if (x.left != null)
       return maximum(x.left);
 
@@ -481,7 +481,7 @@ public class BinarySearchTree<K, V> {
    * postorder tree walk - Visits the root after the values in its subtrees.
    * 
    */
-  public void inorderTreeWalk(TreeNode<K, V> x, Callback<TreeNode<K, V>> callback) {
+  public synchronized void inorderTreeWalk(TreeNode<K, V> x, Callback<TreeNode<K, V>> callback) {
     if (x != null) {
       this.inorderTreeWalk(x.left, callback);
       callback.action(x);
@@ -489,11 +489,11 @@ public class BinarySearchTree<K, V> {
     }
   }
 
-  public void inorderTreeWalk(Callback<TreeNode<K, V>> callback) {
+  public synchronized void inorderTreeWalk(Callback<TreeNode<K, V>> callback) {
     inorderTreeWalk(root, callback);
   }
 
-  public void preorderTreeWalk(TreeNode<K, V> x, Callback<TreeNode<K, V>> callback) {
+  public synchronized void preorderTreeWalk(TreeNode<K, V> x, Callback<TreeNode<K, V>> callback) {
     if (x != null) {
       callback.action(x);
       this.preorderTreeWalk(x.left, callback);
@@ -501,11 +501,11 @@ public class BinarySearchTree<K, V> {
     }
   }
 
-  public void preorderTreeWalk(Callback<TreeNode<K, V>> callback) {
+  public synchronized void preorderTreeWalk(Callback<TreeNode<K, V>> callback) {
     preorderTreeWalk(root, callback);
   } 
 
-  public void postorderTreeWalk(TreeNode<K, V> x, Callback<TreeNode<K, V>> callback) {
+  public synchronized void postorderTreeWalk(TreeNode<K, V> x, Callback<TreeNode<K, V>> callback) {
     if (x != null) {
       this.postorderTreeWalk(x.left, callback);
       this.postorderTreeWalk(x.right, callback);  
@@ -513,7 +513,7 @@ public class BinarySearchTree<K, V> {
     }
   }
 
-  public void postorderTreeWalk(Callback<TreeNode<K, V>> callback) {
+  public synchronized void postorderTreeWalk(Callback<TreeNode<K, V>> callback) {
     postorderTreeWalk(root, callback);
   }
 
@@ -526,7 +526,7 @@ public class BinarySearchTree<K, V> {
    * 
    * @return the tree string 
    */
-  public String toString() {
+  public synchronized String toString() {
     if (count == 0)
       return "{}";
     

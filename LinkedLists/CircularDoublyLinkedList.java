@@ -2,10 +2,20 @@ package LinkedLists;
 
 public class CircularDoublyLinkedList<K, V> extends DoublyLinkedList<K, V> {
   /**
-   * Empty constructor besides the call to super().
+   * Empty constructor besides the call to super() because there is no
+   * initialization and extends the {@link DoublyLinkedList}.
    */
   public CircularDoublyLinkedList() { super(); }
 
+  /**
+   * Inserts a new node into the linked list but ensures that the head and tail
+   * wrap around to retain the circular structure.
+   * 
+   * @param key   the key of the new node
+   * @param value the value of the new node
+   * 
+   * @throws IllegalArgumentException if the key or value is {@code null} or blank
+   */
   @Override
   public synchronized void insert(K key, V value) {
     if (key == null || key.toString().isBlank())
@@ -89,7 +99,7 @@ public class CircularDoublyLinkedList<K, V> extends DoublyLinkedList<K, V> {
    * 
    * <p>
    * The internal process of retrieving a value from a node is identical to the
-   * superclass {@code DoublyLinkedList} definition.
+   * superclass {@link DoublyLinkedList} definition.
    * </p>
    */
   @Override
@@ -102,7 +112,7 @@ public class CircularDoublyLinkedList<K, V> extends DoublyLinkedList<K, V> {
    * 
    * <p>
    * The internal process of retrieving a value from a node is identical to the
-   * superclass {@code DoublyLinkedList} definition.
+   * superclass {@link DoublyLinkedList} definition.
    * </p>
    */
   @Override

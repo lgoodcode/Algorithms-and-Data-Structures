@@ -6,5 +6,5 @@ package Trees.util;
  */
 @FunctionalInterface
 public interface Callback<T> {
-  abstract public void action(T x);
+  void action(T x);
 }

@@ -3,10 +3,12 @@ package Stacks;
 import Stacks.exceptions.*;
 
 public class Stack<T> {
-  private final Entry<?>[] stack;
+  private Entry<?>[] stack;
   private int top = 0;
 
   public Stack(int size) {
+    if (size < 1)
+      throw new IllegalArgumentException("Illegal size, must be greater than 1.");
     stack = new Entry<?>[size];
   }
 
