@@ -1,4 +1,4 @@
-package HashTables.__tests__;
+package Hashtables.__tests__;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
@@ -19,7 +19,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.logging.Logger;
-import HashTables.CuckooHashtable.CuckooHashtable;
+
+import Hashtables.CuckooHashtable;
 
 @TestInstance(Lifecycle.PER_CLASS)
 interface TestLifecycleLogger {

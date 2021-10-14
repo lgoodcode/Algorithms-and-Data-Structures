@@ -1,4 +1,4 @@
-package HashTables;
+package Hashtables;
 
 /**
  * This class creates entries that hold a key/value pair. It allows 
@@ -9,9 +9,9 @@ package HashTables;
  * @param <K> type parameter for the key. Can hold any {@code Object}.
  * @param <V> type parameter for the value. Can hold any {@code Object}
  */
-public final class Entry<K, V> {
-  private final K key;
-  private final V value;
+public class Entry<K, V> {
+  private K key;
+  private V value;
 
   public Entry(K key, V value) {
     this.key = key;
@@ -27,6 +27,6 @@ public final class Entry<K, V> {
   }
 
   public String toString() {
-    return "\nEntry key: " + key + " value: " + value;
+    return "Key: " + key + ", value: " + value;
   }
 }

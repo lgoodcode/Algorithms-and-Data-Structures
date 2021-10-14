@@ -1,9 +1,9 @@
-package HashTables.exceptions;
+package Hashtables.exceptions;
 
-public final class InvalidPrimeException extends HashTableException {
+public final class InvalidPrimeException extends Exception {
   int num;
 
-  public <T extends Number>InvalidPrimeException(T p) { 
+  public <T extends Number> InvalidPrimeException(T p) { 
     super();
     num = p.intValue(); 
   }

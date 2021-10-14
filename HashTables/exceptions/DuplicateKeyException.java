@@ -1,6 +1,6 @@
-package HashTables.exceptions;
+package Hashtables.exceptions;
 
-public final class DuplicateKeyException extends HashTableException {
+public final class DuplicateKeyException extends Exception {
   Object key;
   String str;
 

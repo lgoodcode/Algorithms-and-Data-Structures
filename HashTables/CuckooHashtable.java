@@ -1,4 +1,4 @@
-package HashTables.CuckooHashtable;
+package Hashtables;
 
 import java.util.Objects;
 import java.util.Map;
@@ -7,12 +7,11 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.function.Consumer;
 
-import HashTables.exceptions.DuplicateKeyException;
-
 import java.util.NoSuchElementException;
 import java.util.ConcurrentModificationException;
 
-import static HashTables.HashTableFunctions.isPrime;
+import Hashtables.exceptions.DuplicateKeyException;
+import static Hashtables.HashTableFunctions.isPrime;
 
 /**
  * This class implements a high performance dynamic hashtable where the size is
@@ -59,7 +58,7 @@ import static HashTables.HashTableFunctions.isPrime;
  * @see CuckooHashSubtable
  * @see Entry
  * @see Enumerator
- * @version 1.2
+ * @version 1.3
  */
 public final class CuckooHashtable<K, V> {
   /**
@@ -555,12 +554,13 @@ public final class CuckooHashtable<K, V> {
   }
 
   /**
-   * Overloaded delete method for the entry object.
+   * Overloaded delete method for the {@code Entry} object.
    * 
    * @param entry the entry to delete
    * @return whether the entry was successfully deleted or not
    * 
    * @throws NullPointerException if the entry is {@code null}
+   * @see Entry
    * @see #delete(K key)
    */
   public synchronized boolean delete(Entry<K, V> entry) {
@@ -819,45 +819,6 @@ public final class CuckooHashtable<K, V> {
   }
 
   /**
-   * This class creates entries that hold a key/value pair. It allows any
-   * non-{@code null} object of subclass {@code Object} to be used as a key or
-   * value, which works for everything since all {@code Object} is the superclass
-   * of any object.
-   * 
-   * @param <K> type parameter for the key. Can hold any {@code Object}
-   * @param <V> type parameter for the value. Can hold any {@code Object}
-   * 
-   * @throws NullPointerException if the key or value is {@code null}
-   * @since 1.0
-   */
-  static class Entry<K, V> {
-    private final K key;
-    private final V value;
-
-    public Entry(K key, V value) {
-      if (key == null)
-        throw new NullPointerException();
-      if (value == null)
-        throw new NullPointerException();
-
-      this.key = key;
-      this.value = value;
-    }
-
-    public K getKey() {
-      return key;
-    }
-
-    public V getValue() {
-      return value;
-    }
-
-    public String toString() {
-      return "Key: " + key + ", Value: " + value;
-    }
-  }
-
-  /**
    * Returns a string representation of this {@code CuckooHashtable} object in the
    * form of a set of entries, seperated by new lines with the key, an equals sign
    * {@code =}, and the associated element, where the {@code toString} method is
@@ -878,16 +839,10 @@ public final class CuckooHashtable<K, V> {
     for (Entry<K, V> e : entries) {
       K key = e.getKey();
       V value = e.getValue();
-      sb.append("  ");
-      sb.append(key == this ? "(this Map)" : key.toString());
-      sb.append(" = ");
-      sb.append(value == this ? "(this Map)" : value.toString());
-      sb.append(",\n");
+      sb.append("  \"" + key.toString() + " = " + value.toString() + "\",\n");
     }
 
-    sb.append('}').toString();
-
-    return sb.toString();
+    return sb.toString() + "}";
   }
 
   // Types of Enumerations/Iterations
@@ -1061,7 +1016,7 @@ public final class CuckooHashtable<K, V> {
         last = e;
         entry = null;
 
-        return type == KEYS ? (T) e.key : (type == VALUES ? (T) e.value : (T) e);
+        return type == KEYS ? (T) e.getKey() : (type == VALUES ? (T) e.getValue() : (T) e);
       }
 
       throw new NoSuchElementException("Hashtable Enumerator");

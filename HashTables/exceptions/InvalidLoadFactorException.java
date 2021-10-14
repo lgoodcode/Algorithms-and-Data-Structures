@@ -1,6 +1,6 @@
-package HashTables.exceptions;
+package Hashtables.exceptions;
 
-public final class InvalidLoadFactorException extends HashTableException {
+public final class InvalidLoadFactorException extends Exception {
   float lf;
 
   public InvalidLoadFactorException(float lf) {

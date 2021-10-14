@@ -1,6 +1,4 @@
-package HashTables;
-
-import HashTables.exceptions.*;
+package Hashtables;
 
 public final class HashTableFunctions {
   /**
@@ -40,14 +38,12 @@ public final class HashTableFunctions {
    * @throws InvalidPrimeException when given an invalid prime number
    * @return {@code int[a, b]} constants for table hash function
    */
-
-  // TODO: update expcetions and document format
-  public static <T extends Number> int[] injectiveIntegers(T[] S, int m, int p) throws HashTableException {
+  public static <T extends Number> int[] injectiveIntegers(T[] S, int m, int p) {
     // Sanity checks on prime number and subtable size
     if (isPrime(p) == false)
-      throw new InvalidPrimeException(p);
-    else if (m < 0)
-      throw new InvalidSubtableSizeException(m);
+      throw new IllegalArgumentException("Invalid prime number given: " + p);
+    else if (m < 1)
+      throw new IllegalArgumentException("Invalid table size given: " + p);
 
     int[] used = new int[100];
     int a = (int) (Math.random() * p - 2) + 1;
@@ -64,7 +60,7 @@ public final class HashTableFunctions {
         used[used_idx++] = hash;
       } else {
         // Determine whether the hash has already been used
-        for (int i = 0; i < used_idx; ++i) {
+        for (int i = 0; i < used_idx; i++) {
           if (hash == used[i]) {
             // If used, the constants doesn't give us a good hash function try again
             return HashTableFunctions.injectiveIntegers(S, m, p);
@@ -80,28 +76,5 @@ public final class HashTableFunctions {
     int[] valid = { a, b };
 
     return valid;
-  }
-}
-
-class HashTableFunctionsDemo {
-  public static void main(String[] args) {
-    boolean prime = HashTableFunctions.isPrime(1277);
-    boolean prime2 = HashTableFunctions.isPrime(334);
-
-    System.out.println("Is 1277 prime: " + prime);
-    System.out.println("Is 334 prime: " + prime2);
-
-    Integer[] set = { 10, 22, 37, 40, 52, 60, 70, 72, 75 };
-
-    try {
-      int[] constants = HashTableFunctions.injectiveIntegers(set, 100, 1277);
-      System.out.println("Injective constants for set: ");
-
-      for (int x : constants)
-        System.out.println(x);
-
-    } catch (HashTableException err) {
-      System.out.println(err);
-    }
   }
 }
