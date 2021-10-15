@@ -1,8 +1,29 @@
 package Hashtables;
 
+import Hashtables.exceptions.HashtableFullException;
+
 public abstract class AbstractHashtable<K, V> {
   protected Entry<?, ?>[] table;
-  protected int m, n = 0;
+  protected int m, n;
+
+  /**
+   * Initializes an empty, hashtable, with the specified size for the total
+   * capacity for the table.
+   * 
+   * <h4>Tip: Using a large value, preferrably a prime number, will prevent any
+   * unwanted errors from occurring.</h4>
+   * 
+   * @param size the specififed size of the hashtable maximum capacity
+   * 
+   * @throws IllegalArgumentException if the specified size is less than 1
+   */
+  protected AbstractHashtable(int size) {
+    if (size < 1)
+      throw new IllegalArgumentException("Illegal size given. Must be larger than 1.");
+
+    m = size;
+    table = new Entry<?, ?>[size];
+  }
 
  /**
    * Determines whether the hashtable is empty or not
@@ -35,7 +56,7 @@ public abstract class AbstractHashtable<K, V> {
    * @throws HashtableFullException   if the attempting to insert while the table
    *                                  is full
    */
-  public abstract boolean insert(K key, V value);
+  public abstract boolean insert(K key, V value) throws HashtableFullException;
 
   /**
    * Internal method used by the other methods to lookup entries in the hashtable.
