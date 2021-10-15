@@ -190,16 +190,16 @@ public class CircularDoublyLinkedList<K, V> extends DoublyLinkedList<K, V> {
     if (head == null && tail == null)
       return "{}";
 
-    StringBuilder str = new StringBuilder();
+    StringBuilder sb = new StringBuilder();
     DoublyNode<K, V> node = head;
 
-    str.append("{");
+    sb.append("{");
 
     do {
-      str.append("\n\"" + node.toString() + "\"");
+      sb.append("\n\"" + node.toString() + "\"");
       node = node.next;
     } while (node != head);
     
-    return str.toString() + "\n}";
+    return sb.toString() + "\n}";
   }
 }

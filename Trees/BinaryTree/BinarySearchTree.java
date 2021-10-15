@@ -530,14 +530,14 @@ public class BinarySearchTree<K, V> {
     if (count == 0)
       return "{}";
     
-    StringBuilder str = new StringBuilder();
+    StringBuilder sb = new StringBuilder();
     
-    str.append("{");
+    sb.append("{");
     
-    inorderTreeWalk((TreeNode<K, V> x) -> str.append("\n\"" + x.toString() + "\""));
+    inorderTreeWalk((TreeNode<K, V> x) -> sb.append("\n\"" + x.toString() + "\""));
     
-    str.append("\n}");
+    sb.append("\n}");
 
-    return str.toString();
+    return sb.toString();
   }
 }

@@ -120,16 +120,16 @@ public class LinkedList<K, V> {
     if (head == null)
       return "{}";
     
-    StringBuilder str = new StringBuilder();
+    StringBuilder sb = new StringBuilder();
     LinkedListNode<K, V> node = head;
     
-    str.append("{");
+    sb.append("{");
 
     while (node != null) {
-      str.append("\n\"" + node.toString() + "\"");
+      sb.append("\n\"" + node.toString() + "\"");
       node = node.next;
     }
     
-    return str.toString() + "\n}";
+    return sb.toString() + "\n}";
   }
 }

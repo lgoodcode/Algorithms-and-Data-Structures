@@ -136,13 +136,13 @@ public class Queue<T> {
     if (isEmpty())
       return "{}";
 
-    StringBuilder str = new StringBuilder();
-    str.append("{\n");
+    StringBuilder sb = new StringBuilder();
+    sb.append("{\n");
 
     for (int i=head; i<tail; i++)
-      str.append("\"" + queue[i].toString() + "\"\n");
+      sb.append("\"" + queue[i].toString() + "\"\n");
     
-    return str.toString() + "}";
+    return sb.toString() + "}";
   }
 
   /**

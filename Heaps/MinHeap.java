@@ -132,13 +132,13 @@ public class MinHeap<T> {
     if (isEmpty())
       return "{}";
 
-    StringBuilder str = new StringBuilder();
-    str.append("{\n");
+    StringBuilder sb = new StringBuilder();
+    sb.append("{\n");
 
     for (int i=0; i<heap.length; i++)
-      str.append("\"" + heap[i].toString() + "\"\n");
+      sb.append("\"" + heap[i].toString() + "\"\n");
 
-    return str.toString() + "}";
+    return sb.toString() + "}";
   }
 
   /**

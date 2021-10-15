@@ -561,11 +561,11 @@ public final class FibonacciHeap<K, V> {
     if (isEmpty())
       return "{}";
 
-    StringBuilder str = new StringBuilder();
-    str.append("{\n");
+    StringBuilder sb = new StringBuilder();
+    sb.append("{\n");
 
-    walk(min, (node) -> str.append("\"" + node.toString() + "\"\n"));
+    walk(min, (node) -> sb.append("\"" + node.toString() + "\"\n"));
 
-    return str.toString() + "}";
+    return sb.toString() + "}";
   }
 }
