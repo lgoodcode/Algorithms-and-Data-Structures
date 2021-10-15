@@ -177,12 +177,7 @@ public class LinearProbing<K, V> {
   public synchronized boolean hasKey(K key) {
     if (key == null || key.toString().isBlank())
       throw new IllegalArgumentException("Key cannot be null or blank.");
-
-    int idx = search(key);
-
-    if (idx != -1 && table[idx].getKey().equals(key))
-      return true;
-    return false;
+    return search(key) != -1;
   }
 
   /**
@@ -201,9 +196,7 @@ public class LinearProbing<K, V> {
 
     int idx = search(key);
 
-    if (idx != -1 && table[idx].getKey().equals(key))
-      return (V) table[idx].getValue();
-    return null;
+    return idx != -1 ? (V) table[idx].getValue() : null;
   }
 
   /**
@@ -215,7 +208,7 @@ public class LinearProbing<K, V> {
    * 
    * @throws IllegalArgumentException if the key or value is {@code null} or blank
    */
-  public boolean delete(K key) {
+  public synchronized boolean delete(K key) {
     if (key == null || key.toString().isBlank())
       throw new IllegalArgumentException("Key cannot be null or blank.");
 
