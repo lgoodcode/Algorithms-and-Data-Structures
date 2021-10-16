@@ -14,12 +14,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import Hashtables.OpenAddressing.DoubleHashing;
+import Hashtables.ChainingHashtable;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-public class DoubleHashing_Test {
-  DoubleHashing<Integer, String> table;
-  DoubleHashing<String, String> table2;
+public class ChainingHashtable_Test {
+  ChainingHashtable<Integer, String> table;
+  ChainingHashtable<String, String> table2;
   // Iterable<Integer> intKeys;
   // Iterable<String> strKeys;
 
@@ -27,13 +27,13 @@ public class DoubleHashing_Test {
   // @Execution(ExecutionMode.CONCURRENT)
   // void instantiating_overloaded_constructors() {
   //   assertAll("instantiation for overloaded constructors", 
-  //     () -> assertDoesNotThrow(() -> new DoubleHashing<>(), "default constructor"),
-  //     () -> assertDoesNotThrow(() -> new DoubleHashing<>(3), "given a prime"),
-  //     () -> assertDoesNotThrow(() -> new DoubleHashing<>(3, 1), "given a prime and size"),
+  //     () -> assertDoesNotThrow(() -> new ChainingHashtable<>(), "default constructor"),
+  //     () -> assertDoesNotThrow(() -> new ChainingHashtable<>(3), "given a prime"),
+  //     () -> assertDoesNotThrow(() -> new ChainingHashtable<>(3, 1), "given a prime and size"),
   //     () -> assertDoesNotThrow(() -> 
-  //       new DoubleHashing<>(3, 1, 0.9f), "given a prime, size, and loadFactor"),
-  //     () -> assertDoesNotThrow(() -> new DoubleHashing<>(3, 0.9f), "given prime and loadFactor"),
-  //     () -> assertDoesNotThrow(() -> new DoubleHashing<>(0.9f, 1), "given loadFactor and size")
+  //       new ChainingHashtable<>(3, 1, 0.9f), "given a prime, size, and loadFactor"),
+  //     () -> assertDoesNotThrow(() -> new ChainingHashtable<>(3, 0.9f), "given prime and loadFactor"),
+  //     () -> assertDoesNotThrow(() -> new ChainingHashtable<>(0.9f, 1), "given loadFactor and size")
   //   );
   // }
 
@@ -41,7 +41,7 @@ public class DoubleHashing_Test {
   // @Execution(ExecutionMode.CONCURRENT)
   // @CsvSource({ "4, 1, 0.9", "3, 0, 0.9", "3, 1, 0.3" })
   // void throws_when_instantiated_with_illegal_values(int prime, int size, float lf) {
-  //   assertThrows(IllegalArgumentException.class, () -> new DoubleHashing<>(prime, size, lf));
+  //   assertThrows(IllegalArgumentException.class, () -> new ChainingHashtable<>(prime, size, lf));
   // }
 
   @Nested
@@ -50,7 +50,7 @@ public class DoubleHashing_Test {
 
     @BeforeEach
     void create_hashtable() {
-      table = new DoubleHashing<>(size);
+      table = new ChainingHashtable<>(size);
     }
 
     @Test
@@ -61,11 +61,6 @@ public class DoubleHashing_Test {
     @Test
     void size_is_zero() {
       assertEquals(0, table.size());
-    }
-
-    @Test
-    void capacity() {
-      assertEquals(size, table.capacity());
     }
 
     @Test
@@ -83,7 +78,7 @@ public class DoubleHashing_Test {
     @NullAndEmptySource
     @ValueSource(strings = { " ", "  ", "\t", "\n" })
     void throws_NullPointerException_for_null_and_empty_keys(String key) {
-      table2 = new DoubleHashing<>(size);
+      table2 = new ChainingHashtable<>(size);
 
       // Throws NullPointerException for null value and IllegalArgumentException
       assertThrows(Exception.class, () -> table2.insert(key, "test"));
@@ -97,7 +92,7 @@ public class DoubleHashing_Test {
 
     @BeforeEach
     void insert_key_value() {
-      table = new DoubleHashing<>(size);
+      table = new ChainingHashtable<>(3);
       assertDoesNotThrow(() -> table.insert(1, "one"));
     }
 
@@ -126,16 +121,8 @@ public class DoubleHashing_Test {
     }
 
     @Test
-    void insert_throws_table_is_full() {
-      table.insert(2, "two");
-      table.insert(3, "three");
-
-      assertThrows(IllegalStateException.class, () -> table.insert(4, "four"));
-    }
-
-    @Test
     void to_String() {
-      assertEquals("{\n  \"Key: 1, value: one\"\n}", table.toString());
+      assertEquals("{\n{\n\"Key: 1, value: one\"\n}\n}", table.toString());
     }
   }
 
@@ -144,7 +131,7 @@ public class DoubleHashing_Test {
 
     @BeforeEach
     void create_table() {
-      table = new DoubleHashing<>(1117);
+      table = new ChainingHashtable<>(5);
     }
 
     @Test

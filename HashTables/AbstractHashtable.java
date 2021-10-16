@@ -1,7 +1,5 @@
 package Hashtables;
 
-import Hashtables.exceptions.HashtableFullException;
-
 public abstract class AbstractHashtable<K, V> {
   protected Entry<?, ?>[] table;
   protected int m, n;
@@ -76,11 +74,11 @@ public abstract class AbstractHashtable<K, V> {
    * @param value the value of the entry
    * @return boolean indicating whether the insertion was successful or not
    *
-   * @throws IllegalArgumentException if the key or value is {@code null} or blank
-   * @throws HashtableFullException   if attempting to insert while the table is
+   * @throws IllegalStateException    if attempting to insert while the table is
    *                                  full
+   * @throws IllegalArgumentException if the key or value is {@code null} or blank
    */
-  public abstract boolean insert(K key, V value) throws HashtableFullException;
+  public abstract void insert(K key, V value);
 
   /**
    * Internal method used by the other methods to lookup entries in the hashtable.

@@ -15,7 +15,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import Hashtables.OpenAddressing.QuadraticProbing;
-import Hashtables.exceptions.HashtableFullException;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 public class QuadraticProbing_Test {
@@ -128,12 +127,10 @@ public class QuadraticProbing_Test {
 
     @Test
     void insert_throws_table_is_full() {
-      try {
-        table.insert(2, "two");
-        table.insert(3, "three");
-      } catch (HashtableFullException e) {}
+      table.insert(2, "two");
+      table.insert(3, "three");
 
-      assertThrows(HashtableFullException.class, () -> table.insert(4, "four"));
+      assertThrows(IllegalStateException.class, () -> table.insert(4, "four"));
     }
 
     @Test
@@ -152,28 +149,26 @@ public class QuadraticProbing_Test {
 
     @Test
     void insertions() {
-      try {
-        assertTrue(table.insert(1, "one"));
-        assertTrue(table.insert(2, "two"));
-        assertTrue(table.insert(3, "three"));
-        assertTrue(table.insert(4, "four"));
-        assertTrue(table.insert(5, "five"));
-        assertTrue(table.insert(6, "six"));
-        assertTrue(table.insert(7, "seven"));
-        assertTrue(table.insert(8, "eight"));
-        assertTrue(table.insert(9, "nine"));
-        assertTrue(table.insert(10, "ten"));
-        assertTrue(table.insert(110, "eleven"));
-        assertTrue(table.insert(120, "twelve"));
-        assertTrue(table.insert(13, "thirteen"));
-        assertTrue(table.insert(14, "fourteen"));
-        assertTrue(table.insert(15, "fifteen"));
-        assertTrue(table.insert(16, "sixteen"));
-        assertTrue(table.insert(17, "seventeen"));
-        assertTrue(table.insert(18, "eighteen"));
-        assertTrue(table.insert(19, "nineteen"));
-        assertTrue(table.insert(20, "twenty"));
-      } catch (HashtableFullException e) {}
+      table.insert(1, "one");
+      table.insert(2, "two");
+      table.insert(3, "three");
+      table.insert(4, "four");
+      table.insert(5, "five");
+      table.insert(6, "six");
+      table.insert(7, "seven");
+      table.insert(8, "eight");
+      table.insert(9, "nine");
+      table.insert(10, "ten");
+      table.insert(110, "eleven");
+      table.insert(120, "twelve");
+      table.insert(13, "thirteen");
+      table.insert(14, "fourteen");
+      table.insert(15, "fifteen");
+      table.insert(16, "sixteen");
+      table.insert(17, "seventeen");
+      table.insert(18, "eighteen");
+      table.insert(19, "nineteen");
+      table.insert(20, "twenty");
 
       assertTrue(table.hasKey(1));
       assertTrue(table.hasKey(2));

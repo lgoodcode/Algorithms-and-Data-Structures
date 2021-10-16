@@ -16,6 +16,7 @@ public class CircularLinkedList<K, V> extends DoublyLinkedList<K, V> {
    * 
    * @throws IllegalArgumentException {@inheritDoc}
    */
+  @Override
   public synchronized void insert(K key, V value) {
     checkKey(key);
     checkValue(value);
@@ -45,6 +46,7 @@ public class CircularLinkedList<K, V> extends DoublyLinkedList<K, V> {
    * @return the {@code DoublyNode} or {@code null} if not found
    * @throws IllegalArgumentException {@inheritDoc}
    */
+  @Override
   public synchronized DoublyNode<K, V> search(K key) {
     checkKey(key);
     
@@ -72,6 +74,7 @@ public class CircularLinkedList<K, V> extends DoublyLinkedList<K, V> {
    * 
    * @throws IllegalArgumentException {@inheritDoc}
    */
+  @Override
   public synchronized DoublyNode<K, V> rSearch(K key) {
     checkKey(key);
 
@@ -110,6 +113,7 @@ public class CircularLinkedList<K, V> extends DoublyLinkedList<K, V> {
    * 
    * @param key the key of the desired node to remove
    */
+  @Override
   public synchronized void remove(DoublyNode<K, V> node) {
     if (node == null)
       return;
@@ -134,6 +138,7 @@ public class CircularLinkedList<K, V> extends DoublyLinkedList<K, V> {
    * 
    * @return the object string in JSON format
    */
+  @Override
   public synchronized String toString() {
     if (head == null && tail == null)
       return "{}";

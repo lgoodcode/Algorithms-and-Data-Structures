@@ -15,6 +15,7 @@ public class DoublyLinkedList<K, V> extends LinkedList<K, V> {
    * 
    * @return the {@code DoublyNode} at the head or {@code null} if none
    */
+  @Override
   public synchronized DoublyNode<K, V> getHead() {
     return head;
   }
@@ -33,6 +34,7 @@ public class DoublyLinkedList<K, V> extends LinkedList<K, V> {
    * 
    * @throws IllegalArgumentException {@inheritDoc}.
    */
+  @Override
   public synchronized void insert(K key, V value) {
     checkKey(key);
     checkValue(value);
@@ -56,6 +58,7 @@ public class DoublyLinkedList<K, V> extends LinkedList<K, V> {
    * @throws IllegalArgumentException {@inheritDoc}
    * @throws IndexOutOfBoundsException {@inheritDoc}
    */
+  @Override
   public synchronized void insertAt(int index, K key, V value) {
     checkIndex(index);
     checkKey(key);
@@ -87,6 +90,7 @@ public class DoublyLinkedList<K, V> extends LinkedList<K, V> {
    * 
    * @throws IllegalArgumentException if the key is {@code null} or blank
    */
+  @Override
   public synchronized DoublyNode<K, V> search(K key) {
     checkKey(key);
 
@@ -129,6 +133,7 @@ public class DoublyLinkedList<K, V> extends LinkedList<K, V> {
    * 
    * @throws IndexOutOfBoundsException {@inheritDoc}
    */
+  @Override
   public synchronized DoublyNode<K, V> searchIndex(int index) {
     checkIndex(index);
 
@@ -160,6 +165,7 @@ public class DoublyLinkedList<K, V> extends LinkedList<K, V> {
    * 
    * @throws IllegalArgumentException {@inheritDoc}
    */
+  @Override
   public synchronized V get(K key) {
     DoublyNode<K, V> node = search(key);
     return node != null ? node.getValue() : null;
@@ -184,6 +190,7 @@ public class DoublyLinkedList<K, V> extends LinkedList<K, V> {
    * 
    * @throws IndexOutOfBoundsException {@inheritDoc}
    */
+  @Override
   public synchronized V getIndex(int index) {
     DoublyNode<K, V> node = searchIndex(index);
     return node != null ? node.getValue() : null;
@@ -230,6 +237,7 @@ public class DoublyLinkedList<K, V> extends LinkedList<K, V> {
    * 
    * @throws IllegalArgumentException {@inheritDoc}
    */
+  @Override
   public synchronized void remove(K key) {
     remove(search(key));
   }
@@ -255,15 +263,18 @@ public class DoublyLinkedList<K, V> extends LinkedList<K, V> {
    * 
    * @throws IndexOutOfBoundsException {@inheritDoc}
    */
+  @Override
   public synchronized void removeIndex(int index) {
     remove(searchIndex(index));
   }
 
   /**
-   * Displays the contents of the list in order in a JSON format.
+   * Displays the contents of the list in order in a JSON format. Overrides due to
+   * the node implemented being different.
    * 
    * @return the string format of the object
    */
+  @Override
   public synchronized String toString() {
     if (head == null)
       return "{}";

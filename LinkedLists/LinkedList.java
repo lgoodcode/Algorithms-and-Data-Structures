@@ -199,7 +199,7 @@ public class LinkedList<K, V> {
    * Retrieves the value of the node with at the specified index position.
    * 
    * @param index the index of the desired node's value to retrieve
-   * @return the value or {@code null} if not node not found
+   * @return the value or {@code null} if node not found
    * 
    * @throws IndexOutOfBoundsException if the index is not within the range
    *                                   {@code [0, size-1]}

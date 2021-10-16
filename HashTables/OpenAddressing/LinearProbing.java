@@ -2,7 +2,6 @@ package Hashtables.OpenAddressing;
 
 import Hashtables.Entry;
 import Hashtables.AbstractHashtable;
-import Hashtables.exceptions.HashtableFullException;
 
 /**
  * Linear Probing uses a hash function of the form:
@@ -75,6 +74,16 @@ public final class LinearProbing<K, V> extends AbstractHashtable<K, V> {
   }
 
   /**
+   * Checks if the table is full before insertions.
+   * 
+   * @throws IllegalStateException if the table is full
+   */
+  private synchronized void checkCapacity() {
+    if (n == table.length)
+      throw new IllegalStateException("Hashtable is full.");
+  }
+
+  /**
    * The hash function
    * 
    * @param key the key to hash
@@ -96,12 +105,11 @@ public final class LinearProbing<K, V> extends AbstractHashtable<K, V> {
    * @param value the value of the entry
    * @return boolean indicating whether the insertion was successful or not
    * 
-   * @throws HashtableFullException   {@inheritDoc}
+   * @throws IllegaStateException     {@inheritDoc}
    * @throws IllegalArgumentException {@inheritDoc}
    */
-  public synchronized boolean insert(K key, V value) throws HashtableFullException {
-    if (n == m)
-      throw new HashtableFullException(m);
+  public synchronized void insert(K key, V value) {
+    checkCapacity();
     checkKey(key);
     checkValue(value);
 
@@ -112,7 +120,7 @@ public final class LinearProbing<K, V> extends AbstractHashtable<K, V> {
       if (table[j] == null) {
         table[j] = entry;
         n++;
-        return true;
+        return;
       }
     }
 
@@ -120,11 +128,9 @@ public final class LinearProbing<K, V> extends AbstractHashtable<K, V> {
       if (table[i] == null) {
         table[i] = entry;
         n++;
-        return true;
+        return;
       }
     }
-
-    return false;
   } 
 
   /**

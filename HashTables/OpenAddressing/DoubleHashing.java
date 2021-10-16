@@ -2,7 +2,6 @@ package Hashtables.OpenAddressing;
 
 import Hashtables.Entry;
 import Hashtables.AbstractHashtable;
-import Hashtables.exceptions.HashtableFullException;
 
 /**
  * This hashtable uses the DoubleHashing implementation of OpenAddressing, where
@@ -86,6 +85,16 @@ public final class DoubleHashing<K, V> extends AbstractHashtable<K, V> {
   }
 
   /**
+   * Checks if the table is full before insertions.
+   * 
+   * @throws IllegalStateException if the table is full
+   */
+  private synchronized void checkCapacity() {
+    if (n == table.length)
+      throw new IllegalStateException("Hashtable is full.");
+  }
+
+  /**
    * The hash function that consists of two hash functions. The initial hash
    * function hashes the initial slot, if it is occupied, then it uses the number
    * of times it has collided as a counter to activate the secondary hash function
@@ -123,24 +132,22 @@ public final class DoubleHashing<K, V> extends AbstractHashtable<K, V> {
    * 
    * @param key   the key of the entry
    * @param value the value of the entry
-   * @throws HashtableFullException   {@inheritDoc}
+   * @throws IllegalStateException    {@inheritDoc}
    * @throws IllegalArgumentException {@inheritDoc}
    */
-  public synchronized boolean insert(K key, V value) throws HashtableFullException {
-    if (n == m)
-      throw new HashtableFullException(m);
+  public synchronized void insert(K key, V value) {
+    checkCapacity();
     checkKey(key);
     checkValue(value);
 
     for (int i=0, j = hash(key, i); i < m && j < m; i++, j = hash(key, i)) { 
       if (table[j] == null) {
         table[j] = new Entry<K, V>(key, value);
-        n++;
-        return true;
+        break;
       }
     }
 
-    return false;
+    n++;
   }
 
   /**

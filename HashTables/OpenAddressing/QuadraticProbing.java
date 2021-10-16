@@ -2,7 +2,6 @@ package Hashtables.OpenAddressing;
 
 import Hashtables.Entry;
 import Hashtables.AbstractHashtable;
-import Hashtables.exceptions.HashtableFullException;
 import static Hashtables.HashTableFunctions.isPrime;
 
 /**
@@ -80,6 +79,16 @@ public final class QuadraticProbing<K, V> extends AbstractHashtable<K, V> {
   }
 
   /**
+   * Checks if the table is full before insertions.
+   * 
+   * @throws IllegalStateException if the table is full
+   */
+  private synchronized void checkCapacity() {
+    if (n == table.length)
+      throw new IllegalStateException("Hashtable is full.");
+  }
+
+  /**
    * The hash function that consits of an initial hash function that uses its own
    * constants and an auxiliary hash function that is quadratic of the {@code i}
    * number of slots skipped.
@@ -98,24 +107,22 @@ public final class QuadraticProbing<K, V> extends AbstractHashtable<K, V> {
    * 
    * @param key   the key of the entry
    * @param value the value of the entry
-   * @throws HashtableFullException   {@inheritDoc}
+   * @throws IllegalStateException    {@inheritDoc}
    * @throws IllegalArgumentException {@inheritDoc}
    */
-  public synchronized boolean insert(K key, V value) throws HashtableFullException {
-    if (n == m)
-      throw new HashtableFullException(m);
+  public synchronized void insert(K key, V value) {
+    checkCapacity();
     checkKey(key);
     checkValue(value);
 
     for (int i=0, j = hash(key, i); i < m; i++, j = hash(key, i)) { 
       if (table[j] == null) {
         table[j] = new Entry<K, V>(key, value);
-        n++;
-        return true;
+        break;
       }
     }
 
-    return false;
+    n++;
   }
 
   /**
