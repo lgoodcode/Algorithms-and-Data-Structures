@@ -90,7 +90,7 @@ import LinkedLists.LinkedList;
  * </p>
  */
 public final class ChainingHashtable<K, V> {
-  LinkedList<?, ?>[] table;
+  private LinkedList<?, ?>[] table;
   private int m, n;
 
   public ChainingHashtable(int size) {

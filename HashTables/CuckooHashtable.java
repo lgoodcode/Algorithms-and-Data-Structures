@@ -397,12 +397,11 @@ public final class CuckooHashtable<K, V> {
         // If the position is empty, insert new entry and return.
         if (Tj.isOccupied(newKey) == false) {
           Tj.insert(newEntry);
-
           return;
         }
 
         // Otherwise, a key already exists here, swap it
-        prevEntry = (Entry<K, V>) Tj.remove(newKey);
+        prevEntry = (Entry<K, V>) Tj.extract(newKey);
         Tj.insert(newEntry);
 
         // Check for duplicate key and cycle
@@ -813,7 +812,7 @@ public final class CuckooHashtable<K, V> {
      * @see CuckooHashtable#insert()
      */
     @SuppressWarnings("unchecked")
-    protected synchronized Entry<K, V> remove(K key) {
+    protected synchronized Entry<K, V> extract(K key) {
       checkKey(key);
 
       int hash = hash(key);
