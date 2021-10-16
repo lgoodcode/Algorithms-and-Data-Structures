@@ -6,7 +6,8 @@ package LinkedLists;
  * through the list until either the desired node is found or the end is reached.
  */
 public class LinkedList<K, V> {
-  protected LinkedListNode<K, V> head = null;
+  private LinkedListNode<K, V> head = null;
+  protected int size = 0;
 
   /**
    * Empty constructor because there is no initialization.
@@ -14,56 +15,168 @@ public class LinkedList<K, V> {
   public LinkedList() {}
 
   /**
+   * Determines whether the list is empty or not
+   * 
+   * @return boolean indicating if the list is empty
+   */
+  public synchronized boolean isEmpty() {
+    return size == 0;
+  }
+
+  /**
+   * Returns the number of elements in the list
+   * 
+   * @return the number of elements in the list
+   */
+  public synchronized int size() {
+    return size;
+  }
+
+  /**
    * Returns the node at the head of list.
    * 
-   * @return the {@code LinkedListNode} at the head or {@code null} if none
+   * @return the node at the head or {@code null} if none
    */
-  public LinkedListNode<K, V> getHead() {
+  public synchronized LinkedListNode<K, V> getHead() {
     return head;
   }
 
   /**
-   * Inserts a new {@code LinkedListNode} with the specified key and value pair.
-   * If there is no {@code head}, then it will simply set the head as the new
-   * node. Otherwise, the new node's {@code next} will point to the current head
-   * and the new head will be set as the new node.
+   * Checks whether the specified index is valid, meaning it must be greater or
+   * equal to {@code 0} and less than the current size.
+   * 
+   * @param index the specified index to check
+   * 
+   * @throws IndexOutOfBoundsException if the index is not within the range
+   *                                   {@code [0, size-1]}
+   */
+  protected synchronized void checkIndex(int index) {
+    if (index < 0 && index >= size)
+      throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
+  }
+
+  /**
+   * Checks the key to make sure it isn't {@code null} or blank
+   * 
+   * @param key the key to check
+   * 
+   * @throws IllegalArgumentException if the key is {@code null} or blank
+   */
+  protected synchronized void checkKey(K key) {
+    if (key == null || key.toString().isBlank())
+      throw new IllegalArgumentException("Key cannot be null or blank");
+  }
+
+  /**
+   * Checks the value to make sure it isn't {@code null} or blank
+   * 
+   * @param value the value to check
+   * 
+   * @throws IllegalArgumentException if the value is {@code null} or blank
+   */
+  protected synchronized void checkValue(V value) {
+    if (value == null || value.toString().isBlank())
+      throw new IllegalArgumentException("Key cannot be null or blank");
+  }
+
+  /**
+   * Inserts a new node with the specified key and value pair. If there is no
+   * {@code head}, then it will simply set the head as the new node. Otherwise,
+   * the new node's {@code next} will point to the current head and the new head
+   * will be set as the new node.
    * 
    * @param key   the key of the new node
    * @param value the value of the new node
    * 
    * @throws IllegalArgumentException if the key or value is {@code null} or
-   *                                  empty.
+   *                                  blank.
    */
-  public void insert(K key, V value) {
-    if (key == null || key.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or empty.");
-    if (value == null || value.toString().isBlank())
-      throw new IllegalArgumentException("Value cannot be null or empty.");
+  public synchronized void insert(K key, V value) {
+    checkKey(key);
+    checkValue(value);
 
     LinkedListNode<K, V> node = new LinkedListNode<>(key, value);
 
     if (head != null)
       node.next = head;
     head = node;
+
+    size++;
+  }
+
+  /**
+   * Inserts a new node at the specified index position.
+   * 
+   * @param index the position to insert the new node
+   * @param key   the key of the new node
+   * @param value the value of the new node
+   * 
+   * @throws IllegalArgumentException  if the key or value is {@code null} or
+   *                                   empty.
+   * @throws IndexOutOfBoundsException if the index is not within the range
+   *                                   {@code [0, size-1]}
+   */
+  public synchronized void insertAt(int index, K key, V value) {
+    checkIndex(index);
+    checkKey(key);
+    checkValue(value);
+
+    LinkedListNode<K, V> node = new LinkedListNode<>(key, value);
+    LinkedListNode<K, V> prev;
+
+    if (index == 0) {
+      node.next = head;
+      head = node;
+    }
+    else {
+      prev = searchIndex(index - 1);
+      node.next = prev.next;
+      prev.next = node;
+    }
+
+    size++;
   }
 
   /**
    * Iterates through the list until the desired node with the corresponding
-   * specified key is found or the end is reached, returning the
-   * {@code LinkedListNode} or @{code null} if not found.
+   * specified key is found or the end is reached, returning the node or
+   * {@code null} if not found.
    * 
    * @param key the key of the desired node to find
-   * @return the {@code LinkedListNode} or {@code null} if not found
+   * @return the node or {@code null} if not found
    * 
    * @throws IllegalArgumentException if the key is {@code null} or blank
    */
-  public LinkedListNode<K, V> search(K key) {
-    if (key == null || key.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or blank");
+  public synchronized LinkedListNode<K, V> search(K key) {
+    checkKey(key);
 
     LinkedListNode<K, V> node = head;
 
     while (node != null && !node.getKey().equals(key))
+      node = node.next;
+    return node;
+  }
+
+  /**
+   * Returns the node at the specified index or {@code null} if there are no items
+   * in the list.
+   * 
+   * @param index the index position of the node to return
+   * @return the node at the specified index position or {@code null} if list is
+   *         empty
+   * 
+   * @throws IndexOutOfBoundsException if the index is not within the range
+   *                                   {@code [0, size-1]}
+   */
+  public synchronized LinkedListNode<K, V> searchIndex(int index) {
+    checkIndex(index);
+
+    if (head == null)
+      return null;
+
+    LinkedListNode<K, V> node = head;
+
+    for (int i=0; i<index; i++)
       node = node.next;
     return node;
   }
@@ -77,46 +190,78 @@ public class LinkedList<K, V> {
    * 
    * @throws IllegalArgumentException if the key is {@code null} or blank
    */
-  public V get(K key) {
-    if (key == null || key.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or blank");
-
+  public synchronized V get(K key) {
     LinkedListNode<K, V> node = search(key);
-
-    if (node != null && node.getKey().equals(key))
-      return node.getValue();
-    return null;
+    return node != null ? node.getValue() : null;
   }
 
   /**
-   * Removes a {@code LinkedListNode} containing the specified key. It starts
-   * at the head and then continues down the list looking ahead an additional
-   * node. This is so when the next node is the desired node with the 
-   * corresponding key, we want to simply dereference the node by setting
-   * the current node {@code next} pointer to the node that follows the desired
-   * node to remove.
+   * Retrieves the value of the node with at the specified index position.
+   * 
+   * @param index the index of the desired node's value to retrieve
+   * @return the value or {@code null} if not node not found
+   * 
+   * @throws IndexOutOfBoundsException if the index is not within the range
+   *                                   {@code [0, size-1]}
+   */
+  public synchronized V getIndex(int index) {
+    LinkedListNode<K, V> node = searchIndex(index);
+    return node != null ? node.getValue() : null;
+  }
+
+  /**
+   * Removes the node containing the specified key. It starts at the head and then
+   * continues down the list looking ahead an additional node. This is so when the
+   * next node is the desired node with the corresponding key, we want to simply
+   * dereference the node by setting the current node {@code next} pointer to the
+   * node that follows the desired node to remove.
    * 
    * @param key the key of the desired node to remove
    */
-  public void remove(K key) {
-    if (key == null || key.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or blank");
-      
+  public synchronized void remove(K key) {
     LinkedListNode<K, V> node = head;
 
     while (node != null && node.next != null && !node.next.getKey().equals(key))
       node = node.next;
 
-    if (node.next.getKey().equals(key))
-      node.next = node.next.next;
+    node.next = node.next.next;
+    size--;
   }
 
+  /**
+   * Removes the node at the specified index. Will throw an exception if the index
+   * is invalid.
+   * 
+   * @param index the position of the node to remove
+   * @return boolean indicating whether the node was successfully removed or not
+   * 
+   * @throws IndexOutOfBoundsException if the index is not within the range
+   *                                   {@code [0, size-1]}
+   */
+  public synchronized void removeIndex(int index) {
+    if (index == 0) {
+      head = null;
+      size--;
+      return;
+    }
+
+    LinkedListNode<K, V> prev = searchIndex(index - 1);
+    LinkedListNode<K, V> node;
+
+    if (prev == null)
+      return;
+    
+    node = prev.next;
+    prev.next = node.next;
+    size--;
+  }
+  
   /**
    * Displays the contents of the list in order in a JSON format.
    * 
    * @return the string format of the object
    */
-  public String toString() {
+  public synchronized String toString() {
     if (head == null)
       return "{}";
     

@@ -70,7 +70,7 @@ public final class DoubleHashing<K, V> extends AbstractHashtable<K, V> {
    * 
    * @param size the specififed size of the hashtable maximum capacity
    * 
-   * @throws IllegalArgumentException if the specified size is less than 1
+   * @throws IllegalArgumentException if the specified size is less than {@code 1}
    */
   public DoubleHashing(int size) {
     super(size);
@@ -123,17 +123,14 @@ public final class DoubleHashing<K, V> extends AbstractHashtable<K, V> {
    * 
    * @param key   the key of the entry
    * @param value the value of the entry
-   * @throws IllegalArgumentException if the key or value is {@code null} or blank
-   * @throws HashtableFullException   if the attempting to insert while the table
-   *                                  is full
+   * @throws HashtableFullException   {@inheritDoc}
+   * @throws IllegalArgumentException {@inheritDoc}
    */
   public synchronized boolean insert(K key, V value) throws HashtableFullException {
-    if (key == null || key.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or blank.");
-    if (value == null || value.toString().isBlank())
-      throw new IllegalArgumentException("Value cannot be null or blank.");
     if (n == m)
       throw new HashtableFullException(m);
+    checkKey(key);
+    checkValue(value);
 
     for (int i=0, j = hash(key, i); i < m && j < m; i++, j = hash(key, i)) { 
       if (table[j] == null) {
@@ -152,9 +149,11 @@ public final class DoubleHashing<K, V> extends AbstractHashtable<K, V> {
    * @param key the key to lookup
    * @return the index of the element with the specified key or {@code -1} if not
    *         found
-   * @throws IllegalArgumentException if the key or value is {@code null} or blank
+   * @throws IllegalArgumentException {@inheritDoc}
    */
   protected synchronized int search(K key) {
+    checkKey(key);
+    
     for (int i=0, j = hash(key, i); i < m && j < m; i++, j = hash(key, i)) { 
       if (table[j] != null && table[j].getKey().equals(key))
         return j;

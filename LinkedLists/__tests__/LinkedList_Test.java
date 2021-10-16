@@ -36,6 +36,7 @@ public class LinkedList_Test {
     @BeforeEach
     void create_list() {
       list = new LinkedList<>();
+      list2 = new LinkedList<>();
     }
 
     @Test
@@ -48,9 +49,19 @@ public class LinkedList_Test {
       assertNull(list.search(1));
     }
 
+    @Test 
+    void searchIndex_null_on_nonexistent_key() {
+      assertNull(list.search(4));
+    }
+
     @Test
     void get_returns_null() {
       assertNull(list.get(1));
+    }
+
+    @Test 
+    void getIndex_returns_null() {
+      assertNull(list2.getIndex(3));
     }
 
     @Test
@@ -99,7 +110,17 @@ public class LinkedList_Test {
     }
 
     @Test
-    void all_inserts_succeed() {
+    void insertAt() {
+      list.insertAt(3, 6, "six");
+
+      assertEquals("six", list.getIndex(3));
+      assertEquals("two", list.getIndex(4));
+      assertEquals("three", list.getIndex(2));
+      assertEquals("one", list.getIndex(5));
+    }
+
+    @Test
+    void get() {
       assertAll(
         () -> assertEquals("one", list.get(1)),
         () -> assertEquals("two", list.get(2)),
@@ -110,9 +131,29 @@ public class LinkedList_Test {
     }
 
     @Test
+    void getIndex() {
+      assertAll(
+        () -> assertEquals("one", list.getIndex(4)),
+        () -> assertEquals("two", list.getIndex(3)),
+        () -> assertEquals("three", list.getIndex(2)),
+        () -> assertEquals("four", list.getIndex(1)),
+        () -> assertEquals("five", list.getIndex(0))
+      );
+    }
+
+    @Test
     void search() {
       node = new LinkedListNode<>(4, "four");
       node2 = list.search(4);
+
+      assertEquals(node.getKey(), node2.getKey());
+      assertEquals(node.getValue(), node2.getValue());
+    }
+    
+    @Test
+    void searchIndex() {
+      node = new LinkedListNode<>(3, "three");
+      node2 = list.searchIndex(2);
 
       assertEquals(node.getKey(), node2.getKey());
       assertEquals(node.getValue(), node2.getValue());
@@ -127,6 +168,18 @@ public class LinkedList_Test {
         () -> assertEquals("two", list.get(2)),
         () -> assertEquals("four", list.get(4)),
         () -> assertEquals("five", list.get(5))
+      );
+    }
+
+    @Test
+    void removeIndex() {
+      list.removeIndex(3);
+
+      assertAll(
+        () -> assertEquals("one", list.getIndex(3)),
+        () -> assertEquals("three", list.getIndex(2)),
+        () -> assertEquals("four", list.getIndex(1)),
+        () -> assertEquals("five", list.getIndex(0))
       );
     }
 

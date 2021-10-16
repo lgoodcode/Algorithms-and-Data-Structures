@@ -3,7 +3,7 @@ package LinkedLists;
 public class LinkedListNode<K, V> {
   private K key;
   private V value;
-  protected LinkedListNode<K, V> next = null;
+  protected LinkedListNode<K, V> next;
 
   public LinkedListNode(K key, V value) {
     if (key.equals(null) || key.toString().isBlank())

@@ -67,7 +67,7 @@ public final class QuadraticProbing<K, V> extends AbstractHashtable<K, V> {
 
     p = prime;
     a = (int) (Math.random() * p - 2) + 1;
-    b = (int) Math.random() * p - 1;
+    b = (int) (Math.random() * p) - 1;
   }
 
   /**
@@ -80,7 +80,9 @@ public final class QuadraticProbing<K, V> extends AbstractHashtable<K, V> {
   }
 
   /**
-   * 
+   * The hash function that consits of an initial hash function that uses its own
+   * constants and an auxiliary hash function that is quadratic of the {@code i}
+   * number of slots skipped.
    * 
    * @param k the key to hash
    * @param i the number of rehashes
@@ -96,17 +98,14 @@ public final class QuadraticProbing<K, V> extends AbstractHashtable<K, V> {
    * 
    * @param key   the key of the entry
    * @param value the value of the entry
-   * @throws IllegalArgumentException if the key or value is {@code null} or blank
-   * @throws HashtableFullException   if the attempting to insert while the table
-   *                                  is full
+   * @throws HashtableFullException   {@inheritDoc}
+   * @throws IllegalArgumentException {@inheritDoc}
    */
   public synchronized boolean insert(K key, V value) throws HashtableFullException {
-    if (key == null || key.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or blank.");
-    if (value == null || value.toString().isBlank())
-      throw new IllegalArgumentException("Value cannot be null or blank.");
     if (n == m)
       throw new HashtableFullException(m);
+    checkKey(key);
+    checkValue(value);
 
     for (int i=0, j = hash(key, i); i < m; i++, j = hash(key, i)) { 
       if (table[j] == null) {
@@ -125,9 +124,11 @@ public final class QuadraticProbing<K, V> extends AbstractHashtable<K, V> {
    * @param key the key to lookup
    * @return the index of the element with the specified key or {@code -1} if not
    *         found
-   * @throws IllegalArgumentException if the key or value is {@code null} or blank
+   * @throws IllegalArgumentException {@inheritDoc}
    */
   protected synchronized int search(K key) {
+    checkKey(key);
+
     for (int i=0, j = hash(key, i); i < m; i++, j = hash(key, i)) { 
       if (table[j] != null && table[j].getKey().equals(key))
         return j;

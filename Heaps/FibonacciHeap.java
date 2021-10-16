@@ -13,7 +13,7 @@ import java.util.function.Consumer;
  * Uses the {@code BiFunction} functional interface instead of creating one for
  * the compare function.
  * 
- * @see LinkedLists.CircularDoublyLinkedList
+ * @see LinkedLists.CircularLinkedList
  */
 public final class FibonacciHeap<K, V> {
   private BiFunction<K, K, Boolean> compareFn;
@@ -110,7 +110,7 @@ public final class FibonacciHeap<K, V> {
     * 
     * @param key   the key
     * @param value the value
-    * @see LinkedLists.CircularDoublyLinkedList
+    * @see LinkedLists.CircularLinkedList
     */
   public synchronized void insert(K key, V value) {
     FibonacciNode<K, V> node = new FibonacciNode<>(key, value);

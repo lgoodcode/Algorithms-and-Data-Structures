@@ -1,39 +1,30 @@
 package LinkedLists;
 
-/**
- * A functional interface to compare two objects.
- */
-@FunctionalInterface
-interface Compare<T> {
-  abstract public boolean compare(T x, T y);
-}
+import java.util.function.BiFunction;
 
-
-public class SortedDoublyLinkedList<K, V> extends DoublyLinkedList<K, V> {
-  private Compare<K> compareFn;
+public class SortedLinkedList<K, V> extends DoublyLinkedList<K, V> {
+  private BiFunction<K, K, Boolean> compareFn;
   
   /**
    * Empty contructor because there is no initialization.
    */
-  public SortedDoublyLinkedList(Compare<K> compareFn) { 
+  public SortedLinkedList(BiFunction<K, K, Boolean> compareFn) { 
     super(); 
     
     this.compareFn = compareFn;
   }
 
-  public SortedDoublyLinkedList() {
+  public SortedLinkedList() {
     this((K x, K y) -> x.hashCode() < y.hashCode());
   }
 
   private boolean isLessThan(DoublyNode<K, V> x, DoublyNode<K, V> y) {
-    return compareFn.compare(x.getKey(), y.getKey());
+    return compareFn.apply(x.getKey(), y.getKey());
   }
 
   public synchronized void insert(K key, V value) {
-    if (key == null || key.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or empty.");
-    if (value == null || value.toString().isBlank())
-      throw new IllegalArgumentException("Value cannot be null or empty.");
+    checkKey(key);
+    checkValue(value);
 
     DoublyNode<K, V> node = new DoublyNode<>(key, value);
     DoublyNode<K, V> temp;
@@ -76,5 +67,7 @@ public class SortedDoublyLinkedList<K, V> extends DoublyLinkedList<K, V> {
         node.next = temp;
       }
     }
+
+    size++;
   }
 }

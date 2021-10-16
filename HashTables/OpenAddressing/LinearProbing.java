@@ -59,7 +59,7 @@ public final class LinearProbing<K, V> extends AbstractHashtable<K, V> {
    * 
    * @param size the specififed size of the hashtable maximum capacity
    * 
-   * @throws IllegalArgumentException if the specified size is less than 1
+   * @throws IllegalArgumentException if the specified size is less than {@code 1}
    */
   public LinearProbing(int size) {
     super(size);
@@ -74,6 +74,13 @@ public final class LinearProbing<K, V> extends AbstractHashtable<K, V> {
     return table.length;
   }
 
+  /**
+   * The hash function
+   * 
+   * @param key the key to hash
+   * @param i   the number of index slots skipped
+   * @return the hash value
+   */
   protected int hash(K key, int i) {
     return (int) (Math.floor(m * ((key.hashCode() * 0.5675) % 1)) % m) + i;
   }
@@ -85,21 +92,18 @@ public final class LinearProbing<K, V> extends AbstractHashtable<K, V> {
    * position was found using the hash function, we wrap around and start at
    * {@code 0} up to {@code h'(k) - 1}.
    * 
-   * @param key the key of the entry
+   * @param key   the key of the entry
    * @param value the value of the entry
    * @return boolean indicating whether the insertion was successful or not
    * 
-   * @throws IllegalArgumentException if the key or value is {@code null} or blank
-   * @throws HashtableFullException   if the attempting to insert while the table
-   *                                  is full
+   * @throws HashtableFullException   {@inheritDoc}
+   * @throws IllegalArgumentException {@inheritDoc}
    */
   public synchronized boolean insert(K key, V value) throws HashtableFullException {
-    if (key == null || key.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or blank.");
-    if (value == null || value.toString().isBlank())
-      throw new IllegalArgumentException("Value cannot be null or blank.");
     if (n == m)
       throw new HashtableFullException(m);
+    checkKey(key);
+    checkValue(value);
 
     Entry<K, V> entry = new Entry<K, V>(key, value);
     int i, j;
@@ -124,14 +128,13 @@ public final class LinearProbing<K, V> extends AbstractHashtable<K, V> {
   } 
 
   /**
-   * Internal method used by the other methods to lookup entries in the hashtable.
+   * {@inheritDoc}
    * 
-   * @param key the key to lookup
-   * @return the index of the element with the specified key or {@code -1} if not
-   *         found
-   * @throws IllegalArgumentException if the key or value is {@code null} or blank
+   * @throws IllegalArgumentException {@inheritDoc}
    */
   protected synchronized int search(K key) {
+    checkKey(key);
+
     int i, j;
 
     for (i=0, j = hash(key, i); j < m; i++, j = hash(key, i)) {

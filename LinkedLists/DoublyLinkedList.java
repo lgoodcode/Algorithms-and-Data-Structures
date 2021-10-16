@@ -3,18 +3,15 @@ package LinkedLists;
 public class DoublyLinkedList<K, V> extends LinkedList<K, V> {
   protected DoublyNode<K, V> head = null;
   protected DoublyNode<K, V> tail = null;
-  // Iteration types
-  protected int FORWARD = 0;
-  protected int REVERSE = 1;
 
   /**
    * Empty contructor because there is no initialization besides the call to
    * super() because it extends {@link LinkedList}.
    */
-  public DoublyLinkedList() { super(); }
+  public DoublyLinkedList() { super(); } 
 
   /**
-   * Returns the node at the head of list.
+   * Returns the node at the head of the list.
    * 
    * @return the {@code DoublyNode} at the head or {@code null} if none
    */
@@ -32,18 +29,13 @@ public class DoublyLinkedList<K, V> extends LinkedList<K, V> {
   }
 
   /**
-   * Inserts a new item into the linked list.
+   * {@inheritDoc}
    * 
-   * @param key   the key of the new node
-   * @param value the value of the new node
-   * 
-   * @throws IllegalArgumentException if the key or value is {@code null} or blank
+   * @throws IllegalArgumentException {@inheritDoc}.
    */
   public synchronized void insert(K key, V value) {
-    if (key == null || key.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or empty.");
-    if (value == null || value.toString().isBlank())
-      throw new IllegalArgumentException("Value cannot be null or empty.");
+    checkKey(key);
+    checkValue(value);
 
     DoublyNode<K, V> node = new DoublyNode<>(key, value);
 
@@ -54,21 +46,49 @@ public class DoublyLinkedList<K, V> extends LinkedList<K, V> {
       head.prev = node;
       head = node;
     }
+
+    size++;
   }
 
   /**
-   * Iterates through the list until the desired node with the corresponding
-   * specified key is found or the end is reached, returning the
-   * {@code DoublyNode} or {@code null} if not found.
+   * {@inheritDoc}
    * 
-   * @param key the key of the desired node to find
-   * @return the {@code DoublyNode} or {@code null} if not found
+   * @throws IllegalArgumentException {@inheritDoc}
+   * @throws IndexOutOfBoundsException {@inheritDoc}
+   */
+  public synchronized void insertAt(int index, K key, V value) {
+    checkIndex(index);
+    checkKey(key);
+    checkValue(value);
+
+    DoublyNode<K, V> node = new DoublyNode<>(key, value);
+    DoublyNode<K, V> prev;
+
+    if (index == 0) {
+      node.next = head.next;
+      head = node;
+
+      if (tail == null)
+        tail = node;
+    }
+    else {
+      prev = searchIndex(index).prev;
+      prev.next.prev = node;
+      node.next = prev.next;
+      node.prev = prev;
+      prev.next = node;
+    }
+
+    size++;
+  }
+
+  /**
+   * {@inheritDoc}
    * 
    * @throws IllegalArgumentException if the key is {@code null} or blank
    */
   public synchronized DoublyNode<K, V> search(K key) {
-    if (key == null || key.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or blank");
+    checkKey(key);
 
     DoublyNode<K, V> node = head;
     
@@ -88,8 +108,7 @@ public class DoublyLinkedList<K, V> extends LinkedList<K, V> {
    * @throws IllegalArgumentException if the key is {@code null} or blank
    */
   public synchronized DoublyNode<K, V> rSearch(K key) {
-    if (key == null || key.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or blank");
+    checkKey(key);
 
     DoublyNode<K, V> node = tail;
 
@@ -99,43 +118,51 @@ public class DoublyLinkedList<K, V> extends LinkedList<K, V> {
   }
 
   /**
-   * Retrieves the value of the node with the specified key or {@code null}
-   * if not found.
+   * {@inheritDoc}
    * 
    * <p>
-   * This is an internal method that is used for both normal {@code get()} and
-   * the reverse iteration {@code rGet()}. The process is identical except for
-   * the type of {@code search()} method used. Simply passing the type allows for
-   * reduced boilerplating.
+   * Since we have a pointer to the end of the list, we can increase performance
+   * by determining whether the node at the specified index as towards the head or
+   * tail and start iterating from either side making it perform at worst
+   * {@code O(n/2)}.
    * </p>
    * 
-   * @param key the key of the desired nodes' value to retrieve
-   * @return the value or {@code null} if not node not found
-   * 
-   * @throws IllegalArgumentException if the key is {@code null} or blank
+   * @throws IndexOutOfBoundsException {@inheritDoc}
    */
-  protected V _get(int type, K key) {
-    if (key == null || key.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or blank");
+  public synchronized DoublyNode<K, V> searchIndex(int index) {
+    checkIndex(index);
 
-    DoublyNode<K, V> node = type == FORWARD ? search(key) : rSearch(key);
+    if (head == null)
+      return null;
 
-    if (node != null && node.getKey().equals(key))
-      return node.getValue();
-    return null;
+    DoublyNode<K, V> node;
+
+    // Shifting to the right a bit reduces value by a power of 2
+    // which is the equivalent of a division by 2.
+    if (index < (size >> 1)) {
+      node = head;
+
+      for (int i=0; i<index; i++)
+        node = node.next;
+      return node;
+    }
+    else {
+      node = tail;
+
+      for (int i=size-1; i>index; i--)
+        node = node.prev;
+      return node; 
+    }
   }
 
   /**
-   * Retrieves the value of the node with the specified key or {@code null}
-   * if not found.
+   * {@inheritDoc}
    * 
-   * @param key the key of the desired nodes' value to retrieve
-   * @return the value or {@code null} if not node not found
-   * 
-   * @throws IllegalArgumentException if the key is {@code null} or blank
+   * @throws IllegalArgumentException {@inheritDoc}
    */
   public synchronized V get(K key) {
-    return _get(FORWARD, key);
+    DoublyNode<K, V> node = search(key);
+    return node != null ? node.getValue() : null;
   }
 
   /**
@@ -148,7 +175,18 @@ public class DoublyLinkedList<K, V> extends LinkedList<K, V> {
    * @throws IllegalArgumentException if the key is {@code null} or blank
    */
   public synchronized V rGet(K key) {
-    return _get(REVERSE, key);
+    DoublyNode<K, V> node = rSearch(key);
+    return node != null ? node.getValue() : null;  
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @throws IndexOutOfBoundsException {@inheritDoc}
+   */
+  public synchronized V getIndex(int index) {
+    DoublyNode<K, V> node = searchIndex(index);
+    return node != null ? node.getValue() : null;
   }
 
   /**
@@ -158,20 +196,13 @@ public class DoublyLinkedList<K, V> extends LinkedList<K, V> {
    * follows the desired node to remove.
    * 
    * <p>
-   * This is an internal method that is used for both normal {@code remove()} and
-   * the reverse iteration {@code rRemove()}. The process is identical except for
-   * the type of {@code search()} method used. Simply passing the type allows for
-   * reduced boilerplating.
+   * This is an internal method that is used for the different removal variations
+   * that differ by how the node is found.
    * </p>
    * 
-   * @param key the key of the desired node to remove
+   * @param node the node to remove
    */
-  private void _remove(int type, K key) {
-    if (key == null || key.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or blank");
-
-    DoublyNode<K, V> node = type == FORWARD ? search(key) : rSearch(key);
-
+  public synchronized void remove(DoublyNode<K, V> node) {
     if (node == null)
       return;
     if (node == head && node == tail) {
@@ -190,24 +221,21 @@ public class DoublyLinkedList<K, V> extends LinkedList<K, V> {
       node.prev.next = node.next;
       node.next.prev = node.prev;
     }
+
+    size--;
   }
 
   /**
-   * Removes a {@code DoublyNode} containing the specified key. It starts
-   * at the head and then continues down the list looking ahead an additional
-   * node. This is so when the next node is the desired node with the 
-   * corresponding key, we want to simply dereference the node by setting
-   * the current node {@code next} pointer to the node that follows the desired
-   * node to remove.
+   * {@inheritDoc}
    * 
-   * @param key the key of the desired node to remove
+   * @throws IllegalArgumentException {@inheritDoc}
    */
   public synchronized void remove(K key) {
-    _remove(FORWARD, key);
+    remove(search(key));
   }
 
   /**
-   * Removes a {@code DoublyNode} containing the specified key. It starts at the
+   * Removes the node containing the specified key. It starts at the
    * tail and then goes in reverse order of the list looking at each previous
    * node. This is so when the next node is the desired node with the
    * corresponding key, we want to simply dereference the node by setting the
@@ -215,9 +243,20 @@ public class DoublyLinkedList<K, V> extends LinkedList<K, V> {
    * to remove.
    * 
    * @param key the key of the desired node to remove
+   * 
+   * @throws IllegalArgumentException if the key is {@code null} or blank
    */
   public synchronized void rRemove(K key) {
-    _remove(REVERSE, key);
+    remove(rSearch(key));
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @throws IndexOutOfBoundsException {@inheritDoc}
+   */
+  public synchronized void removeIndex(int index) {
+    remove(searchIndex(index));
   }
 
   /**
@@ -226,12 +265,12 @@ public class DoublyLinkedList<K, V> extends LinkedList<K, V> {
    * @return the string format of the object
    */
   public synchronized String toString() {
-    if (head == null && tail == null)
+    if (head == null)
       return "{}";
-
+    
     StringBuilder sb = new StringBuilder();
     DoublyNode<K, V> node = head;
-
+    
     sb.append("{");
 
     while (node != null) {
@@ -241,4 +280,5 @@ public class DoublyLinkedList<K, V> extends LinkedList<K, V> {
     
     return sb.toString() + "\n}";
   }
+
 }

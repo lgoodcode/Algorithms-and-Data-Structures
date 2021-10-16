@@ -20,16 +20,6 @@ public class DoublyLinkedList_Test {
   DoublyNode<Integer, String> node;
   DoublyNode<Integer, String> node2;
 
-  @Test
-  void is_instantiated() {
-    list = new DoublyLinkedList<>();
-  }
-
-  @Test
-  void node_is_instantiated() {
-    node = new DoublyNode<>(1, "one");
-  }
-
   @Nested
   class When_New {
 
@@ -53,6 +43,11 @@ public class DoublyLinkedList_Test {
       assertNull(list.rSearch(1));
     }
 
+    @Test 
+    void searchIndex_null_on_nonexistent_key() {
+      assertNull(list.search(4));
+    }
+
     @Test
     void get_returns_null() {
       assertNull(list.get(1));
@@ -61,6 +56,11 @@ public class DoublyLinkedList_Test {
     @Test
     void rGet_returns_null() {
       assertNull(list.rGet(1));
+    }
+
+    @Test
+    void getIndex_returns_null() {
+      assertNull(list.getIndex(1));
     }
 
     @Test
@@ -127,13 +127,45 @@ public class DoublyLinkedList_Test {
     }
 
     @Test
-    void all_inserts_succeed() {
+    void insertAt() {
+      list.insertAt(3, 6, "six");
+
+      assertEquals("six", list.getIndex(3));
+      assertEquals("two", list.getIndex(4));
+      assertEquals("three", list.getIndex(2));
+      assertEquals("one", list.getIndex(5));
+    }
+
+    @Test
+    void get() {
       assertAll(
         () -> assertEquals("one", list.get(1)),
         () -> assertEquals("two", list.get(2)),
         () -> assertEquals("three", list.get(3)),
         () -> assertEquals("four", list.get(4)),
         () -> assertEquals("five", list.get(5))
+      );
+    }
+
+    @Test
+    void rGet() {
+      assertAll(
+        () -> assertEquals("one", list.rGet(1)),
+        () -> assertEquals("two", list.rGet(2)),
+        () -> assertEquals("three", list.rGet(3)),
+        () -> assertEquals("four", list.rGet(4)),
+        () -> assertEquals("five", list.rGet(5))
+      );
+    }
+
+    @Test
+    void getIndex() {
+      assertAll(
+        () -> assertEquals("one", list.getIndex(4)),
+        () -> assertEquals("two", list.getIndex(3)),
+        () -> assertEquals("three", list.getIndex(2)),
+        () -> assertEquals("four", list.getIndex(1)),
+        () -> assertEquals("five", list.getIndex(0))
       );
     }
 
@@ -155,14 +187,13 @@ public class DoublyLinkedList_Test {
       assertEquals(node.getValue(), node2.getValue());
     }
 
-    @Test 
-    void get() {
-      assertEquals("four", list.get(4));
-    }
+    @Test
+    void searchIndex() {
+      node = new DoublyNode<>(3, "three");
+      node2 = list.searchIndex(2);
 
-    @Test 
-    void rGet() {
-      assertEquals("four", list.rGet(4));
+      assertEquals(node.getKey(), node2.getKey());
+      assertEquals(node.getValue(), node2.getValue());
     }
 
     @Test
@@ -186,6 +217,18 @@ public class DoublyLinkedList_Test {
         () -> assertEquals("two", list.get(2)),
         () -> assertEquals("four", list.get(4)),
         () -> assertEquals("five", list.get(5))
+      );
+    }
+
+    @Test
+    void removeIndex() {
+      list.removeIndex(3);
+
+      assertAll(
+        () -> assertEquals("one", list.getIndex(3)),
+        () -> assertEquals("three", list.getIndex(2)),
+        () -> assertEquals("four", list.getIndex(1)),
+        () -> assertEquals("five", list.getIndex(0))
       );
     }
 

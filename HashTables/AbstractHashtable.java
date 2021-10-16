@@ -15,7 +15,7 @@ public abstract class AbstractHashtable<K, V> {
    * 
    * @param size the specififed size of the hashtable maximum capacity
    * 
-   * @throws IllegalArgumentException if the specified size is less than 1
+   * @throws IllegalArgumentException if the specified size is less than {@code 1}
    */
   protected AbstractHashtable(int size) {
     if (size < 1)
@@ -43,23 +43,50 @@ public abstract class AbstractHashtable<K, V> {
     return n;
   }
 
+  /**
+   * Checks the key to make sure it isn't {@code null} or blank
+   * 
+   * @param key the key to check
+   * 
+   * @throws IllegalArgumentException if the key is {@code null} or blank
+   */
+  protected final synchronized void checkKey(K key) {
+    if (key == null || key.toString().isBlank())
+      throw new IllegalArgumentException("Key cannot be null or blank");
+  }
+
+  /**
+   * Checks the value to make sure it isn't {@code null} or blank
+   * 
+   * @param value the value to check
+   * 
+   * @throws IllegalArgumentException if the value is {@code null} or blank
+   */
+  protected final synchronized void checkValue(V value) {
+    if (value == null || value.toString().isBlank())
+      throw new IllegalArgumentException("Key cannot be null or blank");
+  }
+
   protected abstract int hash(K key, int i);
 
   /**
    * Inserts the new entry into the hashtable.
    *
-   * @param key the key of the entry
+   * @param key   the key of the entry
    * @param value the value of the entry
    * @return boolean indicating whether the insertion was successful or not
    *
    * @throws IllegalArgumentException if the key or value is {@code null} or blank
-   * @throws HashtableFullException   if the attempting to insert while the table
-   *                                  is full
+   * @throws HashtableFullException   if attempting to insert while the table is
+   *                                  full
    */
   public abstract boolean insert(K key, V value) throws HashtableFullException;
 
   /**
    * Internal method used by the other methods to lookup entries in the hashtable.
+   * Must use the {@link #checkKey()} method in the implementation so that the
+   * other methods that use this method don't have to implement it, making it 
+   * the single point of failure.
    *
    * @param key the key to lookup
    * @return the index of the element with the specified key or {@code -1} if not
@@ -79,8 +106,6 @@ public abstract class AbstractHashtable<K, V> {
    * @throws IllegalArgumentException if the key or value is {@code null} or blank
    */
   public final synchronized boolean hasKey(K key) {
-    if (key == null || key.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or blank.");
     return search(key) != -1;
   }
 
@@ -95,11 +120,7 @@ public abstract class AbstractHashtable<K, V> {
    */
   @SuppressWarnings("unchecked")
   public final synchronized V get(K key) {
-    if (key == null || key.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or blank.");
-
     int idx = search(key);
-
     return idx != -1 ? (V) table[idx].getValue() : null;
   }
 
@@ -113,9 +134,6 @@ public abstract class AbstractHashtable<K, V> {
    * @throws IllegalArgumentException if the key or value is {@code null} or blank
    */
   public final synchronized boolean delete(K key) {
-    if (key == null || key.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or blank.");
-
     int idx = search(key);
 
     if (idx != -1) {

@@ -5,48 +5,32 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import static org.junit.Assert.assertSame;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import LinkedLists.CircularDoublyLinkedList;
+import LinkedLists.CircularLinkedList;
 import LinkedLists.DoublyNode;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-public class CircularDoublyLinkedList_Test {
-  CircularDoublyLinkedList<Integer, String> list;
-  CircularDoublyLinkedList<String, String> list2;
+public class CircularLinkedList_Test {
+  CircularLinkedList<Integer, String> list;
+  CircularLinkedList<String, String> list2;
   DoublyNode<Integer, String> node;
   DoublyNode<Integer, String> node2;
-
-  @Test
-  void is_instantiated() {
-    list = new CircularDoublyLinkedList<>();
-  }
-
-  @Test
-  void node_is_instantiated() {
-    node = new DoublyNode<>(1, "one");
-  }
 
   @Nested
   class When_New {
 
     @BeforeEach
     void create_list() {
-      list = new CircularDoublyLinkedList<>();
+      list = new CircularLinkedList<>();
     }
 
     @Test
     void insertion() {
       list.insert(1, "one");
-
-      assertSame(list.getHead(), list.getTail());
-
-      assertNotNull(list.search(1));
     }
 
     @Test 
@@ -57,6 +41,11 @@ public class CircularDoublyLinkedList_Test {
     @Test
     void rSearch_null_on_nonexistent_key() {
       assertNull(list.rSearch(1));
+    }
+
+    @Test 
+    void searchIndex_null_on_nonexistent_key() {
+      assertNull(list.search(4));
     }
 
     @Test
@@ -70,6 +59,11 @@ public class CircularDoublyLinkedList_Test {
     }
 
     @Test
+    void getIndex_returns_null() {
+      assertNull(list.getIndex(1));
+    }
+
+    @Test
     void empty_list_string() {
       assertEquals("{}", list.toString());
     }
@@ -78,7 +72,7 @@ public class CircularDoublyLinkedList_Test {
     @NullAndEmptySource
     @ValueSource(strings = { " ", "  ", "\t", "\n" })
     void insert_throws_on_bad_keys(String key) {
-      list2 = new CircularDoublyLinkedList<>();
+      list2 = new CircularLinkedList<>();
 
       assertThrows(IllegalArgumentException.class, () -> list2.insert(key, "test"));
     }
@@ -87,7 +81,7 @@ public class CircularDoublyLinkedList_Test {
     @NullAndEmptySource
     @ValueSource(strings = { " ", "  ", "\t", "\n" })
     void search_throws_on_bad_keys(String key) {
-      list2 = new CircularDoublyLinkedList<>();
+      list2 = new CircularLinkedList<>();
 
       assertThrows(IllegalArgumentException.class, () -> list2.search(key));
     }
@@ -96,7 +90,7 @@ public class CircularDoublyLinkedList_Test {
     @NullAndEmptySource
     @ValueSource(strings = { " ", "  ", "\t", "\n" })
     void remove_throws_on_bad_keys(String key) {
-      list2 = new CircularDoublyLinkedList<>();
+      list2 = new CircularLinkedList<>();
 
       assertThrows(IllegalArgumentException.class, () -> list2.remove(key));
     }
@@ -105,7 +99,7 @@ public class CircularDoublyLinkedList_Test {
     @NullAndEmptySource
     @ValueSource(strings = { " ", "  ", "\t", "\n" })
     void rRemove_throws_on_bad_keys(String key) {
-      list2 = new CircularDoublyLinkedList<>();
+      list2 = new CircularLinkedList<>();
 
       assertThrows(IllegalArgumentException.class, () -> list2.rRemove(key));
     }
@@ -123,7 +117,7 @@ public class CircularDoublyLinkedList_Test {
 
     @BeforeEach
     void create_and_insert() {
-      list = new CircularDoublyLinkedList<>();
+      list = new CircularLinkedList<>();
 
       list.insert(1, "one");
       list.insert(2, "two");
@@ -132,14 +126,46 @@ public class CircularDoublyLinkedList_Test {
       list.insert(5, "five");
     }
 
+    // @Test
+    void insertAt() {
+      list.insertAt(3, 6, "six");
+
+      assertEquals("six", list.getIndex(3));
+      assertEquals("two", list.getIndex(4));
+      assertEquals("three", list.getIndex(2));
+      assertEquals("one", list.getIndex(5));
+    }
+
     @Test
-    void all_inserts_succeed() {
+    void get() {
       assertAll(
         () -> assertEquals("one", list.get(1)),
         () -> assertEquals("two", list.get(2)),
         () -> assertEquals("three", list.get(3)),
         () -> assertEquals("four", list.get(4)),
         () -> assertEquals("five", list.get(5))
+      );
+    }
+
+    @Test
+    void rGet() {
+      assertAll(
+        () -> assertEquals("one", list.rGet(1)),
+        () -> assertEquals("two", list.rGet(2)),
+        () -> assertEquals("three", list.rGet(3)),
+        () -> assertEquals("four", list.rGet(4)),
+        () -> assertEquals("five", list.rGet(5))
+      );
+    }
+
+    @Test
+    void getIndex() {
+      assertAll(
+        () -> assertEquals("one", list.getIndex(4)),
+        () -> assertEquals("two", list.getIndex(3)),
+        () -> assertEquals("three", list.getIndex(2)),
+        () -> assertEquals("four", list.getIndex(1)),
+        () -> assertEquals("five", list.getIndex(0))
       );
     }
 
@@ -162,23 +188,12 @@ public class CircularDoublyLinkedList_Test {
     }
 
     @Test
-    void search_returns_null_on_nonexistent_key() {
-      assertNull(list.search(9));
-    }
+    void searchIndex() {
+      node = new DoublyNode<>(3, "three");
+      node2 = list.searchIndex(2);
 
-    @Test
-    void rSearch_returns_null_on_nonexistent_key() {
-      assertNull(list.rSearch(9));
-    }
-
-    @Test 
-    void get() {
-      assertEquals("four", list.get(4));
-    }
-
-    @Test 
-    void rGet() {
-      assertEquals("four", list.rGet(4));
+      assertEquals(node.getKey(), node2.getKey());
+      assertEquals(node.getValue(), node2.getValue());
     }
 
     @Test
@@ -202,6 +217,18 @@ public class CircularDoublyLinkedList_Test {
         () -> assertEquals("two", list.get(2)),
         () -> assertEquals("four", list.get(4)),
         () -> assertEquals("five", list.get(5))
+      );
+    }
+
+    @Test
+    void removeIndex() {
+      list.removeIndex(3);
+
+      assertAll(
+        () -> assertEquals("one", list.getIndex(3)),
+        () -> assertEquals("three", list.getIndex(2)),
+        () -> assertEquals("four", list.getIndex(1)),
+        () -> assertEquals("five", list.getIndex(0))
       );
     }
 

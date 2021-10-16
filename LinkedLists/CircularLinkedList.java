@@ -1,11 +1,11 @@
 package LinkedLists;
 
-public class CircularDoublyLinkedList<K, V> extends DoublyLinkedList<K, V> {
+public class CircularLinkedList<K, V> extends DoublyLinkedList<K, V> {
   /**
    * Empty constructor besides the call to super() because there is no
    * initialization and extends the {@link DoublyLinkedList}.
    */
-  public CircularDoublyLinkedList() { super(); }
+  public CircularLinkedList() { super(); }
 
   /**
    * Inserts a new node into the linked list but ensures that the head and tail
@@ -14,15 +14,12 @@ public class CircularDoublyLinkedList<K, V> extends DoublyLinkedList<K, V> {
    * @param key   the key of the new node
    * @param value the value of the new node
    * 
-   * @throws IllegalArgumentException if the key or value is {@code null} or blank
+   * @throws IllegalArgumentException {@inheritDoc}
    */
-  @Override
   public synchronized void insert(K key, V value) {
-    if (key == null || key.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or empty.");
-    if (value == null || value.toString().isBlank())
-      throw new IllegalArgumentException("Value cannot be null or empty.");
-
+    checkKey(key);
+    checkValue(value);
+    
     DoublyNode<K, V> node = new DoublyNode<>(key, value);
 
     if (head == null) {
@@ -34,24 +31,23 @@ public class CircularDoublyLinkedList<K, V> extends DoublyLinkedList<K, V> {
       node.prev = head.prev;
       head = head.prev = tail.next = node;
     }
+
+    size++;
   }
 
   /**
    * Iterates through the list until the desired node with the corresponding
    * specified key is found or the end is reached, returning the
-   * {@code DoublyNode} or {@code null} if not found. Stops once the next
-   * node points to the head, indicating restarting the cycle.
+   * {@code DoublyNode} or {@code null} if not found. Stops once the next node
+   * points to the head, indicating restarting the cycle.
    * 
    * @param key the key of the desired node to find
    * @return the {@code DoublyNode} or {@code null} if not found
-   * 
-   * @throws IllegalArgumentException if the key is {@code null} or blank
+   * @throws IllegalArgumentException {@inheritDoc}
    */
-  @Override
   public synchronized DoublyNode<K, V> search(K key) {
-    if (key == null || key.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or blank");
-
+    checkKey(key);
+    
     DoublyNode<K, V> node = head;
     
     if (node == null)
@@ -74,12 +70,10 @@ public class CircularDoublyLinkedList<K, V> extends DoublyLinkedList<K, V> {
    * @param key the key of the desired node to find
    * @return the {@code DoublyNode} or {@code null} if not found
    * 
-   * @throws IllegalArgumentException if the key is {@code null} or blank
+   * @throws IllegalArgumentException {@inheritDoc}
    */
-  @Override
   public synchronized DoublyNode<K, V> rSearch(K key) {
-    if (key == null || key.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or blank");
+    checkKey(key);
 
     DoublyNode<K, V> node = head;
 
@@ -92,32 +86,6 @@ public class CircularDoublyLinkedList<K, V> extends DoublyLinkedList<K, V> {
     if (node.getKey().equals(key))
       return node;
     return null;
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * <p>
-   * The internal process of retrieving a value from a node is identical to the
-   * superclass {@link DoublyLinkedList} definition.
-   * </p>
-   */
-  @Override
-  public synchronized V get(K key) {
-    return super._get(FORWARD, key);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * <p>
-   * The internal process of retrieving a value from a node is identical to the
-   * superclass {@link DoublyLinkedList} definition.
-   * </p>
-   */
-  @Override
-  public synchronized V rGet(K key) {
-    return super._get(REVERSE, key);
   }
 
   /**
@@ -142,12 +110,7 @@ public class CircularDoublyLinkedList<K, V> extends DoublyLinkedList<K, V> {
    * 
    * @param key the key of the desired node to remove
    */
-  private void _remove(int type, K key) {
-    if (key == null || key.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or blank");
-
-    DoublyNode<K, V> node = type == FORWARD ? search(key) : rSearch(key);
-
+  public synchronized void remove(DoublyNode<K, V> node) {
     if (node == null)
       return;
     if (node == head && node == tail)
@@ -159,22 +122,8 @@ public class CircularDoublyLinkedList<K, V> extends DoublyLinkedList<K, V> {
 
     node.prev.next = node.next;
     node.next.prev = node.prev;
-  }
 
-  @Override
-  public synchronized void remove(K key) {
-    _remove(FORWARD, key);
-  }
-
-  /**
-   * Removes a {@code DoublyNode} containing the specified key. It starts at the
-   * tail and then continues up the list looking behind an additional node.
-   * 
-   * @param key the key of the desired node to remove
-   */
-  @Override
-  public synchronized void rRemove(K key) {
-    _remove(REVERSE, key);
+    size--;
   }
 
   /**
@@ -185,7 +134,6 @@ public class CircularDoublyLinkedList<K, V> extends DoublyLinkedList<K, V> {
    * 
    * @return the object string in JSON format
    */
-  @Override
   public synchronized String toString() {
     if (head == null && tail == null)
       return "{}";

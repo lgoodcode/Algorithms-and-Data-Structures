@@ -10,19 +10,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import LinkedLists.SortedDoublyLinkedList;
+import LinkedLists.SortedLinkedList;
 import LinkedLists.DoublyNode;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-public class SortedDoublyLinkedList_Test {
-  SortedDoublyLinkedList<Integer, String> list;
-  SortedDoublyLinkedList<String, String> list2;
+public class SortedLinkedList_Test {
+  SortedLinkedList<Integer, String> list;
+  SortedLinkedList<String, String> list2;
   DoublyNode<Integer, String> node;
   DoublyNode<Integer, String> node2;
 
   @Test
   void is_instantiated() {
-    list = new SortedDoublyLinkedList<>();
+    list = new SortedLinkedList<>();
   }
 
   @Test
@@ -35,7 +35,7 @@ public class SortedDoublyLinkedList_Test {
 
     @BeforeEach
     void create_list() {
-      list = new SortedDoublyLinkedList<>();
+      list = new SortedLinkedList<>();
     }
 
     @Test
@@ -53,6 +53,11 @@ public class SortedDoublyLinkedList_Test {
       assertNull(list.rSearch(1));
     }
 
+    @Test 
+    void searchIndex_null_on_nonexistent_key() {
+      assertNull(list.search(4));
+    }
+
     @Test
     void get_returns_null() {
       assertNull(list.get(1));
@@ -64,6 +69,11 @@ public class SortedDoublyLinkedList_Test {
     }
 
     @Test
+    void getIndex_returns_null() {
+      assertNull(list.getIndex(1));
+    }
+
+    @Test
     void empty_list_string() {
       assertEquals("{}", list.toString());
     }
@@ -72,7 +82,7 @@ public class SortedDoublyLinkedList_Test {
     @NullAndEmptySource
     @ValueSource(strings = { " ", "  ", "\t", "\n" })
     void insert_throws_on_bad_keys(String key) {
-      list2 = new SortedDoublyLinkedList<>();
+      list2 = new SortedLinkedList<>();
 
       assertThrows(IllegalArgumentException.class, () -> list2.insert(key, "test"));
     }
@@ -81,7 +91,7 @@ public class SortedDoublyLinkedList_Test {
     @NullAndEmptySource
     @ValueSource(strings = { " ", "  ", "\t", "\n" })
     void search_throws_on_bad_keys(String key) {
-      list2 = new SortedDoublyLinkedList<>();
+      list2 = new SortedLinkedList<>();
 
       assertThrows(IllegalArgumentException.class, () -> list2.search(key));
     }
@@ -90,7 +100,7 @@ public class SortedDoublyLinkedList_Test {
     @NullAndEmptySource
     @ValueSource(strings = { " ", "  ", "\t", "\n" })
     void remove_throws_on_bad_keys(String key) {
-      list2 = new SortedDoublyLinkedList<>();
+      list2 = new SortedLinkedList<>();
 
       assertThrows(IllegalArgumentException.class, () -> list2.remove(key));
     }
@@ -99,7 +109,7 @@ public class SortedDoublyLinkedList_Test {
     @NullAndEmptySource
     @ValueSource(strings = { " ", "  ", "\t", "\n" })
     void rRemove_throws_on_bad_keys(String key) {
-      list2 = new SortedDoublyLinkedList<>();
+      list2 = new SortedLinkedList<>();
 
       assertThrows(IllegalArgumentException.class, () -> list2.rRemove(key));
     }
@@ -117,7 +127,7 @@ public class SortedDoublyLinkedList_Test {
 
     @BeforeEach
     void create_and_insert() {
-      list = new SortedDoublyLinkedList<>();
+      list = new SortedLinkedList<>();
 
       list.insert(5, "five");
       list.insert(3, "three");
@@ -126,15 +136,14 @@ public class SortedDoublyLinkedList_Test {
       list.insert(4, "four");
     }
 
-    @Test
-    void all_inserts_succeed() {
-      assertAll(
-        () -> assertEquals("one", list.get(1)),
-        () -> assertEquals("two", list.get(2)),
-        () -> assertEquals("three", list.get(3)),
-        () -> assertEquals("four", list.get(4)),
-        () -> assertEquals("five", list.get(5))
-      );
+    @Test 
+    void get() {
+      assertEquals("four", list.get(4));
+    }
+
+    @Test 
+    void rGet() {
+      assertEquals("four", list.rGet(4));
     }
 
     @Test
@@ -155,14 +164,13 @@ public class SortedDoublyLinkedList_Test {
       assertEquals(node.getValue(), node2.getValue());
     }
 
-    @Test 
-    void get() {
-      assertEquals("four", list.get(4));
-    }
+    @Test
+    void searchIndex() {
+      node = new DoublyNode<>(3, "three");
+      node2 = list.searchIndex(2);
 
-    @Test 
-    void rGet() {
-      assertEquals("four", list.rGet(4));
+      assertEquals(node.getKey(), node2.getKey());
+      assertEquals(node.getValue(), node2.getValue());
     }
 
     @Test
@@ -186,6 +194,18 @@ public class SortedDoublyLinkedList_Test {
         () -> assertEquals("two", list.get(2)),
         () -> assertEquals("four", list.get(4)),
         () -> assertEquals("five", list.get(5))
+      );
+    }
+
+    @Test
+    void removeIndex() {
+      list.removeIndex(3);
+
+      assertAll(
+        () -> assertEquals("one", list.getIndex(0)),
+        () -> assertEquals("two", list.getIndex(1)),
+        () -> assertEquals("three", list.getIndex(2)),
+        () -> assertEquals("five", list.getIndex(3))
       );
     }
 
