@@ -1,6 +1,6 @@
 package Hashtables;
 
-public final class HashTableFunctions {
+public final class HashtableFunctions {
   /**
    * Given a valid {@code Number} type, determines if it is a prime number.
    * 
@@ -38,7 +38,7 @@ public final class HashTableFunctions {
    * @throws InvalidPrimeException when given an invalid prime number
    * @return {@code int[a, b]} constants for table hash function
    */
-  public static <T extends Number> int[] injectiveIntegers(T[] S, int m, int p) {
+  public static <T> int[] injectiveIntegers(T[] S, int m, int p) {
     // Sanity checks on prime number and subtable size
     if (isPrime(p) == false)
       throw new IllegalArgumentException("Invalid prime number given: " + p);
@@ -53,24 +53,17 @@ public final class HashTableFunctions {
 
     // Iterate through every value in the set
     for (T k : S) {
-      // Get the hash value
-      hash = ((a * k.intValue() + b) % p % m);
+      hash = ((a * k.hashCode() + b) % p % m);
 
-      if (used_idx == 0) {
-        used[used_idx++] = hash;
-      } else {
-        // Determine whether the hash has already been used
-        for (int i = 0; i < used_idx; i++) {
-          if (hash == used[i]) {
-            // If used, the constants doesn't give us a good hash function try again
-            return HashTableFunctions.injectiveIntegers(S, m, p);
-          } else {
-            // Otherwise, add used hash function to used array and continue to next set item
-            used[used_idx++] = hash;
-            break;
-          }
-        }
+      // Determine whether the hash has already been used
+      for (int i = 0; i < used_idx; i++) {
+        // If used, the constants doesn't give us an injective hash function; try again
+        if (hash == used[i])
+          return HashtableFunctions.injectiveIntegers(S, m, p);
       }
+
+      // Add hash to used hashes array
+      used[used_idx++] = hash;
     }
 
     int[] valid = { a, b };

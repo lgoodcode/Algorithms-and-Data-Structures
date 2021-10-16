@@ -11,7 +11,8 @@ import java.util.NoSuchElementException;
 import java.util.ConcurrentModificationException;
 
 import Hashtables.exceptions.DuplicateKeyException;
-import static Hashtables.HashTableFunctions.isPrime;
+
+import static Hashtables.HashtableFunctions.isPrime;
 
 /**
  * This class implements a high performance dynamic hashtable where the size is
@@ -124,7 +125,7 @@ public final class CuckooHashtable<K, V> {
    * @throws IllegalArgumentException when given a prime number that isn't prime,
    *         a subtable size smaller than 1, or a load factor less then 0.75f.
    */
-  public CuckooHashtable(int prime, int size, float loadFactor) throws IllegalArgumentException {
+  public CuckooHashtable(int prime, int size, float loadFactor) {
     if (isPrime(prime) == false)
       throw new IllegalArgumentException("Illegal prime number: " + prime);
     else if (size < 1)
@@ -210,6 +211,30 @@ public final class CuckooHashtable<K, V> {
 
     for (Map.Entry<K, V> entry : S.entrySet())
       insert(entry.getKey(), entry.getValue());
+  }
+
+  /**
+   * Checks the key to make sure it isn't {@code null} or blank
+   * 
+   * @param key the key to check
+   * 
+   * @throws IllegalArgumentException if the key is {@code null} or blank
+   */
+  protected synchronized void checkKey(K key) {
+    if (key == null || key.toString().isBlank())
+      throw new IllegalArgumentException("Key cannot be null or blank");
+  }
+
+  /**
+   * Checks the value to make sure it isn't {@code null} or blank
+   * 
+   * @param value the value to check
+   * 
+   * @throws IllegalArgumentException if the value is {@code null} or blank
+   */
+  protected synchronized void checkValue(V value) {
+    if (value == null || value.toString().isBlank())
+      throw new IllegalArgumentException("Key cannot be null or blank");
   }
 
   /**
@@ -347,19 +372,15 @@ public final class CuckooHashtable<K, V> {
    * @param key   the hashtable key
    * @param value the value
    * 
-   * @throws NullPointerException if the key or value is null
+   * @throws IllegalArgumentException if the key or value is {@code null} or blank
    * 
-   * @throws DuplicateKeyException if the specified key already exists in the
-   *         hashtable
+   * @throws DuplicateKeyException    if the specified key already exists in the
+   *                                  hashtable
    */
   @SuppressWarnings("unchecked")
   public synchronized void insert(K key, V value) {
-    if (key == null  || value == null)
-      throw new NullPointerException("Key and value cannot be null values.");
-    if (key instanceof String && key.toString().isBlank())
-      throw new IllegalArgumentException("Key string cannot be blank.");
-    if (value instanceof String && value.toString().isBlank())
-      throw new IllegalArgumentException("Value string cannot be blank.");
+    checkKey(key);
+    checkValue(value);
 
     if (capacityReached()) {
       fullRehash(key, value);
@@ -453,24 +474,36 @@ public final class CuckooHashtable<K, V> {
   }
 
   /**
+   * Performs a lookup in each subtable to find the {@code Entry} with the
+   * specified key.
+   * 
+   * @param key the key of the entry to find
+   * @return the {@code Entry} object or {@code null} if not found
+   * 
+   * @throws IllegalArgumentException if the key is {@code null} or blank
+   */
+  @SuppressWarnings("unchecked")
+  public synchronized Entry<K, V> find(K key) {
+    checkKey(key);
+
+    Entry<K, V> entry = null;
+
+    for (CuckooHashSubtable<K, V> Tj : (CuckooHashSubtable<K, V>[]) tables)
+      if ((entry = Tj.getEntry(key)) != null)
+        return entry;
+    return entry;
+  }
+
+  /**
    * Determines whether the given key has an entry in the hashtable.
    * 
    * @param key the key to check if exists
    * @return whether the key exists in the hashtable or not
    * 
-   * @throws NullPointerException if the key is {@code null}
+   * @throws IllegalArgumentException if the key is {@code null} or blank
    */
-  @SuppressWarnings("unchecked")
   public synchronized boolean hasKey(K key) {
-    if (key == null)
-      throw new NullPointerException();
-
-    for (CuckooHashSubtable<K, V> Tj : (CuckooHashSubtable<K, V>[]) tables) {
-      if (Tj.hasKey(key))
-        return true;
-    }
-
-    return false;
+    return find(key) != null;
   }
 
   /**
@@ -480,12 +513,11 @@ public final class CuckooHashtable<K, V> {
    * @param value the value to check if exists
    * @return whether the value exists in the hashtable or not
    * 
-   * @throws NullPointerException if the value is {@code null}
+   * @throws IllegalArgumentException if the value is {@code null} or blank
    */
   @SuppressWarnings("unchecked")
   public synchronized boolean hasValue(V value) {
-    if (value == null)
-      throw new NullPointerException();
+    checkValue(value);
 
     for (CuckooHashSubtable<K, V> Tj : (CuckooHashSubtable<K, V>[]) tables) {
       if (Tj.hasValue(value))
@@ -503,22 +535,11 @@ public final class CuckooHashtable<K, V> {
    * @return the value of the specified key entry if it exists or {@code null} if
    *         not
    * 
-   * @throws NullPointerException if the key is {@code null}
+   * @throws IllegalArgumentException if the key is {@code null} or blank
    */
-  @SuppressWarnings("unchecked")
   public synchronized V get(K key) {
-    if (key == null)
-      throw new NullPointerException();
-
-    V value;
-    for (CuckooHashSubtable<K, V> Tj : (CuckooHashSubtable<K, V>[]) tables) {
-      value = Tj.get(key);
-
-      if (value != null)
-        return value;
-    }
-
-    return null;
+    Entry<K, V> entry = find(key);
+    return entry != null ? entry.getValue() : null;
   }
 
   /**
@@ -529,27 +550,22 @@ public final class CuckooHashtable<K, V> {
    * @param key the key of the entry to delete
    * @return whether the entry was successfully deleted or not
    * 
-   * @throws NullPointerException if the key is {@code null}
+   * @throws IllegalArgumentException if the key is {@code null} or blank
    */
-
   @SuppressWarnings("unchecked")
   public synchronized boolean delete(K key) {
-    if (key == null)
-      throw new NullPointerException();
+    checkKey(key);
 
     for (CuckooHashSubtable<K, V> Tj : (CuckooHashSubtable<K, V>[]) tables) {
       if (Tj.hasKey(key)) {
         if (Tj.delete(key)) {
           modCount++;
           n--;
-
           return true;
         }
-
         return false;
       }
     }
-
     return false;
   }
 
@@ -575,12 +591,8 @@ public final class CuckooHashtable<K, V> {
    */
   @SuppressWarnings("unchecked")
   public synchronized void clear() {
-    for (CuckooHashSubtable<K, V> Tj : (CuckooHashSubtable<K, V>[]) tables) {
-      for (Entry<K, V> e : (Entry<K, V>[]) Tj.table) {
-        if (e != null)
-          Tj.delete(e);
-      }
-    }
+    for (CuckooHashSubtable<K, V> Tj : (CuckooHashSubtable<K, V>[]) tables)
+      Tj.clear();
   }
 
   /**
@@ -607,9 +619,9 @@ public final class CuckooHashtable<K, V> {
    * @param <V> value type parameter dervied from the main type parameter
    * @see CuckooHashtable
    * @see CuckooHashtable#tables
-   * @since 1.0
+   * @since 1.1
    */
-  private static class CuckooHashSubtable<K, V> {
+  protected static class CuckooHashSubtable<K, V> {
     private int m, p, a, b;
     private Entry<?, ?>[] table;
 
@@ -628,7 +640,7 @@ public final class CuckooHashtable<K, V> {
      * @param p prime number
      * @param m subtable size
      */
-    public CuckooHashSubtable(int p, int m) {
+    protected CuckooHashSubtable(int p, int m) {
       this.p = p;
       this.m = m;
       a = (int) (Math.random() * p - 2) + 1;
@@ -637,17 +649,37 @@ public final class CuckooHashtable<K, V> {
     }
 
     /**
+     * Checks the key to make sure it isn't {@code null} or blank
+     * 
+     * @param key the key to check
+     * 
+     * @throws IllegalArgumentException if the key is {@code null} or blank
+     */
+    private synchronized void checkKey(K key) {
+      if (key == null || key.toString().isBlank())
+        throw new IllegalArgumentException("Key cannot be null or blank");
+    }
+
+    /**
+     * Checks the value to make sure it isn't {@code null} or blank
+     * 
+     * @param value the value to check
+     * 
+     * @throws IllegalArgumentException if the value is {@code null} or blank
+     */
+    private synchronized void checkValue(V value) {
+      if (value == null || value.toString().isBlank())
+        throw new IllegalArgumentException("Key cannot be null or blank");
+    }
+
+    /**
      * The deterministic hash function to derive a index slot for a given key
      * {@code k}.
      *  
      * @param k the key to hash
      * @return integer index for this subtable
-     * 
-     * @throws NullPointerException if the key is {@code null}
      */
     private int hash(K key) {
-      if (key == null)
-        throw new NullPointerException();
       return ((a * key.hashCode() + b) % p) % m;
     }
 
@@ -661,7 +693,7 @@ public final class CuckooHashtable<K, V> {
      * @see Entry
      */
     @SuppressWarnings("unchecked")
-    public synchronized Entry<K, V>[] getTable() {
+    protected synchronized Entry<K, V>[] getTable() {
       return (Entry<K, V>[]) table;
     }
 
@@ -671,12 +703,30 @@ public final class CuckooHashtable<K, V> {
      * @param key the key to check if occupies a slot
      * @return whether the key hash occupies a slot in the table
      * 
-     * @throws NullPointerException if the key is {@code null}
+     * @throws IllegalArgumentException if the key is {@code null} or blank
      */
-    public synchronized boolean isOccupied(K key) {
-      if (key == null)
-        throw new NullPointerException();
+    protected synchronized boolean isOccupied(K key) {
+      checkKey(key);
       return table[hash(key)] != null;
+    }
+
+    /**
+     * Performs a lookup in the hashtable to find the index of the entry
+     * with the specified key or {@code -1} if not found.
+     * 
+     * @param key the key of the entry index to find
+     * @return the index of the entry or {@code -1} if not found
+     * 
+     * @throws IllegalArgumentException if the key is {@code null} or blank
+     */
+    protected synchronized int search(K key) {
+      checkKey(key);
+
+      int hash = hash(key);
+
+      if (table[hash] != null && table[hash].getKey().equals(key))
+        return hash;
+      return -1;
     }
 
     /**
@@ -684,20 +734,12 @@ public final class CuckooHashtable<K, V> {
      * and if the slot is occupied, if the key matches.
      * 
      * @param key the key
-     * @return does the given key exist in the table
+     * @return if the given key exist in the table
      * 
-     * @throws NullPointerException if the key is {@code null}
+     * @throws IllegalArgumentException if the key is {@code null} or blank
      */
-    public synchronized boolean hasKey(K key) {
-      if (key == null)
-        throw new NullPointerException();
-        
-      int hash = hash(key);
-
-      if (table[hash] != null)
-        return table[hash].getKey().equals(key);
-
-      return false;
+    protected synchronized boolean hasKey(K key) {
+      return search(key) != -1;
     }
 
     /**
@@ -705,17 +747,16 @@ public final class CuckooHashtable<K, V> {
      * 
      * @param value the value
      * @return whether the given value exists in the table
+     * 
+     * @throws IllegalArgumentException if the value is {@code null} or blank
      */
     @SuppressWarnings("unchecked")
-    public synchronized boolean hasValue(V value) {
-      if (value == null)
-        throw new NullPointerException();
+    protected synchronized boolean hasValue(V value) {
+      checkValue(value);
     
-      for (Entry<K, V> e : (Entry<K, V>[]) table) {
+      for (Entry<K, V> e : (Entry<K, V>[]) table)
         if (e.getValue().equals(value))
           return true;
-      }
-
       return false;    
     }
 
@@ -727,7 +768,7 @@ public final class CuckooHashtable<K, V> {
      * 
      * @throws NullPointerException if the entry is {@code null}
      */
-    public synchronized void insert(Entry<K, V> entry) {
+    protected synchronized void insert(Entry<K, V> entry) {
       if (entry == null)
         throw new NullPointerException();
       table[hash(entry.getKey())] = entry;
@@ -739,19 +780,24 @@ public final class CuckooHashtable<K, V> {
      * @param key the key to retrieve the corresponding value
      * @return the value if the given key entry exists or {@code null} if not
      * 
-     * @throws NullPointerException if the key is {@code null}
+     * @throws IllegalArgumentException if the key is {@code null} or blank
      */
     @SuppressWarnings("unchecked")
-    public synchronized V get(K key) {
-      if (key == null)
-        throw new NullPointerException();
+    protected synchronized V get(K key) {
+      int idx = search(key);
+      return idx != -1 ? (V) table[idx].getValue() : null;
+    }
 
-      Entry<K, V> entry = (Entry<K, V>) table[hash(key)];
-
-      if (entry != null && entry.getKey().equals(key))
-        return entry.getValue();
-
-      return null;
+    /**
+     * Retrieves the {@code Entry} with the given key.
+     * 
+     * @param key the key of the entry to retrieve
+     * @return the {@code Entry} or {@code null} if not found
+     */
+    @SuppressWarnings("unchecked")
+    protected synchronized Entry<K, V> getEntry(K key) {
+      int idx = search(key);
+      return idx != -1 ? (Entry<K, V>) table[idx] : null;
     }
 
     /**
@@ -762,13 +808,13 @@ public final class CuckooHashtable<K, V> {
      * @return desired {@code Entry} for either normal removal or swapping entries
      *         in the {@code CuckooHashTable.insert()} process.
      * 
-     * @throws NullPointerException if the key is {@code null}
+     * @throws IllegalArgumentException if the key is {@code null} or blank
+     * 
      * @see CuckooHashtable#insert()
      */
     @SuppressWarnings("unchecked")
-    public synchronized Entry<K, V> remove(K key) {
-      if (key == null)
-        throw new NullPointerException();
+    protected synchronized Entry<K, V> remove(K key) {
+      checkKey(key);
 
       int hash = hash(key);
       Entry<K, V> entry = (Entry<K, V>) table[hash];
@@ -785,17 +831,13 @@ public final class CuckooHashtable<K, V> {
      * @param key the key of the entry to delete
      * @return whether the operation was successful or not
      * 
-     * @throws NullPointerException if key is {@code null}
+     * @throws IllegalArgumentException if the key is {@code null} or blank
      */
-    public synchronized boolean delete(K key) {
-      if (key == null)
-        throw new NullPointerException();
+    protected synchronized boolean delete(K key) {
+      int idx = search(key);
 
-      int hash = hash(key);
-
-      if (table[hash] != null && table[hash].getKey().equals(key)) {
-        table[hash] = null;
-
+      if (idx != -1) {
+        table[idx] = null;
         return true;
       }
 
@@ -811,10 +853,18 @@ public final class CuckooHashtable<K, V> {
      * 
      * @throws NullPointerException if the entry is {@code null}
      */
-    public synchronized boolean delete(Entry<K, V> entry) {
+    protected synchronized boolean delete(Entry<K, V> entry) {
       if (entry == null)
         throw new NullPointerException();
       return delete(entry.getKey());
+    }
+
+    /**
+     * Clears all {@code Entry} objects from the table. 
+     */
+    protected synchronized void clear() {
+      for (int i=0; i<table.length; i++)
+        table[i] = null;
     }
   }
 
@@ -890,7 +940,8 @@ public final class CuckooHashtable<K, V> {
      * itself, so that the this$0 value pointing to the CuckooHashtable doesn't
      * exist.
      */
-    static final EmptyIterable<?> EMPTY_ITERABLE = new EmptyIterable<>();
+    // static final EmptyIterable<?> EMPTY_ITERABLE = new EmptyIterable<>();
+    public EmptyIterable() {}
 
     // Enumeration methods
     public boolean hasMoreElements() {

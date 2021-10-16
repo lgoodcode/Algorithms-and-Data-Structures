@@ -2,7 +2,7 @@ package Hashtables.OpenAddressing;
 
 import Hashtables.Entry;
 import Hashtables.AbstractHashtable;
-import static Hashtables.HashTableFunctions.isPrime;
+import static Hashtables.HashtableFunctions.isPrime;
 
 /**
  * <h4>Tip: Using a large value, preferrably a prime number, for the table size
