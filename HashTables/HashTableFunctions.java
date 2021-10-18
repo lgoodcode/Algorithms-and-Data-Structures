@@ -32,34 +32,34 @@ public final class HashtableFunctions {
    * set, table size, and prime number.
    * 
    * @param <T> {@code Number}
-   * @param S   set or list of elements to create the hash function for
+   * @param keys   set or list of elements to create the hash function for
    * @param m   maximal size of the subtable
    * @param p   prime number of the hash table T
    * @throws InvalidPrimeException when given an invalid prime number
    * @return {@code int[a, b]} constants for table hash function
    */
-  public static <T> int[] injectiveIntegers(T[] S, int m, int p) {
+  public static <T> int[] injectiveIntegers(int[] keys, int num, int m, int p) {
     // Sanity checks on prime number and subtable size
     if (isPrime(p) == false)
       throw new IllegalArgumentException("Invalid prime number given: " + p);
     else if (m < 1)
       throw new IllegalArgumentException("Invalid table size given: " + p);
 
-    int[] used = new int[100];
+    int[] used = new int[m];
     int a = (int) (Math.random() * p - 2) + 1;
     int b = (int) (Math.random() * p - 1);
     int used_idx = 0;
     int hash;
 
     // Iterate through every value in the set
-    for (T k : S) {
-      hash = ((a * k.hashCode() + b) % p % m);
+    for (int i=0; i<num; i++) {
+      hash = ((a * keys[i] + b) % p % m);
 
       // Determine whether the hash has already been used
-      for (int i = 0; i < used_idx; i++) {
+      for (int j=0; j < used_idx; j++) {
         // If used, the constants doesn't give us an injective hash function; try again
-        if (hash == used[i])
-          return HashtableFunctions.injectiveIntegers(S, m, p);
+        if (hash == used[j])
+          return HashtableFunctions.injectiveIntegers(keys, num, m, p);
       }
 
       // Add hash to used hashes array
@@ -69,5 +69,9 @@ public final class HashtableFunctions {
     int[] valid = { a, b };
 
     return valid;
+  }
+
+  public static <T> int[] injectiveIntegers(int[] keys, int m, int p) {
+    return injectiveIntegers(keys, keys.length, m, p);
   }
 }

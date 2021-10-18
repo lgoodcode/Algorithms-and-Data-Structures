@@ -1,5 +1,9 @@
 package Hashtables.OpenAddressing;
 
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Iterator;
+
 import Hashtables.Entry;
 import Hashtables.AbstractHashtable;
 
@@ -59,6 +63,15 @@ import Hashtables.AbstractHashtable;
  * </p>
  */
 public final class DoubleHashing<K, V> extends AbstractHashtable<K, V> {
+  /**
+   * The array of {@code Entry} objects that hold the key/value pairs.
+   */
+  private Entry<?, ?>[] table;
+
+  /**
+   * The table size
+   */
+  private int m;
 
   /**
    * Initializes an empty, hashtable, with the specified size for the total
@@ -72,7 +85,19 @@ public final class DoubleHashing<K, V> extends AbstractHashtable<K, V> {
    * @throws IllegalArgumentException if the specified size is less than {@code 1}
    */
   public DoubleHashing(int size) {
-    super(size);
+    if (size < 1)
+      throw new IllegalArgumentException("Illegal size given. Must be larger than 1.");
+
+    m = size;
+    table = new Entry<?, ?>[size];
+  }
+
+  /**
+   * A default constructor that initializes the hashtable with a size of {@code 117},
+   * a fairly large number for common uses and is prime to allow better hashing.
+   */
+  public DoubleHashing() {
+    this(117);
   }
 
   /**
@@ -85,11 +110,11 @@ public final class DoubleHashing<K, V> extends AbstractHashtable<K, V> {
   }
 
   /**
-   * Checks if the table is full before insertions.
+   *{@inheritDoc}
    * 
-   * @throws IllegalStateException if the table is full
+   * @throws IllegalStateException {@inheritDoc}
    */
-  private synchronized void checkCapacity() {
+  protected void checkCapacity() {
     if (n == table.length)
       throw new IllegalStateException("Hashtable is full.");
   }
@@ -123,7 +148,7 @@ public final class DoubleHashing<K, V> extends AbstractHashtable<K, V> {
    * @param i the number of rehashes
    * @return the hashed index
    */
-  protected int hash(K key, int i) {
+  private int hash(K key, int i) {
     return (key.hashCode() % m) + (i * (1 + (key.hashCode() % (m-2))) % m);
   }
 
@@ -151,22 +176,104 @@ public final class DoubleHashing<K, V> extends AbstractHashtable<K, V> {
   }
 
   /**
-   * Internal method used by the other methods to lookup entries in the hashtable.
+   * {@inheritDoc}
    * 
    * @param key the key to lookup
    * @return the index of the element with the specified key or {@code -1} if not
    *         found
    * @throws IllegalArgumentException {@inheritDoc}
    */
-  protected synchronized int search(K key) {
+  public int search(K key) {
     checkKey(key);
     
-    for (int i=0, j = hash(key, i); i < m && j < m; i++, j = hash(key, i)) { 
+    for (int i=0, j = hash(key, i); i < m && j < m; i++, j = hash(key, i))
       if (table[j] != null && table[j].getKey().equals(key))
         return j;
+    return -1; 
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @throws IllegalArgumentException {@inheritDoc}
+   */
+  public boolean hasKey(K key) {
+    return search(key) != -1;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @throws IllegalArgumentException {@inheritDoc}
+   */
+  @SuppressWarnings("unchecked")
+  public V get(K key) {
+    int idx = search(key);
+    return idx != -1 ? (V) table[idx].getValue() : null;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @throws IllegalArgumentException {@inheritDoc}
+   */
+  public synchronized boolean delete(K key) {
+    int idx = search(key);
+
+    if (idx != -1) {
+      table[idx] = null;
+      n--;
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Returns a string JSON object representation of the hashtable.
+   *
+   * @return a string of the hashtable
+   */
+  public String toString() {
+    if (isEmpty())
+      return "{}";
+
+    StringBuilder sb = new StringBuilder();
+
+    sb.append("{\n");
+
+    for (int i=0; i<m; i++) {
+      if (table[i] != null)
+        sb.append("  \"" + table[i].toString() + "\"\n");
     }
 
-    return -1; 
+    return sb.toString() + "}";
+  }
+
+  protected <T> Iterable<T> getIterable(int type) {
+    if (isEmpty())
+      return new EmptyIterable<>();
+    return new Enumerator<>(type, true);
+  }
+
+  protected <T> Iterator<T> getIterator(int type) {
+    if (isEmpty())
+      return Collections.emptyIterator();
+    return new Enumerator<>(type, true);
+  }
+
+  protected <T> Enumeration<T> getEnumeration(int type) {
+    if (isEmpty())
+      return Collections.emptyEnumeration();
+    return new Enumerator<>(type, false);
+  }
+
+  protected class Enumerator<T> extends AbstractEnumerator<T> {
+    Enumerator(int type, boolean iterator) {
+      this.type = type;
+      this.iterator = iterator;
+      this.table = DoubleHashing.this.table;
+      this.index = DoubleHashing.this.table.length;
+    }  
   }
 
 }

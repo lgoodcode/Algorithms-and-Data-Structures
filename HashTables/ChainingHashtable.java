@@ -1,6 +1,11 @@
 package Hashtables;
 
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Iterator;
+
 import LinkedLists.LinkedList;
+import LinkedLists.LinkedListNode;
 
 /**
  * A hash table is a table that maps the universe U of keys into the slots
@@ -89,9 +94,9 @@ import LinkedLists.LinkedList;
  * implement the function on most computers.
  * </p>
  */
-public final class ChainingHashtable<K, V> {
-  private LinkedList<?, ?>[] table;
-  private int m, n;
+public final class ChainingHashtable<K, V> extends AbstractHashtable<K, V> {
+  protected LinkedList<?, ?>[] table;
+  protected int m;
 
   public ChainingHashtable(int size) {
     if (size < 1)
@@ -99,48 +104,6 @@ public final class ChainingHashtable<K, V> {
 
     m = size;
     table = new LinkedList<?, ?>[size];
-  }
-
- /**
-   * Determines whether the hashtable is empty or not
-   *
-   * @return whether the table is empty or not
-   */
-  public synchronized boolean isEmpty() {
-    return n == 0;
-  }
-
-  /**
-   * Returns the number of entries in the hashtable.
-   *
-   * @return the number of entries in the hashtable
-   */
-  public synchronized int size() {
-    return n;
-  }
-
-  /**
-   * Checks the key to make sure it isn't {@code null} or blank
-   * 
-   * @param key the key to check
-   * 
-   * @throws IllegalArgumentException if the key is {@code null} or blank
-   */
-  private synchronized void checkKey(K key) {
-    if (key == null || key.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or blank");
-  }
-
-  /**
-   * Checks the value to make sure it isn't {@code null} or blank
-   * 
-   * @param value the value to check
-   * 
-   * @throws IllegalArgumentException if the value is {@code null} or blank
-   */
-  private synchronized void checkValue(V value) {
-    if (value == null || value.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or blank");
   }
 
   /**
@@ -189,7 +152,7 @@ public final class ChainingHashtable<K, V> {
    * @throws IllegalArgumentException if the key or value is {@code null} or blank
    */
   @SuppressWarnings("unchecked")
-  private synchronized int search(K key) {
+  private int search(K key) {
     checkKey(key);
     int hash = hash(key);
 
@@ -207,7 +170,7 @@ public final class ChainingHashtable<K, V> {
    *
    * @throws IllegalArgumentException if the key or value is {@code null} or blank
    */
-  public final synchronized boolean hasKey(K key) {
+  public boolean hasKey(K key) {
     return search(key) != -1;
   }
 
@@ -221,7 +184,7 @@ public final class ChainingHashtable<K, V> {
    * @throws IllegalArgumentException if the key or value is {@code null} or blank
    */
   @SuppressWarnings("unchecked")
-  public synchronized V get(K key) {
+  public V get(K key) {
     int idx = search(key);
 
     if (idx == -1)
@@ -269,5 +232,42 @@ public final class ChainingHashtable<K, V> {
     }
 
     return sb.toString() + "}";
+  }
+
+  protected <T> Iterable<T> getIterable(int type) {
+    if (isEmpty())
+      return new EmptyIterable<>();
+    return new Enumerator<>(type, true);
+  }
+
+  protected <T> Iterator<T> getIterator(int type) {
+    if (isEmpty())
+      return Collections.emptyIterator();
+    return new Enumerator<>(type, true);
+  }
+
+  protected <T> Enumeration<T> getEnumeration(int type) {
+    if (isEmpty())
+      return Collections.emptyEnumeration();
+    return new Enumerator<>(type, false);
+  }
+
+  @SuppressWarnings("unchecked")
+  protected class Enumerator<T> extends AbstractEnumerator<T> {
+    Enumerator(int type, boolean iterator) {
+      table = new Entry<?, ?>[n];
+      this.type = type;
+      this.iterator = iterator;
+      index = 0;
+
+      for (LinkedList<K, V> list : (LinkedList<K, V>[]) ChainingHashtable.this.table) {
+        LinkedListNode<K, V> node = list.getHead();
+
+        while (node != null) {
+          table[index++] = new Entry<K, V>(node.getKey(), node.getValue());
+          // TODO: need to fix this
+        }
+      }
+    } 
   }
 }

@@ -261,7 +261,7 @@ public class LinkedList<K, V> {
    * 
    * @return the string format of the object
    */
-  public synchronized String toString() {
+  public String toString() {
     if (head == null)
       return "{}";
     
@@ -277,4 +277,6 @@ public class LinkedList<K, V> {
     
     return sb.toString() + "\n}";
   }
+
+  
 }

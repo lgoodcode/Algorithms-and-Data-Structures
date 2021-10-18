@@ -22,6 +22,7 @@ public class ChainingHashtable_Test {
   ChainingHashtable<String, String> table2;
   // Iterable<Integer> intKeys;
   // Iterable<String> strKeys;
+  int size = 5;
 
   // @Test
   // @Execution(ExecutionMode.CONCURRENT)
@@ -46,7 +47,6 @@ public class ChainingHashtable_Test {
 
   @Nested
   class When_New {
-    int size = 10;
 
     @BeforeEach
     void create_hashtable() {
@@ -88,11 +88,10 @@ public class ChainingHashtable_Test {
   @Nested
   @Tag("inserted")
   class After_Inserting {
-    int size = 3;
 
     @BeforeEach
     void insert_key_value() {
-      table = new ChainingHashtable<>(3);
+      table = new ChainingHashtable<>(size);
       assertDoesNotThrow(() -> table.insert(1, "one"));
     }
 
@@ -131,7 +130,7 @@ public class ChainingHashtable_Test {
 
     @BeforeEach
     void create_table() {
-      table = new ChainingHashtable<>(5);
+      table = new ChainingHashtable<>(size);
     }
 
     @Test

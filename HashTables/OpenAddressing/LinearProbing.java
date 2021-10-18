@@ -1,7 +1,11 @@
 package Hashtables.OpenAddressing;
 
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Iterator;
+
+import Hashtables.AbstractStaticHashtable;
 import Hashtables.Entry;
-import Hashtables.AbstractHashtable;
 
 /**
  * Linear Probing uses a hash function of the form:
@@ -47,7 +51,7 @@ import Hashtables.AbstractHashtable;
  * table capacity.
  * </p>
  */
-public final class LinearProbing<K, V> extends AbstractHashtable<K, V> {
+public final class LinearProbing<K, V> extends AbstractStaticHashtable<K, V> {
 
   /**
    * Initializes an empty, hashtable, with the specified size for the total
@@ -61,26 +65,19 @@ public final class LinearProbing<K, V> extends AbstractHashtable<K, V> {
    * @throws IllegalArgumentException if the specified size is less than {@code 1}
    */
   public LinearProbing(int size) {
-    super(size);
+    if (size < 1)
+      throw new IllegalArgumentException("Illegal size given. Must be larger than 1.");
+
+    m = size;
+    table = new Entry<?, ?>[size];
   }
 
   /**
-   * Returns the initialized hashtable number of elements it can hold.
-   * 
-   * @return the number of elements that can be stored.
+   * A default constructor that initializes the hashtable with a size of {@code 117},
+   * a fairly large number for common uses and is prime to allow better hashing.
    */
-  public int capacity() {
-    return table.length;
-  }
-
-  /**
-   * Checks if the table is full before insertions.
-   * 
-   * @throws IllegalStateException if the table is full
-   */
-  private synchronized void checkCapacity() {
-    if (n == table.length)
-      throw new IllegalStateException("Hashtable is full.");
+  public LinearProbing() {
+    this(117);
   }
 
   /**
@@ -90,7 +87,7 @@ public final class LinearProbing<K, V> extends AbstractHashtable<K, V> {
    * @param i   the number of index slots skipped
    * @return the hash value
    */
-  protected int hash(K key, int i) {
+  private int hash(K key, int i) {
     return (int) (Math.floor(m * ((key.hashCode() * 0.5675) % 1)) % m) + i;
   }
 
@@ -138,7 +135,7 @@ public final class LinearProbing<K, V> extends AbstractHashtable<K, V> {
    * 
    * @throws IllegalArgumentException {@inheritDoc}
    */
-  protected synchronized int search(K key) {
+  public int search(K key) {
     checkKey(key);
 
     int i, j;
@@ -156,4 +153,87 @@ public final class LinearProbing<K, V> extends AbstractHashtable<K, V> {
     return -1; 
   }
 
+ /**
+   * {@inheritDoc}
+   * 
+   * @throws IllegalArgumentException {@inheritDoc}
+   */
+  public boolean hasKey(K key) {
+    return search(key) != -1;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @throws IllegalArgumentException {@inheritDoc}
+   */
+  @SuppressWarnings("unchecked")
+  public V get(K key) {
+    int idx = search(key);
+    return idx != -1 ? (V) table[idx].getValue() : null;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @throws IllegalArgumentException {@inheritDoc}
+   */
+  public synchronized boolean delete(K key) {
+    int idx = search(key);
+
+    if (idx != -1) {
+      table[idx] = null;
+      n--;
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Returns a string JSON object representation of the hashtable.
+   *
+   * @return a string of the hashtable
+   */
+  public String toString() {
+    if (isEmpty())
+      return "{}";
+
+    StringBuilder sb = new StringBuilder();
+
+    sb.append("{\n");
+
+    for (int i=0; i<m; i++) {
+      if (table[i] != null)
+        sb.append("  \"" + table[i].toString() + "\"\n");
+    }
+
+    return sb.toString() + "}";
+  }
+
+  protected <T> Iterable<T> getIterable(int type) {
+    if (isEmpty())
+      return new EmptyIterable<>();
+    return new Enumerator<>(type, true);
+  }
+
+  protected <T> Iterator<T> getIterator(int type) {
+    if (isEmpty())
+      return Collections.emptyIterator();
+    return new Enumerator<>(type, true);
+  }
+
+  protected <T> Enumeration<T> getEnumeration(int type) {
+    if (isEmpty())
+      return Collections.emptyEnumeration();
+    return new Enumerator<>(type, false);
+  }
+
+  protected class Enumerator<T> extends AbstractEnumerator<T> {
+    Enumerator(int type, boolean iterator) {
+      this.type = type;
+      this.iterator = iterator;
+      this.table = LinearProbing.this.table;
+      this.index = LinearProbing.this.table.length;
+    }  
+  }
 }

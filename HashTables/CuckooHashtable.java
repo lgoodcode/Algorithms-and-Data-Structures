@@ -1,14 +1,9 @@
 package Hashtables;
 
-import java.util.Objects;
 import java.util.Map;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
-import java.util.function.Consumer;
-
-import java.util.NoSuchElementException;
-import java.util.ConcurrentModificationException;
 
 import Hashtables.exceptions.DuplicateKeyException;
 
@@ -59,9 +54,9 @@ import static Hashtables.HashtableFunctions.isPrime;
  * @see CuckooHashSubtable
  * @see Entry
  * @see Enumerator
- * @version 1.3
+ * @version 1.4
  */
-public final class CuckooHashtable<K, V> {
+public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
   /**
    * The number of subtables. According to a calculation (I can't remember from
    * where but I'm sure the source is a google away) three subtables has a load
@@ -86,20 +81,6 @@ public final class CuckooHashtable<K, V> {
   private int m;
 
   /**
-   * The counter to track the number of entries total in the hashtable.
-   */
-  private int n = 0;
-
-  /**
-   * The number of times this Hashtable has been structurally modified Structural
-   * modifications are those that change the number of entries in the Hashtable or
-   * otherwise modify its internal structure (e.g., fullRehash, delete).  This field 
-   * is used to make iterators on Collection-views of the Hashtable fail-fast. 
-   * (See ConcurrentModificationException).
-   */
-  private int modCount = 0;
-
-  /**
    * The maximum threshold for the capacity of the hashtable before rebuilding.
    */
   private float loadFactor;
@@ -120,17 +101,19 @@ public final class CuckooHashtable<K, V> {
    * @param prime      prime number for subtables hash function
    * @param size       subtable size
    * @param loadFactor maximum percentage of entries before rebuilding subtables.
-   *                   Must be greater than or equal to 0.75f.
+   *                   Must be greater than or equal to 0.6f and less than or
+   *                   equal to 0.95f
    * 
    * @throws IllegalArgumentException when given a prime number that isn't prime,
-   *         a subtable size smaller than 1, or a load factor less then 0.75f.
+   *                                  a subtable size smaller than 1, or a load
+   *                                  factor less then 0.6f or greater than 0.95f
    */
   public CuckooHashtable(int prime, int size, float loadFactor) {
-    if (isPrime(prime) == false)
+    if (!isPrime(prime))
       throw new IllegalArgumentException("Illegal prime number: " + prime);
-    else if (size < 1)
+    if (size < 1)
       throw new IllegalArgumentException("Illegal subtable size: " + size);
-    else if (Float.isNaN(loadFactor) || Float.compare(loadFactor, 0.75f) < 0)
+    if (Float.isNaN(loadFactor) || loadFactor < 0.6f || loadFactor > 0.95f)
       throw new IllegalArgumentException("Illegal load factor: " + loadFactor);
 
     p = prime;
@@ -214,95 +197,6 @@ public final class CuckooHashtable<K, V> {
   }
 
   /**
-   * Checks the key to make sure it isn't {@code null} or blank
-   * 
-   * @param key the key to check
-   * 
-   * @throws IllegalArgumentException if the key is {@code null} or blank
-   */
-  protected synchronized void checkKey(K key) {
-    if (key == null || key.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or blank");
-  }
-
-  /**
-   * Checks the value to make sure it isn't {@code null} or blank
-   * 
-   * @param value the value to check
-   * 
-   * @throws IllegalArgumentException if the value is {@code null} or blank
-   */
-  protected synchronized void checkValue(V value) {
-    if (value == null || value.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or blank");
-  }
-
-  /**
-   * Returns an iterable of the keys in this hashtable. Use the {@code Iterator}
-   * methods on the returned object to fetch the keys sequentially. If the
-   * hashtable is structurally modified while enumerating over the keys then the
-   * results of enumerating are undefined.
-   * 
-   * <p>
-   * Since the type is an {@code Iterable} it can be used in the enhanced for-each
-   * loop:
-   * 
-   * <pre>
-   * for (Integer k : keys) {
-   *   System.out.println("The key is " + k);
-   * }
-   * </pre>
-   * </p>
-   *
-   * @return an iterable of the keys in this hashtable
-   * @see #keys()
-   * @see #values()
-   */
-  public synchronized Iterable<K> keys() {
-    return getIterable(KEYS);
-  }
-
-  /**
-   * Returns an iterable of the values in this hashtable. Use the {@code Iterator}
-   * methods on the returned object to fetch the values sequentially. If the
-   * hashtable is structurally modified while enumerating over the values then the
-   * results of enumerating are undefined.
-   * 
-   * @return an iterable of the values in the hashtable
-   */
-  public synchronized Iterable<V> values() {
-    return getIterable(VALUES);
-  }
-
-  public synchronized <E extends Entry<K, V>> Iterable<E> entries() {
-    return getIterable(ENTRIES);
-  }
-
-  public synchronized Iterator<K> keysIterator() {
-    return getIterator(KEYS);
-  }
-
-  public synchronized Iterator<V> valuesIterator() {
-    return getIterator(VALUES);
-  }
-
-  public synchronized <E extends Entry<K, V>> Iterator<E> entriesIterator() {
-    return getIterator(ENTRIES);
-  }
-
-  public synchronized Enumeration<K> keysEnumeration() {
-    return getEnumeration(KEYS);
-  }
-
-  public synchronized Enumeration<V> valuesEnumeration() {
-    return getEnumeration(VALUES);
-  }
-
-  public synchronized <E extends Entry<K, V>> Enumeration<E> entriesEnumeration() {
-    return getEnumeration(ENTRIES);
-  }
-
-  /**
    * Used within insert() and determines whether the incremented size counter is
    * equal to or exceeds the load capacity.
    * 
@@ -310,7 +204,7 @@ public final class CuckooHashtable<K, V> {
    * @see #fullRehash()
    */
   private boolean capacityReached() {
-    return ++n >= (m * T) * loadFactor;
+    return n >= (m * T) * loadFactor;
   }
 
   /**
@@ -321,32 +215,20 @@ public final class CuckooHashtable<K, V> {
    * @see #fullRehash()
    */
   private void buildSubtables() {
-    for (int i = 0; i < T; ++i) {
+    for (int i = 0; i < T; ++i)
       tables[i] = new CuckooHashSubtable<K, V>(p, m);
-    }
-  }
-
-  /**
-   * Returns the number of entries in the hashtable.
-   * 
-   * @return the number of entries in the hashtable
-   */
-  public synchronized int size() {
-    return n;
-  }
-
-  /**
-   * Returns a boolean indicating whether the hashtable is empty or not.
-   * 
-   * @return is the hashtable empty or not
-   */
-  public synchronized boolean isEmpty() {
-    return size() == 0;
   }
 
   /**
    * Inserts the given value into the table using the hashed value of the key.
-   * Neither the key nor the value can be {@code null}.
+   * Neither the key nor the value can be {@code null}. The size counter is
+   * incremented before an insertion or after a call to {@link #fullRehash()}
+   * because the load capacity upper limit is {@code 95%}. So, it could possibly
+   * cause an index-out-of-bounds error since the table will either be at max
+   * capacity (i.e., if {@code m = 1} two entries would be at {@code 66%} load,
+   * then three would be {@code 100%}). The {@code modCount} is incremented after
+   * the successful insertion, since if a full rehash is triggered, that method
+   * will increment {@code modCount}
    * 
    * <hr>
    * 
@@ -382,6 +264,8 @@ public final class CuckooHashtable<K, V> {
     checkKey(key);
     checkValue(value);
 
+    n++;
+
     if (capacityReached()) {
       fullRehash(key, value);
     } else {
@@ -397,6 +281,7 @@ public final class CuckooHashtable<K, V> {
         // If the position is empty, insert new entry and return.
         if (Tj.isOccupied(newKey) == false) {
           Tj.insert(newEntry);
+          modCount++;
           return;
         }
 
@@ -415,8 +300,6 @@ public final class CuckooHashtable<K, V> {
         first = false;
       }
     }
-
-    modCount++;
   }
 
   /**
@@ -425,7 +308,7 @@ public final class CuckooHashtable<K, V> {
    * the size counter, and re-insert all the entries into the hashtable.
    * 
    * <p>
-   * The new subtable size, m, is calcluated 
+   * The new subtable size, {@code m}, is calcluated 
    * </p>
    * 
    * <hr/>
@@ -446,7 +329,7 @@ public final class CuckooHashtable<K, V> {
 
     // Place entries from all subtables into a single array
     for (CuckooHashSubtable<K, V> Tj : (CuckooHashSubtable<K, V>[]) tables) {
-      for (Entry<K, V> e : Tj.getTable()) {
+      for (Entry<K, V> e : (Entry<K, V>[]) Tj.table) {
         if (e != null)
           entries[entryIdx++] = e;
       }
@@ -456,7 +339,7 @@ public final class CuckooHashtable<K, V> {
     entries[entryIdx++] = new Entry<K,V>(key, value);
 
     // Calculate new m, reset size counter, increment modified counter
-    m = (1 + c) * Math.max(entries.length, 4);
+    m = (1 + c) * Math.max(n, 4);
     n = 0;
     modCount++;
 
@@ -482,7 +365,7 @@ public final class CuckooHashtable<K, V> {
    * @throws IllegalArgumentException if the key is {@code null} or blank
    */
   @SuppressWarnings("unchecked")
-  public synchronized Entry<K, V> find(K key) {
+  public Entry<K, V> find(K key) {
     checkKey(key);
 
     Entry<K, V> entry = null;
@@ -501,7 +384,7 @@ public final class CuckooHashtable<K, V> {
    * 
    * @throws IllegalArgumentException if the key is {@code null} or blank
    */
-  public synchronized boolean hasKey(K key) {
+  public boolean hasKey(K key) {
     return find(key) != null;
   }
 
@@ -515,7 +398,7 @@ public final class CuckooHashtable<K, V> {
    * @throws IllegalArgumentException if the value is {@code null} or blank
    */
   @SuppressWarnings("unchecked")
-  public synchronized boolean hasValue(V value) {
+  public boolean hasValue(V value) {
     checkValue(value);
 
     for (CuckooHashSubtable<K, V> Tj : (CuckooHashSubtable<K, V>[]) tables) {
@@ -536,7 +419,7 @@ public final class CuckooHashtable<K, V> {
    * 
    * @throws IllegalArgumentException if the key is {@code null} or blank
    */
-  public synchronized V get(K key) {
+  public V get(K key) {
     Entry<K, V> entry = find(key);
     return entry != null ? entry.getValue() : null;
   }
@@ -556,13 +439,10 @@ public final class CuckooHashtable<K, V> {
     checkKey(key);
 
     for (CuckooHashSubtable<K, V> Tj : (CuckooHashSubtable<K, V>[]) tables) {
-      if (Tj.hasKey(key)) {
-        if (Tj.delete(key)) {
-          modCount++;
-          n--;
-          return true;
-        }
-        return false;
+      if (Tj.hasKey(key) && Tj.delete(key)) {
+        modCount++;
+        n--;
+        return true;
       }
     }
     return false;
@@ -620,9 +500,9 @@ public final class CuckooHashtable<K, V> {
    * @see CuckooHashtable#tables
    * @since 1.1
    */
-  protected static class CuckooHashSubtable<K, V> {
-    private int m, p, a, b;
+  protected static class CuckooHashSubtable<K, V> extends AbstractHashSubtable<K, V> {
     private Entry<?, ?>[] table;
+    private int m, p, a, b;
 
     /**
      * Constructs a new, empty hashtable given a specified prime number {@code p}
@@ -639,36 +519,12 @@ public final class CuckooHashtable<K, V> {
      * @param p prime number
      * @param m subtable size
      */
-    protected CuckooHashSubtable(int p, int m) {
-      this.p = p;
-      this.m = m;
+    protected CuckooHashSubtable(int prime, int size) {
+      this.p = prime;
+      this.m = size;
       a = (int) (Math.random() * p - 2) + 1;
       b = (int) (Math.random() * p) - 1;
       table = new Entry<?, ?>[m];
-    }
-
-    /**
-     * Checks the key to make sure it isn't {@code null} or blank
-     * 
-     * @param key the key to check
-     * 
-     * @throws IllegalArgumentException if the key is {@code null} or blank
-     */
-    private synchronized void checkKey(K key) {
-      if (key == null || key.toString().isBlank())
-        throw new IllegalArgumentException("Key cannot be null or blank");
-    }
-
-    /**
-     * Checks the value to make sure it isn't {@code null} or blank
-     * 
-     * @param value the value to check
-     * 
-     * @throws IllegalArgumentException if the value is {@code null} or blank
-     */
-    private synchronized void checkValue(V value) {
-      if (value == null || value.toString().isBlank())
-        throw new IllegalArgumentException("Key cannot be null or blank");
     }
 
     /**
@@ -683,20 +539,6 @@ public final class CuckooHashtable<K, V> {
     }
 
     /**
-     * Retrieves the table reference. Used in the
-     * {@code CuckooHashTable.fullRehash()} method to iterate through the and pull
-     * all entries to rebuild subtables.
-     * 
-     * @return the table of {@code Entry} objects
-     * @see CuckooHashtable#fullRehash()
-     * @see Entry
-     */
-    @SuppressWarnings("unchecked")
-    protected synchronized Entry<K, V>[] getTable() {
-      return (Entry<K, V>[]) table;
-    }
-
-    /**
      * Checkes whether the given key when hashed, occupies a slot.
      * 
      * @param key the key to check if occupies a slot
@@ -704,7 +546,7 @@ public final class CuckooHashtable<K, V> {
      * 
      * @throws IllegalArgumentException if the key is {@code null} or blank
      */
-    protected synchronized boolean isOccupied(K key) {
+    protected boolean isOccupied(K key) {
       checkKey(key);
       return table[hash(key)] != null;
     }
@@ -718,7 +560,7 @@ public final class CuckooHashtable<K, V> {
      * 
      * @throws IllegalArgumentException if the key is {@code null} or blank
      */
-    protected synchronized int search(K key) {
+    protected int search(K key) {
       checkKey(key);
 
       int hash = hash(key);
@@ -737,7 +579,7 @@ public final class CuckooHashtable<K, V> {
      * 
      * @throws IllegalArgumentException if the key is {@code null} or blank
      */
-    protected synchronized boolean hasKey(K key) {
+    public boolean hasKey(K key) {
       return search(key) != -1;
     }
 
@@ -750,7 +592,7 @@ public final class CuckooHashtable<K, V> {
      * @throws IllegalArgumentException if the value is {@code null} or blank
      */
     @SuppressWarnings("unchecked")
-    protected synchronized boolean hasValue(V value) {
+    protected boolean hasValue(V value) {
       checkValue(value);
     
       for (Entry<K, V> e : (Entry<K, V>[]) table)
@@ -773,6 +615,10 @@ public final class CuckooHashtable<K, V> {
       table[hash(entry.getKey())] = entry;
     }
 
+    public synchronized void insert(K key, V value) {
+      return;
+    }
+
     /**
      * Retrieves the value for the entry of the given key.
      * 
@@ -782,7 +628,7 @@ public final class CuckooHashtable<K, V> {
      * @throws IllegalArgumentException if the key is {@code null} or blank
      */
     @SuppressWarnings("unchecked")
-    protected synchronized V get(K key) {
+    public V get(K key) {
       int idx = search(key);
       return idx != -1 ? (V) table[idx].getValue() : null;
     }
@@ -794,7 +640,7 @@ public final class CuckooHashtable<K, V> {
      * @return the {@code Entry} or {@code null} if not found
      */
     @SuppressWarnings("unchecked")
-    protected synchronized Entry<K, V> getEntry(K key) {
+    protected Entry<K, V> getEntry(K key) {
       int idx = search(key);
       return idx != -1 ? (Entry<K, V>) table[idx] : null;
     }
@@ -832,7 +678,7 @@ public final class CuckooHashtable<K, V> {
      * 
      * @throws IllegalArgumentException if the key is {@code null} or blank
      */
-    protected synchronized boolean delete(K key) {
+    public synchronized boolean delete(K key) {
       int idx = search(key);
 
       if (idx != -1) {
@@ -876,8 +722,8 @@ public final class CuckooHashtable<K, V> {
    * @return a string representation of this hashtable
    * @since 1.2
    */
-  public synchronized String toString() {
-    if (n == 0)
+  public String toString() {
+    if (isEmpty())
       return "{}";
 
     StringBuilder sb = new StringBuilder();
@@ -894,116 +740,27 @@ public final class CuckooHashtable<K, V> {
     return sb.toString() + "}";
   }
 
-  // Types of Enumerations/Iterations
-  private static final int KEYS = 0;
-  private static final int VALUES = 1;
-  private static final int ENTRIES = 2;
-
-  private <T> Iterable<T> getIterable(int type) {
-    if (n == 0)
+  protected <T> Iterable<T> getIterable(int type) {
+    if (isEmpty())
       return new EmptyIterable<>();
     return new Enumerator<>(type, true);
   }
 
-  private <T> Iterator<T> getIterator(int type) {
-    if (n == 0)
+  protected <T> Iterator<T> getIterator(int type) {
+    if (isEmpty())
       return Collections.emptyIterator();
     return new Enumerator<>(type, true);
   }
 
-  private <T> Enumeration<T> getEnumeration(int type) {
-    if (n == 0)
+  protected <T> Enumeration<T> getEnumeration(int type) {
+    if (isEmpty())
       return Collections.emptyEnumeration();
     return new Enumerator<>(type, false);
   }
 
-  /**
-   * This class creates an empty {@code Iterable} that has no elements.
-   *
-   * <ul>
-   * <li>{@link Iterator#hasNext} always returns {@code false}.</li>
-   * <li>{@link Iterator#next} always throws {@link NoSuchElementException}.</li>
-   * </ul>
-   *
-   * <p>
-   * Implementations of this method are permitted, but not required, to return the
-   * same object from multiple invocations.
-   * </p>
-   *
-   * @param <T> the class of the objects in the iterable
-   * @since 1.1
-   */
-  private static class EmptyIterable<T> implements Enumeration<T>, Iterator<T>, Iterable<T> {
-    /**
-     * This is set so the class object will have a single value; a endless cycle of
-     * itself, so that the this$0 value pointing to the CuckooHashtable doesn't
-     * exist.
-     */
-    // static final EmptyIterable<?> EMPTY_ITERABLE = new EmptyIterable<>();
-    public EmptyIterable() {}
-
-    // Enumeration methods
-    public boolean hasMoreElements() {
-      return false;
-    }
-
-    public T nextElement() {
-      throw new NoSuchElementException();
-    }
-
-    // Iterator methods
-    public boolean hasNext() {
-      return false;
-    }
-
-    public T next() {
-      throw new NoSuchElementException();
-    }
-
-    public void remove() {
-      throw new IllegalStateException();
-    }
-
-    // Iterable method
-    public Iterator<T> iterator() {
-      return this;
-    }
-
-    @Override
-    public void forEachRemaining(Consumer<? super T> action) {
-      Objects.requireNonNull(action);
-    }
-  }
-
-  /**
-   * A hashtable enumerator class. This class implements the Enumeration,
-   * Iterator, and Iterable interfaces, but individual instances can be created
-   * with the Iterator methods disabled. This is necessary to avoid
-   * unintentionally increasing the capabilities granted a user by passing an
-   * Enumeration.
-   * 
-   * @param <T> the type of the object in the table that is being enumerated
-   * @see CuckooHashtable#getIterable
-   * @since 1.1
-   */
-  private class Enumerator<T> implements Enumeration<T>, Iterator<T>, Iterable<T> {
-    private Entry<?, ?>[] table = new Entry<?, ?>[T * m];
-    private Entry<?, ?> entry, last;
-    private int type, index;
-
-    /**
-     * Indicates whether this Enumerator is serving as an Iterator or an
-     * Enumeration.
-     */
-    private final boolean iterator;
-
-    /**
-     * The expected value of modCount when instantiating the iterator. If this
-     * expectation is violated, the iterator has detected concurrent modification.
-     */
-    protected int expectedModCount = CuckooHashtable.this.modCount;
-
+  protected class Enumerator<T> extends AbstractEnumerator<T> {
     Enumerator(int type, boolean iterator) {
+      table = new Entry<?, ?>[T * m];
       this.type = type;
       this.iterator = iterator;
       index = 0;
@@ -1013,133 +770,6 @@ public final class CuckooHashtable<K, V> {
         System.arraycopy(Tj.table, 0, table, index, Tj.table.length);
         index += Tj.table.length;
       }
-    }
-
-    // Iterable method
-    public Iterator<T> iterator() {
-      return iterator ? this : this.asIterator();
-    }
-
-    /**
-     * Checks whether there are more elments to return.
-     *
-     * @return if this object has one or more items to provide or not
-     */
-    public boolean hasMoreElements() {
-      Entry<?, ?>[] t = table;
-      Entry<?, ?> e = entry;
-      int i = index;
-
-      /* Use locals for faster loop iteration */
-      while (e == null && i > 0) {
-        e = t[--i];
-      }
-
-      entry = e;
-      index = i;
-
-      return e != null;
-    }
-
-    /**
-     * Returns the next element if it has one to provide.
-     * 
-     * @return the next element
-     * 
-     * @throws NoSuchElementException if no more elements exist
-     */
-    @SuppressWarnings("unchecked")
-    public T nextElement() {
-      Entry<?, ?>[] t = table;
-      Entry<?, ?> e = entry;
-      int i = index;
-
-      /* Use locals for faster loop iteration */
-      while (e == null && i > 0) {
-        e = t[--i];
-      }
-
-      entry = e;
-      index = i;
-
-      if (e != null) {
-        last = e;
-        entry = null;
-
-        return type == KEYS ? (T) e.getKey() : (type == VALUES ? (T) e.getValue() : (T) e);
-      }
-
-      throw new NoSuchElementException("Hashtable Enumerator");
-    }
-
-    /**
-     * The Iterator method; the same as Enumeration.
-     */
-    public boolean hasNext() {
-      return hasMoreElements();
-    }
-
-    /**
-     * Iterator method. Returns the next element in the iteration.
-     * 
-     * @return the next element in the iteration
-     * @throws ConcurrentModificationException if the fullRehash function modified
-     *         this map during computation.
-     */
-    public T next() {
-      if (CuckooHashtable.this.modCount != expectedModCount)
-        throw new ConcurrentModificationException();
-      return nextElement();
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * Removes from the underlying collection the last element returned
-     * by this iterator (optional operation).  This method can be called
-     * only once per call to {@link #next}.
-     * <p>
-     * The behavior of an iterator is unspecified if the underlying collection
-     * is modified while the iteration is in progress in any way other than by
-     * calling this method, unless an overriding class has specified a
-     * concurrent modification policy.
-     * <p>
-     * The behavior of an iterator is unspecified if this method is called
-     * after a call to the {@link #forEachRemaining forEachRemaining} method.
-     * 
-     * @throws UnsupportedOperationException if the {@code remove} operation is
-     *         not supported by this iterator, e.g., if the object is an
-     *         {@code Enumeration}.
-     *
-     * @throws IllegalStateException if the {@code next} method has not yet been 
-     *         called, or the {@code remove} method has already been called after 
-     *         the last call to the {@code next} method.
-     * 
-     * @throws ConcurrentModificationException if function such as fullRehash modified
-     *         this map during computation.
-     */
-    @Override
-    @SuppressWarnings("unchecked")
-    public void remove() {
-      if (!iterator)
-        throw new UnsupportedOperationException();
-      if (last == null)
-        throw new IllegalStateException("Hashtable Enumerator");
-      if (modCount != expectedModCount)
-        throw new ConcurrentModificationException();
-
-      // Synchronized block to lock the hashtable object while removing entry
-      synchronized (CuckooHashtable.this) {
-        if (CuckooHashtable.this.delete((Entry<K, V>) last)) {
-          expectedModCount++;
-          last = null;
-
-          return;
-        }
-
-        throw new ConcurrentModificationException();
-      }
-    }
+    }  
   }
-
 }
