@@ -39,7 +39,8 @@ public abstract class AbstractStaticHashtable<K, V> extends AbstractHashtable<K,
    *
    * @throws IllegalStateException    if attempting to insert while the table is
    *                                  full
-   * @throws IllegalArgumentException if the key or value is {@code null} or blank
+   * @throws IllegalArgumentException if the key or value is {@code null}, blank,
+   *                                  or already exists in the hashtable
    */
   public abstract void insert(K key, V value);
 

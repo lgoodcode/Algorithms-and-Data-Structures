@@ -1,4 +1,4 @@
-package Hashtables;
+package LinkedLists;
 
 import java.util.Objects;
 import java.util.Enumeration;
@@ -7,7 +7,19 @@ import java.util.function.Consumer;
 import java.util.NoSuchElementException;
 import java.util.ConcurrentModificationException;
 
-public abstract class AbstractHashtable<K, V> {
+/**
+ * Creates a simple forward-feed LinkedList that performs, at worst case, O(n).
+ * This is because all operations are performed in a linear fashion, iterating
+ * through the list until either the desired node is found or the end is reached.
+ */
+public abstract class AbstractLinkedList<K, V> {
+  protected LinkedListNode<K, V> head = null;
+
+  /**
+   * The counter to track the number of entries total in the linkedlist.
+   */
+  protected int size = 0;
+
   /**
    * The number of times this Hashtable has been structurally modified Structural
    * modifications are those that change the number of entries in the Hashtable or
@@ -18,45 +30,63 @@ public abstract class AbstractHashtable<K, V> {
   protected int modCount = 0;
 
   /**
-   * The counter to track the number of entries total in the hashtable.
-   */
-  protected int n;
-
-  /**
    * Iteration types
    */
   protected final int KEYS = 0;
   protected final int VALUES = 1;
   protected final int ENTRIES = 2;
 
- /**
-   * Determines whether the hashtable is empty or not
-   *
-   * @return whether the table is empty or not
+  /**
+   * Determines whether the list is empty or not
+   * 
+   * @return boolean indicating if the list is empty
    */
   public final boolean isEmpty() {
-    return n == 0;
+    return size == 0;
   }
 
   /**
-   * Returns the number of entries in the hashtable.
-   *
-   * @return the number of entries in the hashtable
+   * Returns the number of elements in the list
+   * 
+   * @return the number of elements in the list
    */
   public final int size() {
-    return n;
+    return size;
   }
 
   /**
-   * Checks the key to make sure it isn't {@code null} or blank.
+   * Returns the node at the head of list.
+   * 
+   * @return the node at the head or {@code null} if none
+   */
+  public LinkedListNode<K, V> getHead() {
+    return head;
+  }
+
+  /**
+   * Checks whether the specified index is valid, meaning it must be greater or
+   * equal to {@code 0} and less than the current size.
+   * 
+   * @param index the specified index to check
+   * 
+   * @throws IndexOutOfBoundsException if the index is not within the range
+   *                                   {@code [0, size-1]}
+   */
+  protected final void checkIndex(int index) {
+    if (index < 0 && index >= size)
+      throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
+  }
+
+  /**
+   * Checks the key to make sure it isn't {@code null} or blank
    * 
    * @param key the key to check
    * 
-   * @throws IllegalArgumentException if the key is {@code null}, or blank
+   * @throws IllegalArgumentException if the key is {@code null} or blank
    */
   protected final void checkKey(K key) {
     if (key == null || key.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or blank.");
+      throw new IllegalArgumentException("Key cannot be null or blank");
   }
 
   /**
@@ -68,91 +98,106 @@ public abstract class AbstractHashtable<K, V> {
    */
   protected final void checkValue(V value) {
     if (value == null || value.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or blank.");
+      throw new IllegalArgumentException("Key cannot be null or blank");
   }
 
   /**
-   * Checks the key to make sure it doesn't already exist in the hashtable. A
-   * duplicate key will always hash to the same value so it will cause the table
-   * to not function properly.
+   * Inserts a new node with the specified key and value pair. If there is no
+   * {@code head}, then it will simply set the head as the new node. Otherwise,
+   * the new node's {@code next} will point to the current head and the new head
+   * will be set as the new node.
    * 
-   * @param key the key to check
+   * @param key   the key of the new node
+   * @param value the value of the new node
    * 
-   * @throws IllegalArgumentException if the key already exists in the hashtable
-   */
-  protected final void checkDuplicate(K key) {
-    if (hasKey(key))
-      throw new IllegalArgumentException("Key already exists in the hashtable.");
-  }
-
-  /**
-   * Inserts the new entry into the hashtable.
-   *
-   * @param key   the key of the entry
-   * @param value the value of the entry
-   * @return boolean indicating whether the insertion was successful or not
-   *
-   * @throws IllegalStateException    if attempting to insert while the table is
-   *                                  full
-   * @throws IllegalArgumentException if the key or value is {@code null}, blank,
-   *                                  or already exists in the hashtable
+   * @throws IllegalArgumentException if the key or value is {@code null} or
+   *                                  blank.
    */
   public abstract void insert(K key, V value);
 
   /**
-   * Returns a boolean indicating whether the hashtable contains an entry with the
-   * specified key.
-   *
-   * @param key the key to search for
-   * @return whether an entry in the table contains the specified key
-   *
-   * @throws IllegalArgumentException if the key or value is {@code null} or blank
+   * Inserts a new node at the specified index position.
+   * 
+   * @param index the position to insert the new node
+   * @param key   the key of the new node
+   * @param value the value of the new node
+   * 
+   * @throws IllegalArgumentException  if the key or value is {@code null} or
+   *                                   empty.
+   * @throws IndexOutOfBoundsException if the index is not within the range
+   *                                   {@code [0, size-1]}
    */
-  public abstract boolean hasKey(K key);
+  public abstract void insertAt(int index, K key, V value);
 
   /**
-   * Returns the value for the entry with the specified key or {@code null} if not
-   * found.
-   *
-   * @param key the key of the entry value to retrieve
-   * @return the value of the entry with the specified key or {@code null} if not
-   *         found
-   * @throws IllegalArgumentException if the key or value is {@code null} or blank
+   * Iterates through the list until the desired node with the corresponding
+   * specified key is found or the end is reached, returning the node or
+   * {@code null} if not found.
+   * 
+   * @param key the key of the desired node to find
+   * @return the node or {@code null} if not found
+   * 
+   * @throws IllegalArgumentException if the key is {@code null} or blank
+   */
+  public abstract LinkedListNode<K, V> search(K key);
+
+  /**
+   * Returns the node at the specified index or {@code null} if there are no items
+   * in the list.
+   * 
+   * @param index the index position of the node to return
+   * @return the node at the specified index position or {@code null} if list is
+   *         empty
+   * 
+   * @throws IndexOutOfBoundsException if the index is not within the range
+   *                                   {@code [0, size-1]}
+   */
+  public abstract LinkedListNode<K, V> searchIndex(int index);
+
+  /**
+   * Retrieves the value of the node with the specified key or {@code null}
+   * if not found.
+   * 
+   * @param key the key of the desired nodes' value to retrieve
+   * @return the value or {@code null} if not node not found
+   * 
+   * @throws IllegalArgumentException if the key is {@code null} or blank
    */
   public abstract V get(K key);
 
   /**
-   * Deletes an entry in the hashtable with the specified key. Returns a boolean value
-   * indicating whether the operation was successful or not.
-   *
-   * @param key the key of the entry to delete
-   * @return boolean indicating if the entry was deleted or not
-   *
-   * @throws IllegalArgumentException if the key or value is {@code null} or blank
+   * Retrieves the value of the node with at the specified index position.
+   * 
+   * @param index the index of the desired node's value to retrieve
+   * @return the value or {@code null} if node not found
+   * 
+   * @throws IndexOutOfBoundsException if the index is not within the range
+   *                                   {@code [0, size-1]}
    */
-  public abstract boolean delete(K key);
+  public abstract V getIndex(int index);
 
   /**
-   * Iterates through the entries of the hashtable and prints it out in a string
-   * in an object-like format using an arror "->" to distinguish the relationship
-   * between the key and value.
-   *
-   * @return the hashtable string
+   * Removes the node containing the specified key. It starts at the head and then
+   * continues down the list looking ahead an additional node. This is so when the
+   * next node is the desired node with the corresponding key, we want to simply
+   * dereference the node by setting the current node {@code next} pointer to the
+   * node that follows the desired node to remove.
+   * 
+   * @param key the key of the desired node to remove
    */
-  public final String toString() {
-    if (isEmpty())
-      return "{}";
+  public abstract void remove(K key);
 
-    StringBuilder sb = new StringBuilder();
-    Iterable<Entry<K, V>> entries = entries();
-
-    sb.append("{\n");
-    
-    entries.forEach((entry) -> sb.append("\s\s" + entry.toString() + ",\n"));
-
-    return sb.toString() + "}";
-  }
-
+  /**
+   * Removes the node at the specified index. Will throw an exception if the index
+   * is invalid.
+   * 
+   * @param index the position of the node to remove
+   * 
+   * @throws IndexOutOfBoundsException if the index is not within the range
+   *                                   {@code [0, size-1]}
+   */
+  public abstract void removeIndex(int index);
+  
   /**
    * Returns an {@link Iterable} of the specified type.
    * 
@@ -181,9 +226,9 @@ public abstract class AbstractHashtable<K, V> {
   protected abstract <T> Enumeration<T> getEnumeration(int type);
 
   /**
-   * Returns an iterable of the keys in this hashtable. Use the {@code Iterator}
+   * Returns an iterable of the keys in this linkedlist. Use the {@code Iterator}
    * methods on the returned object to fetch the keys sequentially. If the
-   * hashtable is structurally modified while enumerating over the keys then the
+   * linkedlist is structurally modified while enumerating over the keys then the
    * results of enumerating are undefined.
    * 
    * <p>
@@ -197,25 +242,25 @@ public abstract class AbstractHashtable<K, V> {
    * </pre>
    * </p>
    *
-   * @return an iterable of the keys in this hashtable
+   * @return an iterable of the keys in this linkedlist
    */
   public Iterable<K> keys() {
     return getIterable(KEYS);
   }
 
   /**
-   * Returns an iterable of the values in this hashtable. Use the {@code Iterator}
+   * Returns an iterable of the values in this linkedlist. Use the {@code Iterator}
    * methods on the returned object to fetch the values sequentially. If the
-   * hashtable is structurally modified while enumerating over the values then the
+   * linkedlist is structurally modified while enumerating over the values then the
    * results of enumerating are undefined.
    * 
-   * @return an iterable of the values in the hashtable
+   * @return an iterable of the values in the linkedlist
    */
   public Iterable<V> values() {
     return getIterable(VALUES);
   }
 
-  public <E extends Entry<K, V>> Iterable<E> entries() {
+  public <E extends LinkedListNode<K, V>> Iterable<E> entries() {
     return getIterable(ENTRIES);
   }
 
@@ -227,7 +272,7 @@ public abstract class AbstractHashtable<K, V> {
     return getIterator(VALUES);
   }
 
-  public <E extends Entry<K, V>> Iterator<E> entriesIterator() {
+  public <E extends LinkedListNode<K, V>> Iterator<E> entriesIterator() {
     return getIterator(ENTRIES);
   }
 
@@ -239,12 +284,12 @@ public abstract class AbstractHashtable<K, V> {
     return getEnumeration(VALUES);
   }
 
-  public <E extends Entry<K, V>> Enumeration<E> entriesEnumeration() {
+  public <E extends LinkedListNode<K, V>> Enumeration<E> entriesEnumeration() {
     return getEnumeration(ENTRIES);
   }
 
   /**
-   * A hashtable enumerator class. This class implements the Enumeration,
+   * A linkedlist enumerator class. This class implements the Enumeration,
    * Iterator, and Iterable interfaces, but individual instances can be created
    * with the Iterator methods disabled. This is necessary to avoid
    * unintentionally increasing the capabilities granted a user by passing an
@@ -253,8 +298,8 @@ public abstract class AbstractHashtable<K, V> {
    * @param <T> the type of the object in the table that is being enumerated
    */
   protected abstract class AbstractEnumerator<T> implements Enumeration<T>, Iterator<T>, Iterable<T> {
-    protected Entry<?, ?>[] table;
-    protected Entry<?, ?> entry, last;
+    protected LinkedListNode<?, ?>[] list;
+    protected LinkedListNode<?, ?> entry, last;
     protected int type, index;
 
     /**
@@ -267,7 +312,7 @@ public abstract class AbstractHashtable<K, V> {
      * The expected value of modCount when instantiating the iterator. If this
      * expectation is violated, the iterator has detected concurrent modification.
      */
-    protected int expectedModCount = AbstractHashtable.this.modCount;
+    protected int expectedModCount = AbstractLinkedList.this.modCount;
 
     // Iterable method
     public final Iterator<T> iterator() {
@@ -280,13 +325,13 @@ public abstract class AbstractHashtable<K, V> {
      * @return if this object has one or more items to provide or not
      */
     public final boolean hasMoreElements() {
-      Entry<?, ?>[] t = table;
-      Entry<?, ?> e = entry;
+      LinkedListNode<?, ?>[] l = list;
+      LinkedListNode<?, ?> e = entry;
       int i = index;
 
       /* Use locals for faster loop iteration */
       while (e == null && i > 0) {
-        e = t[--i];
+        e = l[--i];
       }
 
       entry = e;
@@ -304,13 +349,13 @@ public abstract class AbstractHashtable<K, V> {
      */
     @SuppressWarnings("unchecked")
     public final T nextElement() {
-      Entry<?, ?>[] t = table;
-      Entry<?, ?> e = entry;
+      LinkedListNode<?, ?>[] l = list;
+      LinkedListNode<?, ?> e = entry;
       int i = index;
 
       /* Use locals for faster loop iteration */
       while (e == null && i > 0) {
-        e = t[--i];
+        e = l[--i];
       }
 
       entry = e;
@@ -341,7 +386,7 @@ public abstract class AbstractHashtable<K, V> {
      *         this map during computation.
      */
     public final T next() {
-      if (AbstractHashtable.this.modCount != expectedModCount)
+      if (AbstractLinkedList.this.modCount != expectedModCount)
         throw new ConcurrentModificationException();
       return nextElement();
     }
@@ -369,8 +414,8 @@ public abstract class AbstractHashtable<K, V> {
      *         called, or the {@code remove} method has already been called after 
      *         the last call to the {@code next} method.
      * 
-     * @throws ConcurrentModificationException if a function such as fullRehash modified
-     *         this map during computation.
+     * @throws ConcurrentModificationException if a function modified this map 
+     *         during computation.
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -382,14 +427,11 @@ public abstract class AbstractHashtable<K, V> {
       if (modCount != expectedModCount)
         throw new ConcurrentModificationException();
 
-      // Synchronized block to lock the hashtable object while removing entry
-      synchronized (AbstractHashtable.this) {
-        if (AbstractHashtable.this.delete((K) last.getKey())) {
-          expectedModCount++;
-          last = null;
-          return;
-        }
-        throw new ConcurrentModificationException();
+      // Synchronized block to lock the linkedlist object while removing entry
+      synchronized (AbstractLinkedList.this) {
+        AbstractLinkedList.this.remove((K) last.getKey());
+        expectedModCount++;
+        last = null;
       }
     }
   }
@@ -408,6 +450,7 @@ public abstract class AbstractHashtable<K, V> {
    * </p>
    *
    * @param <T> the class of the objects in the iterable
+   * @since 1.1
    */
   protected static final class EmptyIterable<T> implements Enumeration<T>, Iterator<T>, Iterable<T> {
     /**
@@ -451,4 +494,5 @@ public abstract class AbstractHashtable<K, V> {
       Objects.requireNonNull(action);
     }
   }
+
 }

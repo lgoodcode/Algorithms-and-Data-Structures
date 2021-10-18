@@ -1,5 +1,9 @@
 package LinkedLists;
 
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Iterator;
+
 public class DoublyLinkedList<K, V> extends LinkedList<K, V> {
   protected DoublyNode<K, V> head = null;
   protected DoublyNode<K, V> tail = null;
@@ -8,15 +12,15 @@ public class DoublyLinkedList<K, V> extends LinkedList<K, V> {
    * Empty contructor because there is no initialization besides the call to
    * super() because it extends {@link LinkedList}.
    */
-  public DoublyLinkedList() { super(); } 
+  public DoublyLinkedList() { super() ;} 
 
   /**
-   * Returns the node at the head of the list.
+   * Returns the node at the head of list.
    * 
-   * @return the {@code DoublyNode} at the head or {@code null} if none
+   * @return the node at the head or {@code null} if none
    */
   @Override
-  public synchronized DoublyNode<K, V> getHead() {
+  public DoublyNode<K, V> getHead() {
     return head;
   }
 
@@ -25,7 +29,7 @@ public class DoublyLinkedList<K, V> extends LinkedList<K, V> {
    * 
    * @return the {@code DoublyNode} at the tail or {@code null} if none
    */
-  public synchronized DoublyNode<K, V> getTail() {
+  public DoublyNode<K, V> getTail() {
     return tail;
   }
 
@@ -91,7 +95,7 @@ public class DoublyLinkedList<K, V> extends LinkedList<K, V> {
    * @throws IllegalArgumentException if the key is {@code null} or blank
    */
   @Override
-  public synchronized DoublyNode<K, V> search(K key) {
+  public DoublyNode<K, V> search(K key) {
     checkKey(key);
 
     DoublyNode<K, V> node = head;
@@ -111,7 +115,7 @@ public class DoublyLinkedList<K, V> extends LinkedList<K, V> {
    * 
    * @throws IllegalArgumentException if the key is {@code null} or blank
    */
-  public synchronized DoublyNode<K, V> rSearch(K key) {
+  public DoublyNode<K, V> rSearch(K key) {
     checkKey(key);
 
     DoublyNode<K, V> node = tail;
@@ -134,7 +138,7 @@ public class DoublyLinkedList<K, V> extends LinkedList<K, V> {
    * @throws IndexOutOfBoundsException {@inheritDoc}
    */
   @Override
-  public synchronized DoublyNode<K, V> searchIndex(int index) {
+  public DoublyNode<K, V> searchIndex(int index) {
     checkIndex(index);
 
     if (head == null)
@@ -166,7 +170,7 @@ public class DoublyLinkedList<K, V> extends LinkedList<K, V> {
    * @throws IllegalArgumentException {@inheritDoc}
    */
   @Override
-  public synchronized V get(K key) {
+  public V get(K key) {
     DoublyNode<K, V> node = search(key);
     return node != null ? node.getValue() : null;
   }
@@ -180,7 +184,7 @@ public class DoublyLinkedList<K, V> extends LinkedList<K, V> {
    * 
    * @throws IllegalArgumentException if the key is {@code null} or blank
    */
-  public synchronized V rGet(K key) {
+  public V rGet(K key) {
     DoublyNode<K, V> node = rSearch(key);
     return node != null ? node.getValue() : null;  
   }
@@ -191,7 +195,7 @@ public class DoublyLinkedList<K, V> extends LinkedList<K, V> {
    * @throws IndexOutOfBoundsException {@inheritDoc}
    */
   @Override
-  public synchronized V getIndex(int index) {
+  public V getIndex(int index) {
     DoublyNode<K, V> node = searchIndex(index);
     return node != null ? node.getValue() : null;
   }
@@ -275,21 +279,51 @@ public class DoublyLinkedList<K, V> extends LinkedList<K, V> {
    * @return the string format of the object
    */
   @Override
-  public synchronized String toString() {
+  public String toString() {
     if (head == null)
       return "{}";
     
     StringBuilder sb = new StringBuilder();
-    DoublyNode<K, V> node = head;
+    Iterable<DoublyNode<K, V>> entries = entries();
     
-    sb.append("{");
+    sb.append("{\n");
 
-    while (node != null) {
-      sb.append("\n\"" + node.toString() + "\"");
-      node = node.next;
-    }
+    entries.forEach((node) -> sb.append(node.toString() + "\n"));
     
-    return sb.toString() + "\n}";
+    return sb.toString() + "}";
   }
 
+  protected <T> Iterable<T> getIterable(int type) {
+    if (isEmpty())
+      return new EmptyIterable<>();
+    return new Enumerator<>(type, true);
+  }
+
+  protected <T> Iterator<T> getIterator(int type) {
+    if (isEmpty())
+      return Collections.emptyIterator();
+    return new Enumerator<>(type, true);
+  }
+
+  protected <T> Enumeration<T> getEnumeration(int type) {
+    if (isEmpty())
+      return Collections.emptyEnumeration();
+    return new Enumerator<>(type, false);
+  }
+
+  protected class Enumerator<T> extends AbstractEnumerator<T> {
+    Enumerator(int type, boolean iterator) {
+      list = new DoublyNode<?, ?>[size];
+      this.type = type;
+      this.iterator = iterator;
+      index = 0;
+
+      DoublyNode<K, V> node = DoublyLinkedList.this.getHead();
+
+      do {
+        list[index++] = node;
+        node = node.next;
+      } while (node != null && node != head);
+    }
+  }
 }

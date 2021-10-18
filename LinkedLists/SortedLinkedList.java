@@ -70,4 +70,31 @@ public class SortedLinkedList<K, V> extends DoublyLinkedList<K, V> {
 
     size++;
   }
+
+  /**
+   * This iterates in the order that the list is because it is sorted. Using
+   * the {@code entries()} method will result in the string being in reverse
+   * order, which is not what we want for this structure because it should
+   * output the contents sorted.
+   * 
+   * @return the list string
+   */
+  @Override
+  public String toString() {
+    if (head == null)
+      return "{}";
+    
+    StringBuilder sb = new StringBuilder();
+    DoublyNode<K, V> node = getHead();
+    
+    sb.append("{\n");
+
+    do {
+      sb.append(node.toString() + "\n");
+      node = node.next;
+    } while (node != null);
+
+    
+    return sb.toString() + "}";
+  }
 }

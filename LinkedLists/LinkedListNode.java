@@ -24,6 +24,6 @@ public class LinkedListNode<K, V> {
   }
 
   public String toString() {
-    return "Key: " + key + ", value: " + value;
+    return "\"" + key + " -> " + value + "\"";
   }
 }

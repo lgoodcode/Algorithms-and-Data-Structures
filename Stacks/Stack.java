@@ -31,11 +31,11 @@ public class Stack<T> {
     top = s.top;
   }
 
-  public synchronized int size() {
+  public int size() {
     return stack.length;
   }
 
-  public synchronized boolean isEmpty() {
+  public boolean isEmpty() {
     return top == 0;
   }
 
@@ -59,7 +59,7 @@ public class Stack<T> {
     return e.getValue();
   }
 
-  public synchronized String toString() {
+  public String toString() {
     if (isEmpty())
       return "{}";
 

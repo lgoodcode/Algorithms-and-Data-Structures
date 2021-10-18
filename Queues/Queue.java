@@ -66,7 +66,7 @@ public class Queue<T> {
    * 
    * @return is the queue empty
    */
-  public synchronized boolean isEmpty() {
+  public boolean isEmpty() {
     return head == tail && head == 0;
   }
 
@@ -75,7 +75,7 @@ public class Queue<T> {
    * 
    * @return the capacity of the queue
    */
-  public synchronized int size() {
+  public int size() {
     return queue.length;
   }
 
@@ -132,7 +132,7 @@ public class Queue<T> {
    * 
    * @return the object string
    */
-  public synchronized String toString() {
+  public String toString() {
     if (isEmpty())
       return "{}";
 

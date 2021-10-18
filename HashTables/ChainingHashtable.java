@@ -5,7 +5,6 @@ import java.util.Enumeration;
 import java.util.Iterator;
 
 import LinkedLists.LinkedList;
-import LinkedLists.LinkedListNode;
 
 /**
  * A hash table is a table that maps the universe U of keys into the slots
@@ -123,12 +122,14 @@ public final class ChainingHashtable<K, V> extends AbstractHashtable<K, V> {
    * @param key   the key to insert
    * @param value the value to insert
    * 
-   * @throws IllegalArgumentException if the key or value is {@code null} or blank
+   * @throws IllegalArgumentException if the key or value is {@code null}, blank,
+   *                                  or already exists in the hashtable
    */
   @SuppressWarnings("unchecked")
   public synchronized void insert(K key, V value) {
     checkKey(key);
     checkValue(value);
+    checkDuplicate(key);
 
     int hash = hash(key);
 
@@ -213,27 +214,6 @@ public final class ChainingHashtable<K, V> extends AbstractHashtable<K, V> {
     return false;
   }
 
-  /**
-   * Returns a string JSON object representation of the hashtable.
-   *
-   * @return a string of the hashtable
-   */
-  public String toString() {
-    if (isEmpty())
-      return "{}";
-
-    StringBuilder sb = new StringBuilder();
-    
-    sb.append("{\n");
-
-    for (int i=0; i<m; i++) {
-      if (table[i] != null)
-        sb.append(table[i].toString().strip() + "\n");
-    }
-
-    return sb.toString() + "}";
-  }
-
   protected <T> Iterable<T> getIterable(int type) {
     if (isEmpty())
       return new EmptyIterable<>();
@@ -261,11 +241,10 @@ public final class ChainingHashtable<K, V> extends AbstractHashtable<K, V> {
       index = 0;
 
       for (LinkedList<K, V> list : (LinkedList<K, V>[]) ChainingHashtable.this.table) {
-        LinkedListNode<K, V> node = list.getHead();
-
-        while (node != null) {
-          table[index++] = new Entry<K, V>(node.getKey(), node.getValue());
-          // TODO: need to fix this
+        if (list != null) {
+          list.entries().forEach((node) -> {
+            table[index++] = new Entry<K, V>(node.getKey(), node.getValue());
+          });
         }
       }
     } 

@@ -235,11 +235,11 @@ public class CircularLinkedList_Test {
     @Test
     void to_string() {
       assertEquals("{"
-          + "\n\"Key: 5, value: five\""
-          + "\n\"Key: 4, value: four\""  
-          + "\n\"Key: 3, value: three\""  
-          + "\n\"Key: 2, value: two\""  
-          + "\n\"Key: 1, value: one\""  
+          + "\n\"1 -> one\""  
+          + "\n\"2 -> two\""  
+          + "\n\"3 -> three\""  
+          + "\n\"4 -> four\""  
+          + "\n\"5 -> five\""
           + "\n}", 
         list.toString()
       );

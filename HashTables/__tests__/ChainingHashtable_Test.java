@@ -121,7 +121,7 @@ public class ChainingHashtable_Test {
 
     @Test
     void to_String() {
-      assertEquals("{\n{\n\"Key: 1, value: one\"\n}\n}", table.toString());
+      assertEquals("{\n\s\s\"1 -> one\",\n}", table.toString());
     }
   }
 

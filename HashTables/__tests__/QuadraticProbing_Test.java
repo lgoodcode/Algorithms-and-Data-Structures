@@ -135,7 +135,7 @@ public class QuadraticProbing_Test {
 
     @Test
     void to_String() {
-      assertEquals("{\n  \"Key: 1, value: one\"\n}", table.toString());
+      assertEquals("{\n\s\s\"1 -> one\",\n}", table.toString());
     }
   }
 

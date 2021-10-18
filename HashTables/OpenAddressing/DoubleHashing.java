@@ -228,27 +228,6 @@ public final class DoubleHashing<K, V> extends AbstractHashtable<K, V> {
     return false;
   }
 
-  /**
-   * Returns a string JSON object representation of the hashtable.
-   *
-   * @return a string of the hashtable
-   */
-  public String toString() {
-    if (isEmpty())
-      return "{}";
-
-    StringBuilder sb = new StringBuilder();
-
-    sb.append("{\n");
-
-    for (int i=0; i<m; i++) {
-      if (table[i] != null)
-        sb.append("  \"" + table[i].toString() + "\"\n");
-    }
-
-    return sb.toString() + "}";
-  }
-
   protected <T> Iterable<T> getIterable(int type) {
     if (isEmpty())
       return new EmptyIterable<>();

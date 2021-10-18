@@ -61,9 +61,16 @@ public final class DynamicHashtable<K, V> extends AbstractDynamicHashtable<K, V>
   private int a, b, m, p; 
   
   /**
+   * Creates a new, empty, dynamic hashtable. The {@code size} specified results
+   *  in an actual total capacity of the value squared. The {@code prime} i
+   *  used for the hash functions and must be larger than the total expect
+   * d table capacity, otherwise, the table won't function properly.
    * 
-   * @param size
-   * @param prime
+   * @param size   the desired table size squared
+   * @param prime the prime used for the hash functions
+   * 
+   * @throws IllegalArgumentException if the {@code size} is less than {@code 1}
+   *         or the {@code prime} is not a valid prime number
    */
   public DynamicHashtable(int size, int prime) {
     if (size < 1)
@@ -78,10 +85,17 @@ public final class DynamicHashtable<K, V> extends AbstractDynamicHashtable<K, V>
     buildSubtables();
   }
 
+  /**
+   * Constructs a new, empty, dynamic hashtable with default values of
+   * {@code size = 4} and {@code prime = 1277}.
+   */
   public DynamicHashtable() {
-    this(1, 1277);
+    this(4, 1277);
   }
 
+  /**
+   * Sets new tables with the hashtable's specified size {@code m}.
+   */
   private void buildSubtables() {
     tables = new DynamicSubtable<?, ?>[m];
 
@@ -89,6 +103,9 @@ public final class DynamicHashtable<K, V> extends AbstractDynamicHashtable<K, V>
       tables[i] = new DynamicSubtable<K, V>(m, p);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   protected boolean capacityReached() {
     return n > (m * m) * loadFactor;
   }
@@ -97,10 +114,16 @@ public final class DynamicHashtable<K, V> extends AbstractDynamicHashtable<K, V>
     return ((a * key.hashCode() + b) % p) % m;
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @throws IllegalArgumentException {@inheritDoc}
+   */
   @SuppressWarnings("unchecked")
   public synchronized void insert(K key, V value) {
     checkKey(key);
     checkValue(value);
+    checkDuplicate(key);
 
     n++;
 
@@ -124,6 +147,9 @@ public final class DynamicHashtable<K, V> extends AbstractDynamicHashtable<K, V>
     modCount++;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @SuppressWarnings("unchecked")
   protected synchronized void fullRehash(K key, V value) {
     int maxNumEntries = Math.max(m, 2) * m;
@@ -158,6 +184,11 @@ public final class DynamicHashtable<K, V> extends AbstractDynamicHashtable<K, V>
     } 
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @throws IllegalArgumentException {@inheritDoc}
+   */
   @SuppressWarnings("unchecked")
   public synchronized int search(K key) {
     checkKey(key);
@@ -168,6 +199,13 @@ public final class DynamicHashtable<K, V> extends AbstractDynamicHashtable<K, V>
     return -1;
   }
 
+  /**
+   * Retrieves the entry with the specified key or {@code null} if not found.
+   * 
+   * @param key the key of the desired entry
+   * @return the entry or {@code null} if not found
+   * @throws IllegalArgumentException if the specified key is {@code null} or blank
+   */
   @SuppressWarnings("unchecked")
   public synchronized Entry<K, V> getEntry(K key) {
     int idx = search(key);
@@ -177,15 +215,30 @@ public final class DynamicHashtable<K, V> extends AbstractDynamicHashtable<K, V>
     return null;
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @throws IllegalArgumentException {@inheritDoc}
+   */
   public synchronized boolean hasKey(K key) {
     return search(key) != -1;
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @throws IllegalArgumentException {@inheritDoc}
+   */
   public synchronized V get(K key) {
     Entry<K, V> entry = getEntry(key);
     return entry != null ? entry.getValue() : null;
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @throws IllegalArgumentException {@inheritDoc}
+   */
   @SuppressWarnings("unchecked")
   public synchronized boolean delete(K key) {
     int idx = search(key);
@@ -215,6 +268,11 @@ public final class DynamicHashtable<K, V> extends AbstractDynamicHashtable<K, V>
       table = new Entry<?, ?>[m];
     }
   
+    /**
+     * Determines whether the subtable is full.
+     * 
+     * @return boolean indicating whether the table is full or not
+     */
     protected boolean capacityReached() {
       return n >= m;
     }
@@ -223,6 +281,9 @@ public final class DynamicHashtable<K, V> extends AbstractDynamicHashtable<K, V>
       return ((a * key.hashCode() + b) % p) % m;
     }
   
+    /**
+     * {@inheritDoc}
+     */
     public synchronized void insert(K key, V value) {
       int hash = hash(key);
       Entry<K, V> entry = new Entry<K, V>(key, value);
@@ -235,6 +296,13 @@ public final class DynamicHashtable<K, V> extends AbstractDynamicHashtable<K, V>
         rehash(entry);
     }
   
+    /**
+     * Takes all the entries in the subtable and finds new hash constants that will
+     * be injective for the set of entries keys, sets the new constants, and then
+     * re-inserts the entries back into the subtable so there are no collisions.
+     * 
+     * @param entry the newest entry that caused a collision
+     */
     @SuppressWarnings("unchecked")
     protected synchronized void rehash(Entry<K, V> entry) {
       Entry<?, ?>[] entries = new Entry<?, ?>[m];
@@ -263,6 +331,15 @@ public final class DynamicHashtable<K, V> extends AbstractDynamicHashtable<K, V>
         table[hash((K) entries[i].getKey())] = entries[i];
     }
   
+    /**
+     * Triggered when the capacity load is reached and rebuilds the subtables with a
+     * new calculated table size. Iterates through all tables and places the entries
+     * in array and once the tables are initialized, re-inserts all the entries back
+     * into the hashtable.
+     * 
+     * @param key   the key of the new entry that reached the capacity load
+     * @param value the value of the new entry that reached the capacity load
+     */
     @SuppressWarnings("unchecked")
     protected synchronized void fullRehash(K key, V value) {
       Entry<?, ?>[] entries = new Entry<?, ?>[m + 1];
@@ -285,6 +362,12 @@ public final class DynamicHashtable<K, V> extends AbstractDynamicHashtable<K, V>
         table[hash((K) entries[i].getKey())] = entries[i];
     }
   
+    /**
+     * Performs a lookup in the subtable to find an entry with the specified key.
+     * 
+     * @param key the key of the entry to search for
+     * @return the index of the entry or {@code -1} if not found
+     */
     public synchronized int search(K key) {
       int hash = hash(key);
   
@@ -293,22 +376,38 @@ public final class DynamicHashtable<K, V> extends AbstractDynamicHashtable<K, V>
       return -1;
     }
   
+    /**
+     * {@inheritDoc}
+     */
     public synchronized boolean hasKey(K key) {
       return search(key) != -1;
     }
   
+    /**
+     * {@inheritDoc}
+     */
     @SuppressWarnings("unchecked")
     public synchronized V get(K key) {
       int idx = search(key);
       return idx != -1 ? (V) table[idx].getValue() : null;
     }
   
+    /**
+     * Retrieves the entry in the subtable with the specified key or {@code null} if
+     * not found.
+     * 
+     * @param key the key of the entry to look retrieve
+     * @return the {@code Entry} object or {@code null} if not found
+     */
     @SuppressWarnings("unchecked")
     public synchronized Entry<K, V> getEntry(K key) {
       int idx = search(key);
       return idx != -1 ? (Entry<K, V>) table[idx] : null;
     }
   
+    /**
+     * {@inheritDoc}
+     */
     public synchronized boolean delete(K key) {
       int idx = search(key);
   
@@ -319,24 +418,6 @@ public final class DynamicHashtable<K, V> extends AbstractDynamicHashtable<K, V>
       }
       return false;
     }
-  }
-
-  public String toString() {
-    if (isEmpty())
-      return "{}";
-
-    StringBuilder sb = new StringBuilder();
-    Iterable<Entry<K, V>> entries = entries();
-
-    sb.append("{\n");
-
-    for (Entry<K, V> e : entries) {
-      K key = e.getKey();
-      V value = e.getValue();
-      sb.append("  \"" + key.toString() + " = " + value.toString() + "\",\n");
-    }
-
-    return sb.toString() + "}";
   }
 
   protected <T> Iterable<T> getIterable(int type) {
@@ -357,6 +438,10 @@ public final class DynamicHashtable<K, V> extends AbstractDynamicHashtable<K, V>
     return new Enumerator<>(type, false);
   }
 
+  /**
+   * Enumerator class that simply requires a constructor for the implementing data
+   * structure since the underlying array type and size is typically unique.
+   */
   protected class Enumerator<T> extends AbstractEnumerator<T> {
     Enumerator(int type, boolean iterator) {
       table = new Entry<?, ?>[m * m];

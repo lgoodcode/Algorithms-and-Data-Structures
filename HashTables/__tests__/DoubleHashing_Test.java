@@ -135,7 +135,7 @@ public class DoubleHashing_Test {
 
     @Test
     void to_String() {
-      assertEquals("{\n  \"Key: 1, value: one\"\n}", table.toString());
+      assertEquals("{\n  \"1 -> one\",\n}", table.toString());
     }
   }
 

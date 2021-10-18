@@ -1,83 +1,20 @@
 package LinkedLists;
 
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Iterator;
+
 /**
  * Creates a simple forward-feed LinkedList that performs, at worst case, O(n).
  * This is because all operations are performed in a linear fashion, iterating
  * through the list until either the desired node is found or the end is reached.
  */
-public class LinkedList<K, V> {
-  private LinkedListNode<K, V> head = null;
-  protected int size = 0;
+public class LinkedList<K, V> extends AbstractLinkedList<K, V> {
 
   /**
    * Empty constructor because there is no initialization.
    */
   public LinkedList() {}
-
-  /**
-   * Determines whether the list is empty or not
-   * 
-   * @return boolean indicating if the list is empty
-   */
-  public synchronized boolean isEmpty() {
-    return size == 0;
-  }
-
-  /**
-   * Returns the number of elements in the list
-   * 
-   * @return the number of elements in the list
-   */
-  public synchronized int size() {
-    return size;
-  }
-
-  /**
-   * Returns the node at the head of list.
-   * 
-   * @return the node at the head or {@code null} if none
-   */
-  public synchronized LinkedListNode<K, V> getHead() {
-    return head;
-  }
-
-  /**
-   * Checks whether the specified index is valid, meaning it must be greater or
-   * equal to {@code 0} and less than the current size.
-   * 
-   * @param index the specified index to check
-   * 
-   * @throws IndexOutOfBoundsException if the index is not within the range
-   *                                   {@code [0, size-1]}
-   */
-  protected synchronized void checkIndex(int index) {
-    if (index < 0 && index >= size)
-      throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
-  }
-
-  /**
-   * Checks the key to make sure it isn't {@code null} or blank
-   * 
-   * @param key the key to check
-   * 
-   * @throws IllegalArgumentException if the key is {@code null} or blank
-   */
-  protected synchronized void checkKey(K key) {
-    if (key == null || key.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or blank");
-  }
-
-  /**
-   * Checks the value to make sure it isn't {@code null} or blank
-   * 
-   * @param value the value to check
-   * 
-   * @throws IllegalArgumentException if the value is {@code null} or blank
-   */
-  protected synchronized void checkValue(V value) {
-    if (value == null || value.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or blank");
-  }
 
   /**
    * Inserts a new node with the specified key and value pair. If there is no
@@ -168,7 +105,7 @@ public class LinkedList<K, V> {
    * @throws IndexOutOfBoundsException if the index is not within the range
    *                                   {@code [0, size-1]}
    */
-  public synchronized LinkedListNode<K, V> searchIndex(int index) {
+  public LinkedListNode<K, V> searchIndex(int index) {
     checkIndex(index);
 
     if (head == null)
@@ -190,7 +127,7 @@ public class LinkedList<K, V> {
    * 
    * @throws IllegalArgumentException if the key is {@code null} or blank
    */
-  public synchronized V get(K key) {
+  public V get(K key) {
     LinkedListNode<K, V> node = search(key);
     return node != null ? node.getValue() : null;
   }
@@ -204,7 +141,7 @@ public class LinkedList<K, V> {
    * @throws IndexOutOfBoundsException if the index is not within the range
    *                                   {@code [0, size-1]}
    */
-  public synchronized V getIndex(int index) {
+  public V getIndex(int index) {
     LinkedListNode<K, V> node = searchIndex(index);
     return node != null ? node.getValue() : null;
   }
@@ -266,17 +203,46 @@ public class LinkedList<K, V> {
       return "{}";
     
     StringBuilder sb = new StringBuilder();
-    LinkedListNode<K, V> node = head;
+    Iterable<LinkedListNode<K, V>> entries = entries();
     
-    sb.append("{");
+    sb.append("{\n");
 
-    while (node != null) {
-      sb.append("\n\"" + node.toString() + "\"");
-      node = node.next;
-    }
+    entries.forEach((node) -> sb.append(node.toString() + "\n"));
     
-    return sb.toString() + "\n}";
+    return sb.toString() + "}";
   }
 
-  
+  protected <T> Iterable<T> getIterable(int type) {
+    if (isEmpty())
+      return new EmptyIterable<>();
+    return new Enumerator<>(type, true);
+  }
+
+  protected <T> Iterator<T> getIterator(int type) {
+    if (isEmpty())
+      return Collections.emptyIterator();
+    return new Enumerator<>(type, true);
+  }
+
+  protected <T> Enumeration<T> getEnumeration(int type) {
+    if (isEmpty())
+      return Collections.emptyEnumeration();
+    return new Enumerator<>(type, false);
+  }
+
+  protected class Enumerator<T> extends AbstractEnumerator<T> {
+    Enumerator(int type, boolean iterator) {
+      list = new LinkedListNode<?, ?>[size];
+      this.type = type;
+      this.iterator = iterator;
+      index = 0;
+
+      LinkedListNode<K, V> node = LinkedList.this.getHead();
+
+      do {
+        list[index++] = node;
+        node = node.next;
+      } while (node != null);
+    }
+  } 
 }

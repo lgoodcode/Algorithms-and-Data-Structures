@@ -242,27 +242,17 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
    * continuously loop through the tables.
    * </p>
    * 
-   * <p>
-   * A boolean value {@code first} is used to check the key from the first swap,
-   * if any, is equal to the argument {@code key}. If so, then it is a duplicate
-   * key because the hash function is deterministic, in that a given input will
-   * output the same value every time. So that means that the keys are the same
-   * and hashed to the same slot. This will throw an exception because duplicates
-   * will break the hashtable.
-   * </p>
-   * 
    * @param key   the hashtable key
    * @param value the value
    * 
-   * @throws IllegalArgumentException if the key or value is {@code null} or blank
-   * 
-   * @throws DuplicateKeyException    if the specified key already exists in the
-   *                                  hashtable
+   * @throws IllegalArgumentException if the key or value is {@code null}, blank,
+   *                                  or already exists in the hashtable
    */
   @SuppressWarnings("unchecked")
   public synchronized void insert(K key, V value) {
     checkKey(key);
     checkValue(value);
+    checkDuplicate(key);
 
     n++;
 
@@ -271,7 +261,6 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
     } else {
       CuckooHashSubtable<K, V> Tj;
       Entry<K, V> newEntry = new Entry<K, V>(key, value), prevEntry;
-      boolean first = true;
       K newKey;
 
       for (int i = 0;; i = ++i % 3, newEntry = prevEntry) {
@@ -290,14 +279,8 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
         Tj.insert(newEntry);
 
         // Check for duplicate key and cycle
-        if (prevEntry.getKey().equals(key)) {
-          if (first)
-            throw new IllegalArgumentException("Key already exists in table: " + key.toString());
-
+        if (prevEntry.getKey().equals(key))
           fullRehash(key, value);
-        }
-
-        first = false;
       }
     }
   }
@@ -547,7 +530,6 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
      * @throws IllegalArgumentException if the key is {@code null} or blank
      */
     protected boolean isOccupied(K key) {
-      checkKey(key);
       return table[hash(key)] != null;
     }
 
@@ -561,8 +543,6 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
      * @throws IllegalArgumentException if the key is {@code null} or blank
      */
     protected int search(K key) {
-      checkKey(key);
-
       int hash = hash(key);
 
       if (table[hash] != null && table[hash].getKey().equals(key))
@@ -593,8 +573,6 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
      */
     @SuppressWarnings("unchecked")
     protected boolean hasValue(V value) {
-      checkValue(value);
-    
       for (Entry<K, V> e : (Entry<K, V>[]) table)
         if (e.getValue().equals(value))
           return true;
@@ -615,8 +593,11 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
       table[hash(entry.getKey())] = entry;
     }
 
+    /**
+     * @throws IllegalArgumentException {@inheritDoc}
+     */
     public synchronized void insert(K key, V value) {
-      return;
+      insert(new Entry<K, V>(key, value));
     }
 
     /**
@@ -659,8 +640,6 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
      */
     @SuppressWarnings("unchecked")
     protected synchronized Entry<K, V> extract(K key) {
-      checkKey(key);
-
       int hash = hash(key);
       Entry<K, V> entry = (Entry<K, V>) table[hash];
 
@@ -685,7 +664,6 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
         table[idx] = null;
         return true;
       }
-
       return false;
     }
 
@@ -711,33 +689,6 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
       for (int i=0; i<table.length; i++)
         table[i] = null;
     }
-  }
-
-  /**
-   * Returns a string representation of this {@code CuckooHashtable} object in the
-   * form of a set of entries, seperated by new lines with the key, an equals sign
-   * {@code =}, and the associated element, where the {@code toString} method is
-   * used to convert the key and element to strings.
-   *
-   * @return a string representation of this hashtable
-   * @since 1.2
-   */
-  public String toString() {
-    if (isEmpty())
-      return "{}";
-
-    StringBuilder sb = new StringBuilder();
-    Iterable<Entry<K, V>> entries = entries();
-
-    sb.append("{\n");
-
-    for (Entry<K, V> e : entries) {
-      K key = e.getKey();
-      V value = e.getValue();
-      sb.append("  \"" + key.toString() + " = " + value.toString() + "\",\n");
-    }
-
-    return sb.toString() + "}";
   }
 
   protected <T> Iterable<T> getIterable(int type) {

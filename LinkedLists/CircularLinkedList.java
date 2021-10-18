@@ -47,7 +47,7 @@ public class CircularLinkedList<K, V> extends DoublyLinkedList<K, V> {
    * @throws IllegalArgumentException {@inheritDoc}
    */
   @Override
-  public synchronized DoublyNode<K, V> search(K key) {
+  public DoublyNode<K, V> search(K key) {
     checkKey(key);
     
     DoublyNode<K, V> node = head;
@@ -75,7 +75,7 @@ public class CircularLinkedList<K, V> extends DoublyLinkedList<K, V> {
    * @throws IllegalArgumentException {@inheritDoc}
    */
   @Override
-  public synchronized DoublyNode<K, V> rSearch(K key) {
+  public DoublyNode<K, V> rSearch(K key) {
     checkKey(key);
 
     DoublyNode<K, V> node = head;
@@ -130,29 +130,4 @@ public class CircularLinkedList<K, V> extends DoublyLinkedList<K, V> {
     size--;
   }
 
-  /**
-   * Due to the circular structure, the iteration process is different in that we
-   * want to always iterate the {@code toString()} method on the node because
-   * there will always be at least one, and then check whether it is the head to
-   * determine once we have gone back to the start.
-   * 
-   * @return the object string in JSON format
-   */
-  @Override
-  public synchronized String toString() {
-    if (head == null && tail == null)
-      return "{}";
-
-    StringBuilder sb = new StringBuilder();
-    DoublyNode<K, V> node = head;
-
-    sb.append("{");
-
-    do {
-      sb.append("\n\"" + node.toString() + "\"");
-      node = node.next;
-    } while (node != head);
-    
-    return sb.toString() + "\n}";
-  }
 }

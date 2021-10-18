@@ -22,10 +22,20 @@ public abstract class AbstractDynamicHashtable<K, V> extends AbstractHashtable<K
    *
    * @throws IllegalStateException    if attempting to insert while the table is
    *                                  full
-   * @throws IllegalArgumentException if the key or value is {@code null} or blank
+   * @throws IllegalArgumentException if the key or value is {@code null}, blank,
+   *                                  or already exists in the hashtable
    */
   public abstract void insert(K key, V value);
 
+  /**
+   * Triggered when the capacity load is reached and rebuilds the subtables with a
+   * new calculated table size. Iterates through all tables and places the entries
+   * in array and once the tables are initialized, re-inserts all the entries back
+   * into the hashtable.
+   * 
+   * @param key   the key of the new entry that reached the capacity load
+   * @param value the value of the new entry that reached the capacity load
+   */
   protected abstract void fullRehash(K key, V value);
 
   /**

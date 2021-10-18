@@ -5,7 +5,7 @@ import java.util.Enumeration;
 import java.util.Iterator;
 
 import Hashtables.Entry;
-import Hashtables.AbstractHashtable;
+import Hashtables.AbstractStaticHashtable;
 import static Hashtables.HashtableFunctions.isPrime;
 
 /**
@@ -48,17 +48,7 @@ import static Hashtables.HashtableFunctions.isPrime;
  * independent of the keys, as the auxiliary hash function.
  * </p>
  */
-public final class QuadraticProbing<K, V> extends AbstractHashtable<K, V> {
-  /**
-   * The array of {@code Entry} objects that hold the key/value pairs.
-   */
-  private Entry<?, ?>[] table;
-
-  /**
-   * The table size
-   */
-  private int m;  
-
+public final class QuadraticProbing<K, V> extends AbstractStaticHashtable<K, V> {
   /**
    * The prime number used for the hash function
    */
@@ -94,25 +84,6 @@ public final class QuadraticProbing<K, V> extends AbstractHashtable<K, V> {
   }
 
   /**
-   * Returns the initialized hashtable number of elements it can hold.
-   * 
-   * @return the number of elements that can be stored.
-   */
-  public int capacity() {
-    return table.length;
-  }
-
-  /**
-   * Checks if the table is full before insertions.
-   * 
-   * @throws IllegalStateException if the table is full
-   */
-  protected synchronized void checkCapacity() {
-    if (n == table.length)
-      throw new IllegalStateException("Hashtable is full.");
-  }
-
-  /**
    * The hash function that consits of an initial hash function that uses its own
    * constants and an auxiliary hash function that is quadratic of the {@code i}
    * number of slots skipped.
@@ -138,6 +109,7 @@ public final class QuadraticProbing<K, V> extends AbstractHashtable<K, V> {
     checkCapacity();
     checkKey(key);
     checkValue(value);
+    checkDuplicate(key);
 
     for (int i=0, j = hash(key, i); i < m; i++, j = hash(key, i)) { 
       if (table[j] == null) {
@@ -197,27 +169,6 @@ public final class QuadraticProbing<K, V> extends AbstractHashtable<K, V> {
       return true;
     }
     return false;
-  }
-
-  /**
-   * Returns a string JSON object representation of the hashtable.
-   *
-   * @return a string of the hashtable
-   */
-  public String toString() {
-    if (isEmpty())
-      return "{}";
-
-    StringBuilder sb = new StringBuilder();
-
-    sb.append("{\n");
-
-    for (int i=0; i<m; i++) {
-      if (table[i] != null)
-        sb.append("  \"" + table[i].toString() + "\"\n");
-    }
-
-    return sb.toString() + "}";
   }
 
   protected <T> Iterable<T> getIterable(int type) {
