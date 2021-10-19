@@ -1,4 +1,4 @@
-package Heaps;
+package data_structures.heaps;
 
 public final class FibonacciNode<K, V> {
   private K key;

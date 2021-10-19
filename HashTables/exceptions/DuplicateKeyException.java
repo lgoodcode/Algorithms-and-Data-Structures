@@ -1,4 +1,4 @@
-package Hashtables.exceptions;
+package data_structures.hashtables.exceptions;
 
 public final class DuplicateKeyException extends Exception {
   Object key;

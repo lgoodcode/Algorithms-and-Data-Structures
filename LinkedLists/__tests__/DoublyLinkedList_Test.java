@@ -1,4 +1,4 @@
-package LinkedLists.__tests__;
+package data_structures.linkedLists.__tests__;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -10,8 +10,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import LinkedLists.DoublyLinkedList;
-import LinkedLists.DoublyNode;
+import data_structures.linkedLists.DoublyLinkedList;
+import data_structures.linkedLists.DoublyNode;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 public class DoublyLinkedList_Test {

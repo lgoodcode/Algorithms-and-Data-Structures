@@ -1,4 +1,4 @@
-package LinkedLists.__tests__;
+package data_structures.linkedLists.__tests__;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -10,8 +10,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import LinkedLists.LinkedList;
-import LinkedLists.LinkedListNode;
+import data_structures.linkedLists.LinkedList;
+import data_structures.linkedLists.LinkedListNode;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 public class LinkedList_Test {

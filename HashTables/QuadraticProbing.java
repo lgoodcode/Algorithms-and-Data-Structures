@@ -1,12 +1,10 @@
-package Hashtables.OpenAddressing;
+package data_structures.hashtables;
 
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
 
-import Hashtables.Entry;
-import Hashtables.AbstractStaticHashtable;
-import static Hashtables.HashtableFunctions.isPrime;
+import static data_structures.hashtables.HashtableFunctions.isPrime;
 
 /**
  * <h4>Tip: Using a large value, preferrably a prime number, for the table size

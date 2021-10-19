@@ -1,4 +1,4 @@
-package Hashtables.exceptions;
+package data_structures.hashtables.exceptions;
 
 public class HashtableFullException extends Exception {
   private int size;

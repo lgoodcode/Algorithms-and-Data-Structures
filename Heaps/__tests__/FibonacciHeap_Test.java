@@ -1,4 +1,4 @@
-package Heaps.__tests__;
+package data_structures.heaps.__tests__;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import Heaps.FibonacciHeap;
+import data_structures.heaps.FibonacciHeap;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 public class FibonacciHeap_Test {

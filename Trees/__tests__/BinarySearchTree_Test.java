@@ -1,4 +1,4 @@
-package Trees.__tests__;
+package data_structures.trees.__tests__;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -10,8 +10,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import Trees.TreeNode;
-import Trees.BinaryTree.BinarySearchTree;
+import data_structures.trees.TreeNode;
+import data_structures.trees.BinaryTree.BinarySearchTree;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 public class BinarySearchTree_Test {

@@ -1,4 +1,4 @@
-package Heaps.__tests__;
+package data_structures.heaps.__tests__;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -12,8 +12,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import Heaps.MinHeap;
-import Heaps.exceptions.*;
+import data_structures.heaps.MinHeap;
+import data_structures.heaps.exceptions.*;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 public class MinHeap_Test {

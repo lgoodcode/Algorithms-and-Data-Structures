@@ -1,4 +1,4 @@
-package Trees.util;
+package data_structures.trees.util;
 
 /**
  * A functional interface to compare two objects.

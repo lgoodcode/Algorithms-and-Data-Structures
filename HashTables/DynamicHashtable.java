@@ -1,14 +1,10 @@
-package Hashtables.PerfectHashing;
+package data_structures.hashtables;
 
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
 
-import Hashtables.Entry;
-import Hashtables.AbstractDynamicHashtable;
-import Hashtables.AbstractHashSubtable;
-
-import static Hashtables.HashtableFunctions.*;
+import static data_structures.hashtables.HashtableFunctions.*;
 
 /**
  * This implementation of the Dynamic Perfect Hashtable differs slightly. It

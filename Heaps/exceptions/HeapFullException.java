@@ -1,4 +1,4 @@
-package Heaps.exceptions;
+package data_structures.heaps.exceptions;
 
 public final class HeapFullException extends Exception {
   int size;

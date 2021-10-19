@@ -1,4 +1,4 @@
-package Queues.__tests__;
+package data_structures.queues.__tests__;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -12,8 +12,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import Queues.Queue;
-import Queues.exceptions.*;
+import data_structures.queues.Queue;
+import data_structures.queues.exceptions.*;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 public class Queue_Test {

@@ -1,4 +1,4 @@
-package LinkedLists;
+package data_structures.linkedLists;
 
 public class LinkedListNode<K, V> {
   private K key;

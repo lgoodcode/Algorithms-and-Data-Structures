@@ -1,4 +1,4 @@
-package Queues.exceptions;
+package data_structures.queues.exceptions;
 
 public final class QueueEmptyException extends Exception {
   public QueueEmptyException() { super(); }

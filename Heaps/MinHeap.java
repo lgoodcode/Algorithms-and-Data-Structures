@@ -1,6 +1,6 @@
-package Heaps;
+package data_structures.heaps;
 
-import Heaps.exceptions.*;
+import data_structures.heaps.exceptions.*;
 
 public class MinHeap<T> {
   private Entry<?>[] heap;

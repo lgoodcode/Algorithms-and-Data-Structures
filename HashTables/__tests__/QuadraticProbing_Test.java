@@ -1,4 +1,4 @@
-package Hashtables.__tests__;
+package data_structures.hashtables.__tests__;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import Hashtables.OpenAddressing.QuadraticProbing;
+import data_structures.hashtables.QuadraticProbing;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 public class QuadraticProbing_Test {

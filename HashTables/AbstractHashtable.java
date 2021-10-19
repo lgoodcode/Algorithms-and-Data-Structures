@@ -1,4 +1,4 @@
-package Hashtables;
+package data_structures.hashtables;
 
 import java.util.Objects;
 import java.util.Enumeration;

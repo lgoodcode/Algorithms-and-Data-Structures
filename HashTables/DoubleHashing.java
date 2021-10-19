@@ -1,11 +1,8 @@
-package Hashtables.OpenAddressing;
+package data_structures.hashtables;
 
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
-
-import Hashtables.Entry;
-import Hashtables.AbstractHashtable;
 
 /**
  * This hashtable uses the DoubleHashing implementation of OpenAddressing, where

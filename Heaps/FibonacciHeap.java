@@ -1,4 +1,4 @@
-package Heaps;
+package data_structures.heaps;
 
 import java.util.function.BiFunction;
 import java.util.function.Consumer;

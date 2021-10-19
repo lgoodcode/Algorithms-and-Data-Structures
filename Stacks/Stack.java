@@ -1,6 +1,6 @@
-package Stacks;
+package data_structures.stacks;
 
-import Stacks.exceptions.*;
+import data_structures.stacks.exceptions.*;
 
 public class Stack<T> {
   private Entry<?>[] stack;

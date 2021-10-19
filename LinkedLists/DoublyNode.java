@@ -1,4 +1,4 @@
-package LinkedLists;
+package data_structures.linkedLists;
 
 /**
  * A node for {@code DoublyLinkedList} which extends the {@code LinkedListNode}

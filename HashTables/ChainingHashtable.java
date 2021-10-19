@@ -1,10 +1,10 @@
-package Hashtables;
+package data_structures.hashtables;
 
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
 
-import LinkedLists.LinkedList;
+import data_structures.linkedLists.LinkedList;
 
 /**
  * A hash table is a table that maps the universe U of keys into the slots

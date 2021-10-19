@@ -1,7 +1,7 @@
-package Trees.BinaryTree;
+package data_structures.trees.BinaryTree;
 
-import Trees.TreeNode;
-import Trees.util.*;
+import data_structures.trees.TreeNode;
+import data_structures.trees.util.*;
 
 public class BinarySearchTree<K, V> {
   private TreeNode<K, V> root = null;

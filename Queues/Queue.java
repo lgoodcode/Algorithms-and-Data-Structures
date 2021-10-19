@@ -1,6 +1,6 @@
-package Queues;
+package data_structures.queues;
 
-import Queues.exceptions.*;
+import data_structures.queues.exceptions.*;
 
 /**
  * Creates a basic generic queue which can hold any non-{@code null} object

@@ -1,4 +1,4 @@
-package Stacks.__tests__;
+package data_structures.stacks.__tests__;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -12,8 +12,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import Stacks.Stack;
-import Stacks.exceptions.*;
+import data_structures.stacks.Stack;
+import data_structures.stacks.exceptions.*;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 public class Stack_Test {

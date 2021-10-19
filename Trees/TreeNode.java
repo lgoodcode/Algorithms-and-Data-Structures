@@ -1,4 +1,4 @@
-package Trees;
+package data_structures.trees;
 
 public class TreeNode<K, V> extends AbstractTreeNode<K, V> {
   public TreeNode<K, V> parent = null;

@@ -1,4 +1,4 @@
-package Stacks.exceptions;
+package data_structures.stacks.exceptions;
 
 public final class StackFullException extends Exception {
   private int size;

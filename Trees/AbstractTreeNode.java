@@ -1,4 +1,4 @@
-package Trees;
+package data_structures.trees;
 
 public abstract class AbstractTreeNode<K, V> {
   protected AbstractTreeNode() {}

@@ -1,4 +1,4 @@
-package Queues.exceptions;
+package data_structures.queues.exceptions;
 
 public final class QueueFullException extends Exception {
   private int size;

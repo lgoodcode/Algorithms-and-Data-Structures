@@ -1,4 +1,4 @@
-package LinkedLists;
+package data_structures.linkedLists;
 
 import java.util.Collections;
 import java.util.Enumeration;

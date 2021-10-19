@@ -1,4 +1,4 @@
-package Hashtables;
+package data_structures.hashtables;
 
 public abstract class AbstractHashSubtable<K, V> {
 

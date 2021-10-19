@@ -1,4 +1,4 @@
-package LinkedLists;
+package data_structures.linkedLists;
 
 public class CircularLinkedList<K, V> extends DoublyLinkedList<K, V> {
   /**

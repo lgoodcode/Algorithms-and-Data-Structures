@@ -1,13 +1,12 @@
-package Hashtables;
+package data_structures.hashtables;
 
 import java.util.Map;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
 
-import Hashtables.exceptions.DuplicateKeyException;
-
-import static Hashtables.HashtableFunctions.isPrime;
+import data_structures.hashtables.exceptions.DuplicateKeyException;
+import static data_structures.hashtables.HashtableFunctions.isPrime;
 
 /**
  * This class implements a high performance dynamic hashtable where the size is
