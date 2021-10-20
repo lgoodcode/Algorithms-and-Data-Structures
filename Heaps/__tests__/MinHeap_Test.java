@@ -186,11 +186,11 @@ public class MinHeap_Test {
     @Test
     void to_string() {
       assertEquals("{"
-          + "\n\"5\""
-          + "\n\"4\""  
-          + "\n\"3\""  
-          + "\n\"2\""  
           + "\n\"1\""  
+          + "\n\"2\""  
+          + "\n\"3\""  
+          + "\n\"4\""  
+          + "\n\"5\""
           + "\n}", 
         heap.toString()
       );

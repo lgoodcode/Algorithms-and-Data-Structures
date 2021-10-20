@@ -74,19 +74,21 @@ public class MinHeap<T> {
       throw new HeapFullException(size);
 
     heap[size] = new Entry<T>(Integer.MIN_VALUE, value);
-    increaseKey(size, size);
+    increaseKey(size, value.hashCode());
     size++;
   }
 
   public synchronized void increaseKey(int i, int newKey) {
-    if (newKey < heap[i].key)
-      throw new IllegalArgumentException("new key is smaller than current key");
+    if (heap[i].isLessThan(newKey))
+      throw new IllegalArgumentException("New key is smaller than current key");
 
-    heap[i].key = newKey;
     int parent = parent(i);
-    while (i > 0 && heap[parent].key < heap[i].key) {
-      swap(i, parent(i));
-      i = parent(i);
+    heap[i].key = newKey;
+
+    while (i > 0 && heap[parent].key > heap[i].key) {
+      swap(i, parent);
+      i = parent;
+      parent = parent(i);
     }
   }
     
@@ -102,13 +104,6 @@ public class MinHeap<T> {
     heap[size] = null;
 
     minHeapify(0);
-
-    // TODO: correct this temp fix
-    if (heap[0].isLessThan(min)) {
-      Entry<T> temp = (Entry<T>) heap[0];
-      heap[0] = min;
-      min = temp;
-    }
 
     return min.getValue();
   }
@@ -132,8 +127,7 @@ public class MinHeap<T> {
     if (isEmpty())
       return "{}";
 
-    StringBuilder sb = new StringBuilder();
-    sb.append("{\n");
+    StringBuilder sb = new StringBuilder("{\n");
 
     for (int i=0; i<heap.length; i++)
       sb.append("\"" + heap[i].toString() + "\"\n");
@@ -155,6 +149,10 @@ public class MinHeap<T> {
 
     public boolean isLessThan(Entry<?> e) {
       return key < e.key;
+    }
+
+    public boolean isLessThan(int key) {
+      return this.key < key;
     }
   
     public T getValue() {
