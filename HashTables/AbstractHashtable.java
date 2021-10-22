@@ -143,12 +143,10 @@ public abstract class AbstractHashtable<K, V> {
     if (isEmpty())
       return "{}";
 
-    StringBuilder sb = new StringBuilder();
+    StringBuilder sb = new StringBuilder("{\n");
     Iterable<Entry<K, V>> entries = entries();
 
-    sb.append("{\n");
-    
-    entries.forEach((entry) -> sb.append("\s\s" + entry.toString() + ",\n"));
+    entries.forEach((entry) -> sb.append("\s\s\"" + entry.toString() + "\",\n"));
 
     return sb.toString() + "}";
   }

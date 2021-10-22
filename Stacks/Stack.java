@@ -63,8 +63,7 @@ public class Stack<T> {
     if (isEmpty())
       return "{}";
 
-    StringBuilder sb = new StringBuilder();
-    sb.append("{\n");
+    StringBuilder sb = new StringBuilder("{\n");
 
     for (int i=top-1; i>-1; i--)
       sb.append("\"" + stack[i].toString() + "\"\n");

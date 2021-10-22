@@ -495,7 +495,7 @@ public class BinarySearchTree<K, V> extends AbstractTree<K, V> {
     
     StringBuilder sb = new StringBuilder("{\n");
     
-    inorderTreeWalk((TreeNode<K, V> x) -> sb.append("\s\s" + x.toString() + ",\n"));
+    inorderTreeWalk((TreeNode<K, V> x) -> sb.append("\s\s\"" + x.toString() + "\",\n"));
     
     return sb.toString() + "}";
   }

@@ -163,11 +163,11 @@ public class AVLTree_Test {
         str.append(node.toString() + "\n"));
       
       assertEquals(
-            "\"1 -> one\"\n"
-          + "\"3 -> three\"\n"
-          + "\"5 -> five\"\n"
-          + "\"4 -> four\"\n"
-          + "\"2 -> two\"\n",
+            "1 -> one\n"
+          + "3 -> three\n"
+          + "5 -> five\n"
+          + "4 -> four\n"
+          + "2 -> two\n",
         str.toString());
     }
 

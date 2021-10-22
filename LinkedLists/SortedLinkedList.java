@@ -84,11 +84,9 @@ public class SortedLinkedList<K, V> extends DoublyLinkedList<K, V> {
     if (head == null)
       return "{}";
     
-    StringBuilder sb = new StringBuilder();
+    StringBuilder sb = new StringBuilder("{\n");
     DoublyNode<K, V> node = getHead();
     
-    sb.append("{\n");
-
     do {
       sb.append(node.toString() + "\n");
       node = node.next;

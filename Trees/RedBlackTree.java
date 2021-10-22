@@ -94,7 +94,8 @@ public class RedBlackTree<K, V> extends AbstractTree<K, V> {
 
   /**
    * Finds the {@code RedBlackTreeNode} with the smallest key by recursively traversing
-   * down the left subtree.
+   * down the left subtree. Because of the use of the {@code NIL} sentinel we have to
+   * perform a seperate check for {@null} node and then if the node is {@code NIL}.
    *
    * @param node the {@code RedBlackTreeNode} the tree node to start traversing at
    * @return the {@code RedBlackTreeNode} with the smallest key or {@null} if none
@@ -102,8 +103,10 @@ public class RedBlackTree<K, V> extends AbstractTree<K, V> {
   public RedBlackTreeNode<K, V> minimum(RedBlackTreeNode<K, V> node) {
     if (node == null)
       return null;
+    if (node.isNIL())
+      return node;
 
-    if (node.left != null)
+    if (!node.left.isNIL())
       return minimum(node.left);
     return node;
   }
@@ -120,7 +123,8 @@ public class RedBlackTree<K, V> extends AbstractTree<K, V> {
 
   /**
    * Finds the {@code RedBlackTreeNode} with the largest key by recursively traversing
-   * down the right subtree.
+   * down the left subtree. Because of the use of the {@code NIL} sentinel we have to
+   * perform a seperate check for {@null} node and then if the node is {@code NIL}.
    *
    * @param node the {@code RedBlackTreeNode} the tree node to start traversing at
    * @return the {@code RedBlackTreeNode} with the largest key or {@null} if none
@@ -128,8 +132,10 @@ public class RedBlackTree<K, V> extends AbstractTree<K, V> {
   public RedBlackTreeNode<K, V> maximum(RedBlackTreeNode<K, V> node) {
     if (node == null)
       return null;
+    if (node.isNIL())
+      return node;
 
-    if (node.right != null)
+    if (!node.right.isNIL())
       return maximum(node.right);
     return node;
   }
@@ -716,7 +722,7 @@ public class RedBlackTree<K, V> extends AbstractTree<K, V> {
     
     StringBuilder sb = new StringBuilder("{\n");
     
-    inorderTreeWalk((RedBlackTreeNode<K, V> x) -> sb.append("\s\s" + x.toString() + ",\n"));
+    inorderTreeWalk((RedBlackTreeNode<K, V> x) -> sb.append("\s\s\"" + x.toString() + "\",\n"));
     
     return sb.toString() + "}";
   }

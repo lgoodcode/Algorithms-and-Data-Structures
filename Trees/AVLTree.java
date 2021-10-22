@@ -584,7 +584,7 @@ public class AVLTree<K, V> extends AbstractTree<K, V> {
     
     StringBuilder sb = new StringBuilder("{\n");
     
-    inorderTreeWalk((AVLTreeNode<K, V> node) -> sb.append("\s\s" + node.toString() + ",\n"));
+    inorderTreeWalk((AVLTreeNode<K, V> node) -> sb.append("\s\s\"" + node.toString() + "\",\n"));
     
     return sb.toString() + "}";
   }

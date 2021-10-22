@@ -283,11 +283,9 @@ public class DoublyLinkedList<K, V> extends LinkedList<K, V> {
     if (head == null)
       return "{}";
     
-    StringBuilder sb = new StringBuilder();
+    StringBuilder sb = new StringBuilder("{\n");
     Iterable<DoublyNode<K, V>> entries = entries();
     
-    sb.append("{\n");
-
     entries.forEach((node) -> sb.append(node.toString() + "\n"));
     
     return sb.toString() + "}";

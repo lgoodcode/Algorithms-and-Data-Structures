@@ -202,11 +202,9 @@ public class LinkedList<K, V> extends AbstractLinkedList<K, V> {
     if (head == null)
       return "{}";
     
-    StringBuilder sb = new StringBuilder();
+    StringBuilder sb = new StringBuilder("{\n");
     Iterable<LinkedListNode<K, V>> entries = entries();
     
-    sb.append("{\n");
-
     entries.forEach((node) -> sb.append(node.toString() + "\n"));
     
     return sb.toString() + "}";

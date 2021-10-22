@@ -162,11 +162,11 @@ public class BinarySearchTree_Test {
       tree.postorderTreeWalk((TreeNode<Integer, String> node) -> 
         str.append(node.toString() + "\n"));
       
-      assertEquals("\"5 -> five\"\n"
-          + "\"4 -> four\"\n"
-          + "\"3 -> three\"\n"
-          + "\"2 -> two\"\n"
-          + "\"1 -> one\"\n",
+      assertEquals("5 -> five\n"
+          + "4 -> four\n"
+          + "3 -> three\n"
+          + "2 -> two\n"
+          + "1 -> one\n",
         str.toString());
     }
 

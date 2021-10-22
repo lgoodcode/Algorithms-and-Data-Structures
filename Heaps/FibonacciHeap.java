@@ -563,8 +563,7 @@ public final class FibonacciHeap<K, V> {
     if (isEmpty())
       return "{}";
 
-    StringBuilder sb = new StringBuilder();
-    sb.append("{\n");
+    StringBuilder sb = new StringBuilder("{\n");
 
     walk(min, (node) -> sb.append("\"" + node.toString() + "\"\n"));
 
