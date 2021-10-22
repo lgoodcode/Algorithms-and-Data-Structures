@@ -189,8 +189,8 @@ public final class FibonacciHeap<K, V> {
         x.left.right = x; 
         
         x.parent = null;
-        
-      } while ((x = temp) != z.child);
+        x = temp;
+      } while (x != z.child);
     }
 
     // Remove z from root list of heap
@@ -289,7 +289,7 @@ public final class FibonacciHeap<K, V> {
   private synchronized void consolidate() { 
     // Auxiliary array to keep track of roots according to their degrees
     FibonacciNode<?, ?>[] arr = new FibonacciNode<?, ?>[n];
-    FibonacciNode<K, V> y, x = min, temp = min;
+    FibonacciNode<K, V> y, x, temp;
     // Maximum degree D(n) of any node in an n-node Fibonacci heap is O(lg n)
     int d, num = 0, D = log2(n);
 
@@ -303,10 +303,12 @@ public final class FibonacciHeap<K, V> {
      * heapLink() to start making nodes a child of another, it will lose track of
      * whether we actually made a full iteration back to the start.
      */
+    temp = min;
     do num++;
     while ((temp = temp.right) != min);
 
     // For each node in the root list
+    x = min;
     for (int i=0; i<num; i++, x = x.right) {
       d = x.degree;
       // Repeatedly links the root x of the tree containing node w to another tree

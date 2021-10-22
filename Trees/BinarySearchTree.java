@@ -1,62 +1,122 @@
-package data_structures.trees.BinaryTree;
+package data_structures.trees;
 
-import data_structures.trees.TreeNode;
-import data_structures.trees.util.*;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
-public class BinarySearchTree<K, V> {
+public class BinarySearchTree<K, V> extends AbstractTree<K, V> {
+  /**
+   * The root of the tree
+   */
   private TreeNode<K, V> root = null;
-  private Compare<K> compareFn = null;
-  private int count = 0;
 
   /**
    * Creates an empty, BinaryTree, using the specified compare function to
    * determine whether a given {@code TreeNode} is smaller than another.
    * 
-   * @param compareFn an anonymous function that compares two {@TreeNode}s
+   * @param compareFn an anonymous function that compares two {@code TreeNode}
+   *                  objects
    */
-  public BinarySearchTree(Compare<K> compareFn) {
-    this.compareFn = compareFn;
+  public BinarySearchTree(BiFunction<K, K, Boolean> compareFn) {
+    super(compareFn);
   }
 
   /**
-   * The default constructor that uses a general compare function and calls
-   * the main constructor.
+   * The default constructor that uses the default compare function and calls the
+   * main constructor.
    */
   public BinarySearchTree() {
-    this((K x, K y) -> x.hashCode() < y.hashCode());
+    super();
   }
 
   /**
    * The internal compare method used to determine if the key of a
-   * {@code TreeNode} is smaller than the other {@code TreeNode} key.
+   * tree node is smaller than the other tree node key.
    * 
-   * @param x {@code TreeNode} to compare
-   * @param y the other {@code TreeNode} to compare
+   * @param x tree node to compare
+   * @param y the other tree node to compare
    * @return whether the first node key is smaller than the other node key
+   * 
+   * @throws NullPointerException     if the either node is {@code null}
+   * @throws IllegalArgumentException if either key is {@code null} or blank
    */ 
   private boolean isLessThan(TreeNode<K, V> x, TreeNode<K, V> y) {
-    return compareFn.compare(x.getKey(), y.getKey());
+    if (x == null || y == null)
+      throw new NullPointerException("Node cannot be null.");
+    return isLessThan(x.getKey(), y.getKey());
   }
 
   /**
-   * The internal compare method used to determine if a key is smaller
-   * than the other key.
-   * 
-   * @param x key of a {@code TreeNode} to compare
-   * @param y the other key of a {@code TreeNode} to compare
-   * @return whether the first key is smaller than the other key
+   * Minimum O(h)
+   *
+   * This just follows the left child pointers until we reach NIL.
+   *
+   * Tree-Minimum(x)
+   * 1   while x.left != NIL
+   * 2       x = x.left
+   * 3   return x
    */
-  private boolean isLessThan(K x, K y) {
-    return compareFn.compare(x, y);
+
+  /**
+   * Finds the {@code TreeNode} with the smallest key by recursively traversing
+   * down the left subtree.
+   *
+   * @param node the {@code TreeNode} the tree node to start traversing from
+   * @return the {@code TreeNode} with the smallest key or {@null} if none
+   */
+  public TreeNode<K, V> minimum(TreeNode<K, V> node) {
+    if (node == null)
+      return null;
+
+    if (node.left != null)
+      return minimum(node.left);
+    return node;
   }
 
   /**
-   * Returns the number of {@code TreeNode}s in the tree.
-   * 
-   * @return the number of nodes
+   * Finds the {@code TreeNode} with the smallest key by recursively traversing
+   * down the left subtree starting at the root of the tree.
+   *
+   * @return the {@code TreeNode} with the smallest key or {@null} if none
    */
-  public int size() {
-    return count;
+    public TreeNode<K, V> minimum() {
+      return minimum(root);
+  }
+
+  /**
+   * Maximum O(h)
+   *
+   * This just follows the right child pointers until we reach NIL.
+   *
+   * Tree-Maximum(x)
+   * 1   while x.right != NIL
+   * 2       x = x.right
+   * 3   return x
+   */
+
+  /**
+   * Finds the {@code TreeNode} with the largest key by recursively traversing
+   * down the right subtree.
+   *
+   * @param node the {@code TreeNode} the tree node to start traversing at
+   * @return the {@code TreeNode} with the largest key or {@null} if none
+   */
+  public TreeNode<K, V> maximum(TreeNode<K, V> node) {
+    if (node == null)
+      return null;
+
+    if (node.right != null)
+      return maximum(node.right);
+    return node;
+  }
+
+  /**
+   * Finds the {@code TreeNode} with the largest key by recursively traversing
+   * down the left subtree starting at the root of the tree.
+   *
+   * @return the {@code TreeNode} with the largest key or {@null} if none
+   */
+  public TreeNode<K, V> maximum() {
+    return maximum(root);
   }
 
   /**
@@ -85,17 +145,19 @@ public class BinarySearchTree<K, V> {
   /**
    * Inserts a new {@code TreeNode} into the tree with the given key and value.
    * 
-   * @param key   the key of the new key/value node to insert
-   * @param value the value of the new key/value node to insert
+   * @param key   the key of the new node to insert
+   * @param value the value of the new node to insert
    * 
-   * @throws IllegalArgumentException if the key or value is {@code null} or 
-   *                                  blank.
+   * @throws IllegalArgumentException if the key or value is {@code null} or
+   *                                  blank, or if the key already exists in the
+   *                                  tree
    */
   public synchronized void insert(K key, V value) {
-    if (key == null || key.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or blank value.");
-    if (value == null || value.toString().isBlank())
-      throw new IllegalArgumentException("Value cannot be null or blank value.");
+    checkKey(key);
+    checkValue(value);
+    checkDuplicate(key);
+
+    count++;
 
     TreeNode<K, V> x = root;
     TreeNode<K, V> y = null;
@@ -113,76 +175,11 @@ public class BinarySearchTree<K, V> {
     z.parent = y;
 
     if (y == null)
-      root = z; // Tree was empty
+      root = z;
     else if (isLessThan(z, y))
       y.left = z;
     else 
       y.right = z;
-
-    count++;
-  }
-
-  /**
-   * Maximum O(h) / Minimum O(h)
-   *
-   * This just follows the left/right child pointers until we reach NIL.
-   *
-   * Tree-Minimum(x)
-   * 1   while x.left != NIL
-   * 2       x = x.left
-   * 3   return x
-   */
-
-  /**
-   * Finds the {@code TreeNode} with the smallest key by recursively traversing
-   * down the left subtree.
-   *
-   * @param x the {@code TreeNode} the tree node to start traversing at
-   * @return the {@code TreeNode} with the smallest key or {@null} if none
-   */
-  public TreeNode<K, V> minimum(TreeNode<K, V> x) {
-    if (x == null)
-      return null;
-
-    if (x.left != null)
-      return minimum(x.left);
-    return x;
-  }  
-
-  /**
-   * Finds the {@code TreeNode} with the smallest key by recursively traversing
-   * down the left subtree starting at the root of the tree.
-   *
-   * @return the {@code TreeNode} with the smallest key or {@null} if none
-   */
-  public TreeNode<K, V> minimum() {
-    return minimum(root);
-  }
-
-  /**
-   * Finds the {@code TreeNOde} with the largest key by recursively traversing
-   * down the right subtree.
-   *
-   * @param x the {@code TreeNode} the tree node to start traversing at
-   * @return the {@code TreeNode} with the largest key or {@null} if none
-   */
-  public TreeNode<K, V> maximum(TreeNode<K, V> x) {
-    if (x == null)
-      return null;
-
-    if (x.right != null)
-      return maximum(x.right);
-    return x;
-  }
-
-  /**
-   * Finds the {@code TreeNode} with the largest key by recursively traversing
-   * down the left subtree starting at the root of the tree.
-   *
-   * @return the {@code TreeNode} with the largest key or {@null} if none
-   */
-  public TreeNode<K, V> maximum() {
-    return maximum(root);
   }
 
   /**
@@ -204,26 +201,24 @@ public class BinarySearchTree<K, V> {
    * {@code TreeNode} so that it can descend further until either the the correct
    * node is found with the matching key, or we reach the end.
    * 
-   * @param x   the current tree node
-   * @param key the key of the node to find
+   * @param node the current tree node
+   * @param key  the key of the node to find
    * @return the tree node or {@code null} if not found
    * 
-   * @throws IllegalArgumentException if the key is {@code null}
+   * @throws IllegalArgumentException if the key is {@code null} or blank
    */
-  public TreeNode<K, V> search(TreeNode<K, V> x, K key) {
-    if (key == null || key.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or blank.");
-      
-    if (x == null || key.equals(x.getKey()))
-      return x;
-    if (isLessThan(key, x.getKey()))
-      return search(x.left, key);
-    else 
-      return search(x.right, key);
+  public TreeNode<K, V> search(TreeNode<K, V> node, K key) {
+    checkKey(key);
+
+    if (node == null || key == node.getKey())
+      return node;
+    if (isLessThan(key, node.getKey()))
+      return search(node.left, key);
+    return search(node.right, key);
   } 
 
   /**
-   * Search for a node for the specified key starting at the root.
+   * Search for a node for the specified key starting at the {@code root}.
    * 
    * @param key the key of the node to find
    * @return the tree node or {@code null} if not found
@@ -231,30 +226,26 @@ public class BinarySearchTree<K, V> {
    * @throws IllegalArgumentException if the key is {@code null} or blank
    */
   public TreeNode<K, V> search(K key) {
-    if (key == null || key.toString().isBlank()) 
-      throw new IllegalArgumentException("Key cannot be null or blank.");
     return search(root, key);
   }
 
   /**
-   * Retrieves the value for the corresponding {@code TreeNode} of the given key
-   * or {@code null} if not found.
+   * {@inheritDoc}
    * 
-   * @param key the key of the tree node
-   * @return the value or {@code null} if not found
+   * @throws IllegalArgumentException {@inheritDoc}
+   */
+  public boolean hasKey(K key) {
+    return search(key) != null;
+  }
+
+  /**
+   * {@inheritDoc}
    * 
-   * @throws IllegalArgumentException if the key is {@code null}
+   * @throws IllegalArgumentException {@inheritDoc}
    */
   public V get(K key) {
-    if (key == null || key.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or blank.");
-
     TreeNode<K, V> node = search(key);
-
-    if (node != null && node.getKey().equals(key))
-      return node.getValue();
-
-    return null;
+    return node != null ? node.getValue() : null;
   }
 
   /**
@@ -285,12 +276,12 @@ public class BinarySearchTree<K, V> {
    * @param x {@code TreeNode}
    * @param y {@code TreeNode}
    */
-  private synchronized void transplant(TreeNode<K, V> x, TreeNode<K, V> y) {
+  private void transplant(TreeNode<K, V> x, TreeNode<K, V> y) {
     // If x is the root of the tree, make y the root
     if (x.parent == null)
       root = y;
     // Updates x.parent.left if x is a left child
-    else if (x.equals(x.parent.left))
+    else if (x == x.parent.left)
       x.parent.left = y;
     // Otherwise, updates x.parent.right because x must be a right child
     else 
@@ -324,29 +315,31 @@ public class BinarySearchTree<K, V> {
    * {@code transplant()} method to adjust the tree nodes to replace the removed
    * node.
    * 
-   * @param z the {@code TreeNode} to remove
+   * @param node the {@code TreeNode} to remove
    * @see #transplant()
    * 
    * @throws NullPointerException if the {@code TreeNode} is {@code null}
    */
-  public synchronized void deleteNode(TreeNode<K, V> z) {
-    if (z == null)
-      throw new NullPointerException("Node to delete cannot be null.");
+  public synchronized void deleteNode(TreeNode<K, V> node) {
+    if (node == null)
+      throw new NullPointerException("Node to Node cannot be null.");
+
+    count--;
 
     /**
      * Case 1: z has no left child
      *
      * We replace z by its right child, which may or may not be NIL.
      */
-    if (z.left == null)
-      transplant(z, z.right);
+    if (node.left == null)
+      transplant(node, node.right);
     /**
      * Case 2: z has no right child
      *
      * We replace z by its left child
      */
-    else if (z.right == null)
-      transplant(z, z.left);
+    else if (node.right == null)
+      transplant(node, node.left);
     else {
       /**
        * Case 3: z has two children
@@ -363,9 +356,9 @@ public class BinarySearchTree<K, V> {
        * successor must be the node in that subtree with the smallest key; hence the
        * call to minimum(z.right).
        */
-      TreeNode<K, V> y = minimum(z.right);
+      TreeNode<K, V> y = minimum(node.right);
 
-      if (y.parent != z) {
+      if (y.parent != node) {
         /**
          * Case 3a: y is in z's right subtree but is not z's right child. We need to
          * replace y by its own right child, and then replace z by y.
@@ -373,7 +366,7 @@ public class BinarySearchTree<K, V> {
          * In this case, z's successor y, in z's right subtree, will have no left child.
          */
         transplant(y, y.right);
-        y.right = z.right;
+        y.right = node.right;
         y.right.parent = y;
       }
 
@@ -382,31 +375,26 @@ public class BinarySearchTree<K, V> {
        * found successor that was transplanted for case 3a. We now make z's parent and
        * left child pointers be the same for y, to take z's place.
        */
-      transplant(z, y);
-      y.left = z.left;
+      transplant(node, y);
+      y.left = node.left;
       y.left.parent = y;
     }
-
-    // Decrement size counter
-    count--;
   }
 
   /**
-   * Deletes a {@code TreeNode} using a specified key to first find the
-   * corresponding node and then passing it to the {@code delete()} method
+   * {@inheritDoc}
    * 
-   * @param key the key of the {@code TreeNode} to delete
-   * 
-   * @throws IllegalArgumentException if the key is {@code null}
+   * @throws IllegalArgumentException {@inheritDoc}
    */
   public synchronized void delete(K key) {
-    if (key == null || key.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or blank.");
-    deleteNode(search(key));
+    TreeNode<K, V> node = search(key);
+
+    if (node != null)
+      deleteNode(node);
   }
 
   /**
-   * Successor O(h) / Predecessor O(h)
+   * Successor O(h)
    *
    * The structure of the binary search tree allows us to determine the successor
    * without ever comparing keys. The procedure returns x if it exists and NIL if
@@ -414,7 +402,7 @@ public class BinarySearchTree<K, V> {
    *
    * Tree-Successor(x)
    * 1   if x.right != NIL
-   * 2       return Tree-Maximum(x.right)
+   * 2       return Tree-Minimum(x.right)
    * 3   y = x.p 
    * 4   while y != NIL and x == y.right
    * 5       x = y
@@ -427,17 +415,21 @@ public class BinarySearchTree<K, V> {
    * without comparing keys. This is done by simply returning the child node with
    * the largest key down the right subtree.
    * 
-   * @param x the {@code TreeNode} to find the successor of
+   * @param node the {@code TreeNode} to find the successor of
    * @return the successor or {@code null} if none
+   * 
+   * @throws NullPointerException if the node specified is {@code null}
    */
-  public TreeNode<K, V> successor(TreeNode<K, V> x) {
-    if (x.right != null)
-      return minimum(x.right);
+  public TreeNode<K, V> successor(TreeNode<K, V> node) {
+    if (node == null)
+      throw new NullPointerException("Node cannot be null.");
+    if (node.right != null)
+      return minimum(node.right);
 
-    TreeNode<K, V> y = x.parent;
+    TreeNode<K, V> y = node.parent;
     
-    while (y != null && x.equals(y.right)) {
-      x = y;
+    while (y != null && node.equals(y.right)) {
+      node = y;
       y = y.parent;
     }
 
@@ -445,25 +437,67 @@ public class BinarySearchTree<K, V> {
   }
 
   /**
+   * Predecessor O(h)
+   *
+   * The structure of the binary search tree allows us to determine the predecessor
+   * without ever comparing keys. The procedure returns x if it exists and NIL if
+   * x is the smallest key in the tree.
+   *
+   * Tree-Predecessor(x)
+   * 1   if x.left != NIL
+   * 2       return Tree-Maximum(x.right)
+   * 3   y = x.p 
+   * 4   while y != NIL and x == y.right
+   * 5       x = y
+   * 6       y = y.p 
+   * 7   return y
+   */
+
+  /**
    * Finds the node that will immediately precede the given {@code TreeNode}
    * without comparing keys. This is done by simply returning the child node with
    * the smallest key down the left subtree.
    * 
-   * @param x the {@code TreeNode} to find the predecessor of
+   * @param node the {@code TreeNode} to find the predecessor of
    * @return the predecessor or {@code null} if none
+   * 
+   * @throws NullPointerException if the node specified is {@code null}
    */
-  public TreeNode<K, V> predecessor(TreeNode<K, V> x) {
-    if (x.left != null)
-      return maximum(x.left);
+  public TreeNode<K, V> predecessor(TreeNode<K, V> node) {
+    if (node == null)
+      throw new NullPointerException("Node cannot be null.");
+    if (node.left != null)
+      return maximum(node.left);
 
-    TreeNode<K, V> y = x.parent;
+    TreeNode<K, V> y = node.parent;
 
-    while (y != null && x.equals(y.left)) {
-      x = y;
+    while (y != null && node.equals(y.left)) {
+      node = y;
       y = y.parent;
     }
 
     return y;
+  }
+
+
+  /**
+   * Implemntation that uses the inorderTreeWalk traversal to create
+   * a string of all the {@code TreeNode} entries in the tree in order
+   * by key.
+   * 
+   * Displays the object string in JSON format.
+   * 
+   * @return the tree string 
+   */
+  public String toString() {
+    if (isEmpty())
+      return "{}";
+    
+    StringBuilder sb = new StringBuilder("{\n");
+    
+    inorderTreeWalk((TreeNode<K, V> x) -> sb.append("\s\s" + x.toString() + ",\n"));
+    
+    return sb.toString() + "}";
   }
 
   /**
@@ -481,63 +515,41 @@ public class BinarySearchTree<K, V> {
    * postorder tree walk - Visits the root after the values in its subtrees.
    * 
    */
-  public void inorderTreeWalk(TreeNode<K, V> x, Callback<TreeNode<K, V>> callback) {
+  public void inorderTreeWalk(TreeNode<K, V> x, Consumer<TreeNode<K, V>> callback) {
     if (x != null) {
       this.inorderTreeWalk(x.left, callback);
-      callback.action(x);
+      callback.accept(x);
       this.inorderTreeWalk(x.right, callback);
     }
   }
 
-  public void inorderTreeWalk(Callback<TreeNode<K, V>> callback) {
-    inorderTreeWalk(root, callback);
-  }
-
-  public void preorderTreeWalk(TreeNode<K, V> x, Callback<TreeNode<K, V>> callback) {
+  
+  public void preorderTreeWalk(TreeNode<K, V> x, Consumer<TreeNode<K, V>> callback) {
     if (x != null) {
-      callback.action(x);
+      callback.accept(x);
       this.preorderTreeWalk(x.left, callback);
       this.preorderTreeWalk(x.right, callback);
     }
   }
-
-  public void preorderTreeWalk(Callback<TreeNode<K, V>> callback) {
-    preorderTreeWalk(root, callback);
-  } 
-
-  public void postorderTreeWalk(TreeNode<K, V> x, Callback<TreeNode<K, V>> callback) {
+  
+  public void postorderTreeWalk(TreeNode<K, V> x, Consumer<TreeNode<K, V>> callback) {
     if (x != null) {
       this.postorderTreeWalk(x.left, callback);
       this.postorderTreeWalk(x.right, callback);  
-      callback.action(x); 
+      callback.accept(x); 
     }
   }
 
-  public void postorderTreeWalk(Callback<TreeNode<K, V>> callback) {
+  public void inorderTreeWalk(Consumer<TreeNode<K, V>> callback) {
+    inorderTreeWalk(root, callback);
+  }
+
+  public void preorderTreeWalk(Consumer<TreeNode<K, V>> callback) {
+    preorderTreeWalk(root, callback);
+  }
+  
+  public void postorderTreeWalk(Consumer<TreeNode<K, V>> callback) {
     postorderTreeWalk(root, callback);
   }
 
-  /**
-   * Implemntation that uses the inorderTreeWalk traversal to create
-   * a string of all the {@code TreeNode} entries in the tree in order
-   * by key.
-   * 
-   * Displays the object string in JSON format.
-   * 
-   * @return the tree string 
-   */
-  public String toString() {
-    if (count == 0)
-      return "{}";
-    
-    StringBuilder sb = new StringBuilder();
-    
-    sb.append("{");
-    
-    inorderTreeWalk((TreeNode<K, V> x) -> sb.append("\n\"" + x.toString() + "\""));
-    
-    sb.append("\n}");
-
-    return sb.toString();
-  }
 }

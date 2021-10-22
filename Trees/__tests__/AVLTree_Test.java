@@ -11,24 +11,24 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import data_structures.trees.BinarySearchTree;
-import data_structures.trees.TreeNode;
+import data_structures.trees.AVLTree;
+import data_structures.trees.AVLTreeNode;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-public class BinarySearchTree_Test {
-  BinarySearchTree<Integer, String> tree;
-  BinarySearchTree<String, String> tree2;
-  TreeNode<Integer, String> node;
-  TreeNode<Integer, String> node2;
+public class AVLTree_Test {
+  AVLTree<Integer, String> tree;
+  AVLTree<String, String> tree2;
+  AVLTreeNode<Integer, String> node;
+  AVLTreeNode<Integer, String> node2;
 
   @Test
   void is_instantiated() {
-    tree  = new BinarySearchTree<>();
+    tree  = new AVLTree<>();
   }
 
   @Test
   void tree_node_instantiates() {
-    node = new TreeNode<>(1, "one");
+    node = new AVLTreeNode<>(1, "one");
   }
 
   @Nested 
@@ -36,7 +36,7 @@ public class BinarySearchTree_Test {
     
     @BeforeEach
     void create_tree() {
-      tree = new BinarySearchTree<>();
+      tree = new AVLTree<>();
     }
 
     @Test 
@@ -80,7 +80,7 @@ public class BinarySearchTree_Test {
     @NullAndEmptySource
     @ValueSource(strings = { " ", "  ", "\t", "\n" })
     void insert_throws_on_bad_keys(String key) {
-      tree2 = new BinarySearchTree<>();
+      tree2 = new AVLTree<>();
 
       assertThrows(IllegalArgumentException.class, () -> tree2.insert(key, "test"));
     }
@@ -99,7 +99,7 @@ public class BinarySearchTree_Test {
 
     @BeforeEach
     void create_and_insert() {
-      tree = new BinarySearchTree<>();
+      tree = new AVLTree<>();
 
       tree.insert(1, "one");
       tree.insert(2, "two");
@@ -121,7 +121,7 @@ public class BinarySearchTree_Test {
 
     @Test
     void search() {
-      node = new TreeNode<>(4, "four");
+      node = new AVLTreeNode<>(4, "four");
       node2 = tree.search(4);
 
       assertEquals(node.getKey(), node2.getKey());
@@ -159,14 +159,15 @@ public class BinarySearchTree_Test {
     @Test
     void postorderTreeWalk() {
       StringBuilder str = new StringBuilder();
-      tree.postorderTreeWalk((TreeNode<Integer, String> node) -> 
+      tree.postorderTreeWalk((AVLTreeNode<Integer, String> node) -> 
         str.append(node.toString() + "\n"));
       
-      assertEquals("\"5 -> five\"\n"
-          + "\"4 -> four\"\n"
+      assertEquals(
+            "\"1 -> one\"\n"
           + "\"3 -> three\"\n"
-          + "\"2 -> two\"\n"
-          + "\"1 -> one\"\n",
+          + "\"5 -> five\"\n"
+          + "\"4 -> four\"\n"
+          + "\"2 -> two\"\n",
         str.toString());
     }
 
@@ -189,7 +190,7 @@ public class BinarySearchTree_Test {
 
     @Test
     void insertions() {
-      tree = new BinarySearchTree<>();
+      tree = new AVLTree<>();
 
       tree.insert(1, "one");
       tree.insert(2, "two");
