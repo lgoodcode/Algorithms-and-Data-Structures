@@ -15,6 +15,18 @@ public class Trie<V> extends AbstractTrie<V> {
   }
 
   /**
+   * Receives the input word and removes any whitespace {@code \s}, newline
+   * {@code \n}, or tab {@code \t} characters as well as dashes {@code -} and
+   * underscores {@code _}.
+   * 
+   * @param word the word to parse
+   * @returns the parsed word
+   */
+  private String parseWord(String word) {
+    return word.strip().replaceAll("[\n\s\t-_]", "");
+  }
+
+  /**
    * {@inheritDoc}
    * 
    * <p>
@@ -31,7 +43,7 @@ public class Trie<V> extends AbstractTrie<V> {
     checkValue(value);
 
     TrieNode<V> child, newChild, node = root;
-    String currentWord = word;
+    String currentWord = parseWord(word);
     char currChar;
 
     count++;
@@ -71,7 +83,7 @@ public class Trie<V> extends AbstractTrie<V> {
     checkWord(word);
     
     TrieNode<V> child, node = root;
-    String currentWord = word;
+    String currentWord = parseWord(word);
     char currChar;
 
     while (currentWord.length() > 0) {

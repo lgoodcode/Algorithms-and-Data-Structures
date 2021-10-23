@@ -144,8 +144,8 @@ public class Trie_Test {
       trie.insert("eight", 8);
       trie.insert("nine", 9);
       trie.insert("ten", 10);
-      trie.insert("onehundredten", 110);
-      trie.insert("onehundredtwenty", 120);
+      trie.insert("one-hundred-ten", 110);
+      trie.insert("one-hundred-twenty", 120);
       trie.insert("thirteen", 13);
       trie.insert("fourteen", 14);
       trie.insert("fifteen", 15);
@@ -169,7 +169,7 @@ public class Trie_Test {
       assertNotNull(trie.get("eight"));
       assertNotNull(trie.get("nine"));
       assertNotNull(trie.get("ten"));
-      assertNotNull(trie.get("onehundredten"));
+      assertEquals(110, trie.get("onehundredten"));
       assertNotNull(trie.get("onehundredtwenty"));
       assertNotNull(trie.get("thirteen"));
       assertNotNull(trie.get("fourteen"));
