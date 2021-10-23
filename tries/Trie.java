@@ -15,35 +15,25 @@ public class Trie<V> extends AbstractTrie<V> {
   }
 
   /**
-   * Receives the input word and removes any whitespace {@code \s}, newline
-   * {@code \n}, or tab {@code \t} characters as well as dashes {@code -} and
-   * underscores {@code _}.
-   * 
-   * @param word the word to parse
-   * @returns the parsed word
-   */
-  private String parseWord(String word) {
-    return word.strip().replaceAll("[\n\s\t-_]", "");
-  }
-
-  /**
    * {@inheritDoc}
    * 
    * <p>
    * Starts at the root node and continues downward, iterating through each,
-   * character of the specified {@code word}. At each level, if a node with the
-   * current character doesn't exist, it is created. Once node is reached with the
-   * final character, it will set the value of the current node.
-   * </p>
+   * character of the specified {@code word}. At each node on the path downward,
+   * it sets the {@code hasWord} property to true because we are inserting a word
+   * under its children. If there is no child node for the current character on
+   * the current node, a new child node is created and set on the current node.
+   * Otherwise, the current node points to the child node and the next character
+   * is set. Once there are no more characters to iterate through, we set the
+   * current node to the specified value.
    * 
    * @throws IllegalArgumentException {@inheritDoc}
    */
   public synchronized void insert(String word, V value) {
-    checkWord(word);
+    String currentWord = parseWord(word);
     checkValue(value);
 
     TrieNode<V> child, newChild, node = root;
-    String currentWord = parseWord(word);
     char currChar;
 
     count++;
@@ -51,22 +41,20 @@ public class Trie<V> extends AbstractTrie<V> {
     while (currentWord.length() > 0) {
       currChar = currentWord.charAt(0);
       child = node.getChild(currChar);
+      node.hasWord = true;
 
-      if (child != null) {
-        currentWord = currentWord.substring(1);
+      if (child != null)
         node = child;
-      }
       else {
-        newChild = new TrieNode<V>((node.getKey() != null ? node.getKey() : "") + currChar);
-
-        if (currentWord.length() == 1)
-          newChild.setValue(value);
-
+        newChild = new TrieNode<V>(currChar, node);
         node.setChild(currChar, newChild);
         node = newChild;
-        currentWord = currentWord.substring(1);
       }
+
+      currentWord = currentWord.substring(1);
     }
+
+    node.setValue(value);
   }
 
   /**
@@ -80,20 +68,14 @@ public class Trie<V> extends AbstractTrie<V> {
    * @throws IllegalArgumentException if the word is {@code null} or blank
    */
   public TrieNode<V> search(String word) {
-    checkWord(word);
-    
-    TrieNode<V> child, node = root;
     String currentWord = parseWord(word);
-    char currChar;
+    TrieNode<V> node = root;
 
     while (currentWord.length() > 0) {
-      currChar = currentWord.charAt(0);
-      child = node.getChild(currChar);
-
-      if (child == null)
+      if (node == null || !node.hasWord)
         return null;
-      
-      node = child;
+
+      node = node.getChild(currentWord.charAt(0));
       currentWord = currentWord.substring(1);
     }
 
@@ -122,14 +104,47 @@ public class Trie<V> extends AbstractTrie<V> {
   /**
    * {@inheritDoc}
    * 
+   * <p>
+   * Once the node with the word sets the value to {@code null}, it performs a
+   * check by iterating through the current nodes children checking if it contains
+   * any children that contain words or is a word. Once the node that is a word or
+   * contains a child that is a node or has words, is reached, it will immediately
+   * stop tracing because we cannot remove any parent node if the current node is
+   * a word or contains nodes with words.
+   * </p>
+   * 
    * @throws IllegalArgumentException {@inheritDoc}
    */
   public synchronized void delete(String word) {
-    TrieNode<V> node = search(word);
+    TrieNode<V> parent, node = search(word);
+    TrieNode<V>[] children;
+    boolean hasWord = false;
 
-    if (node != null) {
-      node.setValue(null);
-      count--;
+    if (node == null)
+      return;
+
+    count--;
+    node.setValue(null);
+    
+    // Trace back up to the root to remove any nodes that don't contain any words
+    for (parent = node.parent; parent != null; node = parent, parent = node.parent) {
+      children = node.getChildren();
+
+      for (int i=0; i<children.length; i++) {
+        if (children[i] != null && (children[i].hasWord || children[i].isWord())) {
+          hasWord = true;
+          break;
+        }
+      }
+
+      if (hasWord)
+        break;
+      else if (!hasWord && node.isWord()) {
+        node.hasWord = false;
+        break;
+      }
+      else
+        parent.removeChild(node.getKey());
     }
   }
 

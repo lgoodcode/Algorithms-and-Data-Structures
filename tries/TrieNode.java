@@ -7,9 +7,19 @@ public class TrieNode<V> {
   private TrieNode<V>[] children;
 
   /**
+   * The parent node of the node used for tracing up to the root.
+   */
+  protected TrieNode<V> parent;
+
+  /**
+   * Whether the current node is a word or contains a child that is or contains word(s).
+   */
+  protected boolean hasWord;
+
+  /**
    * The key of the node.
    */
-  private String key;
+  private char key;
 
   /**
    * The value of the node.
@@ -23,12 +33,11 @@ public class TrieNode<V> {
    * @param key the to set the node with
    */
   @SuppressWarnings("unchecked")
-  public TrieNode(String key) {
-    if (key == null || key.isBlank())
-      throw new IllegalArgumentException("Key cannot be null or blank.");
-
+  public TrieNode(char key, TrieNode<V> parent) {
     children = (TrieNode<V>[]) new TrieNode<?>[26];
     this.key = key;
+    this.parent = parent;
+    hasWord = false;
     value = null;
   }
 
@@ -38,6 +47,8 @@ public class TrieNode<V> {
   @SuppressWarnings("unchecked")
   protected TrieNode() {
     children = (TrieNode<V>[]) new TrieNode<?>[26];
+    key = '\s';
+    hasWord = false;
   }
 
   /**
@@ -87,11 +98,21 @@ public class TrieNode<V> {
   }
 
   /**
+   * Removes a child {@code TrieNode} if it doesn't contain any {@code TrieNode}
+   * with a word or is a word.
+   * 
+   * @param c the character key of the node to remove
+   */
+  protected void removeChild(char c) {
+    children[getIndex(c)] = null;
+  }
+
+  /**
    * Gets the key of the node
    * 
    * @return the key of the node
    */
-  public String getKey() {
+  public char getKey() {
     return key;
   }
 
@@ -111,6 +132,15 @@ public class TrieNode<V> {
    */
   public V getValue() {
     return value;
+  }
+
+  /**
+   * Determines whether the current word is a word with a value.
+   * 
+   * @return if the node has a word value
+   */
+  public boolean isWord() {
+    return value != null;
   }
 
   /**

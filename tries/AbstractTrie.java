@@ -33,16 +33,23 @@ public abstract class AbstractTrie<V> {
   }
 
   /**
-   * Checks the word to make sure it doesn't already exist in the tree. A duplicate
-   * word will override the current word value.
+   * Receives the input word and removes any whitespace {@code \s}, newline
+   * {@code \n}, or tab {@code \t} characters as well as dashes {@code -} and
+   * underscores {@code _}.
    * 
-   * @param word the word to check
+   * <p>
+   * It makes a call to {@link #checkWord(String)} after parsing the word 
+   * because any word input will always be parsed so we check that value
+   * instead of the initial input.
+   * </p>
    * 
-   * @throws IllegalArgumentException if the word already exists in the tree
+   * @param word the word to parse
+   * @returns the parsed word
    */
-  protected final void checkDuplicate(String word) {
-    if (hasWord(word))
-      throw new IllegalArgumentException("Word already exists in the tree.");
+  protected final String parseWord(String word) {
+    String parsed = word.strip().replaceAll("[\n\s\t-_]", "");
+    checkWord(parsed);
+    return parsed;
   }
 
   /**
