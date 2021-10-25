@@ -58,7 +58,12 @@ public class Queue_Test {
 
     @Test 
     void size() {
-      assertEquals(10, queue.size());
+      assertEquals(0, queue.size());
+    }
+
+    @Test
+    void capacity() {
+      assertEquals(10, queue.capacity());
     }
 
     @Test

@@ -5,6 +5,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -20,15 +21,15 @@ public class Trie_Test {
   TrieNode<Integer> node;
   TrieNode<String> node2;
 
-  @Nested 
+  @Nested
   class When_New {
-    
+
     @BeforeEach
     void create_trie() {
       trie = new Trie<>();
     }
 
-    @Test 
+    @Test
     void is_empty() {
       assertEquals(0, trie.size());
     }
@@ -36,7 +37,7 @@ public class Trie_Test {
     @Test
     void insertion() {
       trie.insert("one", 1);
-      
+
       assertEquals(1, trie.get("one"));
     }
 
@@ -51,8 +52,20 @@ public class Trie_Test {
     }
 
     @Test
+    void getPrefix_throws_on_null() {
+      assertThrows(NullPointerException.class, () -> trie.getPrefix(null));
+    }
+
+    @Test
+    void findWords_is_null() {
+      assertNull(trie.findWords());
+      assertNull(trie.findWords(""));
+      assertNull(trie.findWords("a"));
+    }
+
+    @Test
     void delete_throws() {
-      assertThrows(NullPointerException.class, () -> trie.delete(null));
+      assertThrows(IllegalArgumentException.class, () -> trie.delete(null));
     }
 
     @ParameterizedTest
@@ -103,31 +116,32 @@ public class Trie_Test {
       assertEquals(4, node.getValue());
     }
 
-    @Test 
+    @Test
     void delete() {
       trie.delete("one");
 
       assertEquals(7, trie.size());
       assertNull(trie.get("one"));
-    } 
+    }
 
-    @Disabled("Need to be able to debug the recursive walk()")
     @Test
     void to_string() {
       assertEquals("{\n"
-          + "\s\s\"1 -> one\",\n"
-          + "\s\s\"2 -> two\",\n"
-          + "\s\s\"3 -> three\",\n"
-          + "\s\s\"4 -> four\",\n"
-          + "\s\s\"5 -> five\",\n"
+          + "\s\s\"boar -> 8\",\n"
+          + "\s\s\"boars -> 7\",\n"
+          + "\s\s\"boats -> 6\",\n"
+          + "\s\s\"five -> 5\",\n"
+          + "\s\s\"four -> 4\",\n"
+          + "\s\s\"one -> 1\",\n"
+          + "\s\s\"three -> 3\",\n"
+          + "\s\s\"two -> 2\",\n"
           + "}",
         trie.toString());
     }
-
   }
 
   @Nested
-  class Deletion {
+  class Close_Words {
 
     @BeforeEach
     void prep() {
@@ -142,7 +156,7 @@ public class Trie_Test {
     @Test
     void delete_parent() {
       trie.delete("boat");
-      assertEquals(4, trie.get("boats"));   
+      assertEquals(4, trie.get("boats"));
     }
 
     @Test
@@ -150,6 +164,14 @@ public class Trie_Test {
       trie.delete("boats");
       assertEquals(2, trie.get("boat"));
       assertNull(trie.get("boats"));
+    }
+
+    @Test
+    void findWords() {
+      String[] words = { "boa", "boar", "boat", "boats" };
+      assertArrayEquals(words, trie.findWords("boa"));
+      assertArrayEquals(words, trie.findWords(""));
+      assertArrayEquals(words, trie.findWords());
     }
   }
 
@@ -214,17 +236,17 @@ public class Trie_Test {
       assertNotNull(trie.get("two"));
       assertNotNull(trie.get("five"));
       assertNotNull(trie.get("six"));
-      assertNotNull(trie.get("seven"));  
+      assertNotNull(trie.get("seven"));
       assertNotNull(trie.get("eight"));
       assertNotNull(trie.get("nine"));
       assertNotNull(trie.get("ten"));
       assertNotNull(trie.get("onehundredtwenty"));
       assertNotNull(trie.get("thirteen"));
       assertNotNull(trie.get("fifteen"));
-      assertNotNull(trie.get("sixteen")); 
+      assertNotNull(trie.get("sixteen"));
       assertNotNull(trie.get("eighteen"));
       assertNotNull(trie.get("nineteen"));
-      assertNotNull(trie.get("twenty"));    
+      assertNotNull(trie.get("twenty"));
     }
   }
 }
