@@ -1,7 +1,6 @@
 package data_structures.hashtables;
 
 public abstract class AbstractDynamicHashtable<K, V> extends AbstractHashtable<K, V> {
-  
   /**
    * Used within insert() and determines whether the current number of items is
    * equal to or exceeds the load capacity.

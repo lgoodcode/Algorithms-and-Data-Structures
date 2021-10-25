@@ -118,7 +118,7 @@ public class RedBlackTree<K, V> extends AbstractTree<K, V> {
    * @return the {@code RedBlackTreeNode} with the smallest key or {@null} if none
    */
   public RedBlackTreeNode<K, V> minimum() {
-    return minimum(root);
+    return !root.isNIL() ? minimum(root) : null;
   }
 
   /**
@@ -147,7 +147,7 @@ public class RedBlackTree<K, V> extends AbstractTree<K, V> {
    * @return the {@code AVLTreeNode} with the largest key or {@null} if none
    */
   public RedBlackTreeNode<K, V> maximum() {
-    return maximum(root);
+    return !root.isNIL() ? maximum(root) : null;
   }
 
   private void leftRotate(RedBlackTreeNode<K, V> x) {

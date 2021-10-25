@@ -68,6 +68,7 @@ public final class FibonacciHeap<K, V> {
     return min;
   }
 
+  // TODO: implement a better log2 function
   /**
    * Calculates the base 2 of logarithm of the number of items in the heap,
    * {@code n}. It determines the smallest integer value that is greater than
@@ -213,8 +214,8 @@ public final class FibonacciHeap<K, V> {
   }
 
   /**
-   * Consolidate(H)  D(n) + t(H) - 1  D(n): the maximum degree bound
-   *                                  t(H): number of trees in the heap
+   * Consolidate(H)  D(n) + t(H) - 1  D(n): the maximum degree bound (lg n)
+   *                                  t(H): number of trees in the heap (n)
    * 1   let A[0..D(H.n)] be a new array
    * 2   for i = 0 to D(H.n)
    * 3       A[i] = NIL

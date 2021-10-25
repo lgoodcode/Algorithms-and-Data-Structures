@@ -72,14 +72,14 @@ public class MinHeap<T> {
       throw new IllegalArgumentException("Value cannot be null or blank.");
     if (size == heap.length)
       throw new HeapFullException(size);
-
+    
     heap[size] = new Entry<T>(Integer.MIN_VALUE, value);
     increaseKey(size, value.hashCode());
     size++;
   }
 
   public synchronized void increaseKey(int i, int newKey) {
-    if (heap[i].isLessThan(newKey))
+    if (!heap[i].isLessThan(newKey))
       throw new IllegalArgumentException("New key is smaller than current key");
 
     int parent = parent(i);
@@ -136,7 +136,7 @@ public class MinHeap<T> {
   }
 
   /**
-   * A nested inner class that will be used to hold values for the {@code Queue}.
+   * A nested inner class that will be used to hold values for the {@code MinHeap}.
    */
   static class Entry<T> {
     private int key;

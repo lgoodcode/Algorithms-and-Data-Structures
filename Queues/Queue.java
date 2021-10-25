@@ -108,7 +108,7 @@ public class Queue<T> {
   public synchronized void enqueue(T item) throws QueueFullException {
     if (item == null || item.toString().isBlank())
       throw new IllegalArgumentException("Item cannot be null or blank.");
-    if (head == tail && queue[head] == null)
+    if (head == tail && (head == queue.length || queue[head] == null))
       head = tail = 0;
     else if (tail == queue.length)
       throw new QueueFullException(queue.length);
