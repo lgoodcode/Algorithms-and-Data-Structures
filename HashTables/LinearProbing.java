@@ -209,8 +209,8 @@ public final class LinearProbing<K, V> extends AbstractStaticHashtable<K, V> {
     Enumerator(int type, boolean iterator) {
       this.type = type;
       this.iterator = iterator;
-      this.table = LinearProbing.this.table;
-      this.index = LinearProbing.this.table.length;
+      table = LinearProbing.this.table;
+      size = table.length;
     }  
   }
 }

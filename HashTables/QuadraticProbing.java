@@ -191,8 +191,8 @@ public final class QuadraticProbing<K, V> extends AbstractStaticHashtable<K, V> 
     Enumerator(int type, boolean iterator) {
       this.type = type;
       this.iterator = iterator;
-      this.table = QuadraticProbing.this.table;
-      this.index = QuadraticProbing.this.table.length;
+      table = QuadraticProbing.this.table;
+      size = table.length;
     }
   }
 

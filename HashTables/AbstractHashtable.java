@@ -253,7 +253,7 @@ public abstract class AbstractHashtable<K, V> {
   protected abstract class AbstractEnumerator<T> implements Enumeration<T>, Iterator<T>, Iterable<T> {
     protected Entry<?, ?>[] table;
     protected Entry<?, ?> entry, last;
-    protected int type, index;
+    protected int type, size, index = 0;
 
     /**
      * Indicates whether this Enumerator is serving as an Iterator or an
@@ -280,11 +280,11 @@ public abstract class AbstractHashtable<K, V> {
     public final boolean hasMoreElements() {
       Entry<?, ?>[] t = table;
       Entry<?, ?> e = entry;
-      int i = index;
+      int i = index, len = size;
 
       /* Use locals for faster loop iteration */
-      while (e == null && i > 0) {
-        e = t[--i];
+      while (e == null && i < len) {
+        e = t[i++];
       }
 
       entry = e;
@@ -304,11 +304,11 @@ public abstract class AbstractHashtable<K, V> {
     public final T nextElement() {
       Entry<?, ?>[] t = table;
       Entry<?, ?> e = entry;
-      int i = index;
+      int i = index, len = table.length;
 
       /* Use locals for faster loop iteration */
-      while (e == null && i > 0) {
-        e = t[--i];
+      while (e == null && i < len) {
+        e = t[i++];
       }
 
       entry = e;

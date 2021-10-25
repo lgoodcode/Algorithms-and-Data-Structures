@@ -31,9 +31,8 @@ public class TrieNode<V> extends AbstractTrieNode<V> {
    */
   @SuppressWarnings("unchecked")
   protected TrieNode() {
+    super();
     children = (TrieNode<V>[]) new TrieNode<?>[26];
-    key = '\s';
-    hasWord = false;
   }
 
   /**
@@ -50,8 +49,9 @@ public class TrieNode<V> extends AbstractTrieNode<V> {
   /**
    * Sets a new child {@code TrieNode} for the specified character index.
    *
-   * @param c     the character index slot to insert the new child
-   * @param child the new {@TrieNode} child
+   * @param <Node> a subclass of {@link AbstractTrieNode}
+   * @param c      the character index slot to insert the new child
+   * @param child  the new {@TrieNode} child
    */
   @SuppressWarnings("unchecked")
   public <Node extends AbstractTrieNode<V>> void setChild(char c, Node child) {
@@ -73,6 +73,7 @@ public class TrieNode<V> extends AbstractTrieNode<V> {
    * {@code delete()} of the {@code Trie} when tracing up to the root, removing
    * any empty nodes, and in {@code Trie.toString()}.
    *
+   * @param <Node> a subclass of {@link AbstractTrieNode}
    * @return the children
    */
   @SuppressWarnings("unchecked")

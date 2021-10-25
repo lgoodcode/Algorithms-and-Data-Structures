@@ -1,17 +1,17 @@
 package data_structures.tries;
 
-public class Trie<V> extends AbstractTrie<V> {
+public class TrieHash<V> extends AbstractTrie<V> {
   /**
-   * The root node of the {@code Trie} that will hold no value.
+   * The root node of the trie that will hold no value.
    */
-  private TrieNode<V> root;
+  private TrieHashNode<V> root;
 
   /**
-   * Creates a new, empty, {@code Trie}, with the root initialized to a {@code TrieNode}
-   * that has a slot for each letter of the alphabet {@code (26)}.
+   * Creates a new, empty, trie, with the root initialized to a {@code TrieNode}
+   * that has a slot for each letter of the alphabet (26).
    */
-  public Trie() {
-    root = new TrieNode<V>();
+  public TrieHash() {
+    root = new TrieHashNode<V>();
   }
 
   /**
@@ -19,12 +19,13 @@ public class Trie<V> extends AbstractTrie<V> {
    *
    * @throws IllegalArgumentException {@inheritDoc}
    */
+  @Override
   public synchronized void insert(String word, V value) {
     checkWord(word);
     checkValue(value);
 
     String currentWord = parseWord(word);
-    TrieNode<V> child, newChild, node = root;
+    TrieHashNode<V> child, newChild, node = root;
     char currChar;
 
     count++;
@@ -37,7 +38,7 @@ public class Trie<V> extends AbstractTrie<V> {
       if (child != null)
         node = child;
       else {
-        newChild = new TrieNode<V>(currChar, node);
+        newChild = new TrieHashNode<V>(currChar, node);
         node.setChild(currChar, newChild);
         node = newChild;
       }
@@ -52,9 +53,9 @@ public class Trie<V> extends AbstractTrie<V> {
    * {@inheritDoc}
    */
   @SuppressWarnings("unchecked")
-  public TrieNode<V> search(String word) {
+  public TrieHashNode<V> search(String word) {
     String currentWord = parseWord(word);
-    TrieNode<V> node = root;
+    TrieHashNode<V> node = root;
 
     if (currentWord.isBlank())
       return node;
@@ -75,11 +76,11 @@ public class Trie<V> extends AbstractTrie<V> {
    *
    * @throws IllegalArgumentException {@inheritDoc}
    */
+  @Override
   public synchronized void delete(String word) {
     checkWord(word);
 
-    TrieNode<V> parent, node = search(word);
-    TrieNode<V>[] children;
+    TrieHashNode<V> parent, node = search(word);
     boolean hasWord = false;
 
     if (node == null)
@@ -89,27 +90,24 @@ public class Trie<V> extends AbstractTrie<V> {
     node.setValue(null);
 
     for (parent = node.parent; parent != null; node = parent, parent = node.parent) {
-      if (!node.hasWord && !node.isWord()) {
+      if (node.children.isEmpty() && !node.isWord())
         parent.removeChild(node.key);
-        continue;
-      }
 
-      children = node.getChildren();
-
-      for (int i = 0; i < children.length; i++) {
-        if (children[i] != null && (children[i].hasWord || children[i].isWord())) {
+      for (TrieHashNode<V> child : node.children.values()) {
+        if (child.hasWord || child.isWord()) {
           hasWord = true;
           break;
         }
-      }
 
-      if (hasWord)
-        break;
-      else if (!hasWord && node.isWord()) {
-        node.hasWord = false;
-        break;
-      } else
-        parent.removeChild(node.key);
+        if (hasWord)
+          break;
+        else if (!hasWord && node.isWord()) {
+          node.hasWord = false;
+          break;
+        }
+        else
+          parent.removeChild(node.key);
+      }
     }
   }
 
@@ -125,7 +123,7 @@ public class Trie<V> extends AbstractTrie<V> {
     if (node.isRoot())
       return "";
 
-    TrieNode<V> currNode = (TrieNode<V>) node, parent = currNode.parent;
+    TrieHashNode<V> currNode = (TrieHashNode<V>) node, parent = currNode.parent;
     String prefix = "";
 
     while (!currNode.isRoot()) {

@@ -443,13 +443,13 @@ public final class DynamicHashtable<K, V> extends AbstractDynamicHashtable<K, V>
       table = new Entry<?, ?>[m * m];
       this.type = type;
       this.iterator = iterator;
-      index = 0;
+      size = 0;
 
       // Copy all entries from each subtable into the single array of entries
       for (DynamicSubtable<?, ?> Tj : DynamicHashtable.this.tables) {
         for (int i=0; i<Tj.table.length; i++) {
           if (Tj.table[i] != null)
-            table[index++] = Tj.table[i];
+            table[size++] = Tj.table[i];
         }
       }
     }  

@@ -247,8 +247,8 @@ public final class DoubleHashing<K, V> extends AbstractHashtable<K, V> {
     Enumerator(int type, boolean iterator) {
       this.type = type;
       this.iterator = iterator;
-      this.table = DoubleHashing.this.table;
-      this.index = DoubleHashing.this.table.length;
+      table = DoubleHashing.this.table;
+      this.size = table.length; 
     }  
   }
 

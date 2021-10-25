@@ -18,6 +18,19 @@ public abstract class AbstractTrieNode<V> {
   private V value;
 
   /**
+   * The root key
+   */
+  private final char ROOT = '\s';
+
+  /**
+   * Default constructor for the root {@code TrieNode}.
+   */
+  protected AbstractTrieNode() {
+    key = ROOT;
+    hasWord = false;
+  }
+
+  /**
    * Internal method to get the numeric value of the character to map to the
    * proper index location based on the letter in the range of {@code [A, Z]}
    * case-insensitive. The numeric index value from the given character is in the
@@ -44,6 +57,16 @@ public abstract class AbstractTrieNode<V> {
   }
 
   /**
+   * Determines whether the current {@code TrieNode} is the {@code root} of the
+   * {@code Trie} by checking if the key is a whitespace character {@code '\s'}.
+   * 
+   * @return if the node is the {@code root} or not
+   */
+  public final boolean isRoot() {
+    return key == ROOT;
+  }
+
+  /**
    * Gets the value for the node
    *
    * @return the value of the node or {@code null} if none
@@ -64,6 +87,7 @@ public abstract class AbstractTrieNode<V> {
   /**
    * Returns the child {@code TrieNode} for the given character.
    *
+   * @param <Node> a subclass of {@link AbstractTrieNode}
    * @param c the character of the child to get
    * @return the child {@code TrieNode}
    */
@@ -72,6 +96,7 @@ public abstract class AbstractTrieNode<V> {
   /**
    * Sets a new child {@code TrieNode} for the specified character index.
    *
+   * @param <Node> a subclass of {@link AbstractTrieNode}
    * @param c     the character index slot to insert the new child
    * @param child the new {@TrieNode} child
    */
@@ -90,6 +115,7 @@ public abstract class AbstractTrieNode<V> {
    * {@code delete()} of the {@code Trie} whne tracing up to the root, removing
    * any empty nodes, and in {@code Trie.toString()}.
    *
+   * @param <Node> a subclass of {@link AbstractTrieNode}
    * @return the {@code TrieNode} children
    */
   protected abstract <Node extends AbstractTrieNode<V>> Node[] getChildren();

@@ -238,12 +238,12 @@ public final class ChainingHashtable<K, V> extends AbstractHashtable<K, V> {
       table = new Entry<?, ?>[n];
       this.type = type;
       this.iterator = iterator;
-      index = 0;
+      size = 0;
 
       for (LinkedList<K, V> list : (LinkedList<K, V>[]) ChainingHashtable.this.table) {
         if (list != null) {
           list.entries().forEach((node) -> {
-            table[index++] = new Entry<K, V>(node.getKey(), node.getValue());
+            table[size++] = new Entry<K, V>(node.getKey(), node.getValue());
           });
         }
       }

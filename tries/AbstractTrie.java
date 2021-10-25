@@ -3,6 +3,10 @@ package data_structures.tries;
 import java.util.function.Consumer;
 import java.util.function.BiConsumer;
 
+import data_structures.queues.Queue;
+import data_structures.queues.exceptions.QueueFullException;
+import data_structures.queues.exceptions.QueueEmptyException;
+
 public abstract class AbstractTrie<V> {
   /**
    * Counter tracking the number of entries in the {@code Trie}.
@@ -69,6 +73,28 @@ public abstract class AbstractTrie<V> {
   }
 
   /**
+   * Returns the {@code root} of the {@code Trie}.
+   *
+   * <p>
+   * This helps get around having to set a {@code root} property in the
+   * {@link AbstractTrie} where, if the default method is implemented in the
+   * abstract class, it will always returns the {@code AbstractTrieNode}, which
+   * will cause the methods to not function. This makes a call to
+   * {@link #search(String)} with a blank string {@code ""} so that it will
+   * immediately return the {@code root} node of {@code Trie}. This allows more
+   * methods to be default implementations, such as {@link #walk(Consumer)}, which
+   * traverses the entire {@code Trie} from the {@code root} and the
+   * {@link #_toString()} bridge method.
+   * </p>
+   *
+   * @param <Node> a subclass of {@link AbstractTrieNode}
+   * @return the root {@code TrieNode} of the {@code Trie}
+   */
+  public final <Node extends AbstractTrieNode<V>> Node getRoot() {
+    return search("");
+  }
+
+  /**
    * Inserts a new {@code TrieNode} into the {@code Trie} with the specified
    * {@code word} and value. If inserting a {@code word} that is already used, its
    * value will be overriden.
@@ -121,19 +147,31 @@ public abstract class AbstractTrie<V> {
    * the specified {@code word}. Returns {@code true} only if the resulting node
    * in the search is not {@code null} or the {@code root}.
    *
-   * @param word the word to search for
+   * @param <Node> a subclass of {@link AbstractTrieNode}
+   * @param word   the word to search for
    * @return whether a node in the {@code Trie} contains the specified word
    */
-  public abstract boolean hasWord(String word);
+  @SuppressWarnings("unchecked")
+  public final <Node extends AbstractTrieNode<V>> boolean hasWord(String word) {
+    Node node = (Node) search(word);
+    return node != null && !node.isRoot();
+  }
 
   /**
    * Retrieves the value for the corresponding {@code TrieNode} of the given word
    * or {@code null} if not found, or is the {@code root}.
    *
-   * @param word the word of the {@code TrieNode}
+   * @param <Node> a subclass of {@link AbstractTrieNode}
+   * @param word   the word of the {@code TrieNode}
    * @return the value or {@code null} if not found
    */
-  public abstract V get(String word);
+  @SuppressWarnings("unchecked")
+  public final <Node extends AbstractTrieNode<V>> V get(String word) {
+    Node node = (Node) search(word);
+    if (node == null || node.isRoot())
+      return null;
+    return node.getValue();
+  }
 
   /**
    * Deletes a {@code word} value from the {@code Trie} if it exists. Will throw
@@ -157,9 +195,10 @@ public abstract class AbstractTrie<V> {
   public abstract void delete(String word);
 
   /**
-   * Traces up from the specified {@code TrieNode} up to the {@code root}, collecting the
-   * keys from the initial node, all the way up to the {@code root}, to form the prefix.
-   * Throws an exception if the specified node is {@code null}.
+   * Traces up from the specified {@code TrieNode} up to the {@code root},
+   * collecting the keys from the initial node, all the way up to the
+   * {@code root}, to form the prefix. Throws an exception if the specified node
+   * is {@code null}.
    *
    * @param <Node> a subclass of {@link AbstractTrieNode}
    * @param node   the {@code TrieNode} which to find the prefix of
@@ -196,7 +235,48 @@ public abstract class AbstractTrie<V> {
    *                                  blank, or the start node is not the
    *                                  {@code root} and the {@code prefix} is blank
    */
-  protected abstract <Node extends AbstractTrieNode<V>> String[] findWords(Node start, String prefix);
+  protected final <Node extends AbstractTrieNode<V>> String[] findWords(Node start, String prefix) {
+    if (start == null)
+      throw new NullPointerException("Node cannot be null.");
+    if (start.isRoot() && !prefix.isBlank())
+      throw new IllegalArgumentException("Prefix must be blank if starting from the root.");
+    if (!start.isRoot() && prefix.isBlank())
+      throw new IllegalArgumentException("Prefix cannot be blank if not starting from root.");
+    if (isEmpty()) {
+      return null;
+    }
+
+    // Queue is initialized to the number of words in the trie so the maximum length
+    // cannot be exceeded
+    Queue<String> queue = new Queue<>(size());
+    String[] words;
+    int i = 0, len;
+
+    walk(start, prefix, (Node node, String chars) -> {
+      if (node.isWord()) {
+        try {
+          queue.enqueue(chars);
+        } catch (QueueFullException e) {}
+      }
+    });
+
+    if (start.isWord()) {
+      len = queue.size() + 1;
+      words = new String[len];
+      words[i++] = prefix;
+    } else {
+      len = queue.size();
+      words = new String[len];
+    }
+
+    for (; i < len; i++) {
+      try {
+        words[i] = queue.dequeue();
+      } catch (QueueEmptyException e) {}
+    }
+
+    return words;
+  }
 
   /**
    * Finds all the words under the specified {@code TrieNode}. Will make a call to
@@ -212,7 +292,11 @@ public abstract class AbstractTrie<V> {
    * @throws NullPointerException if the specified starting {@code TrieNode} is
    *                              {@code null}
    */
-  public abstract <Node extends AbstractTrieNode<V>> String[] findWords(Node start);
+  public final <Node extends AbstractTrieNode<V>> String[] findWords(Node start) {
+    if (start == null)
+      throw new NullPointerException("Node cannot be null.");
+    return findWords(start, getPrefix(start));
+  }
 
   /**
    * Finds all the words under the specified {@code prefix}. Will make a call to
@@ -220,12 +304,17 @@ public abstract class AbstractTrie<V> {
    * immediately return {@code null} if there doesn't exist a node with the
    * specified {@code prefix}.
    *
+   * @param <Node> a subclass of {@link AbstractTrieNode}
    * @param prefix the prefix of the specified starting {@code TrieNode}
    * @return the {@code String} array of words contained under the {@TrieNode} of
    *         the specified {@code prefix} or {@code null} if none or if
    *         {@code Trie} is empty
    */
-  public abstract String[] findWords(String prefix);
+  @SuppressWarnings("unchecked")
+  public final <Node extends AbstractTrieNode<V>> String[] findWords(String prefix) {
+    Node start = (Node) search(prefix);
+    return start != null ? findWords(start, prefix) : null;
+  }
 
   /**
    * Finds all the words contained in the {@code Trie}.
@@ -233,7 +322,9 @@ public abstract class AbstractTrie<V> {
    * @return the {@code String} array of words contained in the {@code Trie} or
    *         {@code null} if the {@code Trie} is empty
    */
-  public abstract String[] findWords();
+  public final String[] findWords() {
+    return isEmpty() ? null : findWords("");
+  }
 
   /**
    * Recursive method that takes a {@code TrieNode} and a
@@ -249,7 +340,7 @@ public abstract class AbstractTrie<V> {
   public <Node extends AbstractTrieNode<V>> void walk(Node node, Consumer<Node> callback) {
     Node[] children = (Node[]) node.getChildren();
 
-    for (int i=0; i<children.length; i++) {
+    for (int i = 0; i < children.length; i++) {
       if (children[i] != null) {
         callback.accept(children[i]);
         walk(children[i], callback);
@@ -262,7 +353,7 @@ public abstract class AbstractTrie<V> {
    * {@code BiConsumer<TrieNode, String>} callback lambda function to perform
    * side-effect operations each {@code TrieNode} within the {@code Trie} in
    * lexicographical order.
-   * 
+   *
    * <p>
    * This is used for the toString() method for subclass implementations.
    * </p>
@@ -278,7 +369,7 @@ public abstract class AbstractTrie<V> {
 
     Node[] children = (Node[]) node.getChildren();
 
-    for (int i=0; i<children.length; i++) {
+    for (int i = 0; i < children.length; i++) {
       if (children[i] != null) {
         callback.accept(children[i], prefix + children[i].key);
         walk(children[i], prefix + children[i].key, callback);
@@ -286,4 +377,48 @@ public abstract class AbstractTrie<V> {
     }
   }
 
+  /**
+   * Recursive method that traverses all {@code TrieNode} in the {@code Trie},
+   * beginning from the {@code root}. Otherwise, if the {@code Trie} is empty, it
+   * won't do anything.
+   *
+   * @param <Node>   a subclass of {@link AbstractTrieNode}
+   * @param callback the {@code Consumer} lambda function
+   */
+  public <Node extends AbstractTrieNode<V>> void walk(Consumer<Node> callback) {
+    if (!isEmpty())
+      walk(getRoot(), callback);
+  }
+
+  /**
+   * Bridge method to be generic for any {@code Trie} implementation to traverse
+   * all the {@code TrieNodes} and return the object string.
+   *
+   * @param <Node> a subclass of {@link AbstractTrieNode}
+   * @return the object string of the {@code Trie}
+   */
+  private <Node extends AbstractTrieNode<V>> String _toString() {
+    if (isEmpty())
+      return "{}";
+
+    StringBuilder sb = new StringBuilder("{\n");
+
+    walk(getRoot(), "", (Node node, String prefix) -> {
+      if (node.isWord())
+        sb.append("\s\s\"" + prefix + " -> " + node.getValue() + "\",\n");
+    });
+
+    return sb.toString() + "}";
+  }
+
+  /**
+   * Traverses the {@code Trie} and prints out the words by their prefix and
+   * associated values in lexicographical order.
+   *
+   * @return the object string of the {@code Trie}
+   */
+  @Override
+  public final String toString() {
+    return _toString();
+  }
 }

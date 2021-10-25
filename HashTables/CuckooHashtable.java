@@ -713,12 +713,12 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
       table = new Entry<?, ?>[T * m];
       this.type = type;
       this.iterator = iterator;
-      index = 0;
+      size = 0;
 
       // Copy all entries from each subtable into the single array of entries
       for (CuckooHashSubtable<?, ?> Tj : CuckooHashtable.this.tables) {
-        System.arraycopy(Tj.table, 0, table, index, Tj.table.length);
-        index += Tj.table.length;
+        System.arraycopy(Tj.table, 0, table, size, Tj.table.length);
+        size += Tj.table.length;
       }
     }  
   }

@@ -12,22 +12,22 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import data_structures.tries.Trie;
-import data_structures.tries.TrieNode;
+import data_structures.tries.TrieHash;
+import data_structures.tries.TrieHashNode;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-public class Trie_Test {
-  Trie<Integer> trie;
-  Trie<String> trie2;
-  TrieNode<Integer> node;
-  TrieNode<String> node2;
+public class TrieHash_Test {
+  TrieHash<Integer> trie;
+  TrieHash<String> trie2;
+  TrieHashNode<Integer> node;
+  TrieHashNode<String> node2;
 
   @Nested
   class When_New {
 
     @BeforeEach
     void create_trie() {
-      trie = new Trie<>();
+      trie = new TrieHash<>();
     }
 
     @Test
@@ -79,7 +79,7 @@ public class Trie_Test {
     @NullAndEmptySource
     @ValueSource(strings = { " ", "  ", "\t", "\n" })
     void insert_throws_on_bad_words(String word) {
-      trie2 = new Trie<>();
+      trie2 = new TrieHash<>();
 
       assertThrows(IllegalArgumentException.class, () -> trie.insert(word, 1));
     }
@@ -91,7 +91,7 @@ public class Trie_Test {
 
     @BeforeEach
     void create_and_insert() {
-      trie = new Trie<>();
+      trie = new TrieHash<>();
 
       trie.insert("one", 1);
       trie.insert("two", 2);
@@ -153,7 +153,7 @@ public class Trie_Test {
 
     @BeforeEach
     void prep() {
-      trie = new Trie<>();
+      trie = new TrieHash<>();
 
       trie.insert("boa", 1);
       trie.insert("boat", 2);
@@ -188,7 +188,7 @@ public class Trie_Test {
 
     @Test
     void insertions() {
-      trie = new Trie<>();
+      trie = new TrieHash<>();
 
       trie.insert("one", 1);
       trie.insert("two", 2);
