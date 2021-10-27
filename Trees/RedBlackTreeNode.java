@@ -1,6 +1,6 @@
 package data_structures.trees;
 
-public class RedBlackTreeNode<K, V> extends AbstractTreeNode<K, V> {
+public class RedBlackTreeNode<K, V> extends TreeNode<K, V> {
   protected RedBlackTreeNode<K, V> parent;
   protected RedBlackTreeNode<K, V> left;
   protected RedBlackTreeNode<K, V> right;

@@ -14,7 +14,7 @@ import java.util.function.Consumer;
  * same set of operations and take {@code O(log2 n)} time for the basic
  * operations.
  * </p>
- * 
+ *
  * <p>
  * For lookup-intensive applications, the AVL trees are faster than Reb-Black
  * trees because they are more strictly balanced.
@@ -51,7 +51,7 @@ public class AVLTree<K, V> extends AbstractTree<K, V> {
   /**
    * Creates an empty, BinaryTree, using the specified compare function to
    * determine whether a given {@code AVLTreeNode} is smaller than another.
-   * 
+   *
    * @param compareFn an anonymous function that compares two {@code AVLTreeNode}
    *                  objects
    */
@@ -68,26 +68,32 @@ public class AVLTree<K, V> extends AbstractTree<K, V> {
   }
 
   /**
-   * The internal compare method used to determine if the key of a
-   * tree node is smaller than the other tree node key.
-   * 
-   * @param x tree node to compare
-   * @param y the other tree node to compare
-   * @return whether the first node key is smaller than the other node key
-   * 
-   * @throws NullPointerException     if the either node is {@code null}
-   * @throws IllegalArgumentException if either key is {@code null} or blank
-   */ 
-  private boolean isLessThan(AVLTreeNode<K, V> x, AVLTreeNode<K, V> y) {
-    if (x == null || y == null)
-      throw new NullPointerException("Node cannot be null.");
-    return isLessThan(x.getKey(), y.getKey());
-  }  
+   * Internal method to verify the {@code TreeNode} used for methods are
+   * {@code AVLTreeNodes} that require it.
+   *
+   * @param <Node> {@link TreeNode} or a subclass of
+   * @param node   the node to verify
+   *
+   * @throws IllegalArgumentException if the supplied node is not an instance of
+   *                                  {@code AVLTreeNode}
+   */
+  private <Node extends TreeNode<K, V>> void checkType(Node node) {
+    if (node != null && node.getClass() != AVLTreeNode.class)
+      throw new IllegalArgumentException("Node must be an instance of AVLTreeNode.");
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @SuppressWarnings("unchecked")
+  public final <Node extends TreeNode<K, V>> Node getRoot() {
+    return (Node) root;
+  }
 
   /**
    * The Balance Factor of a node is defined to be the height difference of its
    * two child sub-trees.
-   * 
+   *
    * @param node the node whose balance factor we want to get
    * @return the balance factor of the node
    */
@@ -97,7 +103,7 @@ public class AVLTree<K, V> extends AbstractTree<K, V> {
 
   /**
    * Determines the height of the node, relative to height of its child nodes.
-   * 
+   *
    * @param node the node whose height we want
    * @return the height of the node
    */
@@ -105,58 +111,6 @@ public class AVLTree<K, V> extends AbstractTree<K, V> {
     if (node == null)
       return -1;
     return Math.max(height(node.left), height(node.right)) + 1;
-  }
-
-  /**
-   * Finds the {@code AVLTreeNode} with the smallest key by recursively traversing
-   * down the left subtree.
-   *
-   * @param node the {@code AVLTreeNode} the tree node to start traversing at
-   * @return the {@code AVLTreeNode} with the smallest key or {@null} if none
-   */
-  public AVLTreeNode<K, V> minimum(AVLTreeNode<K, V> node) {
-    if (node == null)
-      return null;
-
-    if (node.left != null)
-      return minimum(node.left);
-    return node;
-  }
-
-  /**
-   * Finds the {@code AVLTreeNode} with the smallest key by recursively traversing
-   * down the left subtree starting at the {@code root} of the tree.
-   *
-   * @return the {@code AVLTreeNode} with the smallest key or {@null} if none
-   */
-  public AVLTreeNode<K, V> minimum() {
-    return minimum(root);
-  }
-
-  /**
-   * Finds the {@code AVLTreeNOde} with the largest key by recursively traversing
-   * down the right subtree.
-   *
-   * @param node the {@code AVLTreeNode} the tree node to start traversing at
-   * @return the {@code AVLTreeNode} with the largest key or {@null} if none
-   */
-  public AVLTreeNode<K, V> maximum(AVLTreeNode<K, V> node) {
-    if (node == null)
-      return null;
-
-    if (node.right != null)
-      return maximum(node.right);
-    return node;
-  }
-
-  /**
-   * Finds the {@code AVLTreeNode} with the largest key by recursively traversing
-   * down the left subtree starting at the {@code root} of the tree.
-   *
-   * @return the {@code AVLTreeNode} with the largest key or {@null} if none
-   */
-  public AVLTreeNode<K, V> maximum() {
-    return maximum(root);
   }
 
   private AVLTreeNode<K, V> rotateLeft(AVLTreeNode<K, V> x, AVLTreeNode<K, V> z) {
@@ -232,14 +186,14 @@ public class AVLTree<K, V> extends AbstractTree<K, V> {
   /**
    * Checks each of the node's ancestors for consistency with the invariants of
    * AVL trees.
-   * 
+   *
    * <p>
    * This is used in the {@link #insert()} and {@link #deleteNode()} processes.
    * Because the {@code insert()} method uses a key, the parameter is placed at
    * the end and when used it for {@code delete()} it simply sets the value to
    * {@code null}
    * </p>
-   * 
+   *
    * <p>
    * The loop begins at the node inserted with the parent and works its way up to
    * the root at worst, checking the balance factor of each ancestor to the
@@ -249,10 +203,10 @@ public class AVLTree<K, V> extends AbstractTree<K, V> {
    * the insertion did not increase the height of the tree and the AVL invariant
    * is held and we can stop checking the balance.
    * </p>
-   * 
-   * g - The grandparent of current node 
-   * n - The returned node after a rotation, if a rotation is made 
-   * x - The parent of the current node z 
+   *
+   * g - The grandparent of current node
+   * n - The returned node after a rotation, if a rotation is made
+   * x - The parent of the current node z
    * b - The balance factor of node x
    *
    * @param key the key of the newly inserted node
@@ -260,7 +214,7 @@ public class AVLTree<K, V> extends AbstractTree<K, V> {
    */
   private void retracing(int type, AVLTreeNode<K, V> node, K key) {
     AVLTreeNode<K, V> g, n, x = node.parent;
-    
+
     for (int b; x != null; node = x, x = node.parent) {
       b = balanceFactor(x);
       g = x.parent;
@@ -272,27 +226,27 @@ public class AVLTree<K, V> extends AbstractTree<K, V> {
         if (type == INSERT) {
           if (isLessThan(key, x.left.getKey()))
             n = rotateRight(x, node);
-          else 
-            n = rotateLeftRight(x, node);       
+          else
+            n = rotateLeftRight(x, node);
         }
         else {
           if (balanceFactor(x.left) > 0)
             n = rotateRight(x, node);
           else if (balanceFactor(x.left) < 0)
-            n = rotateLeftRight(x, node);        
+            n = rotateLeftRight(x, node);
         }
-      }      
+      }
       else if (b < -1) {
         if (type == INSERT) {
           if (isLessThan(x.right.getKey(), key))
             n = rotateLeft(x, node);
-          else 
+          else
             n = rotateRightLeft(x, node);
         }
         else {
           if (balanceFactor(x.right) < 0)
             n = rotateLeft(x, node);
-          else if (balanceFactor(x.right) > 0) 
+          else if (balanceFactor(x.right) > 0)
             n = rotateRightLeft(x, node);
         }
       }
@@ -303,10 +257,10 @@ public class AVLTree<K, V> extends AbstractTree<K, V> {
         if (g != null) {
           if (x == g.left)
             g.left = n;
-          else 
+          else
             g.right = n;
         }
-        else 
+        else
           root = n;
 
         break;
@@ -334,7 +288,7 @@ public class AVLTree<K, V> extends AbstractTree<K, V> {
    * greater than {@code -1} or {@code +1}, the subtree rooted at this node is AVL
    * unbalanced, and a rotation is needed.
    * </p>
-   * 
+   *
    * <p>
    * The retracing is consisted of the for-loop where we begin at the newly
    * inserted node {@code z} and retrace its way back up to the {@code root} or
@@ -342,14 +296,15 @@ public class AVLTree<K, V> extends AbstractTree<K, V> {
    * subtree is unchanged - balanced. Otherwise, if the temporary balance factor
    * is {@code -2} or {@code +2}, a rotation is required.
    * </p>
-   * 
+   *
    * {@inheritDoc}
-   * 
+   *
    * @throws IllegalArgumentException {@inheritDoc}
    */
   public synchronized void insert(K key, V value) {
     checkKey(key);
     checkValue(value);
+    checkDuplicate(key);
 
     count++;
 
@@ -362,7 +317,7 @@ public class AVLTree<K, V> extends AbstractTree<K, V> {
 
       if (isLessThan(z, q))
         q = q.left;
-      else 
+      else
       q = q.right;
     }
 
@@ -378,82 +333,85 @@ public class AVLTree<K, V> extends AbstractTree<K, V> {
   }
 
   /**
-   * Commpares the given key to the left and right node of the current
-   * {@code AVLTreeNode} so that it can descend further until either the the
-   * correct node is found with the matching key, or we reach the end.
-   * 
-   * @param node the current tree node
-   * @param key  the key of the node to find
-   * @return the tree node or {@code null} if not found
-   * 
-   * @throws IllegalArgumentException if the key is {@code null} or blank
-   */  
-  public AVLTreeNode<K, V> search(AVLTreeNode<K, V> node, K key) {
+   * {@inheritDoc}
+   *
+   * @throws IllegalArgumentException {@inheritDoc}, or if the supplied node is
+   *                                  not an {@code AVLTreeNode}
+   */
+  @SuppressWarnings("unchecked")
+  public <Node extends TreeNode<K, V>> Node search(Node node, K key) {
+    checkType(node);
     checkKey(key);
 
-    if (node == null || key == node.getKey())
-      return node;
-    if (isLessThan(key, node.getKey()))
-      return search(node.left, key);
-    return search(node.right, key);    
-  } 
+    AVLTreeNode<K, V> _node = (AVLTreeNode<K, V>) node;
 
-  /**
-   * Search for a node for the specified key starting at the {@code root}.
-   * 
-   * @param key the key of the node to find
-   * @return the tree node or {@code null} if not found
-   * 
-   * @throws IllegalArgumentException if the key is {@code null} or blank
-   */
-  public AVLTreeNode<K, V> search(K key) {
-    return search(root, key);
+    if (_node == null || key == _node.getKey())
+      return (Node) _node;
+    if (isLessThan(key, _node.getKey()))
+      return (Node) search(_node.left, key);
+    return (Node) search(_node.right, key);
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @throws IllegalArgumentException {@inheritDoc}
+   * @throws IllegalArgumentException if the supplied node is not an
+   *                                  {@code AVLTreeNode}
    */
-  public boolean hasKey(K key) {
-    return search(key) != null;
+  @SuppressWarnings("unchecked")
+  public <Node extends TreeNode<K, V>> Node minimum(Node node) {
+    checkType(node);
+
+    AVLTreeNode<K, V> _node = (AVLTreeNode<K, V>) node;
+
+    if (_node == null)
+      return null;
+    if (_node.left != null)
+      return (Node) minimum(_node.left);
+    return (Node) _node;
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @throws IllegalArgumentException {@inheritDoc}
+   * @throws IllegalArgumentException if the supplied node is not an
+   *                                  {@code AVLTreeNode}
    */
-  public V get(K key) {
-    AVLTreeNode<K, V> node = search(key);
-    return node != null ? node.getValue() : null;
+  @SuppressWarnings("unchecked")
+  public <Node extends TreeNode<K, V>> Node maximum(Node node) {
+    checkType(node);
+
+    AVLTreeNode<K, V> _node = (AVLTreeNode<K, V>) node;
+
+    if (_node == null)
+      return null;
+    if (_node.right != null)
+      return (Node) maximum(_node.right);
+    return (Node) _node;
   }
 
   /**
-   * Subroutine to move subtrees around the tree. Replaces one subtree as a child
-   * of its parent with another subtree. x's parent becomes y's parent and x's
-   * parent ends up having y as its child.
-   * 
-   * @param x {@code AVLTreeNode}
-   * @param y {@code AVLTreeNode}
-   */  
-  private void transplant(AVLTreeNode<K, V> x, AVLTreeNode<K, V> y) {
-    if (x.parent == null)
-      root = y;
-    else if (x == x.parent.left)
-      x.parent.left = y;
-    else 
-      x.parent.right = y;
+   * {@inheritDoc}
+   */
+  @SuppressWarnings("unchecked")
+  protected <Node extends TreeNode<K, V>> void transplant(Node x, Node y) {
+    AVLTreeNode<K, V> _x = (AVLTreeNode<K, V>) x;
+    AVLTreeNode<K, V> _y = (AVLTreeNode<K, V>) y;
 
-    if (y != null)
-      y.parent = x.parent;
+    if (_x.parent == null)
+      root = _y;
+    else if (_x == _x.parent.left)
+      _x.parent.left = _y;
+    else
+      _x.parent.right = _y;
+
+    if (_y != null)
+      _y.parent = _x.parent;
   }
 
   /**
-   * Deletes the specified {@code AVLTreeNode} from the tree. Calls the
-   * {@code transplant()} method to adjust the tree nodes to replace the removed
-   * node.
-   * 
+   * {@inheritDoc}
+   *
    * <p>
    * The deletion process, similar to the insertion process, begins with the
    * normal deletion in a {@code BinarySearchTree}. After the node has been
@@ -471,172 +429,165 @@ public class AVLTree<K, V> extends AbstractTree<K, V> {
    * {@code 1}, meaning that the tree has to be rebalanced again on the next
    * higher level.
    * </p>
-   * 
-   * @param node the {@code AVLTreeNode} to remove
-   * @see #transplant()
-   * 
-   * @throws NullPointerException if the {@code AVLTreeNode} is {@code null}
+   *
+   * @throws NullPointerException {@inheritDoc}, or if the supplied node is not an
+   *                              {@code AVLTreeNode}
    */
-  public synchronized void deleteNode(AVLTreeNode<K, V> node) {
+  @SuppressWarnings("unchecked")
+  public synchronized <Node extends TreeNode<K, V>> void deleteNode(Node node) {
     if (node == null)
       throw new NullPointerException("Node cannot be null.");
 
+    checkType(node);
     count--;
 
-    AVLTreeNode<K, V> y;
+    AVLTreeNode<K, V> y, _node = (AVLTreeNode<K, V>) node;
 
-    if (node.left == null)
-      transplant(node, node.right);
-    else if (node.right == null)
-      transplant(node, node.left);
+    if (_node.left == null)
+      transplant(_node, _node.right);
+    else if (_node.right == null)
+      transplant(_node, _node.left);
     else {
-      y = minimum(node.right);
+      y = minimum(_node.right);
 
-      if (y.parent != node) {
+      if (y.parent != _node) {
         transplant(y, y.right);
-        y.right = node.right;
+        y.right = _node.right;
         y.right.parent = y;
       }
-      transplant(node, y);
-      y.left = node.left;
+      transplant(_node, y);
+      y.left = _node.left;
       y.left.parent = y;
     }
 
-    retracing(DELETE, node, null);
+    retracing(DELETE, _node, null);
   }
 
   /**
    * {@inheritDoc}
-   * 
-   * @throws IllegalArgumentException {@inheritDoc}
+   *
+   * @throws NullPointerException {@inheritDoc}, or if the supplied node is not an
+   *                              {@code AVLTreeNode}
    */
-  public synchronized void delete(K key) {
-    AVLTreeNode<K, V> node = search(key);
-
-    if (node != null)
-      deleteNode(node);
-  }
-
- /**
-   * Finds the node that will immediately succeed the given {@code AVLTreeNode}
-   * without comparing keys. This is done by simply returning the child node with
-   * the largest key down the right subtree.
-   * 
-   * @param node the {@code AVLTreeNode} to find the successor of
-   * @return the successor or {@code null} if none
-   * 
-   * @throws NullPointerException if the node specified is {@code null}
-   */
-  public AVLTreeNode<K, V> successor(AVLTreeNode<K, V> node) {
+  @SuppressWarnings("unchecked")
+  public <Node extends TreeNode<K, V>> Node successor(Node node) {
     if (node == null)
       throw new NullPointerException("Node cannot be null.");
-    if (node.right != null)
-      return minimum(node.right);
 
-    AVLTreeNode<K, V> y = node.parent;
-    
-    while (y != null && node.equals(y.right)) {
-      node = y;
+    checkType(node);
+
+    AVLTreeNode<K, V> y, _node = (AVLTreeNode<K, V>) node;
+
+    if (_node.right != null)
+      return (Node) minimum(_node.right);
+
+    y = _node.parent;
+
+    while (y != null && _node.equals(y.right)) {
+      _node = y;
       y = y.parent;
     }
 
-    return y;
+    return (Node) y;
   }
 
   /**
-   * Finds the node that will immediately precede the given {@code AVLTreeNode}
-   * without comparing keys. This is done by simply returning the child node with
-   * the smallest key down the left subtree.
-   * 
-   * @param node the {@code AVLTreeNode} to find the predecessor of
-   * @return the predecessor or {@code null} if none
-   * 
-   * @throws NullPointerException if the node specified is {@code null}
+   * {@inheritDoc}
+   *
+   * @throws NullPointerException {@inheritDoc}, or if the supplied node is not an
+   *                              {@code AVLTreeNode}
    */
-  public AVLTreeNode<K, V> predecessor(AVLTreeNode<K, V> node) {
+  @SuppressWarnings("unchecked")
+  public <Node extends TreeNode<K, V>> Node predecessor(Node node) {
     if (node == null)
       throw new NullPointerException("Node cannot be null.");
-    if (node.left != null)
-      return maximum(node.left);
 
-    AVLTreeNode<K, V> y = node.parent;
+    checkType(node);
 
-    while (y != null && node.equals(y.left)) {
-      node = y;
+    AVLTreeNode<K, V> y, _node = (AVLTreeNode<K, V>) node;
+
+    if (_node.left != null)
+      return (Node) maximum(_node.left);
+
+    y = _node.parent;
+
+    while (y != null && _node == y.left) {
+      _node = y;
       y = y.parent;
     }
 
-    return y;
+    return (Node) y;
   }
 
   /**
-   * Implemntation that uses the inorderTreeWalk traversal to create
-   * a string of all the {@code AVLTreeNode} entries in the tree in order
-   * by key.
-   * 
-   * Displays the object string in JSON format.
-   * 
-   * @return the tree string 
+   * {@inheritDoc}
+   *
+   * @throws IllegalArgumentException if the supplied node is not an
+   *                                  {@code AVLTreeNode}
    */
-  public String toString() {
+  @SuppressWarnings("unchecked")
+  public <Node extends TreeNode<K, V>> void inorderTreeWalk(Node node, Consumer<Node> callback) {
+    if (node == null)
+      return;
+
+    checkType(node);
+    AVLTreeNode<K, V> _node = (AVLTreeNode<K, V>) node;
+
+    this.inorderTreeWalk((Node) _node.left, callback);
+    callback.accept((Node) _node);
+    this.inorderTreeWalk((Node) _node.right, callback);
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @throws IllegalArgumentException if the supplied node is not an
+   *                                  {@code AVLTreeNode}
+   */
+  @SuppressWarnings("unchecked")
+  public <Node extends TreeNode<K, V>> void preorderTreeWalk(Node node, Consumer<Node> callback) {
+    if (node == null)
+      return;
+
+    checkType(node);
+    AVLTreeNode<K, V> _node = (AVLTreeNode<K, V>) node;
+
+    callback.accept((Node) _node);
+    this.preorderTreeWalk((Node) _node.left, callback);
+    this.preorderTreeWalk((Node) _node.right, callback);
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @throws IllegalArgumentException if the supplied node is not an
+   *                                  {@code AVLTreeNode}
+   */
+  @SuppressWarnings("unchecked")
+  public <Node extends TreeNode<K, V>> void postorderTreeWalk(Node node, Consumer<Node> callback) {
+    if (node == null)
+      return;
+
+    checkType(node);
+    AVLTreeNode<K, V> _node = (AVLTreeNode<K, V>) node;
+
+    this.postorderTreeWalk((Node) _node.left, callback);
+    this.postorderTreeWalk((Node) _node.right, callback);
+    callback.accept((Node) _node);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  protected <Node extends TreeNode<K, V>> String _toString() {
     if (isEmpty())
       return "{}";
-    
+
     StringBuilder sb = new StringBuilder("{\n");
-    
-    inorderTreeWalk((AVLTreeNode<K, V> node) -> sb.append("\s\s\"" + node.toString() + "\",\n"));
-    
+
+    inorderTreeWalk((AVLTreeNode<K, V> x) -> sb.append("\s\s\"" + x.toString() + "\",\n"));
+
     return sb.toString() + "}";
   }
 
-  /**
-   * Tree-Walk takes (-)(n) time to walk an n-node binary tree, since after the
-   * initial callm the procedure calls itself recursively exactly twice for each
-   * node in the tree.
-   *
-   * inorder tree walk - Visits all nodes in sorted order. This does so by
-   * visiting the root between the values of its left subtree and the right
-   * subtree.
-   *
-   * preorder tree walk - Visits the root before all other values in either
-   * subtree.
-   *
-   * postorder tree walk - Visits the root after the values in its subtrees.
-   * 
-   */
-  public void inorderTreeWalk(AVLTreeNode<K, V> x, Consumer<AVLTreeNode<K, V>> callback) {
-    if (x != null) {
-      this.inorderTreeWalk(x.left, callback);
-      callback.accept(x);
-      this.inorderTreeWalk(x.right, callback);
-    }
-  }
-
-  public void preorderTreeWalk(AVLTreeNode<K, V> x, Consumer<AVLTreeNode<K, V>> callback) {
-    if (x != null) {
-      callback.accept(x);
-      this.preorderTreeWalk(x.left, callback);
-      this.preorderTreeWalk(x.right, callback);
-    }
-  }
-  
-  public void postorderTreeWalk(AVLTreeNode<K, V> x, Consumer<AVLTreeNode<K, V>> callback) {
-    if (x != null) {
-      this.postorderTreeWalk(x.left, callback);
-      this.postorderTreeWalk(x.right, callback);  
-      callback.accept(x); 
-    }
-  }
-
-  public void inorderTreeWalk(Consumer<AVLTreeNode<K, V>> callback) {
-    inorderTreeWalk(root, callback);
-  }
-
-  public void preorderTreeWalk(Consumer<AVLTreeNode<K, V>> callback) {
-    preorderTreeWalk(root, callback);
-  }
-  
-  public void postorderTreeWalk(Consumer<AVLTreeNode<K, V>> callback) {
-    postorderTreeWalk(root, callback);
-  }
 }
