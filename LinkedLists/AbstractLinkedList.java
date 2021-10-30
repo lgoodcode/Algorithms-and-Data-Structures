@@ -315,6 +315,25 @@ public abstract class AbstractLinkedList<T> {
   public abstract void remove(LinkedListNode<T> node);
 
   /**
+   * Displays the contents of the list in order in a JSON format. Overrides due to
+   * the node implemented being different.
+   *
+   * @return the string format of the object
+   */
+  public String toString() {
+    if (head == null)
+      return "{}";
+
+    StringBuilder sb = new StringBuilder("{\n");
+    Iterable<T> values = (Iterable<T>) values();
+    int i = 0;
+
+    for (T val : values)
+      sb.append("\"" + i++ + " -> " + val.toString() + "\",\n");
+    return sb.toString() + "}";
+  }
+
+  /**
    * Returns an {@link Iterable} of the items in the list.
    *
    * @return the {@code Iterable}
@@ -343,35 +362,16 @@ public abstract class AbstractLinkedList<T> {
    *
    * @return an iterable of the values in the linkedlist
    */
-  public Iterable<T> values() {
+  public final Iterable<T> values() {
     return getIterable();
   }
 
-  public Iterator<T> valuesIterator() {
+  public final Iterator<T> valuesIterator() {
     return getIterator();
   }
 
-  public Enumeration<T> valuesEnumeration() {
+  public final Enumeration<T> valuesEnumeration() {
     return getEnumeration();
-  }
-
-  /**
-   * Displays the contents of the list in order in a JSON format. Overrides due to
-   * the node implemented being different.
-   *
-   * @return the string format of the object
-   */
-  public String toString() {
-    if (head == null)
-      return "{}";
-
-    StringBuilder sb = new StringBuilder("{\n");
-    Iterable<T> values = (Iterable<T>) values();
-    int i = 0;
-
-    for (T val : values)
-      sb.append("\"" + i++ + " -> " + val.toString() + "\",\n");
-    return sb.toString() + "}";
   }
 
   /**
@@ -386,7 +386,7 @@ public abstract class AbstractLinkedList<T> {
   protected abstract class AbstractEnumerator<E> implements Enumeration<E>, Iterator<E>, Iterable<E> {
     protected LinkedListNode<?>[] list;
     protected LinkedListNode<?> entry, last;
-    protected int type, size, index = 0;
+    protected int size, index = 0;
 
     /**
      * Indicates whether this Enumerator is serving as an Iterator or an
@@ -411,19 +411,9 @@ public abstract class AbstractLinkedList<T> {
      * @return if this object has one or more items to provide or not
      */
     public final boolean hasMoreElements() {
-      LinkedListNode<?>[] l = list;
-      LinkedListNode<?> e = entry;
-      int i = index, len = size;
-
-      /* Use locals for faster loop iteration */
-      while (e == null && i < len) {
-        e = l[i++];
-      }
-
-      entry = e;
-      index = i;
-
-      return e != null;
+      if (index >= size)
+        return false;
+      return list[index] != null;
     }
 
     /**
@@ -435,26 +425,10 @@ public abstract class AbstractLinkedList<T> {
      */
     @SuppressWarnings("unchecked")
     public final E nextElement() {
-      LinkedListNode<?>[] l = list;
-      LinkedListNode<?> e = entry;
-      int i = index, len = size;
-
-      /* Use locals for faster loop iteration */
-      while (e == null && i < len) {
-        e = l[i++];
-      }
-
-      entry = e;
-      index = i;
-
-      if (e != null) {
-        last = e;
-        entry = null;
-
-        return (E) e.getItem();
-      }
-
-      throw new NoSuchElementException("LinkedList Enumerator");
+      if (index >= size)
+        throw new NoSuchElementException("LinkedList Enumerator");
+      last = list[index];
+      return (E) list[index++].getItem();
     }
 
     /**

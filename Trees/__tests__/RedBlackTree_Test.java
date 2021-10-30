@@ -7,9 +7,14 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
+
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import data_structures.trees.RedBlackTree;
 import data_structures.trees.RedBlackTreeNode;
@@ -26,15 +31,15 @@ public class RedBlackTree_Test {
     tree  = new RedBlackTree<>();
   }
 
-  @Nested 
+  @Nested
   class When_New {
-    
+
     @BeforeEach
     void create_tree() {
       tree = new RedBlackTree<>();
     }
 
-    @Test 
+    @Test
     void is_empty() {
       assertEquals(0, tree.size());
     }
@@ -42,7 +47,7 @@ public class RedBlackTree_Test {
     @Test
     void insertion() {
       tree.insert(1, "one");
-      
+
       assertEquals("one", tree.get(1));
     }
 
@@ -133,13 +138,13 @@ public class RedBlackTree_Test {
       assertEquals(5, tree.maximum().getKey());
     }
 
-    @Test 
+    @Test
     void delete() {
       tree.delete(1);
 
       assertEquals(4, tree.size());
       assertNull(tree.get(1));
-    } 
+    }
 
     @Test
     void predecessor() {
@@ -154,9 +159,9 @@ public class RedBlackTree_Test {
     @Test
     void postorderTreeWalk() {
       StringBuilder str = new StringBuilder();
-      tree.postorderTreeWalk((RedBlackTreeNode<Integer, String> node) -> 
+      tree.postorderTreeWalk((RedBlackTreeNode<Integer, String> node) ->
         str.append(node.toString() + "\n"));
-      
+
       assertEquals(
             "1 -> one\n"
           + "3 -> three\n"
@@ -164,6 +169,53 @@ public class RedBlackTree_Test {
           + "4 -> four\n"
           + "2 -> two\n",
         str.toString());
+    }
+
+    @Test
+    void keys() {
+      Iterator<Integer> keys = tree.keysIterator();
+      assertTrue(keys.hasNext());
+      assertEquals(1, keys.next());
+      assertEquals(2, keys.next());
+      assertEquals(3, keys.next());
+      assertEquals(4, keys.next());
+      assertEquals(5, keys.next());
+      assertFalse(keys.hasNext());
+      assertThrows(NoSuchElementException.class, () -> keys.next());
+    }
+
+    @Test
+    void values() {
+      Iterator<String> values = tree.valuesIterator();
+      assertTrue(values.hasNext());
+      assertEquals("one", values.next());
+      assertEquals("two", values.next());
+      assertEquals("three", values.next());
+      assertEquals("four", values.next());
+      assertEquals("five", values.next());
+      assertFalse(values.hasNext());
+      assertThrows(NoSuchElementException.class, () -> values.next());
+    }
+
+    @Test
+    void entries() {
+      Iterator<RedBlackTreeNode<Integer, String>> entries = tree.entriesIterator();
+      assertTrue(entries.hasNext());
+      assertEquals("one", entries.next().getValue());
+      assertEquals("two", entries.next().getValue());
+      assertEquals("three", entries.next().getValue());
+      assertEquals("four", entries.next().getValue());
+      assertEquals("five", entries.next().getValue());
+      assertFalse(entries.hasNext());
+      assertThrows(NoSuchElementException.class, () -> entries.next());
+    }
+
+    @Test
+    void enumeration_remove() {
+      Iterator<Integer> keys = tree.keysIterator();
+      keys.next();
+      keys.remove();
+      assertFalse(tree.hasKey(1));
     }
 
     @Test
@@ -241,7 +293,7 @@ public class RedBlackTree_Test {
       assertNotNull(tree.get(2));
       assertNotNull(tree.get(5));
       assertNotNull(tree.get(6));
-      assertNotNull(tree.get(7));    
+      assertNotNull(tree.get(7));
       assertNotNull(tree.get(8));
       assertNotNull(tree.get(9));
       assertNotNull(tree.get(10));

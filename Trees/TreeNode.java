@@ -28,18 +28,17 @@ public class TreeNode<K, V> {
   /**
    * Default constructor used for {@code RedBlackTree} sentinel.
    */
-  protected TreeNode() {
-  }
+  protected TreeNode() {}
 
-  public K getKey() {
+  public final K getKey() {
     return key;
   }
 
-  public V getValue() {
+  public final V getValue() {
     return value;
   }
 
-  public String toString() {
+  public final String toString() {
     return key + " -> " + value;
   }
 }

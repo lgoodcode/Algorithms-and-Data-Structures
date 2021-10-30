@@ -12,6 +12,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
 import data_structures.linkedLists.LinkedList;
 import data_structures.linkedLists.LinkedListNode;
 
@@ -66,13 +69,13 @@ public class LinkedList_Test {
     }
 
     @Test
-    void search_returns_null_on_invalid_index() {
-      assertNull(list.search(1));
+    void search_throws_on_invalid_index() {
+      assertThrows(IndexOutOfBoundsException.class, () -> list.search(1));
     }
 
     @Test
-    void get_returns_null_on_invalid_index() {
-      assertNull(list.get(1));
+    void get_throws_on_invalid_index() {
+      assertThrows(IndexOutOfBoundsException.class, () -> list.get(1));
     }
 
     @Test
@@ -273,8 +276,7 @@ public class LinkedList_Test {
         () -> assertEquals("two", list.get(3)),
         () -> assertEquals("three", list.get(2)),
         () -> assertEquals("four", list.get(1)),
-        () -> assertEquals("five", list.get(0)),
-        () -> assertNull(list.get(6))
+        () -> assertEquals("five", list.get(0))
       );
     }
 
@@ -288,6 +290,19 @@ public class LinkedList_Test {
         () -> assertEquals("four", list.get(1)),
         () -> assertEquals("five", list.get(0))
       );
+    }
+
+    @Test
+    void values() {
+      Iterator<String> values = list.valuesIterator();
+      assertTrue(values.hasNext());
+      assertEquals("five", values.next());
+      assertEquals("four", values.next());
+      assertEquals("three", values.next());
+      assertEquals("two", values.next());
+      assertEquals("one", values.next());
+      assertFalse(values.hasNext());
+      assertThrows(NoSuchElementException.class, () -> values.next());
     }
 
     @Test

@@ -1,5 +1,7 @@
 package data_structures.queues;
 
+import java.util.NoSuchElementException;
+
 import data_structures.queues.exceptions.*;
 
 /**
@@ -92,6 +94,16 @@ public class Queue<T> {
   }
 
   /**
+   * Checks if there is another element in the {@code Queue} that can be
+   * {@code dequeued}.
+   * 
+   * @return If there is another element to dequeue
+   */
+  public boolean hasNextElement() {
+    return head != queue.length && queue[head] != null;
+  }
+
+  /**
    * Inserts an item into the {@code Queue}. If the {@code head} and {@code tail}
    * properties of are both at the capacity and there is no item stored at that
    * position, then the {@code Queue} is empty and will reset the counters back to
@@ -121,13 +133,13 @@ public class Queue<T> {
    *
    * @return the next item from the {@code Queue}
    *
-   * @throws QueueEmptyException if attempting to dequeue an item while empty
+   * @throws NoSuchElementException if attempting to dequeue an item while empty
    */
-  public synchronized T dequeue() throws QueueEmptyException {
-    T item = queue[head];
+  public synchronized T dequeue() {
+    if (!hasNextElement())
+      throw new NoSuchElementException("No items in queue.");
 
-    if (item == null)
-      throw new QueueEmptyException();
+    T item = queue[head];
 
     queue[head] = null;
 

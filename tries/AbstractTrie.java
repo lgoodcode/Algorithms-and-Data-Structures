@@ -5,7 +5,6 @@ import java.util.function.BiConsumer;
 
 import data_structures.queues.Queue;
 import data_structures.queues.exceptions.QueueFullException;
-import data_structures.queues.exceptions.QueueEmptyException;
 
 public abstract class AbstractTrie<V> {
   /**
@@ -264,16 +263,14 @@ public abstract class AbstractTrie<V> {
       len = queue.size() + 1;
       words = new String[len];
       words[i++] = prefix;
-    } else {
+    }
+    else {
       len = queue.size();
       words = new String[len];
     }
 
-    for (; i < len; i++) {
-      try {
-        words[i] = queue.dequeue();
-      } catch (QueueEmptyException e) {}
-    }
+    for (; i < len; i++)
+      words[i] = queue.dequeue();
 
     return words;
   }

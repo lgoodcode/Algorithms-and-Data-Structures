@@ -12,6 +12,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.NoSuchElementException;
+
 import data_structures.queues.Queue;
 import data_structures.queues.exceptions.*;
 
@@ -77,9 +79,7 @@ public class Queue_Test {
         queue.enqueue(1);
       } catch (QueueFullException e) {}
       
-      try {
-        assertEquals(1, queue.dequeue());
-      } catch (QueueEmptyException e) {}
+      assertEquals(1, queue.dequeue());
     }
 
     @Test
@@ -88,8 +88,8 @@ public class Queue_Test {
     }
 
     @Test
-    void throws_QueueEmptyException() {
-      assertThrows(QueueEmptyException.class, () -> queue.dequeue());
+    void throws_NoSuchElementException() {
+      assertThrows(NoSuchElementException.class, () -> queue.dequeue());
     }
 
     @ParameterizedTest

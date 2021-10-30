@@ -7,9 +7,14 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
+
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import data_structures.trees.BinarySearchTree;
 import data_structures.trees.TreeNode;
@@ -168,6 +173,53 @@ public class BinarySearchTree_Test {
           + "2 -> two\n"
           + "1 -> one\n",
         str.toString());
+    }
+
+    @Test
+    void keys() {
+      Iterator<Integer> keys = tree.keysIterator();
+      assertTrue(keys.hasNext());
+      assertEquals(1, keys.next());
+      assertEquals(2, keys.next());
+      assertEquals(3, keys.next());
+      assertEquals(4, keys.next());
+      assertEquals(5, keys.next());
+      assertFalse(keys.hasNext());
+      assertThrows(NoSuchElementException.class, () -> keys.next());
+    }
+
+    @Test
+    void values() {
+      Iterator<String> values = tree.valuesIterator();
+      assertTrue(values.hasNext());
+      assertEquals("one", values.next());
+      assertEquals("two", values.next());
+      assertEquals("three", values.next());
+      assertEquals("four", values.next());
+      assertEquals("five", values.next());
+      assertFalse(values.hasNext());
+      assertThrows(NoSuchElementException.class, () -> values.next());
+    }
+
+    @Test
+    void entries() {
+      Iterator<TreeNode<Integer, String>> entries = tree.entriesIterator();
+      assertTrue(entries.hasNext());
+      assertEquals("one", entries.next().getValue());
+      assertEquals("two", entries.next().getValue());
+      assertEquals("three", entries.next().getValue());
+      assertEquals("four", entries.next().getValue());
+      assertEquals("five", entries.next().getValue());
+      assertFalse(entries.hasNext());
+      assertThrows(NoSuchElementException.class, () -> entries.next());
+    }
+
+    @Test
+    void enumeration_remove() {
+      Iterator<Integer> keys = tree.keysIterator();
+      keys.next();
+      keys.remove();
+      assertFalse(tree.hasKey(1));
     }
 
     @Test

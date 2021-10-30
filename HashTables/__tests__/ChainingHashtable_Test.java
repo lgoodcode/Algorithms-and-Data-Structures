@@ -80,7 +80,6 @@ public class ChainingHashtable_Test {
     void throws_NullPointerException_for_null_and_empty_keys(String key) {
       table2 = new ChainingHashtable<>(size);
 
-      // Throws NullPointerException for null value and IllegalArgumentException
       assertThrows(Exception.class, () -> table2.insert(key, "test"));
     }
   }

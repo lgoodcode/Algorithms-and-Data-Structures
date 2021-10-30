@@ -94,7 +94,7 @@ import data_structures.linkedLists.LinkedList;
  * </p>
  */
 public final class ChainingHashtable<K, V> extends AbstractHashtable<K, V> {
-  protected LinkedList<?, ?>[] table;
+  protected LinkedList<?>[] table;
   protected int m;
 
   public ChainingHashtable(int size) {
@@ -102,7 +102,7 @@ public final class ChainingHashtable<K, V> extends AbstractHashtable<K, V> {
       throw new IllegalArgumentException("Illegal size given. Must be larger than 1.");
 
     m = size;
-    table = new LinkedList<?, ?>[size];
+    table = new LinkedList<?>[size];
   }
 
   /**
@@ -117,7 +117,9 @@ public final class ChainingHashtable<K, V> extends AbstractHashtable<K, V> {
   }
 
   /**
-   * Inserts a new key/value pair into the hashtable.
+   * Inserts a new key/value pair into the hashtable. Finds the {@code LinkedList}
+   * at the hashed index slot and inserts a new entry into the list with the
+   * supplied key and value pair.
    * 
    * @param key   the key to insert
    * @param value the value to insert
@@ -134,9 +136,9 @@ public final class ChainingHashtable<K, V> extends AbstractHashtable<K, V> {
     int hash = hash(key);
 
     if (table[hash] == null)
-      table[hash] = new LinkedList<K, V>();
+      table[hash] = new LinkedList<>();
 
-    ((LinkedList<K, V>) table[hash]).insert(key, value);
+    ((LinkedList<Entry<K, V>>) table[hash]).insert(new Entry<K, V>(key, value));
 
     n++;
   }
@@ -144,11 +146,17 @@ public final class ChainingHashtable<K, V> extends AbstractHashtable<K, V> {
   /**
    * Internal method used by the other methods to lookup entries in the hashtable.
    * Must use the {@link #checkKey()} method in the implementation so that the
-   * other methods that use this method don't have to implement it, making it 
-   * the single point of failure.
+   * other methods that use this method don't have to implement it, making it the
+   * single point of failure.
+   * 
+   * <p>
+   * Once the hashed index slot is found, checks if it is {@code null} or not. If
+   * not, it iterates through the entries in the list until an entry with the
+   * specified key is found.
+   * </p>
    *
    * @param key the key to lookup
-   * @return the index of the element with the specified key or {@code -1} if not
+   * @return the index in the table with the specified key or {@code -1} if not
    *         found
    * @throws IllegalArgumentException if the key or value is {@code null} or blank
    */
@@ -157,8 +165,15 @@ public final class ChainingHashtable<K, V> extends AbstractHashtable<K, V> {
     checkKey(key);
     int hash = hash(key);
 
-    if (table[hash] != null)
-      return ((LinkedList<K, V>) table[hash]).search(key) != null ? hash : -1;
+    if (table[hash] == null)
+      return -1;
+
+    LinkedList<Entry<K, V>> list = ((LinkedList<Entry<K, V>>) table[hash]);
+    Iterable<Entry<K, V>> entries = list.values();
+
+    for (Entry<K, V> e : entries)
+      if (e.getKey() == key)
+        return hash;   
     return -1;
   }
 
@@ -190,27 +205,47 @@ public final class ChainingHashtable<K, V> extends AbstractHashtable<K, V> {
 
     if (idx == -1)
       return null;
-    return ((LinkedList<K, V>) table[idx]).get(key);
+    
+    LinkedList<Entry<K, V>> list = ((LinkedList<Entry<K, V>>) table[idx]);
+    Iterable<Entry<K, V>> entries = list.values();
+
+    for (Entry<K, V> e : entries)
+      if (e.getKey() == key)
+        return e.getValue();
+    return null;
   }
 
   /**
-   * Deletes an entry in the hashtable with the specified key. Returns a boolean value
-   * indicating whether the operation was successful or not.
+   * Deletes an entry in the hashtable with the specified key. Returns a boolean
+   * value indicating whether the operation was successful or not. Will remove the
+   * list from the table if, after the removal, the list that the entry was
+   * removed from is now empty.
    *
    * @param key the key of the entry to delete
    * @return boolean indicating if the entry was deleted or not
    *
    * @throws IllegalArgumentException if the key or value is {@code null} or blank
    */
+  @SuppressWarnings("unchecked")
   public synchronized boolean delete(K key) {
     int idx = search(key);
 
-    if (idx != -1) {
-      table[idx] = null;
-      n--;
-      return true;
-    }
+    if (idx == -1)
+      return false;
+    
+    LinkedList<Entry<K, V>> list = ((LinkedList<Entry<K, V>>) table[idx]);
+    Iterable<Entry<K, V>> entries = list.values();
 
+    for (Entry<K, V> e : entries) {
+      if (e.getKey() == key) {
+        entries.iterator().remove();
+        n--;
+
+        if (list.isEmpty())
+          table[idx] = null;
+        return true;
+      }
+    }
     return false;
   }
 
@@ -240,13 +275,11 @@ public final class ChainingHashtable<K, V> extends AbstractHashtable<K, V> {
       this.iterator = iterator;
       size = 0;
 
-      for (LinkedList<K, V> list : (LinkedList<K, V>[]) ChainingHashtable.this.table) {
-        if (list != null) {
-          list.entries().forEach((node) -> {
-            table[size++] = new Entry<K, V>(node.getKey(), node.getValue());
-          });
-        }
+      for (LinkedList<Entry<K, V>> list : (LinkedList<Entry<K, V>>[]) ChainingHashtable.this.table) {
+        if (list != null) 
+          list.values().forEach((entry) -> table[size++] = entry);
       }
     } 
   }
+
 }

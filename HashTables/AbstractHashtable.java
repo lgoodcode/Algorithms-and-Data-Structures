@@ -25,9 +25,9 @@ public abstract class AbstractHashtable<K, V> {
   /**
    * Iteration types
    */
-  protected final int KEYS = 0;
-  protected final int VALUES = 1;
-  protected final int ENTRIES = 2;
+  private final int KEYS = 0;
+  private final int VALUES = 1;
+  private final int ENTRIES = 2;
 
  /**
    * Determines whether the hashtable is empty or not

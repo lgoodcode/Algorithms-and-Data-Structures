@@ -1,7 +1,13 @@
 package data_structures.trees;
 
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+
+import data_structures.queues.Queue;
+import data_structures.queues.exceptions.QueueFullException;
 
 public class BinarySearchTree<K, V> extends AbstractTree<K, V> {
   /**
@@ -69,8 +75,6 @@ public class BinarySearchTree<K, V> extends AbstractTree<K, V> {
     checkValue(value);
     checkDuplicate(key);
 
-    count++;
-
     TreeNode<K, V> x = root;
     TreeNode<K, V> y = null;
     TreeNode<K, V> z = new TreeNode<>(key, value);
@@ -92,6 +96,8 @@ public class BinarySearchTree<K, V> extends AbstractTree<K, V> {
       y.left = z;
     else
       y.right = z;
+
+    count++;
   }
 
   /**
@@ -130,7 +136,7 @@ public class BinarySearchTree<K, V> extends AbstractTree<K, V> {
   @SuppressWarnings("unchecked")
   public <Node extends TreeNode<K, V>> Node minimum(Node node) {
     if (node == null)
-    return null;
+      return null;
     if (node.left != null)
       return (Node) minimum(node.left);
     return node;
@@ -211,10 +217,7 @@ public class BinarySearchTree<K, V> extends AbstractTree<K, V> {
    * @throws NullPointerException {@inheritDoc}
    */
   public synchronized <Node extends TreeNode<K, V>> void deleteNode(Node node) {
-    if (node == null)
-      throw new NullPointerException("Node to Node cannot be null.");
-
-    count--;
+    checkNode(node);
 
     /**
      * Case 1: z has no left child
@@ -269,6 +272,8 @@ public class BinarySearchTree<K, V> extends AbstractTree<K, V> {
       y.left = node.left;
       y.left.parent = y;
     }
+
+    count--;
   }
 
   /**
@@ -295,8 +300,8 @@ public class BinarySearchTree<K, V> extends AbstractTree<K, V> {
    */
   @SuppressWarnings("unchecked")
   public <Node extends TreeNode<K, V>> Node successor(Node node) {
-    if (node == null)
-      throw new NullPointerException("Node cannot be null.");
+    checkNode(node);
+
     if (node.right != null)
       return (Node) minimum(node.right);
 
@@ -334,8 +339,8 @@ public class BinarySearchTree<K, V> extends AbstractTree<K, V> {
    */
   @SuppressWarnings("unchecked")
   public <Node extends TreeNode<K, V>> Node predecessor(Node node) {
-    if (node == null)
-      throw new NullPointerException("Node cannot be null.");
+    checkNode(node);
+
     if (node.left != null)
       return (Node) maximum(node.left);
 
@@ -385,17 +390,41 @@ public class BinarySearchTree<K, V> extends AbstractTree<K, V> {
     }
   }
 
-  /**
-   * {@inheritDoc}
-   */
-  protected <Node extends TreeNode<K, V>> String _toString() {
+  protected <T> Iterable<T> getIterable(int type) {
     if (isEmpty())
-      return "{}";
+      return new EmptyIterable<>();
+    return new Enumerator<>(type, true);
+  }
 
-    StringBuilder sb = new StringBuilder("{\n");
+  protected <T> Iterator<T> getIterator(int type) {
+    if (isEmpty())
+      return Collections.emptyIterator();
+    return new Enumerator<>(type, true);
+  }
 
-    inorderTreeWalk((TreeNode<K, V> x) -> sb.append("\s\s\"" + x.toString() + "\",\n"));
+  protected <T> Enumeration<T> getEnumeration(int type) {
+    if (isEmpty())
+      return Collections.emptyEnumeration();
+    return new Enumerator<>(type, false);
+  }
 
-    return sb.toString() + "}";
+  /**
+   * The {@code Enumerator} constructor to place all the nodes in the tree into an
+   * {@link Queue} to be enumerated.
+   */
+  protected class Enumerator<T> extends AbstractEnumerator<T> {
+    Enumerator(int type, boolean iterator) {
+      this.size = BinarySearchTree.this.count;
+      this.iterator = iterator;
+      this.type = type;
+      entries = new Queue<>(size);
+      
+      inorderTreeWalk((TreeNode<K, V> node) -> {
+        try {
+          entries.enqueue(node);
+        } catch (QueueFullException e) {}
+      });
+    }
+
   }
 }

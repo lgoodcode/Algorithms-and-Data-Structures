@@ -1,7 +1,13 @@
 package data_structures.trees;
 
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+
+import data_structures.queues.Queue;
+import data_structures.queues.exceptions.QueueFullException;
 
 /**
  * A Red-Black tree is a binary search tree with one extra bit of storage per
@@ -288,7 +294,7 @@ public class RedBlackTree<K, V> extends AbstractTree<K, V> {
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * @throws IllegalArgumentException {@inheritDoc}, or if the supplied node is
    *                                  not an {@code RedBlackTreeNode}
    */
@@ -310,7 +316,7 @@ public class RedBlackTree<K, V> extends AbstractTree<K, V> {
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * <p>
    * Because of the use of the {@code NIL} sentinel we have to perform a seperate
    * check for {@code null} node and then if the node is {@code NIL}.
@@ -334,7 +340,7 @@ public class RedBlackTree<K, V> extends AbstractTree<K, V> {
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * <p>
    * Because of the use of the {@code NIL} sentinel we have to perform a seperate
    * check for {@null} node and then if the node is {@code NIL}.
@@ -376,7 +382,7 @@ public class RedBlackTree<K, V> extends AbstractTree<K, V> {
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * <p>
    * We set {@code y} to {@code z} so we can later move {@code y} into {@code z}'s
    * position. Because {@code y}'s color might change, we keep the original stored
@@ -624,7 +630,7 @@ public class RedBlackTree<K, V> extends AbstractTree<K, V> {
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * @throws NullPointerException {@inheritDoc}, or if the supplied node is not an
    *                              {@code RedBlackTreeNode}
    */
@@ -705,18 +711,41 @@ public class RedBlackTree<K, V> extends AbstractTree<K, V> {
     }
   }
 
-  /**
-   * {@inheritDoc}
-   */
-  protected <Node extends TreeNode<K, V>> String _toString() {
+  protected <T> Iterable<T> getIterable(int type) {
     if (isEmpty())
-      return "{}";
+      return new EmptyIterable<>();
+    return new Enumerator<>(type, true);
+  }
 
-    StringBuilder sb = new StringBuilder("{\n");
+  protected <T> Iterator<T> getIterator(int type) {
+    if (isEmpty())
+      return Collections.emptyIterator();
+    return new Enumerator<>(type, true);
+  }
 
-    inorderTreeWalk((RedBlackTreeNode<K, V> x) -> sb.append("\s\s\"" + x.toString() + "\",\n"));
+  protected <T> Enumeration<T> getEnumeration(int type) {
+    if (isEmpty())
+      return Collections.emptyEnumeration();
+    return new Enumerator<>(type, false);
+  }
 
-    return sb.toString() + "}";
+  /**
+   * The {@code Enumerator} constructor to place all the nodes in the tree into an
+   * {@link Queue} to be enumerated.
+   */
+  protected class Enumerator<T> extends AbstractEnumerator<T> {
+    Enumerator(int type, boolean iterator) {
+      this.size = RedBlackTree.this.count;
+      this.iterator = iterator;
+      this.type = type;
+      entries = new Queue<>(size);
+
+      inorderTreeWalk((RedBlackTreeNode<K, V> node) -> {
+        try {
+          entries.enqueue(node);
+        } catch (QueueFullException e) {}
+      });
+    }
   }
 
 }

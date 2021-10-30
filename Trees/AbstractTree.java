@@ -1,7 +1,14 @@
 package data_structures.trees;
 
+import data_structures.queues.Queue;
+
+import java.util.Objects;
+import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.NoSuchElementException;
+import java.util.ConcurrentModificationException;
 
 public abstract class AbstractTree<K, V> {
   /**
@@ -14,6 +21,12 @@ public abstract class AbstractTree<K, V> {
    * Counter tracking the number of entries in the tree.
    */
   protected int count;
+
+  protected int modCount;
+
+  private int KEYS = 0;
+  private int VALUES = 1;
+  private int ENTRIES = 2;
 
   /**
    * Creates an empty, tree, using the specified compare function to determine
@@ -103,6 +116,16 @@ public abstract class AbstractTree<K, V> {
   protected final void checkDuplicate(K key) {
     if (hasKey(key))
       throw new IllegalArgumentException("Key already exists in the tree.");
+  }
+
+  /**
+   * Checks to make sure the specified {@code TreeNode} is not {@code null}.
+   *
+   * @throws NullPointerException if the specified node is {@code null}
+   */
+  protected final <Node extends TreeNode<K, V>> void checkNode(Node node) {
+    if (node == null)
+      throw new NullPointerException("Node cannot be null.");
   }
 
   /**
@@ -429,15 +452,6 @@ public abstract class AbstractTree<K, V> {
   }
 
   /**
-   * Bridge method for the {@link #toString()} so that it can be generic for any
-   * type of {@code BinaryTree}.
-   *
-   * @param <Node> {@link TreeNode} or a subclass of
-   * @return the object string
-   */
-  protected abstract <Node extends TreeNode<K, V>> String _toString();
-
-  /**
    * Implemntation that uses the {@link #inorderTreeWalk(Consumer)} traversal to
    * create a string of all the {@code TreeNode} entries in the tree in order by
    * key.
@@ -445,7 +459,251 @@ public abstract class AbstractTree<K, V> {
    * @return the tree object string
    */
   public final String toString() {
-    return _toString();
+    if (isEmpty())
+      return "{}";
+
+    StringBuilder sb = new StringBuilder("{\n");
+
+    inorderTreeWalk((TreeNode<K, V> x) -> sb.append("\s\s\"" + x.toString() + "\",\n"));
+
+    return sb.toString() + "}";
+  }
+
+  /**
+   * Returns an {@link Iterable} of the specified type.
+   * 
+   * @param <T>  Generic type to allow any type to be iterated over
+   * @param type the type of item to iterate (keys, values, or entries)
+   * @return the {@code Iterable}
+   */
+  protected abstract <T> Iterable<T> getIterable(int type);
+  
+  /**
+   * Returns an {@link Iterator} of the specified type.
+   * 
+   * @param <T>  Generic type to allow any type to be iterated over
+   * @param type the type of item to iterate (keys, values, or entries)
+   * @return the {@code Iterator}
+   */
+  protected abstract <T> Iterator<T> getIterator(int type);
+  
+  /**
+   * Returns an {@link Enumeration} of the specified type.
+   * 
+   * @param <T>  Generic type to allow any type to be enumerated over
+   * @param type the type of item to iterate (keys, values, or entries)
+   * @return the {@code Enumeration}
+   */
+  protected abstract <T> Enumeration<T> getEnumeration(int type);
+
+  public Iterable<K> keys() {
+    return getIterable(KEYS);
+  }
+
+  public Iterable<V> values() {
+    return getIterable(VALUES);
+  }
+
+  public <E extends TreeNode<K, V>> Iterable<E> entries() {
+    return getIterable(ENTRIES);
+  }
+
+  public Iterator<K> keysIterator() {
+    return getIterator(KEYS);
+  }
+
+  public Iterator<V> valuesIterator() {
+    return getIterator(VALUES);
+  }
+
+  public <E extends TreeNode<K, V>> Iterator<E> entriesIterator() {
+    return getIterator(ENTRIES);
+  }
+
+  public Enumeration<K> keysEnumeration() {
+    return getEnumeration(KEYS);
+  }
+
+  public Enumeration<V> valuesEnumeration() {
+    return getEnumeration(VALUES);
+  }
+
+  public <E extends TreeNode<K, V>> Enumeration<E> entriesEnumeration() {
+    return getEnumeration(ENTRIES);
+  }
+
+  /**
+   * A tree enumerator class. This class implements the Enumeration,
+   * Iterator, and Iterable interfaces, but individual instances can be created
+   * with the Iterator methods disabled. This is necessary to avoid
+   * unintentionally increasing the capabilities granted a user by passing an
+   * Enumeration.
+   *
+   * @param <T> the type of the object that is being enumerated
+   */
+  protected abstract class AbstractEnumerator<T> implements Enumeration<T>, Iterator<T>, Iterable<T> {
+    protected Queue<TreeNode<K, V>> entries;
+    protected TreeNode<K, V> last;
+    protected int type, size, index = 0;
+
+    /**
+     * Indicates whether this Enumerator is serving as an Iterator or an
+     * Enumeration.
+     */
+    protected boolean iterator;
+
+    /**
+     * The expected value of modCount when instantiating the iterator. If this
+     * expectation is violated, the iterator has detected concurrent modification.
+     */
+    protected int expectedModCount = AbstractTree.this.modCount;
+
+    // Iterable method
+    public final Iterator<T> iterator() {
+      return iterator ? this : this.asIterator();
+    }
+
+    /**
+     * Checks whether there are more elments to return.
+     *
+     * @return if this object has one or more items to provide or not
+     */
+    public final boolean hasMoreElements() {
+      return entries.hasNextElement();
+    }
+
+    /**
+     * Returns the next element if it has one to provide.
+     *
+     * @return the next element
+     *
+     * @throws NoSuchElementException if no more elements exist
+     */
+    @SuppressWarnings("unchecked")
+    public final T nextElement() {
+      if (!hasNext())
+        throw new NoSuchElementException("Queue enumerator. No items in queue.");
+      last = entries.dequeue();
+      return type == KEYS ? (T) last.getKey() : (type == VALUES ? (T) last.getValue() : (T) last);
+    }
+
+    /**
+     * The Iterator method; the same as Enumeration.
+     */
+    public final boolean hasNext() {
+      return hasMoreElements();
+    }
+
+    /**
+     * Iterator method. Returns the next element in the iteration.
+     *
+     * @return the next element in the iteration
+     * @throws ConcurrentModificationException if the list was modified during
+     *                                         computation.
+     */
+    public final T next() {
+      if (AbstractTree.this.modCount != expectedModCount)
+        throw new ConcurrentModificationException();
+      return nextElement();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * Removes from the underlying collection the last element returned
+     * by this iterator (optional operation).  This method can be called
+     * only once per call to {@link #next}.
+     * <p>
+     * The behavior of an iterator is unspecified if the underlying collection
+     * is modified while the iteration is in progress in any way other than by
+     * calling this method, unless an overriding class has specified a
+     * concurrent modification policy.
+     * <p>
+     * The behavior of an iterator is unspecified if this method is called
+     * after a call to the {@link #forEachRemaining forEachRemaining} method.
+     *
+     * @throws UnsupportedOperationException if the {@code remove} operation is
+     *         not supported by this iterator, e.g., if the object is an
+     *         {@code Enumeration}.
+     *
+     * @throws IllegalStateException if the {@code next} method has not yet been
+     *         called, or the {@code remove} method has already been called after
+     *         the last call to the {@code next} method.
+     *
+     * @throws ConcurrentModificationException if a function modified this map
+     *         during computation.
+     */
+    @Override
+    public final void remove() {
+      if (!iterator)
+        throw new UnsupportedOperationException();
+      if (last == null)
+        throw new IllegalStateException("Tree Enumerator. No last item.");
+      if (modCount != expectedModCount)
+        throw new ConcurrentModificationException();
+
+      // Synchronized block to lock the tree object while removing entry
+      synchronized (AbstractTree.this) {
+        // Pass the current index to remove the last item
+        AbstractTree.this.deleteNode(last);
+        expectedModCount++;
+        last = null;
+      }
+    }
+  }
+
+   /**
+   * This class creates an empty {@code Iterable} that has no elements.
+   *
+   * <ul>
+   * <li>{@link Iterator#hasNext} always returns {@code false}.</li>
+   * <li>{@link Iterator#next} always throws {@link NoSuchElementException}.</li>
+   * </ul>
+   *
+   * <p>
+   * Implementations of this method are permitted, but not required, to return the
+   * same object from multiple invocations.
+   * </p>
+   *
+   * @param <T> the class of the objects in the iterable
+   * @since 1.1
+   */
+  protected static final class EmptyIterable<T> implements Enumeration<T>, Iterator<T>, Iterable<T> {
+    // TODO: need to disable the warning here for unused variable
+    // static final EmptyIterable<?> EMPTY_ITERABLE = new EmptyIterable<>();
+    public EmptyIterable() {}
+
+    // Enumeration methods
+    public boolean hasMoreElements() {
+      return false;
+    }
+
+    public T nextElement() {
+      throw new NoSuchElementException();
+    }
+
+    // Iterator methods
+    public boolean hasNext() {
+      return false;
+    }
+
+    public T next() {
+      throw new NoSuchElementException();
+    }
+
+    public void remove() {
+      throw new IllegalStateException();
+    }
+
+    // Iterable method
+    public Iterator<T> iterator() {
+      return this;
+    }
+
+    @Override
+    public void forEachRemaining(Consumer<? super T> action) {
+      Objects.requireNonNull(action);
+    }
   }
 
 }
