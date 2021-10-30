@@ -1,29 +1,21 @@
 package data_structures.linkedLists;
 
-public class LinkedListNode<K, V> {
-  private K key;
-  private V value;
-  protected LinkedListNode<K, V> next;
+public final class LinkedListNode<T> {
+  protected LinkedListNode<T> next;
+  protected LinkedListNode<T> prev;
+  private T item;
 
-  public LinkedListNode(K key, V value) {
-    if (key.equals(null) || key.toString().isBlank())
-      throw new IllegalArgumentException("Key cannot be null or empty.");
-    if (value.equals(null) || value.toString().isBlank())
-      throw new IllegalArgumentException("Value cannot be null or empty.");
-
-    this.key = key;
-    this.value = value;
+  public LinkedListNode(T item) {
+    if (item == null || item.toString().isBlank())
+      throw new IllegalArgumentException("Item cannot be null or empty.");
+    this.item = item;
   }
 
-  public K getKey() {
-    return key;
-  }
-
-  public V getValue() {
-    return value;
+  public T getItem() {
+    return item;
   }
 
   public String toString() {
-    return "\"" + key + " -> " + value + "\"";
+    return item.toString();
   }
 }

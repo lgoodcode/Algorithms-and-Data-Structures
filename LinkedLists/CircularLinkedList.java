@@ -1,133 +1,182 @@
 package data_structures.linkedLists;
 
-public class CircularLinkedList<K, V> extends DoublyLinkedList<K, V> {
+public class CircularLinkedList<T> extends LinkedList<T> {
   /**
    * Empty constructor besides the call to super() because there is no
-   * initialization and extends the {@link DoublyLinkedList}.
+   * initialization and extends the {@link LinkedList}.
    */
-  public CircularLinkedList() { super(); }
+  public CircularLinkedList() {
+    super();
+  }
 
   /**
-   * Inserts a new node into the linked list but ensures that the head and tail
-   * wrap around to retain the circular structure.
-   * 
-   * @param key   the key of the new node
-   * @param value the value of the new node
-   * 
+   * {@inheritDoc}
+   *
    * @throws IllegalArgumentException {@inheritDoc}
    */
   @Override
-  public synchronized void insert(K key, V value) {
-    checkKey(key);
-    checkValue(value);
-    
-    DoublyNode<K, V> node = new DoublyNode<>(key, value);
+  public synchronized void insert(T item) {
+    checkItem(item);
+
+    LinkedListNode<T> node = new LinkedListNode<>(item);
 
     if (head == null) {
       head = tail = node;
-      node.next = node.prev = node;
-    }
-    else {
-      node.next = head;
-      node.prev = head.prev;
-      head = head.prev = tail.next = node;
+      link(node, node);
+    } else {
+      link(node, head);
+      link(tail, node);
+      head = node;
     }
 
     size++;
+    modCount++;
   }
 
   /**
-   * Iterates through the list until the desired node with the corresponding
-   * specified key is found or the end is reached, returning the
-   * {@code DoublyNode} or {@code null} if not found. Stops once the next node
-   * points to the head, indicating restarting the cycle.
-   * 
-   * @param key the key of the desired node to find
-   * @return the {@code DoublyNode} or {@code null} if not found
+   * {@inheritDoc}
+   *
    * @throws IllegalArgumentException {@inheritDoc}
+   * @throws NullPointerException     {@inheritDoc}
    */
   @Override
-  public DoublyNode<K, V> search(K key) {
-    checkKey(key);
-    
-    DoublyNode<K, V> node = head;
-    
-    if (node == null)
-      return null;
-    
-    while (!node.next.equals(head) && !node.getKey().equals(key))
+  public synchronized void insertBefore(T item, LinkedListNode<T> node) {
+    checkItem(item);
+    checkNode(node);
+
+    LinkedListNode<T> newNode = new LinkedListNode<>(item);
+
+    link(node.prev, newNode, node);
+
+    if (node == head)
+      head = newNode;
+
+    size++;
+    modCount++;
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @throws IllegalArgumentException {@inheritDoc}
+   * @throws NullPointerException     {@inheritDoc}
+   */
+  @Override
+  public synchronized void insertAfter(T item, LinkedListNode<T> node) {
+    checkItem(item);
+    checkNode(node);
+
+    LinkedListNode<T> newNode = new LinkedListNode<>(item);
+
+    link(node, newNode, node.next);
+
+    if (node == tail)
+      tail = newNode;
+
+    size++;
+    modCount++;
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @throws NullPointerException {@inheritDoc}
+   */
+  @Override
+  public synchronized void insertLast(T item) {
+    checkItem(item);
+
+    LinkedListNode<T> node = new LinkedListNode<>(item);
+
+    if (head == null) {
+      head = tail = node;
+      link(node, node);
+    } else {
+      link(tail, node);
+      link(node, head);
+      tail = node;
+    }
+
+    size++;
+    modCount++;
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @throws IndexOutOfBoundsException {@inheritDoc}
+   * @throws IllegalArgumentException  {@inheritDoc}
+   */
+  @Override
+  public synchronized void insertAt(int index, T item) {
+    checkPosition(index);
+    checkItem(item);
+
+    if (head == null) {
+      head = tail = new LinkedListNode<>(item);
+      size++;
+      modCount++;
+    }
+    else if (head == tail) {
+      if (index == 0)
+        insert(item);
+      else
+        insertLast(item);
+    }
+    else if (index == size)
+      insertLast(item);
+    else
+      insertBefore(item, search(index));
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @throws IllegalArgumentException if the key is {@code null} or blank
+   */
+  @Override
+  public int indexOf(T item) {
+    checkItem(item);
+
+    if (head == null)
+      return -1;
+    else if (head.getItem() == item)
+      return 0;
+
+    LinkedListNode<T> node = head;
+    int index = 0;
+
+    do {
       node = node.next;
+      index++;
+    } while (node != head && node.getItem() != item);
 
-    if (node.getKey().equals(key))
-      return node;
-    return null;
+    return node.getItem() == item ? index : -1;
   }
 
   /**
-   * Iterates through the list from the tail and goes in reverse until the desired
-   * node with the corresponding specified key is found or the end is reached,
-   * returning the {@code DoublyNode} or {@code null} if not found. Stops once
-   * the previous node points to the tail, indicating restarting the cycle.
-   * 
-   * @param key the key of the desired node to find
-   * @return the {@code DoublyNode} or {@code null} if not found
-   * 
+   * {@inheritDoc}
+   *
    * @throws IllegalArgumentException {@inheritDoc}
    */
   @Override
-  public DoublyNode<K, V> rSearch(K key) {
-    checkKey(key);
+  public int lastIndexOf(T item) {
+    checkItem(item);
 
-    DoublyNode<K, V> node = head;
+    if (tail == null)
+      return -1;
+    else if (tail.getItem() == item)
+      return size - 1;
 
-    if (node == null)
-      return null;
-    
-    while (!node.prev.equals(head) && !node.getKey().equals(key))
+    LinkedListNode<T> node = tail;
+    int index = size - 1;
+
+    do {
       node = node.prev;
+      index--;
+    } while (node.prev != tail && node.getItem() != item);
 
-    if (node.getKey().equals(key))
-      return node;
-    return null;
-  }
-
-  /**
-   * Removes a {@code DoublyNode} containing the specified key. Due to the
-   * circular nature, there is a slight difference between this and the
-   * {@code DoublyLinkedList} implementation; there are no {@code null} pointers,
-   * so the removed nodes' previous pointer will point to the nodes next and vice
-   * versa for the removed nodes next pointer. This is required to retain the
-   * circular structure.
-   * 
-   * <p>
-   * This is an internal method that is used for both normal {@code remove()} and
-   * the reverse iteration {@code rRemove()}. The process is identical except for
-   * the type of {@code search()} method used. Simply passing the type allows for
-   * reduced boilerplating.
-   * </p>
-   * 
-   * <p>
-   * Because of the circular structure, a different implementation is required
-   * that the superclass definition.
-   * </p>
-   * 
-   * @param key the key of the desired node to remove
-   */
-  @Override
-  public synchronized void remove(DoublyNode<K, V> node) {
-    if (node == null)
-      return;
-    if (node == head && node == tail)
-      head = tail = null;
-    else if (node == head)
-      head = node.next;
-    else if (node == tail)
-      tail = node.prev;
-
-    node.prev.next = node.next;
-    node.next.prev = node.prev;
-
-    size--;
+    return node.getItem() == item ? index : -1;
   }
 
 }

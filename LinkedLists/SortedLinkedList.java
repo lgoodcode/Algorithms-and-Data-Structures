@@ -2,44 +2,70 @@ package data_structures.linkedLists;
 
 import java.util.function.BiFunction;
 
-public class SortedLinkedList<K, V> extends DoublyLinkedList<K, V> {
-  private BiFunction<K, K, Boolean> compareFn;
-  
+public class SortedLinkedList<T> extends LinkedList<T> {
   /**
-   * Empty contructor because there is no initialization.
+   * The function used to compare two keys and returns a boolean value indicating
+   * whether the first argument is less than the second argument.
    */
-  public SortedLinkedList(BiFunction<K, K, Boolean> compareFn) { 
-    super(); 
-    
+  private BiFunction<T, T, Boolean> compareFn;
+
+  /**
+   * Empty constructor besides the call to super() because there is no
+   * initialization and extends the {@link LinkedList}.
+   */
+  public SortedLinkedList(BiFunction<T, T, Boolean> compareFn) {
+    super();
     this.compareFn = compareFn;
   }
 
+  /**
+   * The default constructor that uses implements a default comparison function by
+   * comparing two keys using their {@code hashCode()} values.
+   */
   public SortedLinkedList() {
-    this((K x, K y) -> x.hashCode() < y.hashCode());
+    this((T x, T y) -> x.hashCode() < y.hashCode());
   }
 
-  private boolean isLessThan(DoublyNode<K, V> x, DoublyNode<K, V> y) {
-    return compareFn.apply(x.getKey(), y.getKey());
+  /**
+   * The internal compare method used to determine if the key of a
+   * {@code LinkedListNode} is smaller than the other node key.
+   *
+   * @param x node to compare
+   * @param y the other node to compare
+   * @return whether the first node key is smaller than the other node key
+   *
+   * @throws NullPointerException if the either node is {@code null}
+   */
+  private boolean isLessThan(LinkedListNode<T> x, LinkedListNode<T> y) {
+    checkNode(x);
+    checkNode(y);
+    return compareFn.apply(x.getItem(), y.getItem());
   }
 
-  public synchronized void insert(K key, V value) {
-    checkKey(key);
-    checkValue(value);
+  /**
+   * {@inheritDoc}
+   *
+   * <p>
+   * Iterates through the list, comparing nodes by the comparison function of the
+   * list to place the nodes in descending sorted order.
+   * </p>
+   *
+   * @throws IllegalArgumentException {@inheritDoc}
+   */
+  public synchronized void insert(T item) {
+    checkItem(item);
 
-    DoublyNode<K, V> node = new DoublyNode<>(key, value);
-    DoublyNode<K, V> temp;
+    LinkedListNode<T> temp, node = new LinkedListNode<>(item);
 
     if (head == null)
       head = tail = node;
     else if (head == tail) {
       if (isLessThan(node, head)) {
-        node.next = head;
-        head.prev = node;
+        link(node, head);
         head = node;
       }
       else {
-        head.next = node;
-        node.prev = head;
+        link(head, node);
         tail = node;
       }
     }
@@ -50,49 +76,28 @@ public class SortedLinkedList<K, V> extends DoublyLinkedList<K, V> {
         temp = temp.next;
 
       if (temp == head) {
-        node.next = temp;
-        temp.prev = node;
-        head = node;
+        if (isLessThan(temp, node))
+          link(temp, node, temp.next);
+        else {
+          link(node, temp);
+          head = node;
+        }
       }
       else if (temp == tail) {
-        node.prev = temp.prev;
-        node.prev.next = node;
-        node.next = temp;
-        temp.prev = node;
+        if (isLessThan(node, temp))
+          link(temp.prev, node, temp);
+        else {
+          link(temp, node);
+          tail = node;
+        }
       }
       else {
-        temp.prev.next = node;
-        node.prev = temp.prev;
-        temp.prev = node;
-        node.next = temp;
+        link(temp.prev, node, temp);
       }
     }
 
     size++;
+    modCount++;
   }
 
-  /**
-   * This iterates in the order that the list is because it is sorted. Using
-   * the {@code entries()} method will result in the string being in reverse
-   * order, which is not what we want for this structure because it should
-   * output the contents sorted.
-   * 
-   * @return the list string
-   */
-  @Override
-  public String toString() {
-    if (head == null)
-      return "{}";
-    
-    StringBuilder sb = new StringBuilder("{\n");
-    DoublyNode<K, V> node = getHead();
-    
-    do {
-      sb.append(node.toString() + "\n");
-      node = node.next;
-    } while (node != null);
-
-    
-    return sb.toString() + "}";
-  }
 }
