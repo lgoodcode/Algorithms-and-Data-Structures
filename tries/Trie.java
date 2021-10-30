@@ -120,8 +120,8 @@ public class Trie<V> extends AbstractTrie<V> {
    */
   @SuppressWarnings("unchecked")
   public <Node extends AbstractTrieNode<V>> String getPrefix(Node node) {
-    if (node == null)
-      throw new NullPointerException("Node cannot be null.");
+    checkNode(node);
+
     if (node.isRoot())
       return "";
 

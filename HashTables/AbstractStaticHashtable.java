@@ -1,5 +1,7 @@
 package data_structures.hashtables;
 
+import data_structures.Entry;
+
 public abstract class AbstractStaticHashtable<K, V> extends AbstractHashtable<K, V> {
   /**
    * The array of {@code Entry} objects that hold the key/value pairs.

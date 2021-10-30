@@ -1,8 +1,13 @@
 package data_structures.tries;
 
+import java.util.Iterator;
+import java.util.Enumeration;
 import java.util.function.Consumer;
 import java.util.function.BiConsumer;
+import java.util.NoSuchElementException;
+import java.util.ConcurrentModificationException;
 
+import data_structures.EmptyEnumerator;
 import data_structures.queues.Queue;
 import data_structures.queues.exceptions.QueueFullException;
 
@@ -11,6 +16,21 @@ public abstract class AbstractTrie<V> {
    * Counter tracking the number of entries in the {@code Trie}.
    */
   protected int count;
+
+  /**
+   * The number of times this Trie has been structurally modified Structural
+   * modifications are those that change the number of entries in the list or
+   * otherwise modify its internal structure (e.g., insert, delete). This field is
+   * used to make iterators on Collection-views of the Trie fail-fast.
+   *
+   * @see ConcurrentModificationException
+   */
+  protected int modCount;
+
+  // Enumeration/iteration constants
+  private int WORDS = 0;
+  private int VALUES = 1;
+  private int ENTRIES = 2;
 
   /**
    * Checks the word to make sure it isn't {@code null} or blank. It is only used
@@ -36,6 +56,11 @@ public abstract class AbstractTrie<V> {
   protected final void checkValue(V value) {
     if (value == null || value.toString().isBlank())
       throw new IllegalArgumentException("Key cannot be null or blank.");
+  }
+
+  protected final <Node extends AbstractTrieNode<V>> void checkNode(Node node) {
+    if (node == null)
+      throw new NullPointerException("Node cannot be null.");
   }
 
   /**
@@ -153,7 +178,7 @@ public abstract class AbstractTrie<V> {
   @SuppressWarnings("unchecked")
   public final <Node extends AbstractTrieNode<V>> boolean hasWord(String word) {
     Node node = (Node) search(word);
-    return node != null && !node.isRoot();
+    return node != null && node.isWord();
   }
 
   /**
@@ -186,12 +211,25 @@ public abstract class AbstractTrie<V> {
    * any parent node if the current node is a word or contains nodes with words.
    * </p>
    *
+   * @param <Node> a subclass of {@link AbstractTrieNode}
    * @param word the word of the {@code TrieNode} to delete
    *
    * @throws IllegalArgumentException if the word or value is {@code null} or
    *                                  blank
    */
   public abstract void delete(String word);
+
+  /**
+   * Deletes a {@code TrieNode} from the {@code Trie} with the specified node.
+   *
+   * @param node the {@code TrieNode} to delete
+   *
+   * @throws NullPointerException if the specified node is {@code null}
+   */
+  public final <Node extends AbstractTrieNode<V>> void delete(Node node) {
+    checkNode(node);
+    delete(getPrefix(node));
+  }
 
   /**
    * Traces up from the specified {@code TrieNode} up to the {@code root},
@@ -334,7 +372,7 @@ public abstract class AbstractTrie<V> {
    * @param callback the {@code Consumer} lambda function
    */
   @SuppressWarnings("unchecked")
-  public <Node extends AbstractTrieNode<V>> void walk(Node node, Consumer<Node> callback) {
+  public final <Node extends AbstractTrieNode<V>> void walk(Node node, Consumer<Node> callback) {
     Node[] children = (Node[]) node.getChildren();
 
     for (int i = 0; i < children.length; i++) {
@@ -361,7 +399,7 @@ public abstract class AbstractTrie<V> {
    * @param callback the {@code BiConsumer} lambda function
    */
   @SuppressWarnings("unchecked")
-  protected <Node extends AbstractTrieNode<V>> void
+  protected final <Node extends AbstractTrieNode<V>> void
     walk(Node node, String prefix, BiConsumer<Node, String> callback) {
 
     Node[] children = (Node[]) node.getChildren();
@@ -382,14 +420,16 @@ public abstract class AbstractTrie<V> {
    * @param <Node>   a subclass of {@link AbstractTrieNode}
    * @param callback the {@code Consumer} lambda function
    */
-  public <Node extends AbstractTrieNode<V>> void walk(Consumer<Node> callback) {
+  public final <Node extends AbstractTrieNode<V>> void walk(Consumer<Node> callback) {
     if (!isEmpty())
       walk(getRoot(), callback);
   }
 
   /**
    * Bridge method to be generic for any {@code Trie} implementation to traverse
-   * all the {@code TrieNodes} and return the object string.
+   * all the {@code TrieNodes} and return the object string. This is required
+   * because the {@code toString()} method cannot be generic because of the
+   * erasure.
    *
    * @param <Node> a subclass of {@link AbstractTrieNode}
    * @return the object string of the {@code Trie}
@@ -418,4 +458,223 @@ public abstract class AbstractTrie<V> {
   public final String toString() {
     return _toString();
   }
+
+  /**
+   * Returns an {@link Iterable} of the specified type.
+   *
+   * @param <T>  Generic type to allow any type to be iterated over
+   * @param type the type of item to iterate (keys, values, or entries)
+   * @return the {@code Iterable}
+   */
+  protected final <T> Iterable<T> getIterable(int type) {
+    if (isEmpty())
+      return new EmptyEnumerator<>();
+    return new Enumerator<>(type, true);
+  }
+
+  /**
+   * Returns an {@link Iterator} of the specified type.
+   *
+   * @param <T>  Generic type to allow any type to be iterated over
+   * @param type the type of item to iterate (keys, values, or entries)
+   * @return the {@code Iterator}
+   */
+  protected final <T> Iterator<T> getIterator(int type) {
+    if (isEmpty())
+      return new EmptyEnumerator<>();
+    return new Enumerator<>(type, true);
+  }
+  /**
+   * Returns an {@link Enumeration} of the specified type.
+   *
+   * @param <T>  Generic type to allow any type to be enumerated over
+   * @param type the type of item to iterate (keys, values, or entries)
+   * @return the {@code Enumeration}
+   */
+  protected final <T> Enumeration<T> getEnumeration(int type) {
+    if (isEmpty())
+      return new EmptyEnumerator<>();
+    return new Enumerator<>(type, false);
+  }
+
+  public final Iterable<String> words() {
+    return getIterable(WORDS);
+  }
+
+  public final Iterable<V> values() {
+    return getIterable(VALUES);
+  }
+
+  public final <Node extends AbstractTrieNode<V>> Iterable<Node> entries() {
+    return getIterable(ENTRIES);
+  }
+
+  public final Iterator<String> wordsIterator() {
+    return getIterator(WORDS);
+  }
+
+  public final Iterator<V> valuesIterator() {
+    return getIterator(VALUES);
+  }
+
+  public final <Node extends AbstractTrieNode<V>> Iterator<Node> entriesIterator() {
+    return getIterator(ENTRIES);
+  }
+
+  public final Enumeration<String> wordsEnumeration() {
+    return getEnumeration(WORDS);
+  }
+
+  public final Enumeration<V> valuesEnumeration() {
+    return getEnumeration(VALUES);
+  }
+
+  public final <Node extends AbstractTrieNode<V>> Enumeration<Node> entriesEnumeration() {
+    return getEnumeration(ENTRIES);
+  }
+
+  /**
+   * A trie enumerator class. This class implements the Enumeration,
+   * Iterator, and Iterable interfaces, but individual instances can be created
+   * with the Iterator methods disabled. This is necessary to avoid
+   * unintentionally increasing the capabilities granted a user by passing an
+   * Enumeration.
+   *
+   * @param <T> the type of the object that is being enumerated
+   */
+  protected final class Enumerator<T> implements Enumeration<T>, Iterator<T>, Iterable<T> {
+    protected Queue<AbstractTrieNode<V>> entries;
+    protected AbstractTrieNode<V> last;
+    protected int type, size, index = 0;
+
+    /**
+     * Indicates whether this Enumerator is serving as an Iterator or an
+     * Enumeration.
+     */
+    protected boolean iterator;
+
+    /**
+     * The expected value of modCount when instantiating the iterator. If this
+     * expectation is violated, the iterator has detected concurrent modification.
+     */
+    protected int expectedModCount = AbstractTrie.this.modCount;
+
+    /**
+     * Constructs the enumerator that will be used to enumerate the values in the
+     * trie.
+     *
+     * @param type     the type of object to enumerate
+     * @param iterator whether this will serve as an {@code Enumeration} or
+     *                 {@code Iterator}
+     */
+    protected Enumerator(int type, boolean iterator) {
+      this.size = AbstractTrie.this.count;
+      this.iterator = iterator;
+      this.type = type;
+      entries = new Queue<>(size);
+
+      walk((AbstractTrieNode<V> node) -> {
+        if (node.isWord()) {
+          try {
+            entries.enqueue(node);
+          } catch (QueueFullException e) {}
+        }
+      });
+    }
+
+    // Iterable method
+    public Iterator<T> iterator() {
+      return iterator ? this : this.asIterator();
+    }
+
+    /**
+     * Checks whether there are more elments to return.
+     *
+     * @return if this object has one or more items to provide or not
+     */
+    public boolean hasMoreElements() {
+      return entries.hasNextElement();
+    }
+
+    /**
+     * Returns the next element if it has one to provide.
+     *
+     * @return the next element
+     *
+     * @throws NoSuchElementException if no more elements exist
+     */
+    @SuppressWarnings("unchecked")
+    public T nextElement() {
+      if (!hasNext())
+        throw new NoSuchElementException("Queue enumerator. No items in queue.");
+      last = entries.dequeue();
+      return type == WORDS ? (T) AbstractTrie.this.getPrefix(last)
+        : (type == VALUES ? (T) last.getValue() : (T) last);
+    }
+
+    /**
+     * The Iterator method; the same as Enumeration.
+     */
+    public boolean hasNext() {
+      return hasMoreElements();
+    }
+
+    /**
+     * Iterator method. Returns the next element in the iteration.
+     *
+     * @return the next element in the iteration
+     * @throws ConcurrentModificationException if the list was modified during
+     *                                         computation.
+     */
+    public T next() {
+      if (AbstractTrie.this.modCount != expectedModCount)
+        throw new ConcurrentModificationException();
+      return nextElement();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * Removes from the underlying collection the last element returned
+     * by this iterator (optional operation).  This method can be called
+     * only once per call to {@link #next}.
+     * <p>
+     * The behavior of an iterator is unspecified if the underlying collection
+     * is modified while the iteration is in progress in any way other than by
+     * calling this method, unless an overriding class has specified a
+     * concurrent modification policy.
+     * <p>
+     * The behavior of an iterator is unspecified if this method is called
+     * after a call to the {@link #forEachRemaining forEachRemaining} method.
+     *
+     * @throws UnsupportedOperationException if the {@code remove} operation is
+     *         not supported by this iterator, e.g., if the object is an
+     *         {@code Enumeration}.
+     *
+     * @throws IllegalStateException if the {@code next} method has not yet been
+     *         called, or the {@code remove} method has already been called after
+     *         the last call to the {@code next} method.
+     *
+     * @throws ConcurrentModificationException if a function modified this map
+     *         during computation.
+     */
+    @Override
+    public void remove() {
+      if (!iterator)
+        throw new UnsupportedOperationException();
+      if (last == null)
+        throw new IllegalStateException("trie Enumerator. No last item.");
+      if (modCount != expectedModCount)
+        throw new ConcurrentModificationException();
+
+      // Synchronized block to lock the trie object while removing entry
+      synchronized (AbstractTrie.this) {
+        // Pass the current index to remove the last item
+        AbstractTrie.this.delete(AbstractTrie.this.getPrefix(last));
+        expectedModCount++;
+        last = null;
+      }
+    }
+  }
+
 }

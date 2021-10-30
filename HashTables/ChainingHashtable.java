@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
 
+import data_structures.Entry;
 import data_structures.linkedLists.LinkedList;
 
 /**

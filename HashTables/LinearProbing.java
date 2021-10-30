@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
 
+import data_structures.Entry;
+
 /**
  * Linear Probing uses a hash function of the form:
  *

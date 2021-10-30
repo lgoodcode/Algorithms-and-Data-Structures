@@ -1,14 +1,15 @@
 package data_structures.trees;
 
-import data_structures.queues.Queue;
-
-import java.util.Objects;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.NoSuchElementException;
 import java.util.ConcurrentModificationException;
+
+import data_structures.EmptyEnumerator;
+import data_structures.queues.Queue;
+import data_structures.queues.exceptions.QueueFullException;
 
 public abstract class AbstractTree<K, V> {
   /**
@@ -471,64 +472,74 @@ public abstract class AbstractTree<K, V> {
 
   /**
    * Returns an {@link Iterable} of the specified type.
-   * 
+   *
    * @param <T>  Generic type to allow any type to be iterated over
    * @param type the type of item to iterate (keys, values, or entries)
    * @return the {@code Iterable}
    */
-  protected abstract <T> Iterable<T> getIterable(int type);
-  
+  protected final <T> Iterable<T> getIterable(int type) {
+    if (isEmpty())
+      return new EmptyEnumerator<>();
+    return new Enumerator<>(type, true);
+  }
   /**
    * Returns an {@link Iterator} of the specified type.
-   * 
+   *
    * @param <T>  Generic type to allow any type to be iterated over
    * @param type the type of item to iterate (keys, values, or entries)
    * @return the {@code Iterator}
    */
-  protected abstract <T> Iterator<T> getIterator(int type);
-  
+  protected final <T> Iterator<T> getIterator(int type) {
+    if (isEmpty())
+      return new EmptyEnumerator<>();
+    return new Enumerator<>(type, true);
+  }
   /**
    * Returns an {@link Enumeration} of the specified type.
-   * 
+   *
    * @param <T>  Generic type to allow any type to be enumerated over
    * @param type the type of item to iterate (keys, values, or entries)
    * @return the {@code Enumeration}
    */
-  protected abstract <T> Enumeration<T> getEnumeration(int type);
+  protected final <T> Enumeration<T> getEnumeration(int type) {
+    if (isEmpty())
+      return new EmptyEnumerator<>();
+    return new Enumerator<>(type, false);
+  }
 
-  public Iterable<K> keys() {
+  public final Iterable<K> keys() {
     return getIterable(KEYS);
   }
 
-  public Iterable<V> values() {
+  public final Iterable<V> values() {
     return getIterable(VALUES);
   }
 
-  public <E extends TreeNode<K, V>> Iterable<E> entries() {
+  public final <E extends TreeNode<K, V>> Iterable<E> entries() {
     return getIterable(ENTRIES);
   }
 
-  public Iterator<K> keysIterator() {
+  public final Iterator<K> keysIterator() {
     return getIterator(KEYS);
   }
 
-  public Iterator<V> valuesIterator() {
+  public final Iterator<V> valuesIterator() {
     return getIterator(VALUES);
   }
 
-  public <E extends TreeNode<K, V>> Iterator<E> entriesIterator() {
+  public final <E extends TreeNode<K, V>> Iterator<E> entriesIterator() {
     return getIterator(ENTRIES);
   }
 
-  public Enumeration<K> keysEnumeration() {
+  public final Enumeration<K> keysEnumeration() {
     return getEnumeration(KEYS);
   }
 
-  public Enumeration<V> valuesEnumeration() {
+  public final Enumeration<V> valuesEnumeration() {
     return getEnumeration(VALUES);
   }
 
-  public <E extends TreeNode<K, V>> Enumeration<E> entriesEnumeration() {
+  public final <E extends TreeNode<K, V>> Enumeration<E> entriesEnumeration() {
     return getEnumeration(ENTRIES);
   }
 
@@ -541,7 +552,7 @@ public abstract class AbstractTree<K, V> {
    *
    * @param <T> the type of the object that is being enumerated
    */
-  protected abstract class AbstractEnumerator<T> implements Enumeration<T>, Iterator<T>, Iterable<T> {
+  protected final class Enumerator<T> implements Enumeration<T>, Iterator<T>, Iterable<T> {
     protected Queue<TreeNode<K, V>> entries;
     protected TreeNode<K, V> last;
     protected int type, size, index = 0;
@@ -557,6 +568,27 @@ public abstract class AbstractTree<K, V> {
      * expectation is violated, the iterator has detected concurrent modification.
      */
     protected int expectedModCount = AbstractTree.this.modCount;
+
+    /**
+     * Constructs the enumerator that will be used to enumerate the values in the
+     * tree.
+     *
+     * @param type     the type of object to enumerate
+     * @param iterator whether this will serve as an {@code Enumeration} or
+     *                 {@code Iterator}
+     */
+    protected Enumerator(int type, boolean iterator) {
+      this.size = AbstractTree.this.count;
+      this.iterator = iterator;
+      this.type = type;
+      entries = new Queue<>(size);
+
+      inorderTreeWalk((TreeNode<K, V> node) -> {
+        try {
+          entries.enqueue(node);
+        } catch (QueueFullException e) {}
+      });
+    }
 
     // Iterable method
     public final Iterator<T> iterator() {
@@ -649,60 +681,6 @@ public abstract class AbstractTree<K, V> {
         expectedModCount++;
         last = null;
       }
-    }
-  }
-
-   /**
-   * This class creates an empty {@code Iterable} that has no elements.
-   *
-   * <ul>
-   * <li>{@link Iterator#hasNext} always returns {@code false}.</li>
-   * <li>{@link Iterator#next} always throws {@link NoSuchElementException}.</li>
-   * </ul>
-   *
-   * <p>
-   * Implementations of this method are permitted, but not required, to return the
-   * same object from multiple invocations.
-   * </p>
-   *
-   * @param <T> the class of the objects in the iterable
-   * @since 1.1
-   */
-  protected static final class EmptyIterable<T> implements Enumeration<T>, Iterator<T>, Iterable<T> {
-    // TODO: need to disable the warning here for unused variable
-    // static final EmptyIterable<?> EMPTY_ITERABLE = new EmptyIterable<>();
-    public EmptyIterable() {}
-
-    // Enumeration methods
-    public boolean hasMoreElements() {
-      return false;
-    }
-
-    public T nextElement() {
-      throw new NoSuchElementException();
-    }
-
-    // Iterator methods
-    public boolean hasNext() {
-      return false;
-    }
-
-    public T next() {
-      throw new NoSuchElementException();
-    }
-
-    public void remove() {
-      throw new IllegalStateException();
-    }
-
-    // Iterable method
-    public Iterator<T> iterator() {
-      return this;
-    }
-
-    @Override
-    public void forEachRemaining(Consumer<? super T> action) {
-      Objects.requireNonNull(action);
     }
   }
 

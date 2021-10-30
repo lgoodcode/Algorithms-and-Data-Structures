@@ -7,6 +7,8 @@ import java.util.function.Consumer;
 import java.util.NoSuchElementException;
 import java.util.ConcurrentModificationException;
 
+import data_structures.Entry;
+
 public abstract class AbstractHashtable<K, V> {
   /**
    * The number of times this Hashtable has been structurally modified Structural

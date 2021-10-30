@@ -8,8 +8,14 @@ import org.junit.jupiter.params.provider.ValueSource;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import data_structures.tries.TrieHash;
@@ -70,11 +76,6 @@ public class TrieHash_Test {
       assertNull(trie.findWords("a"));
     }
 
-    @Test
-    void delete_throws() {
-      assertThrows(IllegalArgumentException.class, () -> trie.delete(null));
-    }
-
     @ParameterizedTest
     @NullAndEmptySource
     @ValueSource(strings = { " ", "  ", "\t", "\n" })
@@ -84,6 +85,29 @@ public class TrieHash_Test {
       assertThrows(IllegalArgumentException.class, () -> trie.insert(word, 1));
     }
 
+    @Test
+    void keys_is_empty() {
+      Iterator<String> words = trie.wordsIterator();
+      assertFalse(words.hasNext());
+      assertThrows(NoSuchElementException.class, () -> words.next());
+      assertThrows(IllegalStateException.class, () -> words.remove());
+    }
+
+    @Test
+    void values_is_empty() {
+      Iterator<Integer> values = trie.valuesIterator();
+      assertFalse(values.hasNext());
+      assertThrows(NoSuchElementException.class, () -> values.next());
+      assertThrows(IllegalStateException.class, () -> values.remove());
+    }
+
+    @Test
+    void entries_is_empty() {
+      Iterator<TrieHashNode<Integer>> entries = trie.entriesIterator();
+      assertFalse(entries.hasNext());
+      assertThrows(NoSuchElementException.class, () -> entries.next());
+      assertThrows(IllegalStateException.class, () -> entries.remove());
+    }
   }
 
   @Nested
@@ -130,6 +154,63 @@ public class TrieHash_Test {
 
       assertEquals(7, trie.size());
       assertNull(trie.get("one"));
+      assertFalse(trie.hasWord("one"));
+    }
+
+    @Test
+    void words() {
+      Iterator<String> words = trie.wordsIterator();
+      assertTrue(words.hasNext());
+      assertEquals("boar", words.next());
+      assertEquals("boars", words.next());
+      assertEquals("boats", words.next());
+      assertEquals("five", words.next());
+      assertEquals("four", words.next());
+      assertEquals("one", words.next());
+      assertEquals("three", words.next());
+      assertEquals("two", words.next());
+      assertFalse(words.hasNext());
+      assertThrows(NoSuchElementException.class, () -> words.next());
+    }
+
+    @Test
+    void values() {
+      Iterator<Integer> values = trie.valuesIterator();
+      assertTrue(values.hasNext());
+      assertEquals(8, values.next());
+      assertEquals(7, values.next());
+      assertEquals(6, values.next());
+      assertEquals(5, values.next());
+      assertEquals(4, values.next());
+      assertEquals(1, values.next());
+      assertEquals(3, values.next());
+      assertEquals(2, values.next());
+      assertFalse(values.hasNext());
+      assertThrows(NoSuchElementException.class, () -> values.next());
+    }
+
+    @Test
+    void entries() {
+      Iterator<TrieHashNode<Integer>> entries = trie.entriesIterator();
+      assertTrue(entries.hasNext());
+      assertEquals(8, entries.next().getValue());
+      assertEquals(7, entries.next().getValue());
+      assertEquals(6, entries.next().getValue());
+      assertEquals(5, entries.next().getValue());
+      assertEquals(4, entries.next().getValue());
+      assertEquals(1, entries.next().getValue());
+      assertEquals(3, entries.next().getValue());
+      assertEquals(2, entries.next().getValue());
+      assertFalse(entries.hasNext());
+      assertThrows(NoSuchElementException.class, () -> entries.next());
+    }
+
+    @Test
+    void enumeration_remove() {
+      Iterator<String> words = trie.wordsIterator();
+      words.next();
+      words.remove();
+      assertFalse(trie.hasWord("boar"));
     }
 
     @Test

@@ -92,6 +92,30 @@ public class RedBlackTree_Test {
       assertThrows(IllegalArgumentException.class, () -> tree.insert(1, value));
     }
 
+    @Test
+    void keys_is_empty() {
+      Iterator<Integer> keys = tree.keysIterator();
+      assertFalse(keys.hasNext());
+      assertThrows(NoSuchElementException.class, () -> keys.next());
+      assertThrows(IllegalStateException.class, () -> keys.remove());
+    }
+
+    @Test
+    void values_is_empty() {
+      Iterator<String> values = tree.valuesIterator();
+      assertFalse(values.hasNext());
+      assertThrows(NoSuchElementException.class, () -> values.next());
+      assertThrows(IllegalStateException.class, () -> values.remove());
+    }
+
+    @Test
+    void entries_is_empty() {
+      Iterator<RedBlackTreeNode<Integer, String>> entries = tree.entriesIterator();
+      assertFalse(entries.hasNext());
+      assertThrows(NoSuchElementException.class, () -> entries.next());
+      assertThrows(IllegalStateException.class, () -> entries.remove());
+    }
+  
   }
 
   @Nested

@@ -30,6 +30,7 @@ public abstract class AbstractLinkedList<T> {
    * modifications are those that change the number of entries in the list or
    * otherwise modify its internal structure (e.g., insert, delete).  This field
    * is used to make iterators on Collection-views of the LinkedList fail-fast.
+   * 
    * @see ConcurrentModificationException
    */
   protected int modCount = 0;

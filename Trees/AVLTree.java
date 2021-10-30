@@ -1,13 +1,7 @@
 package data_structures.trees;
 
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
-
-import data_structures.queues.Queue;
-import data_structures.queues.exceptions.QueueFullException;
 
 /**
  * The AVL tree is a self-balancing tree. The heights of two child subtrees of
@@ -580,43 +574,6 @@ public class AVLTree<K, V> extends AbstractTree<K, V> {
     this.postorderTreeWalk((Node) _node.left, callback);
     this.postorderTreeWalk((Node) _node.right, callback);
     callback.accept((Node) _node);
-  }
-
-  protected <T> Iterable<T> getIterable(int type) {
-    if (isEmpty())
-      return new EmptyIterable<>();
-    return new Enumerator<>(type, true);
-  }
-
-  protected <T> Iterator<T> getIterator(int type) {
-    if (isEmpty())
-      return Collections.emptyIterator();
-    return new Enumerator<>(type, true);
-  }
-
-  protected <T> Enumeration<T> getEnumeration(int type) {
-    if (isEmpty())
-      return Collections.emptyEnumeration();
-    return new Enumerator<>(type, false);
-  }
-
-  /**
-   * The {@code Enumerator} constructor to place all the nodes in the tree into an
-   * {@link Queue} to be enumerated.
-   */
-  protected class Enumerator<T> extends AbstractEnumerator<T> {
-    Enumerator(int type, boolean iterator) {
-      this.size = AVLTree.this.count;
-      this.iterator = iterator;
-      this.type = type;
-      entries = new Queue<>(size);
-
-      inorderTreeWalk((AVLTreeNode<K, V> node) -> {
-        try {
-          entries.enqueue(node);
-        } catch (QueueFullException e) {}
-      });
-    }
   }
 
 }

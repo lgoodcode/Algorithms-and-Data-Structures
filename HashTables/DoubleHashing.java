@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
 
+import data_structures.Entry;
+
 /**
  * This hashtable uses the DoubleHashing implementation of OpenAddressing, where
  * it consists of a single table and all the slots are occupied with an element

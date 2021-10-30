@@ -1,4 +1,4 @@
-package data_structures.hashtables;
+package data_structures;
 
 /**
  * This class creates entries that hold a key/value pair. It allows 
