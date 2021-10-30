@@ -1,9 +1,5 @@
 package data_structures.linkedLists;
 
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Iterator;
-
 public class LinkedList<T> extends AbstractLinkedList<T> {
   /**
    * Empty contructor
@@ -245,41 +241,4 @@ public class LinkedList<T> extends AbstractLinkedList<T> {
     modCount++;
   }
 
-  protected Iterable<T> getIterable() {
-    if (isEmpty())
-      return new EmptyIterable<>();
-    return new Enumerator<>(true);
-  }
-
-  protected Iterator<T> getIterator() {
-    if (isEmpty())
-      return Collections.emptyIterator();
-    return new Enumerator<>(true);
-  }
-
-  protected Enumeration<T> getEnumeration() {
-    if (isEmpty())
-      return Collections.emptyEnumeration();
-    return new Enumerator<>(false);
-  }
-
-  /**
-   * The {@code Enumerator} constructor to place all the items in the list into an
-   * array to be iterated.
-   */
-  protected class Enumerator<E> extends AbstractEnumerator<T> {
-    Enumerator(boolean iterator) {
-      this.size = LinkedList.this.size;
-      this.iterator = iterator;
-      list = new LinkedListNode<?>[size];
-      int i = 0;
-
-      LinkedListNode<T> node = getHead();
-
-      do {
-        list[i++] = node;
-        node = node.next;
-      } while (node != null && node != head);
-    }
-  }
 }

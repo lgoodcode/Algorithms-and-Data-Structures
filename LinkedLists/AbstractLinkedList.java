@@ -1,11 +1,11 @@
 package data_structures.linkedLists;
 
-import java.util.Objects;
 import java.util.Enumeration;
 import java.util.Iterator;
-import java.util.function.Consumer;
 import java.util.NoSuchElementException;
 import java.util.ConcurrentModificationException;
+
+import data_structures.EmptyEnumerator;
 
 /**
  * Creates a DoublyLinkedList implementation because, the simple forward only
@@ -181,7 +181,7 @@ public abstract class AbstractLinkedList<T> {
    * @param pred the predecessor of the second node
    * @param node the successor of the first node
    */
-  protected void link(LinkedListNode<T> pred, LinkedListNode<T> node) {
+  protected final void link(LinkedListNode<T> pred, LinkedListNode<T> node) {
     node.prev = pred;
     pred.next = node;
   }
@@ -195,7 +195,7 @@ public abstract class AbstractLinkedList<T> {
    * @param node the node to insert between the first and third
    * @param succ the successor of the second node
    */
-  protected void link(LinkedListNode<T> pred, LinkedListNode<T> node, LinkedListNode<T> succ) {
+  protected final void link(LinkedListNode<T> pred, LinkedListNode<T> node, LinkedListNode<T> succ) {
     node.prev = pred;
     node.next = succ;
     pred.next = node;
@@ -209,7 +209,7 @@ public abstract class AbstractLinkedList<T> {
    *
    * @param node the node to unlink
    */
-  protected void unlink(LinkedListNode<T> node) {
+  protected final void unlink(LinkedListNode<T> node) {
     if (node == head && node == tail) {
       head = tail = null;
     }
@@ -321,7 +321,7 @@ public abstract class AbstractLinkedList<T> {
    *
    * @return the string format of the object
    */
-  public String toString() {
+  public final String toString() {
     if (head == null)
       return "{}";
 
@@ -335,25 +335,40 @@ public abstract class AbstractLinkedList<T> {
   }
 
   /**
-   * Returns an {@link Iterable} of the items in the list.
+   * Returns an {@link Iterable} of the specified type.
    *
+   * @param type the type of item to iterate (keys, values, or entries)
    * @return the {@code Iterable}
    */
-  protected abstract Iterable<T> getIterable();
-
+  protected final Iterable<T> getIterable() {
+    if (isEmpty())
+      return new EmptyEnumerator<>();
+    return new Enumerator<>(true);
+  }
+  
   /**
-   * Returns an {@link Iterator} of the items in the list.
+   * Returns an {@link Iterator} of the specified type.
    *
+   * @param type the type of item to iterate (keys, values, or entries)
    * @return the {@code Iterator}
    */
-  protected abstract Iterator<T> getIterator();
+  protected final Iterator<T> getIterator() {
+    if (isEmpty())
+      return new EmptyEnumerator<>();
+    return new Enumerator<>(true);
+  }
 
   /**
-   * Returns an {@link Enumeration} of items in the list.
+   * Returns an {@link Enumeration} of the specified type.
    *
+   * @param type the type of item to iterate (keys, values, or entries)
    * @return the {@code Enumeration}
    */
-  protected abstract Enumeration<T> getEnumeration();
+  protected final Enumeration<T> getEnumeration() {
+    if (isEmpty())
+      return new EmptyEnumerator<>();
+    return new Enumerator<>(false);
+  }
 
   /**
    * Returns an iterable of the values in this linkedlist. Use the {@code Iterator}
@@ -384,7 +399,7 @@ public abstract class AbstractLinkedList<T> {
    *
    * @param <T> the type of the object that is being enumerated
    */
-  protected abstract class AbstractEnumerator<E> implements Enumeration<E>, Iterator<E>, Iterable<E> {
+  protected final class Enumerator<E> implements Enumeration<E>, Iterator<E>, Iterable<E> {
     protected LinkedListNode<?>[] list;
     protected LinkedListNode<?> entry, last;
     protected int size, index = 0;
@@ -401,8 +416,29 @@ public abstract class AbstractLinkedList<T> {
      */
     protected int expectedModCount = AbstractLinkedList.this.modCount;
 
+    /**
+     * Constructs the enumerator that will be used to enumerate the values in the
+     * list.
+     *
+     * @param iterator whether this will serve as an {@code Enumeration} or
+     *                 {@code Iterator}
+     */
+    protected Enumerator(boolean iterator) {
+      this.size = AbstractLinkedList.this.size;
+      this.iterator = iterator;
+      list = new LinkedListNode<?>[size];
+      int i = 0;
+
+      LinkedListNode<T> node = getHead();
+
+      do {
+        list[i++] = node;
+        node = node.next;
+      } while (node != null && node != head);
+    }
+
     // Iterable method
-    public final Iterator<E> iterator() {
+    public Iterator<E> iterator() {
       return iterator ? this : this.asIterator();
     }
 
@@ -411,7 +447,7 @@ public abstract class AbstractLinkedList<T> {
      *
      * @return if this object has one or more items to provide or not
      */
-    public final boolean hasMoreElements() {
+    public boolean hasMoreElements() {
       if (index >= size)
         return false;
       return list[index] != null;
@@ -425,7 +461,7 @@ public abstract class AbstractLinkedList<T> {
      * @throws NoSuchElementException if no more elements exist
      */
     @SuppressWarnings("unchecked")
-    public final E nextElement() {
+    public E nextElement() {
       if (index >= size)
         throw new NoSuchElementException("LinkedList Enumerator");
       last = list[index];
@@ -435,7 +471,7 @@ public abstract class AbstractLinkedList<T> {
     /**
      * The Iterator method; the same as Enumeration.
      */
-    public final boolean hasNext() {
+    public boolean hasNext() {
       return hasMoreElements();
     }
 
@@ -446,7 +482,7 @@ public abstract class AbstractLinkedList<T> {
      * @throws ConcurrentModificationException if the list was modified during
      *                                         computation.
      */
-    public final E next() {
+    public E next() {
       if (AbstractLinkedList.this.modCount != expectedModCount)
         throw new ConcurrentModificationException();
       return nextElement();
@@ -480,7 +516,7 @@ public abstract class AbstractLinkedList<T> {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public final void remove() {
+    public void remove() {
       if (!iterator)
         throw new UnsupportedOperationException();
       if (last == null)
@@ -495,60 +531,6 @@ public abstract class AbstractLinkedList<T> {
         expectedModCount++;
         last = null;
       }
-    }
-  }
-
-   /**
-   * This class creates an empty {@code Iterable} that has no elements.
-   *
-   * <ul>
-   * <li>{@link Iterator#hasNext} always returns {@code false}.</li>
-   * <li>{@link Iterator#next} always throws {@link NoSuchElementException}.</li>
-   * </ul>
-   *
-   * <p>
-   * Implementations of this method are permitted, but not required, to return the
-   * same object from multiple invocations.
-   * </p>
-   *
-   * @param <E> the class of the objects in the iterable
-   * @since 1.1
-   */
-  protected static final class EmptyIterable<E> implements Enumeration<E>, Iterator<E>, Iterable<E> {
-    // TODO: need to disable the warning here for unused variable
-    // static final EmptyIterable<?> EMPTY_ITERABLE = new EmptyIterable<>();
-    public EmptyIterable() {}
-
-    // Enumeration methods
-    public boolean hasMoreElements() {
-      return false;
-    }
-
-    public E nextElement() {
-      throw new NoSuchElementException();
-    }
-
-    // Iterator methods
-    public boolean hasNext() {
-      return false;
-    }
-
-    public E next() {
-      throw new NoSuchElementException();
-    }
-
-    public void remove() {
-      throw new IllegalStateException();
-    }
-
-    // Iterable method
-    public Iterator<E> iterator() {
-      return this;
-    }
-
-    @Override
-    public void forEachRemaining(Consumer<? super E> action) {
-      Objects.requireNonNull(action);
     }
   }
 

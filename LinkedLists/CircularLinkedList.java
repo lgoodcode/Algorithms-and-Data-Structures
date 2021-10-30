@@ -1,6 +1,6 @@
 package data_structures.linkedLists;
 
-public class CircularLinkedList<T> extends LinkedList<T> {
+public final class CircularLinkedList<T> extends LinkedList<T> {
   /**
    * Empty constructor besides the call to super() because there is no
    * initialization and extends the {@link LinkedList}.

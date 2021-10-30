@@ -89,6 +89,15 @@ public class SortedLinkedList_Test {
     void insert_throws_on_bad_values(String value) {
       assertThrows(IllegalArgumentException.class, () -> list.insert(value));
     }
+
+    @Test
+    void values_is_empty() {
+      Iterator<String> values = list.valuesIterator();
+      assertFalse(values.hasNext());
+      assertThrows(NoSuchElementException.class, () -> values.next());
+      assertThrows(IllegalStateException.class, () -> values.remove());
+    }
+
   }
 
   @Nested

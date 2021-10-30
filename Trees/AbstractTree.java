@@ -23,8 +23,17 @@ public abstract class AbstractTree<K, V> {
    */
   protected int count;
 
+  /**
+   * The number of times this LinkedList has been structurally modified Structural
+   * modifications are those that change the number of entries in the list or
+   * otherwise modify its internal structure (e.g., insert, delete).  This field
+   * is used to make iterators on Collection-views of the LinkedList fail-fast.
+   * 
+   * @see ConcurrentModificationException
+   */
   protected int modCount;
 
+  // Enumeration/iteration constants
   private int KEYS = 0;
   private int VALUES = 1;
   private int ENTRIES = 2;
@@ -122,6 +131,8 @@ public abstract class AbstractTree<K, V> {
   /**
    * Checks to make sure the specified {@code TreeNode} is not {@code null}.
    *
+   * @param <Node> {@link TreeNode} or a subclass of
+   * 
    * @throws NullPointerException if the specified node is {@code null}
    */
   protected final <Node extends TreeNode<K, V>> void checkNode(Node node) {
@@ -219,7 +230,7 @@ public abstract class AbstractTree<K, V> {
    * @param <Node> {@link TreeNode} or a subclass of
    * @return the {@code TreeNode} with the smallest key or {@null} if none
    */
-  public <Node extends TreeNode<K, V>> Node minimum() {
+  public final <Node extends TreeNode<K, V>> Node minimum() {
     return minimum(getRoot());
   }
 
@@ -248,7 +259,7 @@ public abstract class AbstractTree<K, V> {
    * @param <Node> {@link TreeNode} or a subclass of
    * @return the {@code TreeNode} with the largest key or {@null} if none
    */
-  public <Node extends TreeNode<K, V>> Node maximum() {
+  public final <Node extends TreeNode<K, V>> Node maximum() {
     return maximum(getRoot());
   }
 
@@ -261,7 +272,7 @@ public abstract class AbstractTree<K, V> {
    *
    * @throws IllegalArgumentException if the key or value is {@code null} or blank
    */
-  public boolean hasKey(K key) {
+  public final boolean hasKey(K key) {
     return search(key) != null;
   }
 
@@ -275,7 +286,7 @@ public abstract class AbstractTree<K, V> {
    *
    * @throws IllegalArgumentException if the key or value is {@code null} or blank
    */
-  public <Node extends TreeNode<K, V>> V get(K key) {
+  public final <Node extends TreeNode<K, V>> V get(K key) {
     Node node = search(key);
     return node != null ? node.getValue() : null;
   }
@@ -482,6 +493,7 @@ public abstract class AbstractTree<K, V> {
       return new EmptyEnumerator<>();
     return new Enumerator<>(type, true);
   }
+
   /**
    * Returns an {@link Iterator} of the specified type.
    *
@@ -494,6 +506,7 @@ public abstract class AbstractTree<K, V> {
       return new EmptyEnumerator<>();
     return new Enumerator<>(type, true);
   }
+
   /**
    * Returns an {@link Enumeration} of the specified type.
    *
@@ -591,7 +604,7 @@ public abstract class AbstractTree<K, V> {
     }
 
     // Iterable method
-    public final Iterator<T> iterator() {
+    public Iterator<T> iterator() {
       return iterator ? this : this.asIterator();
     }
 
@@ -600,7 +613,7 @@ public abstract class AbstractTree<K, V> {
      *
      * @return if this object has one or more items to provide or not
      */
-    public final boolean hasMoreElements() {
+    public boolean hasMoreElements() {
       return entries.hasNextElement();
     }
 
@@ -612,7 +625,7 @@ public abstract class AbstractTree<K, V> {
      * @throws NoSuchElementException if no more elements exist
      */
     @SuppressWarnings("unchecked")
-    public final T nextElement() {
+    public T nextElement() {
       if (!hasNext())
         throw new NoSuchElementException("Queue enumerator. No items in queue.");
       last = entries.dequeue();
@@ -622,7 +635,7 @@ public abstract class AbstractTree<K, V> {
     /**
      * The Iterator method; the same as Enumeration.
      */
-    public final boolean hasNext() {
+    public boolean hasNext() {
       return hasMoreElements();
     }
 
@@ -633,7 +646,7 @@ public abstract class AbstractTree<K, V> {
      * @throws ConcurrentModificationException if the list was modified during
      *                                         computation.
      */
-    public final T next() {
+    public T next() {
       if (AbstractTree.this.modCount != expectedModCount)
         throw new ConcurrentModificationException();
       return nextElement();
@@ -666,7 +679,7 @@ public abstract class AbstractTree<K, V> {
      *         during computation.
      */
     @Override
-    public final void remove() {
+    public void remove() {
       if (!iterator)
         throw new UnsupportedOperationException();
       if (last == null)
