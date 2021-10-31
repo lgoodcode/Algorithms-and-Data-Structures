@@ -1,10 +1,10 @@
 package data_structures.hashtables;
 
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
 
 import data_structures.Entry;
+import data_structures.EmptyEnumerator;
 import data_structures.linkedLists.LinkedList;
 
 /**
@@ -47,7 +47,7 @@ import data_structures.linkedLists.LinkedList;
  * {@code n} elements, load factor is {@code n / m}, that is, the average number
  * of elements stored in a chain.
  * </p>
- * 
+ *
  * <p>
  * The worse-case behavior of hashing with chaining is terrible: all {@code n}
  * keys hash to the same slot, creating a list of length {@code n}, therefore,
@@ -55,7 +55,7 @@ import data_structures.linkedLists.LinkedList;
  * to compute the hash function - no better than if we used a linked list for
  * all the elements.
  * </p>
- * 
+ *
  * <p>
  * The average-case performance of hashing depends on how well the hash function
  * h distributes the set of keys to be stored among the m slots, on the average.
@@ -109,22 +109,22 @@ public final class ChainingHashtable<K, V> extends AbstractHashtable<K, V> {
   /**
    * Hashes the key using the multiplication method described in the class
    * documentation.
-   * 
+   *
    * @param key the key to hash
    * @return the hashed index slot for the table
    */
   private int hash(K key) {
-    return (int) Math.floor(m * ((key.hashCode() * 0.5675) % 1)); 
+    return (int) Math.floor(m * ((key.hashCode() * 0.5675) % 1));
   }
 
   /**
    * Inserts a new key/value pair into the hashtable. Finds the {@code LinkedList}
    * at the hashed index slot and inserts a new entry into the list with the
    * supplied key and value pair.
-   * 
+   *
    * @param key   the key to insert
    * @param value the value to insert
-   * 
+   *
    * @throws IllegalArgumentException if the key or value is {@code null}, blank,
    *                                  or already exists in the hashtable
    */
@@ -142,6 +142,7 @@ public final class ChainingHashtable<K, V> extends AbstractHashtable<K, V> {
     ((LinkedList<Entry<K, V>>) table[hash]).insert(new Entry<K, V>(key, value));
 
     n++;
+    modCount++;
   }
 
   /**
@@ -149,7 +150,7 @@ public final class ChainingHashtable<K, V> extends AbstractHashtable<K, V> {
    * Must use the {@link #checkKey()} method in the implementation so that the
    * other methods that use this method don't have to implement it, making it the
    * single point of failure.
-   * 
+   *
    * <p>
    * Once the hashed index slot is found, checks if it is {@code null} or not. If
    * not, it iterates through the entries in the list until an entry with the
@@ -174,7 +175,7 @@ public final class ChainingHashtable<K, V> extends AbstractHashtable<K, V> {
 
     for (Entry<K, V> e : entries)
       if (e.getKey() == key)
-        return hash;   
+        return hash;
     return -1;
   }
 
@@ -206,7 +207,7 @@ public final class ChainingHashtable<K, V> extends AbstractHashtable<K, V> {
 
     if (idx == -1)
       return null;
-    
+
     LinkedList<Entry<K, V>> list = ((LinkedList<Entry<K, V>>) table[idx]);
     Iterable<Entry<K, V>> entries = list.values();
 
@@ -233,7 +234,7 @@ public final class ChainingHashtable<K, V> extends AbstractHashtable<K, V> {
 
     if (idx == -1)
       return false;
-    
+
     LinkedList<Entry<K, V>> list = ((LinkedList<Entry<K, V>>) table[idx]);
     Iterable<Entry<K, V>> entries = list.values();
 
@@ -241,6 +242,7 @@ public final class ChainingHashtable<K, V> extends AbstractHashtable<K, V> {
       if (e.getKey() == key) {
         entries.iterator().remove();
         n--;
+        modCount++;
 
         if (list.isEmpty())
           table[idx] = null;
@@ -250,37 +252,40 @@ public final class ChainingHashtable<K, V> extends AbstractHashtable<K, V> {
     return false;
   }
 
+  @Override
   protected <T> Iterable<T> getIterable(int type) {
     if (isEmpty())
-      return new EmptyIterable<>();
+      return new EmptyEnumerator<>();
     return new Enumerator<>(type, true);
   }
 
+  @Override
   protected <T> Iterator<T> getIterator(int type) {
     if (isEmpty())
-      return Collections.emptyIterator();
+      return new EmptyEnumerator<>();
     return new Enumerator<>(type, true);
   }
 
+  @Override
   protected <T> Enumeration<T> getEnumeration(int type) {
     if (isEmpty())
-      return Collections.emptyEnumeration();
+      return new EmptyEnumerator<>();
     return new Enumerator<>(type, false);
   }
 
   @SuppressWarnings("unchecked")
-  protected class Enumerator<T> extends AbstractEnumerator<T> {
+  private class Enumerator<T> extends AbstractEnumerator<T> {
     Enumerator(int type, boolean iterator) {
-      table = new Entry<?, ?>[n];
+      entries = new Entry<?, ?>[n];
       this.type = type;
       this.iterator = iterator;
       size = 0;
 
       for (LinkedList<Entry<K, V>> list : (LinkedList<Entry<K, V>>[]) ChainingHashtable.this.table) {
-        if (list != null) 
-          list.values().forEach((entry) -> table[size++] = entry);
+        if (list != null)
+          list.values().forEach((entry) -> entries[size++] = entry);
       }
-    } 
+    }
   }
 
 }

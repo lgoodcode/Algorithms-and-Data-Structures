@@ -1,11 +1,11 @@
 package data_structures.hashtables;
 
 import java.util.Map;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
 
 import data_structures.Entry;
+import data_structures.EmptyEnumerator;
 import data_structures.hashtables.exceptions.DuplicateKeyException;
 import static data_structures.hashtables.HashtableFunctions.isPrime;
 
@@ -16,22 +16,22 @@ import static data_structures.hashtables.HashtableFunctions.isPrime;
  * the key and value. This is accomplished by using the
  * {@code Object.hashCode()} method which creates a determinstic integer value
  * for any object and can be used by the hash function to derive the index slot.
- * 
+ *
  * <h3>Important</h3>
  * <p>
  * The prime number must be larger than the expected total table size otherwise
  * the hash function will not work properly and may cause the table to break.
  * </p>
- * 
+ *
  * <hr/>
- * 
+ *
  * <p>
  * An instance of {@code CuckooHashTable} uses a prime number {@code p} within
  * the hash function and will also construct {@code CuckooHashSubtable} for the
  * subtables which is an inner class, to hold the actual entries. The entries
  * themselves are of the {@code Entry} private inner class.
  * </p>
- * 
+ *
  * <p>
  * The default values are:
  * <ul>
@@ -41,15 +41,15 @@ import static data_structures.hashtables.HashtableFunctions.isPrime;
  * <li>{@code c} 4</li>
  * <li>{@code loadFactor} 0.9f</li>
  * </ul>
- * 
+ *
  * <p>
  * *Some concepts are similar to the java.util.Hashtable implementation by
  * <i>Arthur van Hoff, Josh Bloch, and Neal Gafter</i>.
  * </p>
- * 
+ *
  * @param <K> type parameter for the keys of the hashtable
  * @param <V> type parameter for the values of the hashtable
- * 
+ *
  * @author Lawrence Good
  * @see CuckooHashSubtable
  * @see Entry
@@ -93,17 +93,17 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
   /**
    * Constructs a new, empty hashtable with the specified inital prime number,
    * subtable size, and load factor.
-   * 
+   *
    * <p>
    * The constructor is overloaded and uses {@code this} to reduce redundant code.
    * </p>
-   * 
+   *
    * @param prime      prime number for subtables hash function
    * @param size       subtable size
    * @param loadFactor maximum percentage of entries before rebuilding subtables.
    *                   Must be greater than or equal to 0.6f and less than or
    *                   equal to 0.95f
-   * 
+   *
    * @throws IllegalArgumentException when given a prime number that isn't prime,
    *                                  a subtable size smaller than 1, or a load
    *                                  factor less then 0.6f or greater than 0.95f
@@ -134,7 +134,7 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
   /**
    * Constructs a new, empty hashtable with the specified prime number and default
    * subtable size (1) and load factor (0.9).
-   * 
+   *
    * @param p prime number
    * @throws IllegalArgumentException if the number isn't prime
    */
@@ -145,7 +145,7 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
   /**
    * Constructs a new, empty hashtable with the specified prime number and
    * subtable size, and default load factor(0.9).
-   * 
+   *
    * @param p prime number
    * @param m subtable size
    * @throws IllegalArgumentException if the number isn't prime or the subtable
@@ -158,7 +158,7 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
   /**
    * Constructs a new, empty hashtable with the specified prime number and load
    * factor, and default subtable size(1).
-   * 
+   *
    * @param p          prime number
    * @param loadFactor load factor
    * @throws IllegalArgumentException if the number isn't prime or the load factor
@@ -171,7 +171,7 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
   /**
    * Constructs a new, empty hashtable with the specified load factor and subtable
    * size, and default prime (1277).
-   * 
+   *
    * @param loadFactor load factor
    * @param m          subtable size
    * @throws IllegalArgumentException if the load factor is less than 0.5 or the
@@ -184,9 +184,9 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
   /**
    * Constructs a new hashtable with the default values and a specified set
    * of entries of a {@code Map}.
-   * 
+   *
    * @param S the set of entries
-   * 
+   *
    * @throws DuplicateKeyException if a duplicate key is used
    */
   public CuckooHashtable(Map<K, V> S) {
@@ -199,7 +199,7 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
   /**
    * Used within insert() and determines whether the incremented size counter is
    * equal to or exceeds the load capacity.
-   * 
+   *
    * @return if the new entry cause the table size to exceed load capacity
    * @see #fullRehash()
    */
@@ -211,7 +211,7 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
    * Rebuilds the subtables by setting the table index to point to the new
    * {@code CuckooHashSubtable} thereby removing the references to the previous
    * tables to allow them to be garbage collected.
-   * 
+   *
    * @see #fullRehash()
    */
   private void buildSubtables() {
@@ -229,11 +229,11 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
    * then three would be {@code 100%}). The {@code modCount} is incremented after
    * the successful insertion, since if a full rehash is triggered, that method
    * will increment {@code modCount}
-   * 
+   *
    * <hr>
-   * 
+   *
    * <h3>Internal operations</h3>
-   * 
+   *
    * <p>
    * Cycles through all the tables until new value is inserted or reach a cycle.
    * {@code i % 3} keeps the counter in the range {@code [0, 2]} for the tables
@@ -241,10 +241,10 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
    * chosen over the while-loop due to the fact an index {@code i} is required to
    * continuously loop through the tables.
    * </p>
-   * 
+   *
    * @param key   the hashtable key
    * @param value the value
-   * 
+   *
    * @throws IllegalArgumentException if the key or value is {@code null}, blank,
    *                                  or already exists in the hashtable
    */
@@ -289,17 +289,17 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
    * Rebuilds the hashtable by iterating through all the entries in the subtables
    * and placing them in a single array, recaclulate the new subtable size, reset
    * the size counter, and re-insert all the entries into the hashtable.
-   * 
+   *
    * <p>
-   * The new subtable size, {@code m}, is calcluated 
+   * The new subtable size, {@code m}, is calcluated
    * </p>
-   * 
+   *
    * <hr/>
-   * 
+   *
    * Suppresses the type safety warning when re-inserting the entries and casting
    * the type parameters because the entries we added with the type parameter so
    * we know it's safe.
-   * 
+   *
    * @param key   the key of the last item before capacity was exceeded or a cycle
    *              was reached.
    * @param value the value of the last item
@@ -335,16 +335,16 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
     // Re-insert the entries
     for (int i=0; i < entryIdx; i++) {
       insert((K) entries[i].getKey(), (V) entries[i].getValue());
-    } 
+    }
   }
 
   /**
    * Performs a lookup in each subtable to find the {@code Entry} with the
    * specified key.
-   * 
+   *
    * @param key the key of the entry to find
    * @return the {@code Entry} object or {@code null} if not found
-   * 
+   *
    * @throws IllegalArgumentException if the key is {@code null} or blank
    */
   @SuppressWarnings("unchecked")
@@ -361,10 +361,10 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
 
   /**
    * Determines whether the given key has an entry in the hashtable.
-   * 
+   *
    * @param key the key to check if exists
    * @return whether the key exists in the hashtable or not
-   * 
+   *
    * @throws IllegalArgumentException if the key is {@code null} or blank
    */
   public boolean hasKey(K key) {
@@ -374,10 +374,10 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
   /**
    * Determines whether a key in any of the subtable maps into the
    * specified value.
-   * 
+   *
    * @param value the value to check if exists
    * @return whether the value exists in the hashtable or not
-   * 
+   *
    * @throws IllegalArgumentException if the value is {@code null} or blank
    */
   @SuppressWarnings("unchecked")
@@ -395,11 +395,11 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
   /**
    * Retrieves the value of the entry for the given key if it exists or
    * {@code null} if it doesn't.
-   * 
+   *
    * @param key the key of the entry whose value we want to retrieve
    * @return the value of the specified key entry if it exists or {@code null} if
    *         not
-   * 
+   *
    * @throws IllegalArgumentException if the key is {@code null} or blank
    */
   public V get(K key) {
@@ -411,10 +411,10 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
    * Deletes the entry for the specified key if it exists and returns a boolean if
    * the operation was successful or not. If successful, it will increment the modCount
    * and decrement the size counter.
-   * 
+   *
    * @param key the key of the entry to delete
    * @return whether the entry was successfully deleted or not
-   * 
+   *
    * @throws IllegalArgumentException if the key is {@code null} or blank
    */
   @SuppressWarnings("unchecked")
@@ -433,10 +433,10 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
 
   /**
    * Overloaded delete method for the {@code Entry} object.
-   * 
+   *
    * @param entry the entry to delete
    * @return whether the entry was successfully deleted or not
-   * 
+   *
    * @throws NullPointerException if the entry is {@code null}
    * @see Entry
    * @see #delete(K key)
@@ -464,19 +464,19 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
    * size {@code m} denoted from the primary {@code CuckooHashTable}. It also
    * contains two constants, {@code a} and {@code b} which are random integers
    * derived within the range of {@code [0, p-1]}.
-   * 
+   *
    * <p>
    * The class is static so it can be used within the outerclass, primarily when
    * creating the array of this class in {@code CuckooHashTable.tables}
    * </p>
-   * 
+   *
    * <p>
    * Randomly choosing the constants a and b from a set that differs by one value,
    * gives us {@code p(p-1)} hash functions. Given a universal collection of hash
    * functions, a singlepair of keys collides with probablity at most {@code 1/m},
    * which gives us {@code Pr of h(k) = h(l) ≤ 1/m}.
    * </p>
-   * 
+   *
    * @param <K> key type parameter derived from the main type parameter
    * @param <V> value type parameter dervied from the main type parameter
    * @see CuckooHashtable
@@ -492,13 +492,13 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
      * and subtable size {@code m}, which is given from the {@code CuckooHashTable}.
      * The sanity checks on the parameters are done in the constructor of the parent
      * hashtable.
-     * 
+     *
      * <p>
      * An instance of {@code CuckooHashSubtable} contains an array of {@code Entry}
      * objects as the actual hashtable where the key is hashed to derive the index
      * where the {@code Entry} is inserted.
      * </p>
-     * 
+     *
      * @param p prime number
      * @param m subtable size
      */
@@ -513,7 +513,7 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
     /**
      * The deterministic hash function to derive a index slot for a given key
      * {@code k}.
-     *  
+     *
      * @param k the key to hash
      * @return integer index for this subtable
      */
@@ -523,10 +523,10 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
 
     /**
      * Checkes whether the given key when hashed, occupies a slot.
-     * 
+     *
      * @param key the key to check if occupies a slot
      * @return whether the key hash occupies a slot in the table
-     * 
+     *
      * @throws IllegalArgumentException if the key is {@code null} or blank
      */
     protected boolean isOccupied(K key) {
@@ -536,10 +536,10 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
     /**
      * Performs a lookup in the hashtable to find the index of the entry
      * with the specified key or {@code -1} if not found.
-     * 
+     *
      * @param key the key of the entry index to find
      * @return the index of the entry or {@code -1} if not found
-     * 
+     *
      * @throws IllegalArgumentException if the key is {@code null} or blank
      */
     protected int search(K key) {
@@ -553,10 +553,10 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
     /**
      * Checks whether the given key has an entry in this table by hashing the key
      * and if the slot is occupied, if the key matches.
-     * 
+     *
      * @param key the key
      * @return if the given key exist in the table
-     * 
+     *
      * @throws IllegalArgumentException if the key is {@code null} or blank
      */
     public boolean hasKey(K key) {
@@ -565,10 +565,10 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
 
     /**
      * Checks whether a given key in the subtable maps to the specified value.
-     * 
+     *
      * @param value the value
      * @return whether the given value exists in the table
-     * 
+     *
      * @throws IllegalArgumentException if the value is {@code null} or blank
      */
     @SuppressWarnings("unchecked")
@@ -576,15 +576,15 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
       for (Entry<K, V> e : (Entry<K, V>[]) table)
         if (e.getValue().equals(value))
           return true;
-      return false;    
+      return false;
     }
 
     /**
      * Inserts a new {@code Entry} into the subtable by getting its' key, deriving
      * the index slot from hashing it, then inserting it.
-     * 
+     *
      * @param entry the {@code Entry} object to insert
-     * 
+     *
      * @throws NullPointerException if the entry is {@code null}
      */
     protected synchronized void insert(Entry<K, V> entry) {
@@ -602,10 +602,10 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
 
     /**
      * Retrieves the value for the entry of the given key.
-     * 
+     *
      * @param key the key to retrieve the corresponding value
      * @return the value if the given key entry exists or {@code null} if not
-     * 
+     *
      * @throws IllegalArgumentException if the key is {@code null} or blank
      */
     @SuppressWarnings("unchecked")
@@ -616,7 +616,7 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
 
     /**
      * Retrieves the {@code Entry} with the given key.
-     * 
+     *
      * @param key the key of the entry to retrieve
      * @return the {@code Entry} or {@code null} if not found
      */
@@ -629,13 +629,13 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
     /**
      * Removes an {@code Entry} from the hashtable, sets that hash slot to null so
      * it can be used again, and returns the removed {@code Entry}.
-     * 
+     *
      * @param hash the derived hash index slot from a key
      * @return desired {@code Entry} for either normal removal or swapping entries
      *         in the {@code CuckooHashTable.insert()} process.
-     * 
+     *
      * @throws IllegalArgumentException if the key is {@code null} or blank
-     * 
+     *
      * @see CuckooHashtable#insert()
      */
     @SuppressWarnings("unchecked")
@@ -651,10 +651,10 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
     /**
      * Deletes an entry for the given key if it exists and the occupied slot key
      * matches the specified key to know it is correct.
-     * 
+     *
      * @param key the key of the entry to delete
      * @return whether the operation was successful or not
-     * 
+     *
      * @throws IllegalArgumentException if the key is {@code null} or blank
      */
     public synchronized boolean delete(K key) {
@@ -670,10 +670,10 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
     /**
      * Overloaded method that receives an {@code Entry<K, V>} object and gets
      * the key and passes it into the {@code delete(K key)}.
-     * 
+     *
      * @param entry the entry to delete
      * @return whether the operation was successful or not
-     * 
+     *
      * @throws NullPointerException if the entry is {@code null}
      */
     protected synchronized boolean delete(Entry<K, V> entry) {
@@ -683,7 +683,7 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
     }
 
     /**
-     * Clears all {@code Entry} objects from the table. 
+     * Clears all {@code Entry} objects from the table.
      */
     protected synchronized void clear() {
       for (int i=0; i<table.length; i++)
@@ -691,37 +691,40 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
     }
   }
 
+  @Override
   protected <T> Iterable<T> getIterable(int type) {
     if (isEmpty())
-      return new EmptyIterable<>();
+      return new EmptyEnumerator<>();
     return new Enumerator<>(type, true);
   }
 
+  @Override
   protected <T> Iterator<T> getIterator(int type) {
     if (isEmpty())
-      return Collections.emptyIterator();
+      return new EmptyEnumerator<>();
     return new Enumerator<>(type, true);
   }
 
+  @Override
   protected <T> Enumeration<T> getEnumeration(int type) {
     if (isEmpty())
-      return Collections.emptyEnumeration();
+      return new EmptyEnumerator<>();
     return new Enumerator<>(type, false);
   }
 
-  protected class Enumerator<T> extends AbstractEnumerator<T> {
+  private class Enumerator<T> extends AbstractEnumerator<T> {
     Enumerator(int type, boolean iterator) {
-      table = new Entry<?, ?>[T * m];
+      entries = new Entry<?, ?>[T * m];
       this.type = type;
       this.iterator = iterator;
       size = 0;
 
       // Copy all entries from each subtable into the single array of entries
       for (CuckooHashSubtable<?, ?> Tj : CuckooHashtable.this.tables) {
-        System.arraycopy(Tj.table, 0, table, size, Tj.table.length);
+        System.arraycopy(Tj.table, 0, entries, size, Tj.table.length);
         size += Tj.table.length;
       }
-    }  
+    }
   }
 
 }

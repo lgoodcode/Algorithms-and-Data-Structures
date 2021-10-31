@@ -6,14 +6,18 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import data_structures.Entry;
 import data_structures.hashtables.DynamicHashtable;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
@@ -28,22 +32,29 @@ public class DynamicHashtable_Test {
   // @Test
   // @Execution(ExecutionMode.CONCURRENT)
   // void instantiating_overloaded_constructors() {
-  //   assertAll("instantiation for overloaded constructors", 
-  //     () -> assertDoesNotThrow(() -> new DynamicHashtable<>(), "default constructor"),
-  //     () -> assertDoesNotThrow(() -> new DynamicHashtable<>(3), "given a prime"),
-  //     () -> assertDoesNotThrow(() -> new DynamicHashtable<>(3, 1), "given a prime and size"),
-  //     () -> assertDoesNotThrow(() -> 
-  //       new DynamicHashtable<>(3, 1, 0.9f), "given a prime, size, and loadFactor"),
-  //     () -> assertDoesNotThrow(() -> new DynamicHashtable<>(3, 0.9f), "given prime and loadFactor"),
-  //     () -> assertDoesNotThrow(() -> new DynamicHashtable<>(0.9f, 1), "given loadFactor and size")
-  //   );
+  // assertAll("instantiation for overloaded constructors",
+  // () -> assertDoesNotThrow(() -> new DynamicHashtable<>(), "default
+  // constructor"),
+  // () -> assertDoesNotThrow(() -> new DynamicHashtable<>(3), "given a prime"),
+  // () -> assertDoesNotThrow(() -> new DynamicHashtable<>(3, 1), "given a prime
+  // and size"),
+  // () -> assertDoesNotThrow(() ->
+  // new DynamicHashtable<>(3, 1, 0.9f), "given a prime, size, and loadFactor"),
+  // () -> assertDoesNotThrow(() -> new DynamicHashtable<>(3, 0.9f), "given prime
+  // and loadFactor"),
+  // () -> assertDoesNotThrow(() -> new DynamicHashtable<>(0.9f, 1), "given
+  // loadFactor and size")
+  // );
   // }
 
-  // @ParameterizedTest(name = "{index}: prime = {0}, size = {1}, loadFactor = {2}")
+  // @ParameterizedTest(name = "{index}: prime = {0}, size = {1}, loadFactor =
+  // {2}")
   // @Execution(ExecutionMode.CONCURRENT)
   // @CsvSource({ "4, 1, 0.9", "3, 0, 0.9", "3, 1, 0.3" })
-  // void throws_when_instantiated_with_illegal_values(int prime, int size, float lf) {
-  //   assertThrows(IllegalArgumentException.class, () -> new DynamicHashtable<>(prime, size, lf));
+  // void throws_when_instantiated_with_illegal_values(int prime, int size, float
+  // lf) {
+  // assertThrows(IllegalArgumentException.class, () -> new
+  // DynamicHashtable<>(prime, size, lf));
   // }
 
   @Nested
@@ -70,7 +81,7 @@ public class DynamicHashtable_Test {
     }
 
     @ParameterizedTest(name = "key {index} => {0}")
-    @ValueSource(ints = {123, 2, 5})
+    @ValueSource(ints = { 123, 2, 5 })
     void get_returns_null_for_any_key(int key) {
       assertNull(table.get(key));
     }
@@ -80,20 +91,58 @@ public class DynamicHashtable_Test {
     @ValueSource(strings = { " ", "  ", "\t", "\n" })
     void throws_NullPointerException_for_null_and_empty_keys(String key) {
       table2 = new DynamicHashtable<>(size, prime);
-
-      // Throws NullPointerException for null value and IllegalArgumentException
       assertThrows(Exception.class, () -> table2.insert(key, "test"));
     }
+
+    @Test
+    void keys_is_empty() {
+      Iterator<Integer> keys = table.keysIterator();
+      assertFalse(keys.hasNext());
+      assertThrows(NoSuchElementException.class, () -> keys.next());
+      assertThrows(IllegalStateException.class, () -> keys.remove());
+    }
+
+    @Test
+    void values_is_empty() {
+      Iterator<String> values = table.valuesIterator();
+      assertFalse(values.hasNext());
+      assertThrows(NoSuchElementException.class, () -> values.next());
+      assertThrows(IllegalStateException.class, () -> values.remove());
+    }
+
+    @Test
+    void entries_is_empty() {
+      Iterator<Entry<Integer, String>> entries = table.entriesIterator();
+      assertFalse(entries.hasNext());
+      assertThrows(NoSuchElementException.class, () -> entries.next());
+      assertThrows(IllegalStateException.class, () -> entries.remove());
+    }
+
   }
 
   @Nested
-  @Tag("inserted")
   class After_Inserting {
 
     @BeforeEach
-    void insert_key_value() {
+    void create_and_insert() {
       table = new DynamicHashtable<>(size, prime);
-      assertDoesNotThrow(() -> table.insert(1, "one"));
+
+      table.insert(1, "one");
+      table.insert(2, "two");
+      table.insert(3, "three");
+      table.insert(4, "four");
+      table.insert(5, "five");
+    }
+
+    @Test
+    void all_inserts_succeed() {
+      assertAll(
+        () -> assertEquals("one", table.get(1)),
+        () -> assertEquals("two", table.get(2)),
+        () -> assertEquals("three", table.get(3)),
+        () -> assertEquals("four", table.get(4)),
+        () -> assertEquals("five", table.get(5))
+      );
     }
 
     @Test
@@ -101,28 +150,72 @@ public class DynamicHashtable_Test {
       assertFalse(table.isEmpty());
     }
 
-    @Test 
+    @Test
     void size() {
-      assertEquals(1, table.size());
+      assertEquals(5, table.size());
     }
 
     @Test
-    void has_get_and_delete_inserted_key() {
-      assertAll("has(), get(), and delete() key", 
-        () -> assertTrue(table.hasKey(1)),
-        () -> {
-          String val = table.get(1);
-          assertNotNull(val);
-          assertEquals("one", val);
-        },
-        () -> assertTrue(table.delete(1)),
-        () -> assertTrue(table.isEmpty())
-      );
+    void hasKey() {
+      assertTrue(table.hasKey(1));
+      assertTrue(table.hasKey(2));
+      assertTrue(table.hasKey(3));
+      assertTrue(table.hasKey(4));
+      assertTrue(table.hasKey(5));
     }
 
     @Test
-    void to_String() {
-      assertEquals("{\n\s\s\"1 -> one\",\n}", table.toString());
+    void get() {
+      assertEquals("one", table.get(1));
+      assertEquals("two", table.get(2));
+      assertEquals("three", table.get(3));
+      assertEquals("four", table.get(4));
+      assertEquals("five", table.get(5));
+    }
+
+    @Test
+    void delete() {
+      table.delete(2);
+      assertNull(table.get(2));
+    }
+
+    @Test
+    void keys() {
+      Iterator<Integer> keys = table.keysIterator();
+      assertTrue(keys.hasNext());
+      assertNotNull(keys.next());
+      assertNotNull(keys.next());
+      assertNotNull(keys.next());
+      assertNotNull(keys.next());
+      assertNotNull(keys.next());
+      assertFalse(keys.hasNext());
+      assertThrows(NoSuchElementException.class, () -> keys.next());
+    }
+
+    @Test
+    void values() {
+      Iterator<String> values = table.valuesIterator();
+      assertTrue(values.hasNext());
+      assertNotNull(values.next());
+      assertNotNull(values.next());
+      assertNotNull(values.next());
+      assertNotNull(values.next());
+      assertNotNull(values.next());
+      assertFalse(values.hasNext());
+      assertThrows(NoSuchElementException.class, () -> values.next());
+    }
+
+    @Test
+    void entries() {
+      Iterator<Entry<Integer, String>> entries = table.entriesIterator();
+      assertTrue(entries.hasNext());
+      assertNotNull(entries.next());
+      assertNotNull(entries.next());
+      assertNotNull(entries.next());
+      assertNotNull(entries.next());
+      assertNotNull(entries.next());
+      assertFalse(entries.hasNext());
+      assertThrows(NoSuchElementException.class, () -> entries.next());
     }
   }
 

@@ -1,9 +1,5 @@
 package data_structures.hashtables;
 
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Iterator;
-
 import data_structures.Entry;
 
 /**
@@ -14,11 +10,11 @@ import data_structures.Entry;
  * h(k, i) = (h^(k) + i) mod m
  * </pre>
  * </p>
- * 
+ *
  * <p>
  * {@code for i = 0 to m-1} where {@code h^} is the auxiliary hash function
  * </p>
- * 
+ *
  * <p>
  * Given key k, we first probe {@code T[h'(k)]} - the slot given by the
  * auxiliary hash function. We next probe slot {@code T[h'(k) + 1]}, and so on
@@ -36,7 +32,7 @@ import data_structures.Entry;
  * {@code (i + 1) / m}. Long runs of occupied slots tend to get longer, and the
  * average search time increases.
  * </p>
- * 
+ *
  * <h3>WARNING:</h3>
  * <p>
  * The table size must be large enough to support a variety of keys. If the
@@ -51,16 +47,15 @@ import data_structures.Entry;
  * </p>
  */
 public final class LinearProbing<K, V> extends AbstractStaticHashtable<K, V> {
-
   /**
    * Initializes an empty, hashtable, with the specified size for the total
    * capacity for the table.
-   * 
+   *
    * <h4>Tip: Using a large value, preferrably a prime number, will prevent any
    * unwanted errors from occurring.</h4>
-   * 
+   *
    * @param size the specififed size of the hashtable maximum capacity
-   * 
+   *
    * @throws IllegalArgumentException if the specified size is less than {@code 1}
    */
   public LinearProbing(int size) {
@@ -81,7 +76,7 @@ public final class LinearProbing<K, V> extends AbstractStaticHashtable<K, V> {
 
   /**
    * The hash function
-   * 
+   *
    * @param key the key to hash
    * @param i   the number of index slots skipped
    * @return the hash value
@@ -96,11 +91,11 @@ public final class LinearProbing<K, V> extends AbstractStaticHashtable<K, V> {
    * {@code T[h'(k) + 1]} and so on up to slot {@code T[m-1]}. If no available
    * position was found using the hash function, we wrap around and start at
    * {@code 0} up to {@code h'(k) - 1}.
-   * 
+   *
    * @param key   the key of the entry
    * @param value the value of the entry
    * @return boolean indicating whether the insertion was successful or not
-   * 
+   *
    * @throws IllegaStateException     {@inheritDoc}
    * @throws IllegalArgumentException {@inheritDoc}
    */
@@ -117,6 +112,7 @@ public final class LinearProbing<K, V> extends AbstractStaticHashtable<K, V> {
       if (table[j] == null) {
         table[j] = entry;
         n++;
+        modCount++;
         return;
       }
     }
@@ -125,14 +121,15 @@ public final class LinearProbing<K, V> extends AbstractStaticHashtable<K, V> {
       if (table[i] == null) {
         table[i] = entry;
         n++;
+        modCount++;
         return;
       }
     }
-  } 
+  }
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * @throws IllegalArgumentException {@inheritDoc}
    */
   public int search(K key) {
@@ -150,12 +147,12 @@ public final class LinearProbing<K, V> extends AbstractStaticHashtable<K, V> {
         return i;
     }
 
-    return -1; 
+    return -1;
   }
 
  /**
    * {@inheritDoc}
-   * 
+   *
    * @throws IllegalArgumentException {@inheritDoc}
    */
   public boolean hasKey(K key) {
@@ -164,7 +161,7 @@ public final class LinearProbing<K, V> extends AbstractStaticHashtable<K, V> {
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * @throws IllegalArgumentException {@inheritDoc}
    */
   @SuppressWarnings("unchecked")
@@ -175,7 +172,7 @@ public final class LinearProbing<K, V> extends AbstractStaticHashtable<K, V> {
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * @throws IllegalArgumentException {@inheritDoc}
    */
   public synchronized boolean delete(K key) {
@@ -184,35 +181,10 @@ public final class LinearProbing<K, V> extends AbstractStaticHashtable<K, V> {
     if (idx != -1) {
       table[idx] = null;
       n--;
+      modCount++;
       return true;
     }
     return false;
   }
 
-  protected <T> Iterable<T> getIterable(int type) {
-    if (isEmpty())
-      return new EmptyIterable<>();
-    return new Enumerator<>(type, true);
-  }
-
-  protected <T> Iterator<T> getIterator(int type) {
-    if (isEmpty())
-      return Collections.emptyIterator();
-    return new Enumerator<>(type, true);
-  }
-
-  protected <T> Enumeration<T> getEnumeration(int type) {
-    if (isEmpty())
-      return Collections.emptyEnumeration();
-    return new Enumerator<>(type, false);
-  }
-
-  protected class Enumerator<T> extends AbstractEnumerator<T> {
-    Enumerator(int type, boolean iterator) {
-      this.type = type;
-      this.iterator = iterator;
-      table = LinearProbing.this.table;
-      size = table.length;
-    }  
-  }
 }

@@ -6,14 +6,17 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import data_structures.Entry;
 import data_structures.hashtables.ChainingHashtable;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
@@ -27,11 +30,11 @@ public class ChainingHashtable_Test {
   // @Test
   // @Execution(ExecutionMode.CONCURRENT)
   // void instantiating_overloaded_constructors() {
-  //   assertAll("instantiation for overloaded constructors", 
+  //   assertAll("instantiation for overloaded constructors",
   //     () -> assertDoesNotThrow(() -> new ChainingHashtable<>(), "default constructor"),
   //     () -> assertDoesNotThrow(() -> new ChainingHashtable<>(3), "given a prime"),
   //     () -> assertDoesNotThrow(() -> new ChainingHashtable<>(3, 1), "given a prime and size"),
-  //     () -> assertDoesNotThrow(() -> 
+  //     () -> assertDoesNotThrow(() ->
   //       new ChainingHashtable<>(3, 1, 0.9f), "given a prime, size, and loadFactor"),
   //     () -> assertDoesNotThrow(() -> new ChainingHashtable<>(3, 0.9f), "given prime and loadFactor"),
   //     () -> assertDoesNotThrow(() -> new ChainingHashtable<>(0.9f, 1), "given loadFactor and size")
@@ -82,16 +85,56 @@ public class ChainingHashtable_Test {
 
       assertThrows(Exception.class, () -> table2.insert(key, "test"));
     }
+
+    @Test
+    void keys_is_empty() {
+      Iterator<Integer> keys = table.keysIterator();
+      assertFalse(keys.hasNext());
+      assertThrows(NoSuchElementException.class, () -> keys.next());
+      assertThrows(IllegalStateException.class, () -> keys.remove());
+    }
+
+    @Test
+    void values_is_empty() {
+      Iterator<String> values = table.valuesIterator();
+      assertFalse(values.hasNext());
+      assertThrows(NoSuchElementException.class, () -> values.next());
+      assertThrows(IllegalStateException.class, () -> values.remove());
+    }
+
+    @Test
+    void entries_is_empty() {
+      Iterator<Entry<Integer, String>> entries = table.entriesIterator();
+      assertFalse(entries.hasNext());
+      assertThrows(NoSuchElementException.class, () -> entries.next());
+      assertThrows(IllegalStateException.class, () -> entries.remove());
+    }
+
   }
 
   @Nested
-  @Tag("inserted")
   class After_Inserting {
 
     @BeforeEach
-    void insert_key_value() {
+    void create_and_insert() {
       table = new ChainingHashtable<>(size);
-      assertDoesNotThrow(() -> table.insert(1, "one"));
+
+      table.insert(1, "one");
+      table.insert(2, "two");
+      table.insert(3, "three");
+      table.insert(4, "four");
+      table.insert(5, "five");
+    }
+
+    @Test
+    void all_inserts_succeed() {
+      assertAll(
+        () -> assertEquals("one", table.get(1)),
+        () -> assertEquals("two", table.get(2)),
+        () -> assertEquals("three", table.get(3)),
+        () -> assertEquals("four", table.get(4)),
+        () -> assertEquals("five", table.get(5))
+      );
     }
 
     @Test
@@ -99,28 +142,84 @@ public class ChainingHashtable_Test {
       assertFalse(table.isEmpty());
     }
 
-    @Test 
+    @Test
     void size() {
-      assertEquals(1, table.size());
+      assertEquals(5, table.size());
     }
 
     @Test
-    void has_get_and_delete_inserted_key() {
-      assertAll("has(), get(), and delete() key", 
-        () -> assertTrue(table.hasKey(1)),
-        () -> {
-          String val = table.get(1);
-          assertNotNull(val);
-          assertEquals("one", val);
-        },
-        () -> assertTrue(table.delete(1)),
-        () -> assertTrue(table.isEmpty())
-      );
+    void hasKey() {
+      assertTrue(table.hasKey(1));
+      assertTrue(table.hasKey(2));
+      assertTrue(table.hasKey(3));
+      assertTrue(table.hasKey(4));
+      assertTrue(table.hasKey(5));
+    }
+
+    @Test
+    void get() {
+      assertEquals("one", table.get(1));
+      assertEquals("two", table.get(2));
+      assertEquals("three", table.get(3));
+      assertEquals("four", table.get(4));
+      assertEquals("five", table.get(5));
+    }
+
+    @Test
+    void delete() {
+      table.delete(2);
+      assertNull(table.get(2));
+    }
+
+    @Test
+    void keys() {
+      Iterator<Integer> keys = table.keysIterator();
+      assertTrue(keys.hasNext());
+      assertEquals(2, keys.next());
+      assertEquals(4, keys.next());
+      assertEquals(1, keys.next());
+      assertEquals(3, keys.next());
+      assertEquals(5, keys.next());
+      assertFalse(keys.hasNext());
+      assertThrows(NoSuchElementException.class, () -> keys.next());
+    }
+
+    @Test
+    void values() {
+      Iterator<String> values = table.valuesIterator();
+      assertTrue(values.hasNext());
+      assertEquals("two", values.next());
+      assertEquals("four", values.next());
+      assertEquals("one", values.next());
+      assertEquals("three", values.next());
+      assertEquals("five", values.next());
+      assertFalse(values.hasNext());
+      assertThrows(NoSuchElementException.class, () -> values.next());
+    }
+
+    @Test
+    void entries() {
+      Iterator<Entry<Integer, String>> entries = table.entriesIterator();
+      assertTrue(entries.hasNext());
+      assertEquals("two", entries.next().getValue());
+      assertEquals("four", entries.next().getValue());
+      assertEquals("one", entries.next().getValue());
+      assertEquals("three", entries.next().getValue());
+      assertEquals("five", entries.next().getValue());
+      assertFalse(entries.hasNext());
+      assertThrows(NoSuchElementException.class, () -> entries.next());
     }
 
     @Test
     void to_String() {
-      assertEquals("{\n\s\s\"1 -> one\",\n}", table.toString());
+      assertEquals("{\n"
+          + "\s\s\"2 -> two\",\n"
+          + "\s\s\"4 -> four\",\n"
+          + "\s\s\"1 -> one\",\n"
+          + "\s\s\"3 -> three\",\n"
+          + "\s\s\"5 -> five\",\n"
+          + "}",
+        table.toString());
     }
   }
 

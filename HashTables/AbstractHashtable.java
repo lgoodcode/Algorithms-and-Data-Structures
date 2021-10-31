@@ -1,21 +1,26 @@
 package data_structures.hashtables;
 
-import java.util.Objects;
 import java.util.Enumeration;
 import java.util.Iterator;
-import java.util.function.Consumer;
 import java.util.NoSuchElementException;
 import java.util.ConcurrentModificationException;
 
 import data_structures.Entry;
+import data_structures.EmptyEnumerator;
 
 public abstract class AbstractHashtable<K, V> {
   /**
+   * The array of {@code Entry} objects that hold the key/value pairs.
+   */
+  protected Entry<?, ?>[] table;
+
+  /**
    * The number of times this Hashtable has been structurally modified Structural
    * modifications are those that change the number of entries in the Hashtable or
-   * otherwise modify its internal structure (e.g., fullRehash, delete).  This field 
-   * is used to make iterators on Collection-views of the Hashtable fail-fast. 
-   * (See ConcurrentModificationException).
+   * otherwise modify its internal structure (e.g., fullRehash, delete).  This field
+   * is used to make iterators on Collection-views of the Hashtable fail-fast.
+   *
+   * @see ConcurrentModificationException
    */
   protected int modCount = 0;
 
@@ -24,9 +29,7 @@ public abstract class AbstractHashtable<K, V> {
    */
   protected int n;
 
-  /**
-   * Iteration types
-   */
+  // Enumeration/iteration constants
   private final int KEYS = 0;
   private final int VALUES = 1;
   private final int ENTRIES = 2;
@@ -51,9 +54,9 @@ public abstract class AbstractHashtable<K, V> {
 
   /**
    * Checks the key to make sure it isn't {@code null} or blank.
-   * 
+   *
    * @param key the key to check
-   * 
+   *
    * @throws IllegalArgumentException if the key is {@code null}, or blank
    */
   protected final void checkKey(K key) {
@@ -63,9 +66,9 @@ public abstract class AbstractHashtable<K, V> {
 
   /**
    * Checks the value to make sure it isn't {@code null} or blank
-   * 
+   *
    * @param value the value to check
-   * 
+   *
    * @throws IllegalArgumentException if the value is {@code null} or blank
    */
   protected final void checkValue(V value) {
@@ -77,9 +80,9 @@ public abstract class AbstractHashtable<K, V> {
    * Checks the key to make sure it doesn't already exist in the hashtable. A
    * duplicate key will always hash to the same value so it will cause the table
    * to not function properly.
-   * 
+   *
    * @param key the key to check
-   * 
+   *
    * @throws IllegalArgumentException if the key already exists in the hashtable
    */
   protected final void checkDuplicate(K key) {
@@ -155,91 +158,95 @@ public abstract class AbstractHashtable<K, V> {
 
   /**
    * Returns an {@link Iterable} of the specified type.
-   * 
+   *
    * @param <T>  Generic type to allow any type to be iterated over
    * @param type the type of item to iterate (keys, values, or entries)
    * @return the {@code Iterable}
    */
-  protected abstract <T> Iterable<T> getIterable(int type);
-  
+  protected <T> Iterable<T> getIterable(int type) {
+    if (isEmpty())
+      return new EmptyEnumerator<>();
+    return new Enumerator<>(type, true);
+  }
+
   /**
    * Returns an {@link Iterator} of the specified type.
-   * 
+   *
    * @param <T>  Generic type to allow any type to be iterated over
    * @param type the type of item to iterate (keys, values, or entries)
    * @return the {@code Iterator}
    */
-  protected abstract <T> Iterator<T> getIterator(int type);
-  
+  protected <T> Iterator<T> getIterator(int type) {
+    if (isEmpty())
+      return new EmptyEnumerator<>();
+    return new Enumerator<>(type, true);
+  }
+
   /**
    * Returns an {@link Enumeration} of the specified type.
-   * 
+   *
    * @param <T>  Generic type to allow any type to be enumerated over
    * @param type the type of item to iterate (keys, values, or entries)
    * @return the {@code Enumeration}
    */
-  protected abstract <T> Enumeration<T> getEnumeration(int type);
+  protected <T> Enumeration<T> getEnumeration(int type) {
+    if (isEmpty())
+      return new EmptyEnumerator<>();
+    return new Enumerator<>(type, false);
+  }
 
   /**
    * Returns an iterable of the keys in this hashtable. Use the {@code Iterator}
    * methods on the returned object to fetch the keys sequentially. If the
    * hashtable is structurally modified while enumerating over the keys then the
    * results of enumerating are undefined.
-   * 
+   *
    * <p>
    * Since the type is an {@code Iterable} it can be used in the enhanced for-each
    * loop:
-   * 
+   *
    * <pre>
-   * for (Integer k : keys) {
-   *   System.out.println("The key is " + k);
-   * }
+   * for (Integer key : keys) {
+   *   System.out.println("The key is " + key);
+   *}
    * </pre>
    * </p>
    *
    * @return an iterable of the keys in this hashtable
    */
-  public Iterable<K> keys() {
+  public final Iterable<K> keys() {
     return getIterable(KEYS);
   }
 
-  /**
-   * Returns an iterable of the values in this hashtable. Use the {@code Iterator}
-   * methods on the returned object to fetch the values sequentially. If the
-   * hashtable is structurally modified while enumerating over the values then the
-   * results of enumerating are undefined.
-   * 
-   * @return an iterable of the values in the hashtable
-   */
-  public Iterable<V> values() {
+  public final Iterable<V> values() {
     return getIterable(VALUES);
   }
 
-  public <E extends Entry<K, V>> Iterable<E> entries() {
+  public final Iterable<Entry<K, V>> entries() {
     return getIterable(ENTRIES);
   }
 
-  public Iterator<K> keysIterator() {
+  public final Iterator<K> keysIterator() {
     return getIterator(KEYS);
   }
 
-  public Iterator<V> valuesIterator() {
+  public final Iterator<V> valuesIterator() {
     return getIterator(VALUES);
   }
 
-  public <E extends Entry<K, V>> Iterator<E> entriesIterator() {
+  public final Iterator<Entry<K, V>> entriesIterator() {
     return getIterator(ENTRIES);
   }
 
-  public Enumeration<K> keysEnumeration() {
+  public final Enumeration<K> keysEnumeration() {
     return getEnumeration(KEYS);
   }
 
-  public Enumeration<V> valuesEnumeration() {
+  public final Enumeration<V> valuesEnumeration() {
     return getEnumeration(VALUES);
   }
 
-  public <E extends Entry<K, V>> Enumeration<E> entriesEnumeration() {
+  public final Enumeration<Entry<K, V>> entriesEnumeration() {
     return getEnumeration(ENTRIES);
   }
 
@@ -249,11 +256,11 @@ public abstract class AbstractHashtable<K, V> {
    * with the Iterator methods disabled. This is necessary to avoid
    * unintentionally increasing the capabilities granted a user by passing an
    * Enumeration.
-   * 
+   *
    * @param <T> the type of the object in the table that is being enumerated
    */
   protected abstract class AbstractEnumerator<T> implements Enumeration<T>, Iterator<T>, Iterable<T> {
-    protected Entry<?, ?>[] table;
+    protected Entry<?, ?>[] entries;
     protected Entry<?, ?> entry, last;
     protected int type, size, index = 0;
 
@@ -280,7 +287,7 @@ public abstract class AbstractHashtable<K, V> {
      * @return if this object has one or more items to provide or not
      */
     public final boolean hasMoreElements() {
-      Entry<?, ?>[] t = table;
+      Entry<?, ?>[] t = entries;
       Entry<?, ?> e = entry;
       int i = index, len = size;
 
@@ -297,16 +304,16 @@ public abstract class AbstractHashtable<K, V> {
 
     /**
      * Returns the next element if it has one to provide.
-     * 
+     *
      * @return the next element
-     * 
+     *
      * @throws NoSuchElementException if no more elements exist
      */
     @SuppressWarnings("unchecked")
     public final T nextElement() {
-      Entry<?, ?>[] t = table;
+      Entry<?, ?>[] t = entries;
       Entry<?, ?> e = entry;
-      int i = index, len = table.length;
+      int i = index, len = entries.length;
 
       /* Use locals for faster loop iteration */
       while (e == null && i < len) {
@@ -335,7 +342,7 @@ public abstract class AbstractHashtable<K, V> {
 
     /**
      * Iterator method. Returns the next element in the iteration.
-     * 
+     *
      * @return the next element in the iteration
      * @throws ConcurrentModificationException if the fullRehash function modified
      *         this map during computation.
@@ -348,7 +355,7 @@ public abstract class AbstractHashtable<K, V> {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * Removes from the underlying collection the last element returned
      * by this iterator (optional operation).  This method can be called
      * only once per call to {@link #next}.
@@ -360,15 +367,15 @@ public abstract class AbstractHashtable<K, V> {
      * <p>
      * The behavior of an iterator is unspecified if this method is called
      * after a call to the {@link #forEachRemaining forEachRemaining} method.
-     * 
+     *
      * @throws UnsupportedOperationException if the {@code remove} operation is
      *         not supported by this iterator, e.g., if the object is an
      *         {@code Enumeration}.
      *
-     * @throws IllegalStateException if the {@code next} method has not yet been 
-     *         called, or the {@code remove} method has already been called after 
+     * @throws IllegalStateException if the {@code next} method has not yet been
+     *         called, or the {@code remove} method has already been called after
      *         the last call to the {@code next} method.
-     * 
+     *
      * @throws ConcurrentModificationException if a function such as fullRehash modified
      *         this map during computation.
      */
@@ -394,61 +401,17 @@ public abstract class AbstractHashtable<K, V> {
     }
   }
 
-   /**
-   * This class creates an empty {@code Iterable} that has no elements.
-   *
-   * <ul>
-   * <li>{@link Iterator#hasNext} always returns {@code false}.</li>
-   * <li>{@link Iterator#next} always throws {@link NoSuchElementException}.</li>
-   * </ul>
-   *
-   * <p>
-   * Implementations of this method are permitted, but not required, to return the
-   * same object from multiple invocations.
-   * </p>
-   *
-   * @param <T> the class of the objects in the iterable
+  /**
+   * Default Enumerator used for hashtables. Sets the entries as the the hashtable
+   * and the size so it can be enmerated.
    */
-  protected static final class EmptyIterable<T> implements Enumeration<T>, Iterator<T>, Iterable<T> {
-    /**
-     * This is set so the class object will have a single value; a endless cycle of
-     * itself, so that the this$0 value pointing to the CuckooHashtable doesn't
-     * exist.
-     */
-    // TODO: need to disable the warning here for unused variable
-    // static final EmptyIterable<?> EMPTY_ITERABLE = new EmptyIterable<>();
-    public EmptyIterable() {}
-
-    // Enumeration methods
-    public boolean hasMoreElements() {
-      return false;
-    }
-
-    public T nextElement() {
-      throw new NoSuchElementException();
-    }
-
-    // Iterator methods
-    public boolean hasNext() {
-      return false;
-    }
-
-    public T next() {
-      throw new NoSuchElementException();
-    }
-
-    public void remove() {
-      throw new IllegalStateException();
-    }
-
-    // Iterable method
-    public Iterator<T> iterator() {
-      return this;
-    }
-
-    @Override
-    public void forEachRemaining(Consumer<? super T> action) {
-      Objects.requireNonNull(action);
+  private class Enumerator<T> extends AbstractEnumerator<T> {
+    Enumerator(int type, boolean iterator) {
+      this.type = type;
+      this.iterator = iterator;
+      entries = AbstractHashtable.this.table;
+      this.size = entries.length;
     }
   }
+
 }

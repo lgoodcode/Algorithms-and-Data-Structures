@@ -3,7 +3,7 @@ package data_structures.hashtables;
 public final class HashtableFunctions {
   /**
    * Given a valid {@code Number} type, determines if it is a prime number.
-   * 
+   *
    * @param <T> {@code Number}
    * @param p   number to check if prime or not
    * @return is number prime
@@ -30,7 +30,7 @@ public final class HashtableFunctions {
   /**
    * Recursive function that creates values that will be injective for the given
    * set, table size, and prime number.
-   * 
+   *
    * @param <T> {@code Number}
    * @param keys   set or list of elements to create the hash function for
    * @param m   maximal size of the subtable

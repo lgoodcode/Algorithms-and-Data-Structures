@@ -1,9 +1,5 @@
 package data_structures.hashtables;
 
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Iterator;
-
 import data_structures.Entry;
 
 /**
@@ -12,7 +8,7 @@ import data_structures.Entry;
  * or {@code null}. It also uses a counter, {@code n}, to determine whether the
  * table has reached it's capacity without having to attempt to compute multiple
  * hashes to discover the table is full.
- * 
+ *
  * <h3>WARNING:</h3>
  * <p>
  * The table size must be large enough to support a variety of keys. If the table
@@ -21,11 +17,11 @@ import data_structures.Entry;
  * liklihood there will be collisions and the secondary hash function works
  * in multiples of its value. So, if key 100 hashes to slot 12 and it is used,
  * the next hash value could result in a index of greater than 20, the table
- * length, causing an error. So choose the keys used carefully, use a 
+ * length, causing an error. So choose the keys used carefully, use a
  * larger than needed hashtable capacity, or simply use a large prime number
  * for the table capacity.
  * </p>
- * 
+ *
  * <p>
  * DoubleHashing offers one of the best methods available for open addressing
  * because the permutations produced have many of the characteristics of
@@ -38,7 +34,7 @@ import data_structures.Entry;
  * h(k, i) = h(h1(k) + (i * h2(k) % m))
  * </pre>
  * </p>
- * 
+ *
  * where both h1 and h2 are auxiliary hash functions. The initial probe goes to
  * position {@code T[h1(k)]} and successive probe positions are offset from
  * previous positions by the amount {@code h2(k) mod m}. Thus, unlike the case
@@ -50,7 +46,7 @@ import data_structures.Entry;
  * The value {@code h2(k)} must be relatively prime to the hash-table size m for
  * the entire hash table to be searched.
  * </p>
- * 
+ *
  * <p>
  * A convenient way to ensure this condition is to let me be a power of 2 and to
  * design h2 so that it always produces an odd number.
@@ -63,11 +59,6 @@ import data_structures.Entry;
  */
 public final class DoubleHashing<K, V> extends AbstractHashtable<K, V> {
   /**
-   * The array of {@code Entry} objects that hold the key/value pairs.
-   */
-  private Entry<?, ?>[] table;
-
-  /**
    * The table size
    */
   private int m;
@@ -75,12 +66,12 @@ public final class DoubleHashing<K, V> extends AbstractHashtable<K, V> {
   /**
    * Initializes an empty, hashtable, with the specified size for the total
    * capacity for the table.
-   * 
+   *
    * <h4>Tip: Using a large value, preferrably a prime number, will prevent any
    * unwanted errors from occurring.</h4>
-   * 
+   *
    * @param size the specififed size of the hashtable maximum capacity
-   * 
+   *
    * @throws IllegalArgumentException if the specified size is less than {@code 1}
    */
   public DoubleHashing(int size) {
@@ -101,7 +92,7 @@ public final class DoubleHashing<K, V> extends AbstractHashtable<K, V> {
 
   /**
    * Returns the initialized hashtable number of elements it can hold.
-   * 
+   *
    * @return the number of elements that can be stored.
    */
   public int capacity() {
@@ -110,7 +101,7 @@ public final class DoubleHashing<K, V> extends AbstractHashtable<K, V> {
 
   /**
    *{@inheritDoc}
-   * 
+   *
    * @throws IllegalStateException {@inheritDoc}
    */
   protected void checkCapacity() {
@@ -124,17 +115,17 @@ public final class DoubleHashing<K, V> extends AbstractHashtable<K, V> {
    * of times it has collided as a counter to activate the secondary hash function
    * to hash to another slot index. This process continues until an open slot is
    * found.
-   * 
+   *
    * <p>
    * <pre>
-   * h1(k) = k % m 
+   * h1(k) = k % m
    *h2(k) = 1 + (k % m^)
    *h(k, i) = h(h1(k) + (i * h2(k) % m))
    * </pre>
    * </p>
-   * 
+   *
    * where {@code m^} is chosen to be slightly less than m - i.e (m-1).
-   * Here, m^ is chosed to be {@code m - 2} because when it is only 
+   * Here, m^ is chosed to be {@code m - 2} because when it is only
    * subtracted by one, it can result in a hash value that would exceed
    * the table size by 1 to allow it to result in a possible index slot.
    *
@@ -142,7 +133,7 @@ public final class DoubleHashing<K, V> extends AbstractHashtable<K, V> {
    * The probe will first look at position {@code h1(k)} followed by adding
    * successive values of {@code h2(k, i)}.
    * </p>
-   * 
+   *
    * @param k the key to hash
    * @param i the number of rehashes
    * @return the hashed index
@@ -153,7 +144,7 @@ public final class DoubleHashing<K, V> extends AbstractHashtable<K, V> {
 
   /**
    * Inserts an entry into the hashtable with the specified key and value.
-   * 
+   *
    * @param key   the key of the entry
    * @param value the value of the entry
    * @throws IllegalStateException    {@inheritDoc}
@@ -164,19 +155,29 @@ public final class DoubleHashing<K, V> extends AbstractHashtable<K, V> {
     checkKey(key);
     checkValue(value);
 
-    for (int i=0, j = hash(key, i); i < m && j < m; i++, j = hash(key, i)) { 
+    for (int i=0, j = hash(key, i); i < m && j < m; i++, j = hash(key, i)) {
       if (table[j] == null) {
         table[j] = new Entry<K, V>(key, value);
-        break;
+        n++;
+        modCount++;
+        return;
       }
     }
 
-    n++;
+    for (int i=0; i<m; i++) {
+      if (table[i] == null) {
+        table[i] = new Entry<K, V>(key, value);
+        n++;
+        modCount++;
+        return;
+      }
+    }
+
   }
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * @param key the key to lookup
    * @return the index of the element with the specified key or {@code -1} if not
    *         found
@@ -184,16 +185,20 @@ public final class DoubleHashing<K, V> extends AbstractHashtable<K, V> {
    */
   public int search(K key) {
     checkKey(key);
-    
+
     for (int i=0, j = hash(key, i); i < m && j < m; i++, j = hash(key, i))
       if (table[j] != null && table[j].getKey().equals(key))
         return j;
-    return -1; 
+
+    for (int i=0; i<m; i++)
+      if (table[i] != null && table[i].getKey().equals(key))
+        return i;
+    return -1;
   }
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * @throws IllegalArgumentException {@inheritDoc}
    */
   public boolean hasKey(K key) {
@@ -202,7 +207,7 @@ public final class DoubleHashing<K, V> extends AbstractHashtable<K, V> {
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * @throws IllegalArgumentException {@inheritDoc}
    */
   @SuppressWarnings("unchecked")
@@ -213,7 +218,7 @@ public final class DoubleHashing<K, V> extends AbstractHashtable<K, V> {
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * @throws IllegalArgumentException {@inheritDoc}
    */
   public synchronized boolean delete(K key) {
@@ -222,36 +227,10 @@ public final class DoubleHashing<K, V> extends AbstractHashtable<K, V> {
     if (idx != -1) {
       table[idx] = null;
       n--;
+      modCount++;
       return true;
     }
     return false;
-  }
-
-  protected <T> Iterable<T> getIterable(int type) {
-    if (isEmpty())
-      return new EmptyIterable<>();
-    return new Enumerator<>(type, true);
-  }
-
-  protected <T> Iterator<T> getIterator(int type) {
-    if (isEmpty())
-      return Collections.emptyIterator();
-    return new Enumerator<>(type, true);
-  }
-
-  protected <T> Enumeration<T> getEnumeration(int type) {
-    if (isEmpty())
-      return Collections.emptyEnumeration();
-    return new Enumerator<>(type, false);
-  }
-
-  protected class Enumerator<T> extends AbstractEnumerator<T> {
-    Enumerator(int type, boolean iterator) {
-      this.type = type;
-      this.iterator = iterator;
-      table = DoubleHashing.this.table;
-      this.size = table.length; 
-    }  
   }
 
 }

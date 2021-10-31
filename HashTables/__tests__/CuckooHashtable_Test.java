@@ -18,8 +18,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import data_structures.Entry;
 import data_structures.hashtables.CuckooHashtable;
 
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.logging.Logger;
 
 @TestInstance(Lifecycle.PER_CLASS)
@@ -57,11 +60,11 @@ public class CuckooHashtable_Test implements TestLifecycleLogger {
   @Test
   @Execution(ExecutionMode.CONCURRENT)
   void instantiating_overloaded_constructors() {
-    assertAll("instantiation for overloaded constructors", 
+    assertAll("instantiation for overloaded constructors",
       () -> assertDoesNotThrow(() -> new CuckooHashtable<>(), "default constructor"),
       () -> assertDoesNotThrow(() -> new CuckooHashtable<>(3), "given a prime"),
       () -> assertDoesNotThrow(() -> new CuckooHashtable<>(3, 1), "given a prime and size"),
-      () -> assertDoesNotThrow(() -> 
+      () -> assertDoesNotThrow(() ->
         new CuckooHashtable<>(3, 1, 0.9f), "given a prime, size, and loadFactor"),
       () -> assertDoesNotThrow(() -> new CuckooHashtable<>(3, 0.9f), "given prime and loadFactor"),
       () -> assertDoesNotThrow(() -> new CuckooHashtable<>(0.9f, 1), "given loadFactor and size")
@@ -109,22 +112,57 @@ public class CuckooHashtable_Test implements TestLifecycleLogger {
     @ValueSource(strings = { " ", "  ", "\t", "\n" })
     void throws_NullPointerException_for_null_and_empty_keys(String key) {
       table2 = new CuckooHashtable<>();
-
-      // Throws NullPointerException for null value and IllegalArgumentException
       assertThrows(Exception.class, () -> table2.insert(key, "test"));
     }
-    
+
+    @Test
+    void keys_is_empty() {
+      Iterator<Integer> keys = table.keysIterator();
+      assertFalse(keys.hasNext());
+      assertThrows(NoSuchElementException.class, () -> keys.next());
+      assertThrows(IllegalStateException.class, () -> keys.remove());
+    }
+
+    @Test
+    void values_is_empty() {
+      Iterator<String> values = table.valuesIterator();
+      assertFalse(values.hasNext());
+      assertThrows(NoSuchElementException.class, () -> values.next());
+      assertThrows(IllegalStateException.class, () -> values.remove());
+    }
+
+    @Test
+    void entries_is_empty() {
+      Iterator<Entry<Integer, String>> entries = table.entriesIterator();
+      assertFalse(entries.hasNext());
+      assertThrows(NoSuchElementException.class, () -> entries.next());
+      assertThrows(IllegalStateException.class, () -> entries.remove());
+    }
   }
 
   @Nested
   class After_Inserting {
-    int[] keys = { 1, 2, 3 };
-    String[] values = { "one", "two", "three" };
 
     @BeforeEach
-    void insert_key_value() {
+    void create_and_insert() {
       table = new CuckooHashtable<>();
-      assertDoesNotThrow(() -> table.insert(keys[0], values[0]));
+
+      table.insert(1, "one");
+      table.insert(2, "two");
+      table.insert(3, "three");
+      table.insert(4, "four");
+      table.insert(5, "five");
+    }
+
+    @Test
+    void all_inserts_succeed() {
+      assertAll(
+        () -> assertEquals("one", table.get(1)),
+        () -> assertEquals("two", table.get(2)),
+        () -> assertEquals("three", table.get(3)),
+        () -> assertEquals("four", table.get(4)),
+        () -> assertEquals("five", table.get(5))
+      );
     }
 
     @Test
@@ -133,31 +171,71 @@ public class CuckooHashtable_Test implements TestLifecycleLogger {
     }
 
     @Test
-    void has_get_and_delete_inserted_key() {
-      assertAll("has(), get(), and delete() key", 
-        () -> assertTrue(table.hasKey(keys[0])),
-        () -> {
-          String val = table.get(keys[0]);
-          assertNotNull(val);
-          assertEquals(values[0], val);
-        },
-        () -> assertTrue(table.delete(keys[0])),
-        () -> assertTrue(table.isEmpty())
-      );
+    void size() {
+      assertEquals(5, table.size());
     }
 
     @Test
-    void insert_to_trigger_fullRehash() {
-      assertDoesNotThrow(() -> {
-        table.insert(keys[1], values[1]);
-        table.insert(keys[2], values[2]);
-      }, "insert two key/value pairs");
+    void hasKey() {
+      assertTrue(table.hasKey(1));
+      assertTrue(table.hasKey(2));
+      assertTrue(table.hasKey(3));
+      assertTrue(table.hasKey(4));
+      assertTrue(table.hasKey(5));
+    }
 
-      assertAll("values are retrieved",
-        () -> assertEquals(3, table.size()),
-        () -> assertEquals(values[1], table.get(keys[1])),
-        () -> assertEquals(values[2], table.get(keys[2]))
-      );
+    @Test
+    void get() {
+      assertEquals("one", table.get(1));
+      assertEquals("two", table.get(2));
+      assertEquals("three", table.get(3));
+      assertEquals("four", table.get(4));
+      assertEquals("five", table.get(5));
+    }
+
+    @Test
+    void delete() {
+      table.delete(2);
+      assertNull(table.get(2));
+    }
+
+    @Test
+    void keys() {
+      Iterator<Integer> keys = table.keysIterator();
+      assertTrue(keys.hasNext());
+      assertNotNull(keys.next());
+      assertNotNull(keys.next());
+      assertNotNull(keys.next());
+      assertNotNull(keys.next());
+      assertNotNull(keys.next());
+      assertFalse(keys.hasNext());
+      assertThrows(NoSuchElementException.class, () -> keys.next());
+    }
+
+    @Test
+    void values() {
+      Iterator<String> values = table.valuesIterator();
+      assertTrue(values.hasNext());
+      assertNotNull(values.next());
+      assertNotNull(values.next());
+      assertNotNull(values.next());
+      assertNotNull(values.next());
+      assertNotNull(values.next());
+      assertFalse(values.hasNext());
+      assertThrows(NoSuchElementException.class, () -> values.next());
+    }
+
+    @Test
+    void entries() {
+      Iterator<Entry<Integer, String>> entries = table.entriesIterator();
+      assertTrue(entries.hasNext());
+      assertNotNull(entries.next());
+      assertNotNull(entries.next());
+      assertNotNull(entries.next());
+      assertNotNull(entries.next());
+      assertNotNull(entries.next());
+      assertFalse(entries.hasNext());
+      assertThrows(NoSuchElementException.class, () -> entries.next());
     }
 
   }

@@ -1,9 +1,5 @@
 package data_structures.hashtables;
 
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Iterator;
-
 import data_structures.Entry;
 import static data_structures.hashtables.HashtableFunctions.isPrime;
 
@@ -12,7 +8,7 @@ import static data_structures.hashtables.HashtableFunctions.isPrime;
  * is a must due to the nature of the hash function being quadratic, it will
  * produce larger index values much more quickly. Doing so will prevent any
  * unwanted errors from occurring.</h4>
- * 
+ *
  * Quadratic Probing uses a hash function of the form:
  *
  * <p>
@@ -20,16 +16,16 @@ import static data_structures.hashtables.HashtableFunctions.isPrime;
  * h(k, i) = (h^(k) + c1(i) + c2(i^2)) mod m
  * </pre>
  * </p>
- * 
+ *
  * <p>
  * where h^ is the auxiliary hash function
  * </p>
- * 
+ *
  * <p>
  * The initial probe position is {@code h'(k)} later positions probed are offset
  * by an arbitrary quadratic polynomial until an open slot is found.
  * </p>
- * 
+ *
  * <p>
  * If two keys have the same initial probe position, then their probe sequences
  * are the same, since {@code h(k1, 0) = h(k2, 0)} implies
@@ -41,7 +37,7 @@ import static data_structures.hashtables.HashtableFunctions.isPrime;
  * As with linear probing, the initial probe determines the entire sequence, so
  * only {@code m} distinct probe sequences are used.
  * </p>
- * 
+ *
  * <p>
  * Using a universal hash function, where the hash function is chosen randomly,
  * independent of the keys, as the auxiliary hash function.
@@ -52,7 +48,7 @@ public final class QuadraticProbing<K, V> extends AbstractStaticHashtable<K, V> 
    * The prime number used for the hash function
    */
   private int p;
-  
+
   /**
    * The constants generated when instantiated for the hash function
    */
@@ -61,12 +57,12 @@ public final class QuadraticProbing<K, V> extends AbstractStaticHashtable<K, V> 
   /**
    * Initializes an empty, hashtable, with the specified size for the total
    * capacity for the table.
-   * 
+   *
    * <h4>Tip: Using a large value, preferrably a prime number, will prevent any
    * unwanted errors from occurring.</h4>
-   * 
+   *
    * @param size the specififed size of the hashtable maximum capacity
-   * 
+   *
    * @throws IllegalArgumentException if the specified size is less than 1
    */
   public QuadraticProbing(int size, int prime) {
@@ -83,10 +79,26 @@ public final class QuadraticProbing<K, V> extends AbstractStaticHashtable<K, V> 
   }
 
   /**
+   * Initializes an empty, hashtable, with the specified size for the total
+   * capacity for the table.
+   *
+   * <p>
+   * Uses a default prime number of {@code 1277}.
+   * </p>
+   *
+   * @param size the specififed size of the hashtable maximum capacity
+   *
+   * @throws IllegalArgumentException if the specified size is less than 1
+   */
+  public QuadraticProbing(int size) {
+    this(size, 1277);
+  }
+
+  /**
    * The hash function that consits of an initial hash function that uses its own
    * constants and an auxiliary hash function that is quadratic of the {@code i}
    * number of slots skipped.
-   * 
+   *
    * @param k the key to hash
    * @param i the number of rehashes
    * @return the hashed index
@@ -98,7 +110,7 @@ public final class QuadraticProbing<K, V> extends AbstractStaticHashtable<K, V> 
 
   /**
    * Inserts an entry into the hashtable with the specified key and value.
-   * 
+   *
    * @param key   the key of the entry
    * @param value the value of the entry
    * @throws IllegalStateException    {@inheritDoc}
@@ -110,19 +122,28 @@ public final class QuadraticProbing<K, V> extends AbstractStaticHashtable<K, V> 
     checkValue(value);
     checkDuplicate(key);
 
-    for (int i=0, j = hash(key, i); i < m; i++, j = hash(key, i)) { 
+    for (int i=0, j = hash(key, i); i < m; i++, j = hash(key, i)) {
       if (table[j] == null) {
         table[j] = new Entry<K, V>(key, value);
-        break;
+        n++;
+        modCount++;
+        return;
       }
     }
 
-    n++;
+    for (int i=0; i < m; i++) {
+      if (table[i] == null) {
+        table[i] = new Entry<K, V>(key, value);
+        n++;
+        modCount++;
+        return;
+      }
+    }
   }
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * @throws IllegalArgumentException {@inheritDoc}
    */
   public synchronized int search(K key) {
@@ -131,12 +152,15 @@ public final class QuadraticProbing<K, V> extends AbstractStaticHashtable<K, V> 
     for (int i=0, j = hash(key, i); i < m; i++, j = hash(key, i))
       if (table[j] != null && table[j].getKey().equals(key))
         return j;
-    return -1; 
+    for (int i=0; i < m; i++)
+      if (table[i] != null && table[i].getKey().equals(key))
+        return i;
+    return -1;
   }
 
    /**
    * {@inheritDoc}
-   * 
+   *
    * @throws IllegalArgumentException {@inheritDoc}
    */
   public synchronized boolean hasKey(K key) {
@@ -145,7 +169,7 @@ public final class QuadraticProbing<K, V> extends AbstractStaticHashtable<K, V> 
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * @throws IllegalArgumentException {@inheritDoc}
    */
   @SuppressWarnings("unchecked")
@@ -156,7 +180,7 @@ public final class QuadraticProbing<K, V> extends AbstractStaticHashtable<K, V> 
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * @throws IllegalArgumentException {@inheritDoc}
    */
   public synchronized boolean delete(K key) {
@@ -165,36 +189,10 @@ public final class QuadraticProbing<K, V> extends AbstractStaticHashtable<K, V> 
     if (idx != -1) {
       table[idx] = null;
       n--;
+      modCount++;
       return true;
     }
     return false;
-  }
-
-  protected <T> Iterable<T> getIterable(int type) {
-    if (isEmpty())
-      return new EmptyIterable<>();
-    return new Enumerator<>(type, true);
-  }
-
-  protected <T> Iterator<T> getIterator(int type) {
-    if (isEmpty())
-      return Collections.emptyIterator();
-    return new Enumerator<>(type, true);
-  }
-
-  protected <T> Enumeration<T> getEnumeration(int type) {
-    if (isEmpty())
-      return Collections.emptyEnumeration();
-    return new Enumerator<>(type, false);
-  }
-
-  protected class Enumerator<T> extends AbstractEnumerator<T> {
-    Enumerator(int type, boolean iterator) {
-      this.type = type;
-      this.iterator = iterator;
-      table = QuadraticProbing.this.table;
-      size = table.length;
-    }
   }
 
 }

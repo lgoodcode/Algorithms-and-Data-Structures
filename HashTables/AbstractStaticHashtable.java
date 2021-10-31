@@ -1,6 +1,10 @@
 package data_structures.hashtables;
 
+import java.util.Iterator;
+import java.util.Enumeration;
+
 import data_structures.Entry;
+import data_structures.EmptyEnumerator;
 
 public abstract class AbstractStaticHashtable<K, V> extends AbstractHashtable<K, V> {
   /**
@@ -15,7 +19,7 @@ public abstract class AbstractStaticHashtable<K, V> extends AbstractHashtable<K,
 
   /**
    * Returns the initialized hashtable number of elements it can hold.
-   * 
+   *
    * @return the number of elements that can be stored.
    */
   public final int capacity() {
@@ -24,7 +28,7 @@ public abstract class AbstractStaticHashtable<K, V> extends AbstractHashtable<K,
 
   /**
    * Checks if the table is full before insertions.
-   * 
+   *
    * @throws IllegalStateException if the table is full
    */
   protected final void checkCapacity() {
@@ -49,7 +53,7 @@ public abstract class AbstractStaticHashtable<K, V> extends AbstractHashtable<K,
   /**
    * Performs a lookup in the hashtable and returns the index of the entry with
    * the specified key or {@code -1} if not found.
-   * 
+   *
    * <p>
    * Must use the {@link #checkKey()} method in the implementation so that the
    * other methods that use this method don't have to implement it, making it a
@@ -96,5 +100,35 @@ public abstract class AbstractStaticHashtable<K, V> extends AbstractHashtable<K,
    * @throws IllegalArgumentException if the key or value is {@code null} or blank
    */
   public abstract boolean delete(K key);
+
+  @Override
+  protected <T> Iterable<T> getIterable(int type) {
+    if (isEmpty())
+      return new EmptyEnumerator<>();
+    return new Enumerator<>(type, true);
+  }
+
+  @Override
+  protected <T> Iterator<T> getIterator(int type) {
+    if (isEmpty())
+      return new EmptyEnumerator<>();
+    return new Enumerator<>(type, true);
+  }
+
+  @Override
+  protected <T> Enumeration<T> getEnumeration(int type) {
+    if (isEmpty())
+      return new EmptyEnumerator<>();
+    return new Enumerator<>(type, false);
+  }
+
+  private class Enumerator<T> extends AbstractEnumerator<T> {
+    Enumerator(int type, boolean iterator) {
+      this.type = type;
+      this.iterator = iterator;
+      entries = AbstractStaticHashtable.this.table;
+      this.size = entries.length;
+    }
+  }
 
 }
