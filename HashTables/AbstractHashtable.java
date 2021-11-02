@@ -291,10 +291,9 @@ public abstract class AbstractHashtable<K, V> {
       Entry<?, ?> e = entry;
       int i = index, len = size;
 
-      /* Use locals for faster loop iteration */
-      while (e == null && i < len) {
+      // Use locals for faster loop iteration
+      while (e == null && i < len)
         e = t[i++];
-      }
 
       entry = e;
       index = i;
@@ -315,10 +314,9 @@ public abstract class AbstractHashtable<K, V> {
       Entry<?, ?> e = entry;
       int i = index, len = entries.length;
 
-      /* Use locals for faster loop iteration */
-      while (e == null && i < len) {
+      // Use locals for faster loop iteration
+      while (e == null && i < len)
         e = t[i++];
-      }
 
       entry = e;
       index = i;

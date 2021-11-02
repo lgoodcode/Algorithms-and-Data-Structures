@@ -568,7 +568,7 @@ public abstract class AbstractTree<K, V> {
   protected final class Enumerator<T> implements Enumeration<T>, Iterator<T>, Iterable<T> {
     protected Queue<TreeNode<K, V>> entries;
     protected TreeNode<K, V> last;
-    protected int type, size, index = 0;
+    protected int type, size;
 
     /**
      * Indicates whether this Enumerator is serving as an Iterator or an
@@ -627,7 +627,7 @@ public abstract class AbstractTree<K, V> {
     @SuppressWarnings("unchecked")
     public T nextElement() {
       if (!hasNext())
-        throw new NoSuchElementException("Queue enumerator. No items in queue.");
+        throw new NoSuchElementException("Tree enumerator. No items in queue.");
       last = entries.dequeue();
       return type == KEYS ? (T) last.getKey() : (type == VALUES ? (T) last.getValue() : (T) last);
     }

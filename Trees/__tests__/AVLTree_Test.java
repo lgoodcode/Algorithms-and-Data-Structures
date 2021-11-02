@@ -57,7 +57,7 @@ public class AVLTree_Test {
     }
 
     @Test
-    void null_on_nonexistent_key() {
+    void get_is_null_on_nonexistent_key() {
       assertNull(tree.get(5));
     }
 

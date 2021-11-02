@@ -7,7 +7,7 @@ public class BinarySearchTree<K, V> extends AbstractTree<K, V> {
   /**
    * The root of the tree
    */
-  private TreeNode<K, V> root = null;
+  private TreeNode<K, V> root;
 
   /**
    * Creates an empty, BinaryTree, using the specified compare function to

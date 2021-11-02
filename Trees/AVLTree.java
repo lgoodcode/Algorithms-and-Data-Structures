@@ -35,7 +35,7 @@ public class AVLTree<K, V> extends AbstractTree<K, V> {
   /**
    * The root of the tree
    */
-  private AVLTreeNode<K, V> root = null;
+  private AVLTreeNode<K, V> root;
 
   /**
    * Constant used for {@link #retracing()} in {@link #insert()} with a key.
