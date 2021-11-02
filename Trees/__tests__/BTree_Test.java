@@ -363,6 +363,13 @@ public class BTree_Test {
       assertEquals("seventeen", tree.get(17));
       assertEquals("eighteen", tree.get(18));
       assertEquals("nineteen", tree.get(19));
+
+      tree.insert(3, "three");
+      tree.insert(4, "four");
+
+      assertEquals("three", tree.get(3));
+      assertEquals("four", tree.get(4));
+
     
     }
   }

@@ -56,4 +56,50 @@ public class BTreeNode<K, V> {
     return count > 0 ? values[count - 1] : null;
   }
 
+  protected void shiftKeys(int start, int end) {
+    if (start < end) {
+      for (int i = start, j = end; i < j; i++) {
+        keys[i] = keys[i+1];
+        values[i] = values[i+1];
+      }
+    }
+    else {
+      for (int i = start, j = end; i > j; i--) {
+        keys[i] = keys[i-1];
+        values[i] = values[i-1];
+      }
+    }
+  }
+  
+  protected void removeKeys(int i, int j) {
+    if (i > j)
+      throw new IllegalArgumentException("Start cannot be greater than end");
+    for (; i < j; i++) {
+      keys[i] = null;
+      values[i] = null;
+    }
+  }
+  
+  protected void removeKeys(int i) {
+    removeKeys(i, keys.length);
+  }
+
+  protected void shiftChildren(int start, int end) {
+    if (start < end) {
+      for (int i = start, j = end; i < j; i++)
+        children[i] = children[i+1];
+    }
+    else {
+      for (int i = start, j = end; i > j; i--)
+        children[i] = children[i-1];
+    }
+  }
+  
+  protected void removeChildren(int i) {
+    if (i >= children.length)
+      throw new IllegalArgumentException("Start cannot be >= children length.");
+    for (; i<children.length; i++)
+      children[i] = null;
+  }
+
 }

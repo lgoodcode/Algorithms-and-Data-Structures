@@ -328,22 +328,16 @@ public final class BTree<K, V> {
     if (!y.leaf) {
       for (j=0; j < t; j++)
         z.children[j] = y.children[j + t];
-      for (; j < C_LEN; j++)
-        z.children[j] = null;
+      y.removeChildren(j);
     }
 
     // Moves the children up one if needed to place child z if it has
     // larger values than the child before it
-    for (j = node.count; j > i; j--)
-      node.children[j + 1] = node.children[j];
-
+    node.shiftChildren(node.count + 1, i);
     node.children[i + 1] = z;
 
     // Moves the keys around on the root for the new one to be inserted
-    for (j = node.count - 1, len = i - 1; j > len; j--) {
-      node.keys[j + 1] = node.keys[j];
-      node.values[j + 1] = node.values[j];
-    }
+    node.shiftKeys(node.count, i);
 
     // Inserts the median key of y to x to seperate y from z
     node.keys[i] = y.keys[t - 1];
@@ -352,10 +346,7 @@ public final class BTree<K, V> {
 
     // Adjust the count and remove the transferred keys and values
     y.count = t - 1;
-    for (j = y.count; j < K_LEN; j++) {
-      y.keys[j] = null;
-      y.values[j] = null;
-    }
+    y.removeKeys(y.count);
 
     // Disk-Write(y)
     // Disk-Write(z)
@@ -574,13 +565,7 @@ public final class BTree<K, V> {
    */
   public V get(BTreeNode<K, V> node, K key) {
     Pair pair = search(node, key);
-    BTreeNode<K, V> x;
-
-    if (pair != null) {
-      x = pair.getNode();
-      return x.values[pair.getIndex()];
-    }
-    return null;
+    return pair != null ? pair.getValue() : null;
   }
 
   /**
@@ -790,8 +775,6 @@ public final class BTree<K, V> {
    */
   @SuppressWarnings("unchecked")
   public <T> T _predecessor(int type, BTreeNode<K, V> node, K key, BTreeNode<K, V> parent) {
-    // Index starts 0 because we want to find the smallest k'
-    // that is less than the given key
     int i = 0, j = parent.count - 1;
 
     while (i < node.count && isLessThan(node.keys[i], key))
@@ -928,8 +911,6 @@ public final class BTree<K, V> {
    */
   @SuppressWarnings("unchecked")
   public <T> T _successor(int type, BTreeNode<K, V> node, K key, BTreeNode<K, V> parent) {
-    // Index starts at the last key because we want to find the smallest k'
-    // that is greater than the given key
     int i = node.count, j = 0;
 
     while (i > 0 && isLessThan(key, node.keys[i-1]))
@@ -1018,15 +999,9 @@ public final class BTree<K, V> {
     if (node.leaf) {
       for (i = 0; i < node.count; i++) {
         if (node.keys[i] == key) {
-          for (j = i, len = node.count - 1; j < len; j++) {
-            node.keys[j] = node.keys[j+1];
-            node.values[j] = node.values[j+1];
-          }
-
           node.count--;
-
-          node.keys[node.count] = null;
-          node.values[node.count] = null;
+          node.shiftKeys(i, node.count);
+          node.removeKeys(node.count);
           count--;
           modCount++;
           return;
@@ -1096,17 +1071,12 @@ public final class BTree<K, V> {
       // Remove pointer to z from x
       for (j = i + 1; j < node.count; j++)
         node.children[j] = node.children[j+1];
-      for (; j < C_LEN; j++)
-        node.children[j] = null;
+      node.removeChildren(j);
 
       // Adjust key count and remove k from x
-      for (j = i, len = node.count - 1; j < len; j++) {
-        node.keys[j] = node.keys[j+1];
-        node.values[j] = node.values[j+1];
-      }
+      node.shiftKeys(i, node.count);
       node.count--;
-      node.keys[node.count] = null;
-      node.values[node.count] = null;
+      node.removeKeys(node.count);
 
       // Recursively delete key from the newly merged node y
       _delete(y, key);
@@ -1155,14 +1125,9 @@ public final class BTree<K, V> {
         node.values[i] = z.values[0];
 
         // Adjust keys in sibling z for the removed key
-        for (j = 0, len = z.count - 1; j < len; j++) {
-          z.keys[j] = z.keys[j+1];
-          z.values[j] = z.values[j+1];
-        }
-
         z.count--;
-        z.keys[z.count] = null;
-        z.values[z.count] = null;
+        z.shiftKeys(0, z.count);
+        z.removeKeys(z.count);
 
         // If the deficient node is an internal node, we need to take the child
         // corresponding to the seperator key
@@ -1172,8 +1137,7 @@ public final class BTree<K, V> {
           // Remove pointer to the child removed from the sibling z
           for (j = 0, len = C_LEN; j < len; j++)
             z.children[j] = z.children[j+1];
-          for (; j < C_LEN; j++)
-            z.children[j] = null;
+          z.removeChildren(j);
         }
 
         // Recursively delete key from the node now that it has enough keys
@@ -1181,16 +1145,11 @@ public final class BTree<K, V> {
         return;
       }
       // If left sibling exists and has enough keys
-      // else if (i > 0 && node.children[i-1] != null && node.children[i-1].count >= t) {
       else if (i > 0 && node.children[i-1].count >= t) {
         z = node.children[i-1];
 
         // Move all keys up one since we are grabbing a key from the left
-        // it'll be < y.keys[0]
-        for (j = y.count; j >= 0; j--) {
-          y.keys[j] = y.keys[j-1];
-          y.values[j] = y.values[j-1];
-        }
+        y.shiftKeys(y.count, 0);
 
         // Move key from x into y
         y.keys[0] = node.keys[i-1];
@@ -1203,8 +1162,7 @@ public final class BTree<K, V> {
 
         // Remove key from left sibling now that it is in x (last key, shrink array)
         z.count--;
-        z.keys[z.count] = null;
-        z.values[z.count] = null;
+        z.removeKeys(z.count);
 
         // If the deficient node is an internal node, we need to take the child
         // corresponding to the seperator key
@@ -1216,8 +1174,7 @@ public final class BTree<K, V> {
           y.children[0] = z.children[z.count+1];
 
           // Remove pointer of child removed from the sibling z
-          for (; j < C_LEN; j++)
-            z.children[j] = null;
+          z.removeChildren(j);
         }
 
         // Node now has enough keys, recursively delete key from it
@@ -1267,17 +1224,10 @@ public final class BTree<K, V> {
         else {
           for (j = i + 1; j < node.count; j++)
             node.children[j] = node.children[j+1];
-          for (; j < C_LEN; j++)
-            node.children[j] = null;
+          node.removeChildren(j);
           node.count--;
-
-          for (j = i, len = node.count; j < len; j++) {
-            node.keys[j] = node.keys[j+1];
-            node.values[j] = node.values[j+1];
-          }
-
-          node.keys[node.count] = null;
-          node.values[node.count] = null;
+          node.shiftKeys(i, node.count);
+          node.removeKeys(node.count);
         }
 
         // Recursively delete k from the newly merged node y
