@@ -1,7 +1,6 @@
 package data_structures.trees;
 
-
-public class BTreeNode<K, V> {
+public final class BTreeNode<K, V> {
   /**
    * The child {@code BTreeNodes}.
    */

@@ -13,11 +13,11 @@ public class BinarySearchTree<K, V> extends AbstractTree<K, V> {
    * Creates an empty, BinaryTree, using the specified compare function to
    * determine whether a given {@code TreeNode} is smaller than another.
    *
-   * @param compareFn an anonymous function that compares two {@code TreeNode}
+   * @param compare an anonymous function that compares two {@code TreeNode}
    *                  objects
    */
-  public BinarySearchTree(BiFunction<K, K, Boolean> compareFn) {
-    super(compareFn);
+  public BinarySearchTree(BiFunction<K, K, Boolean> compare) {
+    super(compare);
   }
 
   /**

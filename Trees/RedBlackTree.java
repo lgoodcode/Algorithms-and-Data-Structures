@@ -60,11 +60,11 @@ public class RedBlackTree<K, V> extends AbstractTree<K, V> {
    * Creates an empty, BinaryTree, using the specified compare function to
    * determine whether a given {@code RedBlackTreeNode} is smaller than another.
    *
-   * @param compareFn an anonymous function that compares two
+   * @param compare an anonymous function that compares two
    *                  {@code RedBlackTreeNode} objects
    */
-  public RedBlackTree(BiFunction<K, K, Boolean> compareFn) {
-    super(compareFn);
+  public RedBlackTree(BiFunction<K, K, Boolean> compare) {
+    super(compare);
   }
 
   /**

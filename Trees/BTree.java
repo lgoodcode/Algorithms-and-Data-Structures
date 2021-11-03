@@ -94,7 +94,7 @@ public final class BTree<K, V> {
    * The function used to compare two keys and returns a boolean value indicating
    * whether the first argument is less than the second argument.
    */
-  protected BiFunction<K, K, Boolean> compareFn;
+  private BiFunction<K, K, Boolean> compare;
 
   /**
    * The root of the tree
@@ -146,15 +146,15 @@ public final class BTree<K, V> {
    * minimum degree of the tree as well.
    *
    * @param t the minimum degree
-   * @param compareFn an anonymous function that compares two key
+   * @param compare an anonymous function that compares two key
    */
-  public BTree(int t, BiFunction<K, K, Boolean> compareFn) {
+  public BTree(int t, BiFunction<K, K, Boolean> compare) {
     if (t < 2)
       throw new IllegalArgumentException("Minimum degree must be >= 2");
-    if (compareFn == null)
+    if (compare == null)
       throw new NullPointerException("Compare function cannot be null.");
 
-    this.compareFn = compareFn;
+    this.compare = compare;
     this.t = t;
     root = new BTreeNode<K, V>(t);
     root.leaf = true;
@@ -167,10 +167,10 @@ public final class BTree<K, V> {
    * determine whether a given key is smaller than another. Uses a default minimum
    * degree of {@code 2}.
    *
-   * @param compareFn an anonymous function that compares two keys
+   * @param compare an anonymous function that compares two keys
    */
-  public BTree(BiFunction<K, K, Boolean> compareFn) {
-    this(2, compareFn);
+  public BTree(BiFunction<K, K, Boolean> compare) {
+    this(2, compare);
   }
 
   /**
@@ -206,7 +206,7 @@ public final class BTree<K, V> {
   protected final boolean isLessThan(K x, K y) {
     checkKey(x);
     checkKey(y);
-    return compareFn.apply(x, y);
+    return compare.apply(x, y);
   }
 
   /**

@@ -52,11 +52,11 @@ public class AVLTree<K, V> extends AbstractTree<K, V> {
    * Creates an empty, BinaryTree, using the specified compare function to
    * determine whether a given {@code AVLTreeNode} is smaller than another.
    *
-   * @param compareFn an anonymous function that compares two {@code AVLTreeNode}
+   * @param compare an anonymous function that compares two {@code AVLTreeNode}
    *                  objects
    */
-  public AVLTree(BiFunction<K, K, Boolean> compareFn) {
-    super(compareFn);
+  public AVLTree(BiFunction<K, K, Boolean> compare) {
+    super(compare);
   }
 
   /**

@@ -1,6 +1,6 @@
 package data_structures.hashtables;
 
-public final class HashtableFunctions {
+public interface HashtableFunctions {
   /**
    * Given a valid {@code Number} type, determines if it is a prime number.
    *

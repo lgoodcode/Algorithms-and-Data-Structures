@@ -16,7 +16,7 @@ public abstract class AbstractTree<K, V> {
    * The function used to compare two keys and returns a boolean value indicating
    * whether the first argument is less than the second argument.
    */
-  protected BiFunction<K, K, Boolean> compareFn;
+  protected BiFunction<K, K, Boolean> compare;
 
   /**
    * Counter tracking the number of entries in the tree.
@@ -28,7 +28,7 @@ public abstract class AbstractTree<K, V> {
    * modifications are those that change the number of entries in the list or
    * otherwise modify its internal structure (e.g., insert, delete).  This field
    * is used to make iterators on Collection-views of the LinkedList fail-fast.
-   * 
+   *
    * @see ConcurrentModificationException
    */
   protected int modCount;
@@ -42,10 +42,10 @@ public abstract class AbstractTree<K, V> {
    * Creates an empty, tree, using the specified compare function to determine
    * whether a given node's key is smaller than another.
    *
-   * @param compareFn an anonymous function that compares two tree node objects
+   * @param compare an anonymous function that compares two tree node objects
    */
-  protected AbstractTree(BiFunction<K, K, Boolean> compareFn) {
-    this.compareFn = compareFn;
+  protected AbstractTree(BiFunction<K, K, Boolean> compare) {
+    this.compare = compare;
     count = 0;
   }
 
@@ -70,7 +70,7 @@ public abstract class AbstractTree<K, V> {
   protected final boolean isLessThan(K x, K y) {
     checkKey(x);
     checkKey(y);
-    return compareFn.apply(x, y);
+    return compare.apply(x, y);
   }
 
   /**
@@ -132,7 +132,7 @@ public abstract class AbstractTree<K, V> {
    * Checks to make sure the specified {@code TreeNode} is not {@code null}.
    *
    * @param <Node> {@link TreeNode} or a subclass of
-   * 
+   *
    * @throws NullPointerException if the specified node is {@code null}
    */
   protected final <Node extends TreeNode<K, V>> void checkNode(Node node) {
