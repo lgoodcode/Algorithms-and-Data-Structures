@@ -2,7 +2,7 @@ package algorithms.greedy;
 
 import java.util.Arrays;
 
-public class FractionalKnapsack {
+public final class FractionalKnapsack {
   private static int TOTAL = 0;
   private static int ITEMS = 1;
 

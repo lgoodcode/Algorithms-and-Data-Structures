@@ -10,7 +10,7 @@ import java.util.Arrays;
  * If the amount is less than the current memo values, it can use them, otherwise,
  * it extends the length of the array.
  */
-public class CoinChangeDP {
+public final class CoinChangeDP {
   private static Integer[][] memo;
 
   public static Integer[] run(Integer[] coins, Integer amount) {
