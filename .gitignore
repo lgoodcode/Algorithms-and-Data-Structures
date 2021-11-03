@@ -1,1 +1,5 @@
-*.class
+# Ignore root java files
+/*.java
+
+# Ignore compiled java class files
+**/*.class
