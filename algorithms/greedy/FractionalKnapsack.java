@@ -2,6 +2,10 @@ package algorithms.greedy;
 
 import java.util.Arrays;
 
+/**
+ * Greedily calculates the maximum possible value for a given weight capacity
+ * for the given item weights and values.
+ */
 public final class FractionalKnapsack {
   private static int TOTAL = 0;
   private static int ITEMS = 1;
@@ -46,10 +50,28 @@ public final class FractionalKnapsack {
     return type == TOTAL ? (T) Integer.valueOf(total) : (T) Arrays.copyOf(items, j);
   }
 
+  /**
+   * Calculates the maximum possible value with the specified weights and values
+   * for a given max weight capacity. It can include a fraction of an item.
+   *
+   * @param capacity the max weight capacity of items
+   * @param weights  the weights of the items
+   * @param values   the values of the items
+   * @return the maximum value for the given weight capacity
+   */
   public static int total(int capacity, int[] weights, int[] values) {
     return run(TOTAL, capacity, weights, values);
   }
 
+  /**
+   * Calculates the maximum possible items with the specified weights and values
+   * for a given max weight capacity. It can include a fraction of an item.
+   *
+   * @param capacity the max weight capacity of items
+   * @param weights  the weights of the items
+   * @param values   the values of the items
+   * @return the items with the maximum value for the given weight capacity
+   */
   public static int[] items(int capacity, int[] weights, int[] values) {
     return run(ITEMS, capacity, weights, values);
   }

@@ -3,39 +3,53 @@ package algorithms.dynamic;
 import java.util.Arrays;
 
 /**
- * Top-down approach memoized to save calculated values when finding optimal
- * solution
+ * Calculates the minimum possible coins for change for a given amount.
  *
+ * <p>
+ * Top-down approach memoized to save calculated values when finding optimal
+ * solution.
+ * </p>
+ *
+ * <p>
  * This version is improved by using static variables to retain computed values.
- * If the amount is less than the current memo values, it can use them, otherwise,
- * it extends the length of the array.
+ * If the amount is less than the current memo values, it can use them,
+ * otherwise, it extends the length of the array.
+ * </p>
  */
 public final class CoinChangeDP {
-  private static Integer[][] memo;
+  private static int[][] memo;
 
-  public static Integer[] run(Integer[] coins, Integer amount) {
+  /**
+   * Calculates the the change with the given coin denomination to derive the
+   * minimum number of coins possible.
+   *
+   * @param coins  the denominations of coins
+   * @param amount the amount to make change for
+   * @return the coins to make the change
+   */
+  public static int[] run(int[] coins, int amount) {
     if (memo == null) {
-      memo = new Integer[amount + 1][30];
-      memo[0] = new Integer[1];
+      memo = new int[amount + 1][30];
+      memo[0] = new int[1];
     }
     else if (amount > memo.length) {
       int oldLen = memo.length, newLen = amount + 1;
       memo = Arrays.copyOf(memo, newLen);
 
       for (int i = oldLen; i < newLen; i++)
-        memo[i] = new Integer[30];
+        memo[i] = new int[30];
     }
 
     return makeChange(coins, amount);
   }
 
-  private static Integer[] makeChange(Integer[] coins, Integer amount) {
+  private static int[] makeChange(int[] coins, int amount) {
     if (amount == 0)
       return memo[0];
-    if (memo[amount][0] != null)
+    if (memo[amount][0] != 0)
       return memo[amount];
 
-    Integer[] min = new Integer[30], newMin = new Integer[30];
+    int[] min = new int[30], newMin = new int[30];
     int i, j, coin, newAmount;
 
     for (i = 0, j = 0; i < coins.length; i++, j = 0) {
@@ -45,7 +59,7 @@ public final class CoinChangeDP {
       if (newAmount >= 0) {
         newMin = makeChange(coins, newAmount);
 
-        while (j < newMin.length && newMin[j] != null)
+        while (j < newMin.length && newMin[j] != 0)
           j++;
 
         min = Arrays.copyOf(newMin, j + 1);

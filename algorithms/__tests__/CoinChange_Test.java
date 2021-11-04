@@ -9,10 +9,10 @@ import algorithms.dynamic.CoinChangeDP;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 public class CoinChange_Test {
-  Integer[] US = { 1, 5, 10, 25 };
-  Integer[] greedyChangeFor43 = { 25, 10, 5, 1, 1, 1 };
-  Integer[] DPChangeFor43 = { 1, 1, 1, 5, 10, 25 };
-  Integer[] DPChangeFor74 = { 1, 1, 1, 1, 10, 10, 25, 25 };
+  int[] US = { 1, 5, 10, 25 };
+  int[] greedyChangeFor43 = { 25, 10, 5, 1, 1, 1 };
+  int[] DPChangeFor43 = { 1, 1, 1, 5, 10, 25 };
+  int[] DPChangeFor74 = { 1, 1, 1, 1, 10, 10, 25, 25 };
 
   @Test 
   void CoinChangeG() {
