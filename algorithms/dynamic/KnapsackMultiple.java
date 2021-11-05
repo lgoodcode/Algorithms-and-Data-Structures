@@ -3,10 +3,10 @@ package algorithms.dynamic;
 import java.util.Arrays;
 
 /**
- * 0-1 Knapsack problem
+ * 0-1 Knapsack problem - modified to allow items to be reused
  * 
  * <p>
- * Runs in {@code O(n W)} time, where {@code n} is the number of items and
+ * Runs in {@code O(n^2 W)} time, where {@code n} is the number of items and
  * {@code W} is the capacity
  * </p>
  * 
@@ -22,7 +22,7 @@ import java.util.Arrays;
  * zeroes to be able to calculate the previous and current item.
  * </p>
  */
-public interface Knapsack {
+public interface KnapsackMultiple {
   static int TOTAL = 0;
   static int ITEMS = 1;
 
@@ -36,15 +36,17 @@ public interface Knapsack {
     int[] items;
     int a, b, i, j, k;
 
-    for (i = 1; i <= n; i++) {
+    for (k = 1; k <= n; k++) {
       for (j = 1; j <= capacity; j++) {
-        // If current capacity is less than item weight
-        if (j < weights[i - 1])
-          K[i][j] = K[i-1][j];  // Set table position with corresponding item/weight
-        else {                  
-          a = K[i-1][j];                              // Previous item value
-          b = K[i-1][j - weights[i-1]] + values[i-1]; // Current item value plus the previous item value
-          K[i][j] = a > b ? a : b;                    // Set the position with the highest value
+        for (i = 1; i <= k; i++) {
+          // If current capacity is less than item weight
+          if (j < weights[i - 1])
+            K[i][j] = K[i-1][j];  // Set table position with corresponding item/weight
+          else {  
+            a = K[k-1][j];                              // Previous item value
+            b = K[k-1][j - weights[i-1]] + values[i-1]; // Current item value plus the previous item value
+            K[i][j] = a > b ? a : b;                    // Set the position with the highest value
+          }
         }
       }
     }
@@ -54,16 +56,16 @@ public interface Knapsack {
 
     // Gets the items of the resulting maximum value
     items = new int[n];
-    i = n;
+    k = n;
     j = 0;
     k = capacity;
 
-    while (i > 0 && k > 0) {
-      i--;
+    while (k > 0 && k > 0) {
+      k--;
 
-      if (K[i+1][k] != K[i][k]) {
-        items[j++] = i;
-        k -= weights[i];
+      if (K[k+1][k] != K[k][k]) {
+        items[j++] = k;
+        k -= weights[k];
       }
     }
 
