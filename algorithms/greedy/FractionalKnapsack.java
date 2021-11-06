@@ -6,9 +6,9 @@ import java.util.Arrays;
  * Greedily calculates the maximum possible value for a given weight capacity
  * for the given item weights and values.
  */
-public final class FractionalKnapsack {
-  private static int TOTAL = 0;
-  private static int ITEMS = 1;
+public interface FractionalKnapsack {
+  static int TOTAL = 0;
+  static int ITEMS = 1;
 
   @SuppressWarnings("unchecked")
   private static <T> T run(int type, int capacity, int[] weights, int[] values) {

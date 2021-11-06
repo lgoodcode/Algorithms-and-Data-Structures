@@ -11,6 +11,10 @@ import java.util.Arrays;
  * </p>
  * 
  * <p>
+ * The weights must be sorted from lowest to highest.
+ * </p>
+ * 
+ * <p>
  * This maximizes the value of items in a fixed capacity with whole items only.
  * If fractional parts of an item are acceptable, the greedy variation is
  * preferred.
@@ -23,23 +27,18 @@ import java.util.Arrays;
  * </p>
  */
 public interface Knapsack {
-  static int TOTAL = 0;
-  static int ITEMS = 1;
-
-  @SuppressWarnings("unchecked")
-  private static <T> T run(int type, int capacity, int[] weights, int[] values) {
+  private static int[][] run(int capacity, int[] weights, int[] values) {
     if (weights.length != values.length)
       throw new IllegalArgumentException("Weights and Values array lengths don't match.");
 
     int n = weights.length;
     int[][] K = new int[n+1][capacity+1]; // Initialize the matrix (n+1 X capacity+1)
-    int[] items;
-    int a, b, i, j, k;
+    int a, b, i, j;
 
     for (i = 1; i <= n; i++) {
       for (j = 1; j <= capacity; j++) {
         // If current capacity is less than item weight
-        if (j < weights[i - 1])
+        if (j < weights[i-1])
           K[i][j] = K[i-1][j];  // Set table position with corresponding item/weight
         else {                  
           a = K[i-1][j];                              // Previous item value
@@ -49,14 +48,20 @@ public interface Knapsack {
       }
     }
 
-    if (type == TOTAL)
-      return (T) Integer.valueOf(K[n][capacity]);
+    return K;
+  }
 
-    // Gets the items of the resulting maximum value
-    items = new int[n];
-    i = n;
-    j = 0;
-    k = capacity;
+  public static int total(int capacity, int[] weights, int[] values) {
+    int[][] K = run(capacity, weights, values);
+    return K[weights.length][capacity];
+  }
+
+  public static int[] items(int capacity, int[] weights, int[] values) {
+    int[][] K = run(capacity, weights, values);
+    int[]  items = new int[weights.length];
+    int i = weights.length;
+    int j = 0;
+    int k = capacity;
 
     while (i > 0 && k > 0) {
       i--;
@@ -67,15 +72,7 @@ public interface Knapsack {
       }
     }
 
-    return (T) Arrays.copyOf(items, j);
-  }
-
-  public static int total(int capacity, int[] weights, int[] values) {
-    return run(TOTAL, capacity, weights, values);
-  }
-
-  public static int[] items(int capacity, int[] weights, int[] values) {
-    return run(ITEMS, capacity, weights, values);
+    return Arrays.copyOf(items, j);  
   }
 
 }

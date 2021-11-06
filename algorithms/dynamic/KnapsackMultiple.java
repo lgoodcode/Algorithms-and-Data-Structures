@@ -1,7 +1,5 @@
 package algorithms.dynamic;
 
-import java.util.Arrays;
-
 /**
  * 0-1 Knapsack problem - modified to allow items to be reused
  * 
@@ -23,20 +21,18 @@ import java.util.Arrays;
  * </p>
  */
 public interface KnapsackMultiple {
-  static int TOTAL = 0;
-  static int ITEMS = 1;
-
-  @SuppressWarnings("unchecked")
-  private static <T> T run(int type, int capacity, int[] weights, int[] values) {
+  private static int[][] run(int capacity, int[] weights, int[] values) {
     if (weights.length != values.length)
       throw new IllegalArgumentException("Weights and Values array lengths don't match.");
 
     int n = weights.length;
     int[][] K = new int[n+1][capacity+1]; // Initialize the matrix (n+1 X capacity+1)
-    int[] items;
     int a, b, i, j, k;
 
     for (k = 1; k <= n; k++) {
+      if (weights[k-1] > capacity)
+        break;
+        
       for (j = 1; j <= capacity; j++) {
         for (i = 1; i <= k; i++) {
           // If current capacity is less than item weight
@@ -51,33 +47,15 @@ public interface KnapsackMultiple {
       }
     }
 
-    if (type == TOTAL)
-      return (T) Integer.valueOf(K[n][capacity]);
-
-    // Gets the items of the resulting maximum value
-    items = new int[n];
-    k = n;
-    j = 0;
-    k = capacity;
-
-    while (k > 0 && k > 0) {
-      k--;
-
-      if (K[k+1][k] != K[k][k]) {
-        items[j++] = k;
-        k -= weights[k];
-      }
-    }
-
-    return (T) Arrays.copyOf(items, j);
+    return K;
   }
 
   public static int total(int capacity, int[] weights, int[] values) {
-    return run(TOTAL, capacity, weights, values);
+    return run(capacity, weights, values)[weights.length][capacity];
   }
 
-  public static int[] items(int capacity, int[] weights, int[] values) {
-    return run(ITEMS, capacity, weights, values);
-  }
+  // public static int[] items(int capacity, int[] weights, int[] values) {
+  //   return run(capacity, weights, values);
+  // }
 
 }

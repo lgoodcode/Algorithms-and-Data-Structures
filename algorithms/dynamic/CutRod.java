@@ -59,10 +59,10 @@ public interface CutRod {
     int[] s = new int[len + 1];
     int i, j, q;
 
-    for (j=0; j < len; j++) {
+    for (j = 0; j < len; j++) {
       q = Integer.MIN_VALUE;
 
-      for (i=0; i <= j; i++) {
+      for (i = 0; i <= j; i++) {
         if (q < prices[i] + r[j-i]) {
           q = Math.max(q, prices[i] + r[j-i]);
           s[j] = i + 1;

@@ -31,7 +31,7 @@ public class Knapsack_Test {
   }
 
   @Test
-  void Knapsack_total() {
+  void knapsack_total() {
     assertEquals(5, Knapsack.total(4, weights, values));
     assertEquals(8, Knapsack.total(6, weights, values));
     assertEquals(9, Knapsack.total(7, weights, values));
@@ -40,18 +40,7 @@ public class Knapsack_Test {
   }
 
   @Test
-  void Knapsack_total_rods() {
-    assertEquals(5, KnapsackMultiple.total(2, sizes, prices));
-    assertEquals(8, KnapsackMultiple.total(3, sizes, prices));
-    assertEquals(10, KnapsackMultiple.total(4, sizes, prices));
-    assertEquals(13, KnapsackMultiple.total(5, sizes, prices));
-    assertEquals(17, KnapsackMultiple.total(6, sizes, prices));
-    assertEquals(18, KnapsackMultiple.total(7, sizes, prices));
-    assertEquals(22, KnapsackMultiple.total(8, sizes, prices));
-  }
-
-  @Test
-  void Knapsack_items() {
+  void knapsack_items() {
     int[] items = { 2, 1 };
     int[] items2 = { 2, 0 };
     int[] items3 = { 2 };
@@ -59,5 +48,16 @@ public class Knapsack_Test {
     assertArrayEquals(items, Knapsack.items(7, weights, values));
     assertArrayEquals(items2, Knapsack.items(6, weights, values));
     assertArrayEquals(items3, Knapsack.items(4, weights, values));
+  }
+
+  @Test
+  void knapsack_multiple_total() {
+    assertEquals(5, KnapsackMultiple.total(2, sizes, prices));
+    assertEquals(8, KnapsackMultiple.total(3, sizes, prices));
+    assertEquals(10, KnapsackMultiple.total(4, sizes, prices));
+    assertEquals(13, KnapsackMultiple.total(5, sizes, prices));
+    assertEquals(17, KnapsackMultiple.total(6, sizes, prices));
+    assertEquals(18, KnapsackMultiple.total(7, sizes, prices));
+    assertEquals(22, KnapsackMultiple.total(8, sizes, prices));
   }
 }
