@@ -72,7 +72,7 @@ public class Queue<T> {
    * @return is the {@code Queue} empty
    */
   public boolean isEmpty() {
-    return head == tail && head == 0;
+    return head == tail;
   }
 
   /**

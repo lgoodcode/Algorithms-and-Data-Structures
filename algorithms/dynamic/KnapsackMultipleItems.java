@@ -22,7 +22,7 @@
 //  * zeroes to be able to calculate the previous and current item.
 //  * </p>
 //  */
-// public interface KnapsackMultiple {
+// public interface KnapsackMultipleItems {
 //   static int TOTAL = 0;
 //   static int ITEMS = 1;
 
@@ -45,18 +45,20 @@
 //         for (j = 1; j <= capacity; j++) {
 //           // If current capacity is less than current item weight
 //           if (j < weights[i-1]) {
-//             K[k][j] = K[i-1][j];  // Set table position with corresponding item/weight
-//             S[k][j] = i - 1;
+//             K[i][j] = K[i-1][j];  // Set table position with corresponding item/weight
+//             S[i][j] = i - 1;
 //           }
 //           else {
-//             a = K[k-1][j];                              // Previous item value
-//             b = K[k-1][j - weights[i-1]] + values[i-1]; // Current item value plus the previous item value
-//             K[i][j] = a > b ? a : b;
+//             a = K[i-1][j];                              // Previous item value
+//             b = K[i-1][j - weights[i-1]] + values[i-1]; // Current item value plus the previous item value
+//             K[i][j] = Math.max(K[i][j], a > b ? a : b);
 
-//             if (a > b)
+//             if (Math.max(K[i][j], a > b ? a : b) != K[i][j]) 
+//               S[i][j] = S[i][j];
+//             else if (a > b)
 //               S[i][j] = k - 1;
 //             else
-//               S[i][j] = k;
+//               S[i][j] = i - 1;
 //           }
 //         }
 //       }
@@ -79,7 +81,9 @@
 //       }
 //     }
 
-//     return (T) Arrays.copyOf(items, j);
+//     int[] x = { 2 };
+//     return (T) x;
+//     // return (T) Arrays.copyOf(items, j);
 //   }
 
 //   public static int total(int capacity, int[] weights, int[] values) {

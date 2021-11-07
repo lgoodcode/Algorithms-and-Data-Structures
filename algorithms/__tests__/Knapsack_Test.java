@@ -8,6 +8,7 @@ import org.junit.jupiter.api.*;
 import algorithms.greedy.FractionalKnapsack;
 import algorithms.dynamic.Knapsack;
 import algorithms.dynamic.KnapsackMultiple;
+// import algorithms.dynamic.KnapsackMultipleItems;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 public class Knapsack_Test {
@@ -68,7 +69,7 @@ public class Knapsack_Test {
   //   int[] items3 = { 1, 1 };
 
   //   // assertArrayEquals(items, KnapsackMultiple.items(2, sizes, prices));
-  //   assertArrayEquals(items2, KnapsackMultiple.items(3, sizes, prices));
-  //   assertArrayEquals(items3, KnapsackMultiple.items(4, sizes, prices)); 
+  //   assertArrayEquals(items2, KnapsackMultipleItems.items(3, sizes, prices));
+  //   assertArrayEquals(items3, KnapsackMultipleItems.items(4, sizes, prices)); 
   // }
 }
