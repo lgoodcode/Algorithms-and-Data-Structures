@@ -60,4 +60,15 @@ public class Knapsack_Test {
     assertEquals(18, KnapsackMultiple.total(7, sizes, prices));
     assertEquals(22, KnapsackMultiple.total(8, sizes, prices));
   }
+
+  // @Test 
+  // void knapsack_multiple_items() {
+  //   int[] items = { 1 };
+  //   int[] items2 = { 2 };
+  //   int[] items3 = { 1, 1 };
+
+  //   // assertArrayEquals(items, KnapsackMultiple.items(2, sizes, prices));
+  //   assertArrayEquals(items2, KnapsackMultiple.items(3, sizes, prices));
+  //   assertArrayEquals(items3, KnapsackMultiple.items(4, sizes, prices)); 
+  // }
 }
