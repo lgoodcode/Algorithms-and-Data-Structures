@@ -6,15 +6,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.*;
 
-import data_structures.graphs.Graph;
 import data_structures.graphs.BFS;
+import data_structures.graphs.Graph;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 public class BFS_Test {
   Graph G;
   BFS.Node[] nodes;
   int[] path = { 0, 1, 4, 8 };
-  
+
   @BeforeEach
   void setup() {
     G = new Graph(9, true);

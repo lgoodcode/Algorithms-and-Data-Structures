@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -74,6 +75,11 @@ public class Queue_Test {
     }
 
     @Test
+    void peek_is_null() {
+      assertNull(queue.peek());
+    }
+
+    @Test
     void enqueue() {
       try {
         queue.enqueue(1);
@@ -123,6 +129,11 @@ public class Queue_Test {
     @Test
     void not_empty() {
       assertFalse(queue.isEmpty());
+    }
+
+    @Test
+    void peek() {
+      assertEquals(1, queue.peek());
     }
 
     @Test

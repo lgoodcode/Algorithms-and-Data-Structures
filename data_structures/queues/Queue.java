@@ -10,7 +10,7 @@ import data_structures.queues.exceptions.*;
  * can be filled again. It can also be instantiated directly from an array of
  * values or another {@code Queue}.
  */
-public class Queue<T> {
+public final class Queue<T> {
   private T[] queue;
   private int head, tail;
 
@@ -91,6 +91,15 @@ public class Queue<T> {
    */
   public int capacity() {
     return queue.length;
+  }
+
+  /**
+   * Returns the next item to be dequeued
+   * 
+   * @return the next item to be dequeued
+   */
+  public T peek() {
+    return queue[head];
   }
 
   /**
