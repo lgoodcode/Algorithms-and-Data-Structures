@@ -1,26 +1,27 @@
-package data_structures.heaps;
+package data_structures.queues;
 
 import java.util.function.BiFunction;
 
-import data_structures.heaps.exceptions.*;
+import data_structures.queues.exceptions.QueueEmptyException;
+import data_structures.queues.exceptions.QueueFullException;
 
-public class MinHeap<T> {
+public class MinPriorityQueue<T> {
   private BiFunction<T, T, Boolean> compare;
   private Entry<?>[] heap;
   private int size = 0;
 
-  public MinHeap(int size, BiFunction<T, T, Boolean> compare) {
+  public MinPriorityQueue(int size, BiFunction<T, T, Boolean> compare) {
     if (size < 1)
       throw new IllegalArgumentException("Illegal size, must be greater than 1.");
     heap = new Entry<?>[size];
     this.compare = compare;
   }
 
-  public MinHeap(int size) {
+  public MinPriorityQueue(int size) {
     this(size, (T x, T y) -> x.hashCode() < y.hashCode());
   }
 
-  public MinHeap(T[] arr) {
+  public MinPriorityQueue(T[] arr) {
     if (arr.length == 0)
       throw new IllegalArgumentException("Initial array of values cannot be empty.");
 
@@ -29,11 +30,11 @@ public class MinHeap<T> {
     for (int i=0; i<arr.length; i++) {
       try {
         insert(arr[i]);
-      } catch (HeapFullException e) {}
+      } catch (QueueFullException e) {}
     }
   }
 
-  public MinHeap(MinHeap<T> h) {
+  public MinPriorityQueue(MinPriorityQueue<T> h) {
     heap = h.heap;
     size = h.size;
   }
@@ -80,11 +81,11 @@ public class MinHeap<T> {
     return (T) heap[0].value;
   }
 
-  public synchronized void insert(T value) throws HeapFullException {
+  public synchronized void insert(T value) throws QueueFullException {
     if (value == null || value.toString().isBlank())
       throw new IllegalArgumentException("Value cannot be null or blank.");
     if (size == heap.length)
-      throw new HeapFullException(size);
+      throw new QueueFullException(size);
     
     heap[size] = new Entry<T>(Integer.MIN_VALUE, value);
     increaseKey(size, size);
@@ -105,16 +106,26 @@ public class MinHeap<T> {
     }
   }
     
+  /**
+   * Because it is a priority queue and the items in the queue can be modified,
+   * we have to double check the new min value after the minHeapify operation.
+   */
   @SuppressWarnings("unchecked")
-  public synchronized T extractMin() throws HeapEmptyException{
+  public synchronized T extractMin() throws QueueEmptyException{
     if (size < 1)
-      throw new HeapEmptyException();
+      throw new QueueEmptyException();
 
-    Entry<T> min = (Entry<T>) heap[0];
+    Entry<T> temp, min = (Entry<T>) heap[0];
     heap[0] = heap[--size];
     heap[size] = null;
 
     minHeapify(0);
+
+    if (!isEmpty() && isLessThan(heap[0], min)) {
+      temp = (Entry<T>) heap[0];
+      heap[0] = min;
+      min = temp;
+    }
 
     return min.value;
   }

@@ -286,7 +286,7 @@ public final class BFS {
   /**
    * Vertex node of the Breadth-First Search. Used to hold the attributes of BFS.
    */
-  public static class Node {
+  public static final class Node {
     /**
      * The status of the vertex, either undiscovered "WHITE" or discovered "GRAY".
      */
