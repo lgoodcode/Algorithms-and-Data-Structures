@@ -113,18 +113,6 @@ public final class Graph {
   }
 
   /**
-   * Checks that the specified weight is not negative.
-   *
-   * @param weight the weight
-   *
-   * @throws IllegalArgumentException if the weight is negative
-   */
-  private void checkWeight(int weight) {
-    if (weight < 0)
-      throw new IllegalArgumentException("Weight cannot be negative.");
-  }
-
-  /**
    * Returns the number of vertices in the graph.
    *
    * @return the number of vertices
@@ -350,7 +338,6 @@ public final class Graph {
 
     checkVertex(u);
     checkVertex(v);
-    checkWeight(w);
 
     _addEdge(u, v, w);
   }
@@ -373,7 +360,6 @@ public final class Graph {
 
     checkVertex(u);
     checkVertex(v);
-    checkWeight(w);
 
     if (G[u] == null || G[u][v] == NIL)
       _addEdge(u, v, w);
