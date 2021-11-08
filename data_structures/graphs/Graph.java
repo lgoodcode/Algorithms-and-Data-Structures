@@ -159,39 +159,53 @@ public final class Graph {
   }
 
   /**
-   * Returns a matrix of the graph edges. Each vertex index array will be the
-   * length of the number of edges that vertex has with the respective vertices.
+   * Returns an array of {@link Graph.Edge} of all the edges in the graph. When
+   * initializing the edge array, will set length to twice the number of edges
+   * contained in the graph if it isn't directed since the edges will point in
+   * both directions.
    *
-   * <p>
-   * If the graph is weighted, it will simply return the graph matrix.
-   * </p>
-   *
-   * @return the edge or graph matrix, if weighted
+   * @return array of {@code Edges}
    */
-  public int[][] getEdges() {
-    if (weighted)
-      return G;
+  public Edge[] getEdges() {
+    if (edges == 0)
+      return new Edge[0];
 
-    int[][] E = new int[rows][];
-    int i, j, k = 0;
+    int numEdges = directed ? edges : edges * 2;
+    int i, j, k = 0, len;
+    Edge[] E = new Edge[numEdges];
 
     // Iterate through each vertex
-    for (i = 0; i < E.length; i++) {
+    for (i = 0, len = rows; i < len; i++) {
       if (G[i] != null) {
-        E[i] = new int[rows];
-
         // Iterate through each edge of the vertex
-        for (j = 0; j < E.length; j++) {
+        for (j = 0; j < len; j++) {
           if (G[i][j] != NIL)
-            E[i][k++] = j;
+            E[k++] = weighted ? new Edge(i, j, G[i][j]) : new Edge(i, j);
         }
-
-        // Set edge array of vertex i to be the length of the number of edges
-        E[i] = Arrays.copyOf(E[i], k);
       }
     }
 
     return E;
+  }
+
+  /**
+   * Returns an {@link Graph.Edge} and the weight if the graph is weighted.
+   *
+   * @param u the x vertex of the edge
+   * @param v the y vertex of the edge
+   * @return the {@code Edge}
+   *
+   * @throws NoSuchElementException if the edge does not exist in the graph
+   */
+  public Edge getEdge(int u, int v) {
+    checkVertex(u);
+    checkVertex(v);
+
+    if (G[u] == null || G[u][v] == NIL)
+      throw new NoSuchElementException("Edge does not exist.");
+    if (weighted)
+      return new Edge(u, v, G[u][v]);
+    return new Edge(u, v);
   }
 
   /**
@@ -421,5 +435,54 @@ public final class Graph {
       G[v][u] = NIL;
 
     edges--;
+  }
+
+  /**
+   * The static class to easily retrieve the edges from the graph and to be able
+   * to access the vertices as well as the weight of the edge, if applicable.
+   */
+  public static final class Edge {
+    protected boolean weighted;
+    protected int u;
+    protected int v;
+    protected int w;
+
+    protected Edge(int u, int v) {
+      weighted = false;
+      this.u = u;
+      this.v = v;
+    }
+
+    protected Edge(int u, int v, int w) {
+      weighted = true;
+      this.u = u;
+      this.v = v;
+      this.w = w;
+    }
+
+    /**
+     * Returns a two element {@code int} array containing the {@code u} and
+     * {@code v} vertices.
+     *
+     * @return the edge vertices array
+     */
+    public int[] getVertices() {
+      int[] V = { u, v };
+      return V;
+    }
+
+    /**
+     * Retrieves the weight of the edge, if the graph is weighted. Otherwise, it
+     * will throw an exception.
+     *
+     * @return the edge weight
+     *
+     * @throws IllegalCallerException if the edge is not weighted
+     */
+    public int getWeight() {
+      if (!weighted)
+        throw new IllegalCallerException("This edge is not part of a weighted graph.");
+      return w;
+    }
   }
 }

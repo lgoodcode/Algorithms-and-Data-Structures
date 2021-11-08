@@ -61,7 +61,7 @@ import data_structures.queues.exceptions.QueueFullException;
  * </p>
  *
  * <hr/>
- * <h3>Aggregate Analysis</h3>
+ * <h3>Aggregate Analysis {@code (-)(V + E)}</h3>
  *
  * <p>
  * The loops on lines 1-3 and lines 5-7 take time (-)(V), exclusive of the time
@@ -131,7 +131,7 @@ public final class DFS {
   }
 
   /**
-   * Runs the Breadth-First Search algorithm on the supplied graph matrix and
+   * Runs the Depth-First Search algorithm on the supplied graph matrix and
    * start vertex to serve as the root of the DFS tree.
    *
    * <p>
@@ -184,7 +184,7 @@ public final class DFS {
   }
 
   /**
-   * Runs the Breadth-First Search algorithm on the supplied graph matrix and
+   * Runs the Depth-First Search algorithm on the supplied graph matrix and
    * start vertex to serve as the root of the DFS tree.
    *
    * @param graph the graph matrix
@@ -199,7 +199,7 @@ public final class DFS {
   }
 
   /**
-   * Runs the Breadth-First Search algorithm on the supplied graph matrix and
+   * Runs the Depth-First Search algorithm on the supplied graph matrix and
    * start vertex to serve as the root of the DFS tree. Then runs a up-tracing on
    * the specified end vertex, checking each parent of end vertex until either the
    * start vertex is reached, resulting in a path, or not, and no path exists
@@ -241,7 +241,7 @@ public final class DFS {
   }
 
   /**
-   * Runs the Breadth-First Search algorithm on the supplied graph matrix and
+   * Runs the Depth-First Search algorithm on the supplied graph matrix and
    * start vertex to serve as the root of the DFS tree. Then runs a up-tracing on
    * the specified end vertex, checking each parent of end vertex until either the
    * start vertex is reached, resulting in a path, or not, and no path exists
@@ -283,7 +283,7 @@ public final class DFS {
   }
 
   /**
-   * Vertex node of the Breadth-First Search. Used to hold the attributes of DFS.
+   * Vertex node of the Depth-First Search. Used to hold the attributes of DFS.
    */
   public static class Node {
     /**

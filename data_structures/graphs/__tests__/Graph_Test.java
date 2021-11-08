@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -18,6 +17,7 @@ import data_structures.graphs.Graph;
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 public class Graph_Test {
   Graph g;
+  Graph.Edge[] edges;
   int rows = 4;
 
   @Nested
@@ -46,8 +46,7 @@ public class Graph_Test {
 
     @Test
     void empty_edges() {
-      int[][] arr = new int[rows][];
-      assertArrayEquals(arr, g.getEdges());
+      assertEquals(0, g.getEdges().length);
     }
 
     @Test
@@ -130,11 +129,12 @@ public class Graph_Test {
 
     @Test
     void getEdges() {
+      int[] V = { 1, 3 };
       assertDoesNotThrow(() -> g.addEdge(1, 3));
       assertEquals(2, g.getNumVertices());
       assertEquals(1, g.getNumEdges());
-      assertNotNull(g.getEdges());
       assertTrue(g.hasEdge(1, 3));
+      assertArrayEquals(V, g.getEdges()[0].getVertices());
     }
 
     @Test
@@ -153,7 +153,7 @@ public class Graph_Test {
 
     @BeforeEach
     void setup() {
-      g = new Graph(rows, false, true);
+      g = new Graph(rows, true, true);
     }
 
     @Test
@@ -161,6 +161,23 @@ public class Graph_Test {
       assertDoesNotThrow(() -> g.addEdge(1, 3, 2));
       assertEquals(2, g.getNumVertices());
       assertEquals(1, g.getNumEdges());
+    }
+
+    @Test
+    void getEdges_with_weight() {
+      g.addEdge(1, 3, 2);
+      edges = g.getEdges();
+      assertEquals(1, edges.length);
+      assertEquals(2, edges[0].getWeight());
+    }
+
+    @Test
+    void getEdge_with_weight() {
+      int[] V = { 1, 3 };
+      g.addEdge(1, 3, 2);
+      Graph.Edge edge = g.getEdge(1, 3);
+      assertEquals(2, edge.getWeight());
+      assertArrayEquals(V, edge.getVertices());
     }
     
     @Test

@@ -3,3 +3,6 @@
 
 # Ignore compiled java class files
 **/*.class
+
+# Ignore personal notes
+notes.md

@@ -35,4 +35,8 @@ public interface QuickSort {
     sort(arr, 0, arr.length - 1, (T x, T y) -> x.hashCode() <= y.hashCode());
   }
 
+  public static <T> void sort(T[] arr, BiFunction<T, T, Boolean> compare) {
+    sort(arr, 0, arr.length - 1, compare);
+  }
+
 }

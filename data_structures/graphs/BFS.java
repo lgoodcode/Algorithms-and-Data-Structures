@@ -59,7 +59,7 @@ import data_structures.queues.exceptions.QueueFullException;
  * </p>
  *
  * <hr/>
- * <h3>Aggregate Analysis</h3>
+ * <h3>Aggregate Analysis {@code O(V + E)}</h3>
  *
  * <p>
  * The operations of enqueuing and dequeing take {@code O(1)} time, so the total
