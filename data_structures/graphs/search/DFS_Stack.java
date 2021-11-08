@@ -1,7 +1,8 @@
-package data_structures.graphs;
+package data_structures.graphs.search;
 
 import java.util.Arrays;
 
+import data_structures.graphs.Graph;
 import data_structures.queues.Queue;
 import data_structures.stacks.Stack;
 import data_structures.stacks.exceptions.StackEmptyException;

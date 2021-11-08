@@ -177,6 +177,31 @@ public final class Graph {
   }
 
   /**
+   * Returns the edges for the specified vertex.
+   * 
+   * @param vertex the vertex whose edges is being retrieved
+   * @return the {@code Edge} array
+   * 
+   * @throws IllegalArgumentException if the vertex doesn't exist in the graph
+   */
+  public Edge[] getEdges(int vertex) {
+    checkVertex(vertex);
+
+    if (G[vertex] == null)
+      throw new IllegalArgumentException("Vertex does not exist in graph.");
+
+    Edge[] E = new Edge[vertices];
+    int i = 0, u = vertex, v, len;
+
+    for (v = 0, len = rows; v < len; v++) {
+      if (G[u][v] != NIL)
+        E[i++] = weighted ? new Edge(u, v, G[u][v]) : new Edge(u, v);
+    }
+
+    return Arrays.copyOf(E, i);
+  }
+
+  /**
    * Returns an {@link Graph.Edge} and the weight if the graph is weighted.
    *
    * @param u the x vertex of the edge

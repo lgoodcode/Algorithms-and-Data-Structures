@@ -1,81 +1,86 @@
-package data_structures.graphs;
+package data_structures.graphs.search;
 
 import java.util.Arrays;
 
+import data_structures.graphs.Graph;
 import data_structures.queues.Queue;
 import data_structures.queues.exceptions.QueueFullException;
 
 /**
- * DFS(G)
- * 1   for each vertex u of G.V
+ * BFS(G, s)
+ * 1   for each vertex u of G.V - {s}
  * 2       u.color = WHITE
- * 3       u.p = NIL
- * 4   time = 0
- * 5   for each vertex u of G.V
- * 6       if u.color == WHITE
- * 7           DFS-Visit(G, u)
- *
- *
- * DFS-Visit(G, u)
- * 1   time = time + 1
- * 2   u.d = time
- * 3   u.color = GRAY
- * 4   for each vertex v of G.Adj[u]
- * 5       if v.color == WHITE
- * 6           v.p = u
- * 7           DFS-Visit(G, v)
- * 8   u.color = BLACK
- * 9   time = time + 1
- * 10  u.f = time
+ * 3       u.d = Infinity
+ * 4       u.p = NIL
+ * 5   s.color = GRAY
+ * 6   s.d = 0
+ * 7   s.p = NIL
+ * 8   Q = 0
+ * 9   Enqueue(Q, s)
+ * 10  while Q != 0
+ * 11      u = Dequeue(Q)
+ * 12      for each v of G.Adj[u]
+ * 13          if v.color == WHITE
+ * 14              v.color = GRAY
+ * 15              v.d = u.d + 1
+ * 16              v.p = u
+ * 17              Enqueue(Q, v)
+ * 18      u.color = Black
  */
 
 /**
- * Depth-first Search searches "deeper" in the graph whenever possible. DFS
- * explores edges out of the most recently discovered vertex {@code v} that
- * still has unexplored edges leaving it.
+ * Breadth-first search is one of the simplest algorithms for searching a graph
+ * and is the archetype for many important graph algorithms. Prim's
+ * minimum-spanning-tree algorithm and Dijkstra's single-source shortest-paths
+ * algorithm use ideas similar to those in breadth-first search.
  *
  * <p>
- * Once all of the edges of {@code v} have been explored, the search
- * "backtracks" to explore edges leaving the vertex from which {@code v} was
- * discovered. This process continues until we have discovered all the vertices
- * that are reachable from the original source vertex. If any undiscovered
- * vertices remain then the DFS selects one of them as a new source, and repeats
- * the search from that source. The algorithm repeats this entire process until
- * it has discovered every vertex.
+ * Given a graph {@code G = (V, E)} and a distinguished source vertex {@code s},
+ * BFS searches systematically to explore the edges of G to "discover" every
+ * vertex that is reachable from {@code s}.
  * </p>
  *
  * <p>
- * DFS produces a "predecessor subgraph", similar to how DFS produces a tree,
- * since it searches all possible paths for a given vertex before continuing to
- * the next.mThe predecessor subgraph may be composed of several trees because
- * the search may repeat from multiple sources. The predecessor subgraph of a
- * DFS forms a "Depth-First Forest" comprising of several "depth-first trees".
- * The edges {@code E.p} are "tree edges".
+ * It computes the distance (smallest number of edges) from {@code s} to each
+ * reachable vertex. It also produces a "breadth-first tree" with root {@code s}
+ * that contains all reachable vertices. Whenever the search discovers a white
+ * vertex {@code v} while scanning the adjacency list of an already discovered
+ * vertex u, the vertex {@code v} and the edge {@code (u, v)} are added to the
+ * tree. {@code u} is a predecessor or parent of {@code v} in the BFS.
  * </p>
  *
  * <p>
- * DFS also "timestamps" each vertex with {@code v.d} to record when {@code v}
- * is first discovered (and grayed) and the second {@code v.f} records when the
- * search finishes examining the adajency list of {@code v} and blackens
- * {@code v}.
+ * The algorithm works on both directed and undirected graphs.
+ * </p>
+ *
+ * <p>
+ * This implementation doesn't use the black color to mark a fully discovered
+ * vertex because as long it is marked gray, as discovered, it won't be
+ * revisted.
  * </p>
  *
  * <hr/>
- * <h3>Aggregate Analysis {@code (-)(V + E)}</h3>
+ * <h3>Aggregate Analysis {@code O(V + E)}</h3>
  *
  * <p>
- * The loops on lines 1-3 and lines 5-7 take time (-)(V), exclusive of the time
- * to execute the calls to DFS-Visit. The DFS-Visit procedure is called exactly
- * once for each vertex v of V. since the vertex u where DFS-Visit is invoked
- * must be white and the first thing DFS-Visit does it paint vertex u gray.
+ * The operations of enqueuing and dequeing take {@code O(1)} time, so the total
+ * time devoted to queue operations is {@code O(V)}.
  * </p>
  *
  * <p>
- * Total cost of executing lines 4-7 of DFS-Visit is (-)(E), thus resulting in
- * the running time of (-)(V + E).
+ * Because the procedure scans the adjacency list of each vertex that is
+ * dequeued, it scans each adjacency list at most once. Since the sum of the
+ * lengths of all the adjacency lists is {@code (-)(E)}, the total time spent in
+ * scanning the adjacency lists is {@code O(E)}.
+ * </p>
+ *
+ * <p>
+ * The overhead for initialization is {@code O(V)}, and the total running time
+ * of the BFS procedure is {@code O(V + E)}. Thus, BFS runs in time linear in
+ * the size of the adjacency-list representation of {@code G}.
  * </p>
  */
-public final class DFS {
+public final class BFS {
   /**
    * Color constant used to flag a vertex as "undiscovered"
    */
@@ -120,7 +125,7 @@ public final class DFS {
   /**
    * Checks if the given vertex is a valid index for the {@code Node} results.
    *
-   * @param nodes  the DFS results to check against
+   * @param nodes  the BFS results to check against
    * @param vertex the vertex index to check
    *
    * @throws IllegalArgumentException if the vertex is negative or greater than
@@ -131,23 +136,12 @@ public final class DFS {
   }
 
   /**
-   * Runs the Depth-First Search algorithm on the supplied graph matrix and
-   * start vertex to serve as the root of the DFS tree.
-   *
-   * <p>
-   * This uses a single element array to hold the {@code time} value so that it
-   * can be passed through each recursive call.
-   * </p>
-   * 
-   * <p>
-   * This implementation omits the use of the "black" color, which marks a vertex
-   * as completed, which isn't necessary because the vertex won't be revisted as
-   * long as it isn't white.
-   * </p>
+   * Runs the Breadth-First Search algorithm on the supplied graph matrix and
+   * start vertex to serve as the root of the BFS tree.
    *
    * @param G the graph matrix
    * @param s the starting vertex
-   * @return the {@link DFS.Node} array results
+   * @return the {@link BFS.Node} array results
    *
    * @throws IllegalArgumentException if the start vertex is negative or greater
    *                                  than the graph length
@@ -155,41 +149,49 @@ public final class DFS {
   private static Node[] _run(Graph G, int s) {
     checkVertex(G, s);
 
-    int[] vertices = G.getVertices(), time = { 0 };
-    int u, numVertices = vertices.length;
+    int[] vertices = G.getVertices();
+    int u, v, numVertices = vertices.length;
     Node[] VTS = new Node[numVertices];
+    Queue<Integer> Q = new Queue<>(numVertices);
 
-    // Initialize DFS vertex nodes
+    // Initialize BFS vertex nodes
     for (u = 0; u < numVertices; u++)
       VTS[u] = new Node();
 
-    for (u = 0; u < numVertices; u++)
-      if (VTS[u].color == WHITE)
-        visit(G, VTS, u, time);
-    return VTS;
-  }
+    // Initialize starting vertex as discovered (GRAY), self (0), root (-1)
+    VTS[s].color = GRAY;
+    VTS[s].distance = 0;
 
-  private static void visit(Graph G, Node[] VTS, int u, int[] time) {
-    VTS[u].distance = ++time[0];
-    VTS[u].color = GRAY;
+    try {
+      Q.enqueue(s);
+    } catch (QueueFullException e) {}
 
-    for (int v = 0, len = G.rows; v < len; v++) {
-      if (G.hasEdge(u, v) && VTS[v].color == WHITE) {
-        VTS[v].parent = u;
-        visit(G, VTS, v, time);
+    while (!Q.isEmpty()) {
+      u = Q.dequeue();
+
+      for (v = 0; v < numVertices; v++) {
+        if (G.hasEdge(u, v) && VTS[v].color == WHITE) {
+          VTS[v].color = GRAY;
+          VTS[v].distance = VTS[u].distance + 1;
+          VTS[v].parent = u;
+
+          try {
+            Q.enqueue(v);
+          } catch (QueueFullException e) {}
+        }
       }
     }
 
-    VTS[u].finish = ++time[0];
+    return VTS;
   }
 
   /**
-   * Runs the Depth-First Search algorithm on the supplied graph matrix and
-   * start vertex to serve as the root of the DFS tree.
+   * Runs the Breadth-First Search algorithm on the supplied graph matrix and
+   * start vertex to serve as the root of the BFS tree.
    *
    * @param graph the graph matrix
    * @param startVertex the starting vertex
-   * @return the {@link DFS.Node} array results
+   * @return the {@link BFS.Node} array results
    *
    * @throws IllegalArgumentException if the start vertex is negative or greater
    *                                  than the graph length
@@ -199,8 +201,8 @@ public final class DFS {
   }
 
   /**
-   * Runs the Depth-First Search algorithm on the supplied graph matrix and
-   * start vertex to serve as the root of the DFS tree. Then runs a up-tracing on
+   * Runs the Breadth-First Search algorithm on the supplied graph matrix and
+   * start vertex to serve as the root of the BFS tree. Then runs a up-tracing on
    * the specified end vertex, checking each parent of end vertex until either the
    * start vertex is reached, resulting in a path, or not, and no path exists
    * between the two vertices.
@@ -222,11 +224,11 @@ public final class DFS {
 
   /**
    * Performs the path tracing for the specified start and end vertex with the
-   * given {@link DFS.Node} results. Checks each parent of end vertex until either
+   * given {@link BFS.Node} results. Checks each parent of end vertex until either
    * the start vertex is reached, resulting in a path, or not, and no path exists
    * between the two vertices.
    *
-   * @param nodes       the DFS tree results
+   * @param nodes       the BFS tree results
    * @param startVertex the starting vertex
    * @param endVertex   the end vertex
    *
@@ -241,8 +243,8 @@ public final class DFS {
   }
 
   /**
-   * Runs the Depth-First Search algorithm on the supplied graph matrix and
-   * start vertex to serve as the root of the DFS tree. Then runs a up-tracing on
+   * Runs the Breadth-First Search algorithm on the supplied graph matrix and
+   * start vertex to serve as the root of the BFS tree. Then runs a up-tracing on
    * the specified end vertex, checking each parent of end vertex until either the
    * start vertex is reached, resulting in a path, or not, and no path exists
    * between the two vertices.
@@ -264,11 +266,11 @@ public final class DFS {
 
   /**
    * Performs the path tracing for the specified start and end vertex with the
-   * given {@link DFS.Node} results. Checks each parent of end vertex until either
+   * given {@link BFS.Node} results. Checks each parent of end vertex until either
    * the start vertex is reached, resulting in a path, or not, and no path exists
    * between the two vertices.
    *
-   * @param nodes       the DFS tree results
+   * @param nodes       the BFS tree results
    * @param startVertex the starting vertex
    * @param endVertex   the end vertex
    *
@@ -283,9 +285,9 @@ public final class DFS {
   }
 
   /**
-   * Vertex node of the Depth-First Search. Used to hold the attributes of DFS.
+   * Vertex node of the Breadth-First Search. Used to hold the attributes of BFS.
    */
-  public static class Node {
+  public static final class Node {
     /**
      * The status of the vertex, either undiscovered "WHITE" or discovered "GRAY".
      */
@@ -302,65 +304,55 @@ public final class DFS {
     protected int parent;
 
     /**
-     * The number of vertices visited before this node was compeleted.
-     */
-    protected int finish;
-
-    /**
-     * Constructs an empty basic DFS node.
+     * Constructs an empty basic BFS node.
      */
     protected Node() {
       color = WHITE;
       distance = Integer.MIN_VALUE;
       parent = -1;
-      finish = Integer.MIN_VALUE;
     }
 
     /**
-     * Traces the results of the DFS tree with a given start and end vertex, to
-     * return a string of the path. Because the DFS produces a forest of subtrees
-     * for each individual vertex traveled, this print function differs from the BFS
-     * implementation. This will return {@code null} if the start vertex wasn't
-     * reached from the end vertex and any node traveled up to this path will check
-     * if the path it traveled reached a dead end and returns {@code null} back up
-     * the call stack. If there is a path, it will instead pass the string back up.
+     * Traces the results of the BFS tree with a given start and end vertex, to
+     * return a string of the path using the {@code StringBuilder}, if one exists.
+     * Otherwise, it will return a no path exists message.
      *
-     * @param N   the DFS tree results
-     * @param u   the start vertex
-     * @param v   the end vertex
-     * @param str the string holding the path or {@code null} if none
+     * @param N  the BFS tree results
+     * @param u  the start vertex
+     * @param v  the end vertex
+     * @param sb the {@code StringBuilder} to build the path string
      */
-    private static String printPathAux(Node[] N, int u, int v, String str) {
+    private static void printPathAux(Node[] N, int u, int v, StringBuilder sb) {
       if (u == v)
-        return str == null ? null : str + u;
+        sb.append(u);
       else if (N[v].parent == -1)
-        return null;
-      String s = printPathAux(N, u, N[v].parent, str);
-      return s == null ? null : s + " -> " + v;
+        sb.append("No path exists from " + u + " to " + v);
+      else {
+        printPathAux(N, u, N[v].parent, sb);
+        sb.append(" -> " + v);
+      }
     }
 
     /**
-     * Returns the path string for the start and end vertices using the DFS tree
+     * Returns the path string for the start and end vertices using the BFS tree
      * results.
      *
-     * @param nodes the DFS tree results
+     * @param nodes the BFS tree results
      * @param u     the starting vertex of the path
      * @param v     the end vertex of the path
      * @return the string path if one exists or a no path exists message string
      */
     protected static String printPath(Node[] nodes, int u, int v) {
-      String path = printPathAux(nodes, u, v, "");
-      return path != null ? path : "No path exists from " + u + " to " + v;
+      StringBuilder sb = new StringBuilder();
+      printPathAux(nodes, u, v, sb);
+      return sb.toString();
     }
 
     /**
      * Uses a {@link Queue} to queue the vertices of a path from the specified start
-     * and end vertices to build an array of the path of vertices. Because of the
-     * DFS forest of subtrees, it could travel a path that results in not a complete
-     * path and add the nodes, so it peeks the last queued item to check if it is
-     * {@code -1} and if so, doesn't enqueue the vertex.
+     * and end vertices to build an array of the path of vertices.
      *
-     * @param N the DFS tree results
+     * @param N the BFS tree results
      * @param u the starting vertex of the path
      * @param v the end vertex of the path
      * @param Q the queue to hold the vertices of the path
@@ -373,9 +365,7 @@ public final class DFS {
           Q.enqueue(-1);
         else {
           arrayPathAux(N, u, N[v].parent, Q);
-
-          if (Q.peek() != -1)
-            Q.enqueue(v);
+          Q.enqueue(v);
         }
       } catch (QueueFullException e) {}
     }
@@ -385,7 +375,7 @@ public final class DFS {
      * vertices. If no path exists, it will return an array with a single {@code -1}
      * element.
      *
-     * @param nodes the DFS tree results
+     * @param nodes the BFS tree results
      * @param u     the start vertex of the path
      * @param v     the end vertex of the path
      * @return the array of vertices for a path, or a single {@code -1} element if

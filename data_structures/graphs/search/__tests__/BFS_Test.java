@@ -1,4 +1,4 @@
-package data_structures.graphs.__tests__;
+package data_structures.graphs.search.__tests__;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -6,8 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.*;
 
-import data_structures.graphs.BFS;
 import data_structures.graphs.Graph;
+import data_structures.graphs.search.BFS;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 public class BFS_Test {

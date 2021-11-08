@@ -50,6 +50,11 @@ public class Graph_Test {
     }
 
     @Test
+    void getEdge_throws_for_non_existent_vertex() {
+      assertThrows(IllegalArgumentException.class, () -> g.getEdges(0));
+    }
+
+    @Test
     void hasVertex_throws() {
       assertThrows(IllegalArgumentException.class, () -> g.hasVertex(-1));
     }
@@ -135,6 +140,16 @@ public class Graph_Test {
       assertEquals(1, g.getNumEdges());
       assertTrue(g.hasEdge(1, 3));
       assertArrayEquals(V, g.getEdges()[0].getVertices());
+    }
+
+    @Test
+    void getEdges_for_vertex() {
+      int[] V = { 1, 3 };
+      assertDoesNotThrow(() -> g.addEdge(1, 3));
+      assertEquals(2, g.getNumVertices());
+      assertEquals(1, g.getNumEdges());
+      assertTrue(g.hasEdge(1, 3));
+      assertArrayEquals(V, g.getEdges(1)[0].getVertices());
     }
 
     @Test
