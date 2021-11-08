@@ -1,6 +1,6 @@
 package algorithms.greedy;
 
-import java.util.Arrays;
+import static java.util.Arrays.copyOf;;
 
 /**
  * Greedily calculates the minimum number of coins for change for a given
@@ -35,6 +35,6 @@ public interface CoinChangeG {
       }
     }
 
-    return Arrays.copyOf(change, j);
+    return copyOf(change, j);
   }
 }

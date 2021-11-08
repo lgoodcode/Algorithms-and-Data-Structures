@@ -1,6 +1,6 @@
 package data_structures.graphs.search;
 
-import java.util.Arrays;
+import static java.util.Arrays.copyOf;
 
 import data_structures.graphs.Graph;
 import data_structures.queues.Queue;
@@ -389,11 +389,11 @@ public final class BFS {
       arrayPathAux(nodes, u, v, Q);
 
       if (Q.isEmpty())
-        return Arrays.copyOf(arr, 0);
+        return copyOf(arr, 0);
 
       while (!Q.isEmpty())
         arr[i++] = Q.dequeue();
-      return Arrays.copyOf(arr, i);
+      return copyOf(arr, i);
     }
 
   }

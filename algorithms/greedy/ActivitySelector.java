@@ -1,6 +1,6 @@
 package algorithms.greedy;
 
-import java.util.Arrays;
+import static java.util.Arrays.copyOf;
 
 /**
  * Greedy top-down recursive algorithm to calculate the most events for the time
@@ -29,7 +29,7 @@ public interface ActivitySelector {
 
     while (i < results.length && results[i] != 0)
       i++;
-    return Arrays.copyOf(results, i);
+    return copyOf(results, i);
   }
 
   private static int[] _run(int[] arr, int[] s, int[] f, int k, int j) {

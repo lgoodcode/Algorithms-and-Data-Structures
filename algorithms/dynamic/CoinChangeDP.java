@@ -1,6 +1,6 @@
 package algorithms.dynamic;
 
-import java.util.Arrays;
+import static java.util.Arrays.copyOf;
 
 /**
  * Calculates the minimum possible coins for change for a given amount.
@@ -34,7 +34,7 @@ public final class CoinChangeDP {
     }
     else if (amount > memo.length) {
       int oldLen = memo.length, newLen = amount + 1;
-      memo = Arrays.copyOf(memo, newLen);
+      memo = copyOf(memo, newLen);
 
       for (int i = oldLen; i < newLen; i++)
         memo[i] = new int[30];
@@ -62,7 +62,7 @@ public final class CoinChangeDP {
         while (j < newMin.length && newMin[j] != 0)
           j++;
 
-        min = Arrays.copyOf(newMin, j + 1);
+        min = copyOf(newMin, j + 1);
         min[j] = coin;
       }
     }

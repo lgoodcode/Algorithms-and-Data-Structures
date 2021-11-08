@@ -1,6 +1,6 @@
 package algorithms.dynamic;
 
-import java.util.Arrays;
+import static java.util.Arrays.copyOf;
 
 /**
  * 0-1 Knapsack problem
@@ -72,7 +72,7 @@ public interface Knapsack {
       }
     }
 
-    return Arrays.copyOf(items, j);  
+    return copyOf(items, j);  
   }
 
 }

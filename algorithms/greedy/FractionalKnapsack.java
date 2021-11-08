@@ -1,6 +1,6 @@
 package algorithms.greedy;
 
-import java.util.Arrays;
+import static java.util.Arrays.copyOf;
 
 /**
  * Greedily calculates the maximum possible value for a given weight capacity
@@ -47,7 +47,7 @@ public interface FractionalKnapsack {
       }
     }
 
-    return type == TOTAL ? (T) Integer.valueOf(total) : (T) Arrays.copyOf(items, j);
+    return type == TOTAL ? (T) Integer.valueOf(total) : (T) copyOf(items, j);
   }
 
   /**

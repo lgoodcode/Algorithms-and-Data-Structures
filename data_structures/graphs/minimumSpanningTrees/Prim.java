@@ -4,9 +4,6 @@ import java.util.function.BiFunction;
 
 import data_structures.graphs.Graph;
 import data_structures.heaps.FibonacciHeap;
-import data_structures.queues.MinPriorityQueue;
-import data_structures.queues.exceptions.QueueEmptyException;
-import data_structures.queues.exceptions.QueueFullException;
 
 /**
  * MST-Prim(G, w, r)
@@ -72,8 +69,7 @@ import data_structures.queues.exceptions.QueueFullException;
  *
  */
 public final class Prim {
-  private static BiFunction<FibonacciHeap.Node<Integer, Node>, 
-FibonacciHeap.Node<Integer, Node>, Boolean> compare = (x, y) -> x.getValue().key < y.getValue().key;
+  private static BiFunction<Node, Node, Boolean> compare = (x, y) -> x.key < y.key;
 
   public static void run(Graph graph, int startVertex) {
     if (!graph.weighted)
@@ -85,30 +81,23 @@ FibonacciHeap.Node<Integer, Node>, Boolean> compare = (x, y) -> x.getValue().key
     _run(graph, startVertex);
   }
 
-  public static void _run(Graph G, int r) {
+  public static Node[] _run(Graph G, int r) {
     int[] V = G.getVertices();
     int i, u, v, w, numVertices = V.length;
     Node[] VTS = new Node[numVertices];
-    // FibonacciHeap<Integer, Node> Q = new FibonacciHeap<>(compare);
-    MinPriorityQueue<Node> Q = new MinPriorityQueue<>(numVertices, (Node x, Node y) -> x.key < y.key);
+    FibonacciHeap<Node> Q = new FibonacciHeap<>(compare);
 
     for (i = 0; i < numVertices; i++) {
       u = V[i];
       VTS[i] = new Node(u);
-      // Q.insert(VTS[i].key, VTS[i]);
-      try {
-        Q.insert(VTS[i]);
-      } catch (QueueFullException e) {}
+      Q.insert(VTS[i]);
 
       if (u == r)
         VTS[i].key = 0;
     }
   
     while (!Q.isEmpty()) {
-      try {
-        u = Q.extractMin().vertex;
-      } catch (QueueEmptyException e) { u = -1; }
-      // u = Q.extractMin().vertex;
+      u = Q.extractMin().vertex;
 
       VTS[u].visited = true;
 
@@ -126,9 +115,7 @@ FibonacciHeap.Node<Integer, Node>, Boolean> compare = (x, y) -> x.getValue().key
       }
     }
 
-    u = 0;
-
-    // return VTS;
+    return VTS;
   }
 
   public static final class Node {

@@ -17,8 +17,8 @@ import data_structures.heaps.FibonacciHeap;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 public class FibonacciHeap_Test {
-  FibonacciHeap<Integer, String> heap;
-  FibonacciHeap<String, String> heap2;
+  FibonacciHeap<Integer> heap;
+  FibonacciHeap<String> heap2;
 
   @Nested
   class Instantiation {
@@ -76,8 +76,8 @@ public class FibonacciHeap_Test {
 
     @Test
     void insert() {
-      heap.insert(1, "one");
-      assertEquals("one", heap.extractMin());
+      heap.insert(1);
+      assertEquals(1, heap.extractMin());
     }
 
     @Test
@@ -93,10 +93,10 @@ public class FibonacciHeap_Test {
     @ParameterizedTest
     @NullAndEmptySource
     @ValueSource(strings = { " ", "  ", "\t", "\n" })
-    void insert_throws_on_bad_values(String key) {
+    void insert_throws_on_bad_values(String value) {
       heap2 = new FibonacciHeap<>();
 
-      assertThrows(IllegalArgumentException.class, () -> heap2.insert(key, "test"));
+      assertThrows(IllegalArgumentException.class, () -> heap2.insert(value));
     }
 
   }
@@ -108,11 +108,11 @@ public class FibonacciHeap_Test {
     void create_and_insert() {
       heap = new FibonacciHeap<>();
 
-      heap.insert(4, "four");
-      heap.insert(2, "two");
-      heap.insert(5, "five");
-      heap.insert(1, "one");
-      heap.insert(3, "three");
+      heap.insert(4);
+      heap.insert(2);
+      heap.insert(5);
+      heap.insert(1);
+      heap.insert(3);
     }
 
     @Test
@@ -122,7 +122,7 @@ public class FibonacciHeap_Test {
 
     @Test
     void get_minimum() {
-      assertEquals("one", heap.getMin().getValue());
+      assertEquals(1, heap.getMin().getItem());
     }
 
     @Test
@@ -133,48 +133,48 @@ public class FibonacciHeap_Test {
     @Test
     void all_inserts_succeed() {
       assertAll(
-        () -> assertEquals("one", heap.extractMin()),
-        () -> assertEquals("two", heap.extractMin()),
-        () -> assertEquals("three", heap.extractMin()),
-        () -> assertEquals("four", heap.extractMin()),
-        () -> assertEquals("five", heap.extractMin())
+        () -> assertEquals(1, heap.extractMin()),
+        () -> assertEquals(2, heap.extractMin()),
+        () -> assertEquals(3, heap.extractMin()),
+        () -> assertEquals(4, heap.extractMin()),
+        () -> assertEquals(5, heap.extractMin())
       );
     }
 
     @Test
     void empties_and_resets() {
       assertAll(
-        () -> assertEquals("one", heap.extractMin()),
-        () -> assertEquals("two", heap.extractMin()),
-        () -> assertEquals("three", heap.extractMin()),
-        () -> assertEquals("four", heap.extractMin()),
-        () -> assertEquals("five", heap.extractMin())
+        () -> assertEquals(1, heap.extractMin()),
+        () -> assertEquals(2, heap.extractMin()),
+        () -> assertEquals(3, heap.extractMin()),
+        () -> assertEquals(4, heap.extractMin()),
+        () -> assertEquals(5, heap.extractMin())
       );
       
       assertDoesNotThrow(() -> {
-        heap.insert(1, "one");
-        heap.insert(2, "two");
-        heap.insert(3, "three");
-        heap.insert(4, "four");
-        heap.insert(5, "five");
+        heap.insert(4);
+        heap.insert(2);
+        heap.insert(5);
+        heap.insert(1);
+        heap.insert(3);
       });
     }
 
     @Test
     void many_insertions() {
-      heap.insert(10,  "ten");
-      heap.insert(8, "eight");
-      heap.insert(6, "six");
-      heap.insert(7, "seven");
-      heap.insert(9, "nine");
-      heap.insert(11, "eleven");
+      heap.insert(7);
+      heap.insert(6);
+      heap.insert(10);
+      heap.insert(11);
+      heap.insert(8);
+      heap.insert(9);
       
       assertAll(
-        () -> assertEquals("one", heap.extractMin()),
-        () -> assertEquals("two", heap.extractMin()),
-        () -> assertEquals("three", heap.extractMin()),
-        () -> assertEquals("four", heap.extractMin()),
-        () -> assertEquals("five", heap.extractMin())
+        () -> assertEquals(1, heap.extractMin()),
+        () -> assertEquals(2, heap.extractMin()),
+        () -> assertEquals(3, heap.extractMin()),
+        () -> assertEquals(4, heap.extractMin()),
+        () -> assertEquals(5, heap.extractMin())
       );
 
     }
@@ -195,11 +195,11 @@ public class FibonacciHeap_Test {
     @Test
     void to_string() {
       assertEquals("{"
-          + "\n\"Key: 1, value: one\""  
-          + "\n\"Key: 3, value: three\""  
-          + "\n\"Key: 5, value: five\""
-          + "\n\"Key: 4, value: four\""  
-          + "\n\"Key: 2, value: two\""  
+          + "\n\"Item: 1\""  
+          + "\n\"Item: 3\""  
+          + "\n\"Item: 5\""
+          + "\n\"Item: 4\""  
+          + "\n\"Item: 2\""  
           + "\n}", 
         heap.toString()
       );
@@ -211,10 +211,10 @@ public class FibonacciHeap_Test {
           heap.extractMin();
 
           assertEquals("{"
-              + "\n\"Key: 2, value: two\""  
-              + "\n\"Key: 4, value: four\""  
-              + "\n\"Key: 3, value: three\""  
-              + "\n\"Key: 5, value: five\""
+              + "\n\"Item: 2\""  
+              + "\n\"Item: 4\""  
+              + "\n\"Item: 3\""  
+              + "\n\"Item: 5\""
               + "\n}", 
             heap.toString()
           );
@@ -223,9 +223,9 @@ public class FibonacciHeap_Test {
           heap.extractMin();
           
           assertEquals("{"
-              + "\n\"Key: 3, value: three\""  
-              + "\n\"Key: 5, value: five\""
-              + "\n\"Key: 4, value: four\""  
+              + "\n\"Item: 3\""  
+              + "\n\"Item: 5\""
+              + "\n\"Item: 4\""  
               + "\n}", 
             heap.toString()
           );
@@ -234,8 +234,8 @@ public class FibonacciHeap_Test {
           heap.extractMin();
           
           assertEquals("{"
-              + "\n\"Key: 4, value: four\""  
-              + "\n\"Key: 5, value: five\""
+              + "\n\"Item: 4\""  
+              + "\n\"Item: 5\""
               + "\n}", 
             heap.toString()
           );

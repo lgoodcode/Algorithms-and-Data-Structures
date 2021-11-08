@@ -1,7 +1,7 @@
 package algorithms;
 
-import java.util.Arrays;
 import java.util.Random;
+import static java.util.Arrays.copyOf;
 
 /**
  * Famous Fisher-Yates shuffle algorithm
@@ -55,7 +55,7 @@ public interface Shuffle {
    * @returns the shuffled copy of the array
    */
   public static <T> T[] copy(T[] arr) {
-    T[] newArr = Arrays.copyOf(arr, arr.length);
+    T[] newArr = copyOf(arr, arr.length);
     apply(newArr, arr.length);
     return newArr;
   }
@@ -70,7 +70,7 @@ public interface Shuffle {
    * @returns the shuffled copy of the array
    */
   public static <T> T[] copy(T[] arr, int length) {
-    T[] newArr = Arrays.copyOf(arr, arr.length);
+    T[] newArr = copyOf(arr, arr.length);
     apply(newArr, length);
     return newArr;
   }

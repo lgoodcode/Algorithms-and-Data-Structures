@@ -15,10 +15,9 @@ import java.util.function.Consumer;
  * 
  * @see LinkedLists.CircularLinkedList
  */
-public final class FibonacciHeap<K, V> {
-  private BiFunction<K, K, Boolean> defaultCompare;
-  private BiFunction<Node<K, V>, Node<K, V>, Boolean> compare;
-  private Node<K, V> min = null;
+public final class FibonacciHeap<T> {
+  private BiFunction<T, T, Boolean> compare;
+  private Node<T> min = null;
   private int n = 0;
 
   /**
@@ -27,7 +26,7 @@ public final class FibonacciHeap<K, V> {
    * 
    * @param compare the compare function
    */
-  public FibonacciHeap(BiFunction<Node<K, V>, Node<K, V>, Boolean> compare) {
+  public FibonacciHeap(BiFunction<T, T, Boolean> compare) {
     this.compare = compare;
   }
 
@@ -36,7 +35,7 @@ public final class FibonacciHeap<K, V> {
    * compares the items using the {@code hashCode()} method.
    */
   public FibonacciHeap() {
-    this.defaultCompare = (K x, K y) -> x.hashCode() < y.hashCode();
+    this((T x, T y) -> x.hashCode() < y.hashCode());
   }
 
   /**
@@ -47,10 +46,8 @@ public final class FibonacciHeap<K, V> {
    * @param y other node to compare
    * @return is the key of node {@code x} less than node {@code y}
    */
-  private boolean isLessThan(Node<K, V> x, Node<K, V> y) {
-    if (defaultCompare != null)
-      return defaultCompare.apply(x.key, y.key);
-    return compare.apply(x, y);
+  private boolean isLessThan(Node<T> x, Node<T> y) {
+    return compare.apply(x.item, y.item);
   }
 
   /**
@@ -77,7 +74,7 @@ public final class FibonacciHeap<K, V> {
    * 
    * @return the miniumum node in the heap
    */
-  public Node<K, V> getMin() {
+  public Node<T> getMin() {
     return min;
   }
 
@@ -126,8 +123,8 @@ public final class FibonacciHeap<K, V> {
     * @param value the value
     * @see LinkedLists.CircularLinkedList
     */
-  public synchronized void insert(K key, V value) {
-    Node<K, V> node = new Node<>(key, value);
+  public synchronized void insert(T item) {
+    Node<T> node = new Node<>(item);
 
     // If heap is empty
     if (min == null) {
@@ -184,11 +181,11 @@ public final class FibonacciHeap<K, V> {
    * 
    * @return the smallest value in the heap or {@code null} if empty
    */
-  public synchronized V extractMin() { 
+  public synchronized T extractMin() { 
     if (isEmpty())
       return null;
 
-    Node<K, V> temp, x, z = min;
+    Node<T> temp, x, z = min;
      
     // If z has a child; get child list of z
     if (z.child != null) {
@@ -223,7 +220,7 @@ public final class FibonacciHeap<K, V> {
     // Decrement size counter
     n--;
 
-    return z.value;
+    return z.item;
   }
 
   /**
@@ -302,13 +299,13 @@ public final class FibonacciHeap<K, V> {
   @SuppressWarnings("unchecked")
   private void consolidate() { 
     // Auxiliary array to keep track of roots according to their degrees
-    Node<?, ?>[] arr = new Node<?, ?>[n];
-    Node<K, V> y, x, temp;
+    Node<?>[] arr = new Node<?>[n];
+    Node<T> y, x, temp;
     // Maximum degree D(n) of any node in an n-node Fibonacci heap is O(lg n)
-    int d, num = 0, D = log2(n);
+    int i, d, num = 0, D = log2(n);
 
     // Initialize the aux array with null values
-    for (int i=0; i<=D; i++)
+    for (i = 0; i <= D; i++)
       arr[i] = null;
 
     /**
@@ -323,13 +320,13 @@ public final class FibonacciHeap<K, V> {
 
     // For each node in the root list
     x = min;
-    for (int i=0; i<num; i++, x = x.right) {
+    for (i = 0; i < num; i++, x = x.right) {
       d = x.degree;
       // Repeatedly links the root x of the tree containing node w to another tree
       // whose root has the same degree as x, until no other root has the same degree.
       while (arr[d] != null) {
         // Another node with the same degree as x
-        y = (Node<K, V>) arr[d];
+        y = (Node<T>) arr[d];
 
         // If y is less than x, swap so that the smallest key becomes the parent
         if (isLessThan(y, x)) {
@@ -348,15 +345,15 @@ public final class FibonacciHeap<K, V> {
 
     // Reconstructs the root list from the auxilary array
     min = null;
-    for (int i=0; i<=D; i++) {
+    for (i = 0; i <= D; i++) {
       if (arr[i] != null) {
         if (min == null) {
-          min = (Node<K, V>) arr[i];
+          min = (Node<T>) arr[i];
           min.right = min.left = min;
         }
         else {
           // CircularDoublyLinkedList insertion to root list
-          temp = (Node<K, V>) arr[i];
+          temp = (Node<T>) arr[i];
           temp.right = min;
           temp.left = min.left;
           min.left = temp;
@@ -383,7 +380,7 @@ public final class FibonacciHeap<K, V> {
     * @param y node to become a child
     * @param x node to become a parent
     */
-  private void heapLink(Node<K, V> y, Node<K, V> x) {
+  private void heapLink(Node<T> y, Node<T> x) {
     // Remove y from root list
     y.left.right = y.right;
     y.right.left = y.left;    
@@ -444,15 +441,12 @@ public final class FibonacciHeap<K, V> {
    * @throws IllegalArgumentException if the key is {@code null}, blank, or equal
    *                                  to or greater than the current key.
    */
-  public synchronized void decreaseKey(Node<K, V> x, K key) {
-    if (compare != null)
-      throw new IllegalCallerException("Cannot compare a Node and a <K> key when using"
-        + " a custom compare function.");
-    if (defaultCompare.apply(x.key, key))
-      throw new IllegalArgumentException("New key must be smaller than current node key.");
+  public synchronized void decreaseKey(Node<T> x, T item) {
+    if (compare.apply(x.item, item))
+      throw new IllegalArgumentException("New item must be smaller than current node item.");
 
-    Node<K, V> y = x.parent;
-    x.key = key;
+    Node<T> y = x.parent;
+    x.item = item;
 
     if (y != null && isLessThan(x, y)) {
       cut(x, y);
@@ -489,7 +483,7 @@ public final class FibonacciHeap<K, V> {
    * @param y parent node
    * @param x child node
    */
-  private void cut(Node<K, V> y, Node<K, V> x) {
+  private void cut(Node<T> y, Node<T> x) {
     // Remove x from child of y
     x.left.right = x.right;
     x.right.left = x.left;
@@ -538,8 +532,8 @@ public final class FibonacciHeap<K, V> {
    * 
    * @param y node to cut from parent
    */
-  private void cascadingCut(Node<K, V> y) {
-    Node<K, V> z = y.parent;
+  private void cascadingCut(Node<T> y) {
+    Node<T> z = y.parent;
 
     if (z != null) {
       if (y.mark == false)
@@ -557,8 +551,8 @@ public final class FibonacciHeap<K, V> {
    * then checks if it has a child, if so, traverses to the child and continues
    * all the way down until all nodes have been reached.
    */
-  private void walk(Node<K, V> node, Consumer<Node<K, V>> callback) {
-    Node<K, V> x = node;
+  private void walk(Node<T> node, Consumer<Node<T>> callback) {
+    Node<T> x = node;
 
     do {
       callback.accept(x);
@@ -590,36 +584,27 @@ public final class FibonacciHeap<K, V> {
    * The internal node used for the {@link FibonacciHeap} to hold the attributes
    * as well as the key and value.
    */
-  public static final class Node<K, V> {
-    protected Node<K, V> parent = null;
-    protected Node<K, V> child = null;
-    protected Node<K, V> left = null;
-    protected Node<K, V> right = null;
-    private K key;
-    private V value;
+  public static final class Node<T> {
+    protected Node<T> parent = null;
+    protected Node<T> child = null;
+    protected Node<T> left = null;
+    protected Node<T> right = null;
+    private T item;
     protected int degree = 0;
     protected boolean mark = false;
   
-    private Node(K key, V value) {
-      if (key == null || key.toString().isBlank())
-        throw new IllegalArgumentException("Key cannot be null or blank.");
-      if (value == null || value.toString().isBlank())
-        throw new IllegalArgumentException("Value cannot be null or blank.");
-  
-      this.key = key;
-      this.value = value;
+    private Node(T item) {
+      if (item == null || item.toString().isBlank())
+        throw new IllegalArgumentException("Item cannot be null or blank.");
+      this.item = item;
     }
   
-    public K getKey() {
-      return key;
-    }
-  
-    public V getValue() {
-      return value;
+    public T getItem() {
+      return item;
     }
   
     public String toString() {
-      return "Key: " + key + ", value: " + value;
+      return "Item: " + item;
     }
   }
 }

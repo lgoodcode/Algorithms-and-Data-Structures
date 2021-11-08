@@ -1,7 +1,7 @@
 package data_structures.graphs.minimumSpanningTrees;
 
-import java.util.Arrays;
 import java.util.function.BiFunction;
+import static java.util.Arrays.copyOf;
 
 import sorting.QuickSort;
 import data_structures.sets.DisjointSet;
@@ -108,6 +108,6 @@ public interface Kruskal {
       }
     }
 
-    return Arrays.copyOf(A, j);
+    return copyOf(A, j);
   }
 }
