@@ -88,14 +88,14 @@ public interface Kruskal {
   public static Edge[] run(Graph graph) {
     Edge[] E = graph.getEdges(), A = new Edge[E.length];
     int[] vertices, V = graph.getVertices();
-    int i, j, u, v, numVertices = V.length;
-    DisjointSet<Integer>[] S = (DisjointSet<Integer>[]) new DisjointSet<?>[numVertices];
+    DisjointSet<Integer>[] S = (DisjointSet<Integer>[]) new DisjointSet<?>[V.length];
+    int i, j, u, v;
 
     // Sort the edges by weight
     QuickSort.sort(E, compare);
 
-    for (i = 0; i < numVertices; i++)
-      S[i] = new DisjointSet<Integer>(i);
+    for (i = 0; i < V.length; i++)
+      S[i] = new DisjointSet<Integer>(V[i]);
 
     for (i = 0, j = 0; i < E.length; i++) {
       vertices = E[i].getVertices();

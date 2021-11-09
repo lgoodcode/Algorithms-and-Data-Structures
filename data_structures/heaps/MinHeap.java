@@ -2,17 +2,19 @@ package data_structures.heaps;
 
 import java.util.function.BiFunction;
 
+import data_structures.Entry;
 import data_structures.heaps.exceptions.*;
 
 public class MinHeap<T> {
   private BiFunction<T, T, Boolean> compare;
-  private Entry<?>[] heap;
+  private Entry<Integer, T>[] heap;
   private int size = 0;
 
+  @SuppressWarnings("unchecked")
   public MinHeap(int size, BiFunction<T, T, Boolean> compare) {
     if (size < 1)
       throw new IllegalArgumentException("Illegal size, must be greater than 1.");
-    heap = new Entry<?>[size];
+    heap = (Entry<Integer, T>[]) new Entry<?, ?>[size];
     this.compare = compare;
   }
 
@@ -20,13 +22,14 @@ public class MinHeap<T> {
     this(size, (T x, T y) -> x.hashCode() < y.hashCode());
   }
 
+  @SuppressWarnings("unchecked")
   public MinHeap(T[] arr) {
     if (arr.length == 0)
       throw new IllegalArgumentException("Initial array of values cannot be empty.");
 
-    heap = new Entry<?>[arr.length];
+    heap = (Entry<Integer, T>[]) new Entry<?, ?>[arr.length];
 
-    for (int i=0; i<arr.length; i++) {
+    for (int i = 0; i < arr.length; i++) {
       try {
         insert(arr[i]);
       } catch (HeapFullException e) {}
@@ -38,13 +41,12 @@ public class MinHeap<T> {
     size = h.size;
   }
 
-  @SuppressWarnings("unchecked")
-  private boolean isLessThan(Entry<?> x, Entry<?> y) {
-    return compare.apply((T) x.value, (T) y.value);
+  private boolean isLessThan(Entry<Integer, T> x, Entry<Integer, T> y) {
+    return compare.apply(x.getValue(), y.getValue());
   }
 
   private synchronized void swap(int a, int b) {
-    Entry<?> temp = heap[a];
+    Entry<Integer, T> temp = heap[a];
     heap[a] = heap[b];
     heap[b] = temp;
   }
@@ -73,11 +75,10 @@ public class MinHeap<T> {
     return heap.length;
   }
 
-  @SuppressWarnings("unchecked")
   public synchronized T minimum() {
     if (isEmpty())
       return null;
-    return (T) heap[0].value;
+    return (T) heap[0].getValue();
   }
 
   public synchronized void insert(T value) throws HeapFullException {
@@ -86,37 +87,36 @@ public class MinHeap<T> {
     if (size == heap.length)
       throw new HeapFullException(size);
     
-    heap[size] = new Entry<T>(Integer.MIN_VALUE, value);
+    heap[size] = new Entry<Integer, T>(Integer.MIN_VALUE, value);
     increaseKey(size, size);
     size++;
   }
 
   public synchronized void increaseKey(int i, int newKey) {
-    if (heap[i].key > newKey)
+    if (heap[i].getKey() > newKey)
       throw new IllegalArgumentException("New key is smaller than current key");
 
     int parent = parent(i);
-    heap[i].key = newKey;
+    heap[i] = new Entry<Integer, T>(newKey, heap[i].getValue());
 
-    while (i > 0 && heap[parent].key > heap[i].key) {
+    while (i > 0 && heap[parent].getKey() > heap[i].getKey()) {
       swap(i, parent);
       i = parent;
       parent = parent(i);
     }
   }
     
-  @SuppressWarnings("unchecked")
   public synchronized T extractMin() throws HeapEmptyException{
     if (size < 1)
       throw new HeapEmptyException();
 
-    Entry<T> min = (Entry<T>) heap[0];
+    Entry<Integer, T> min = heap[0];
     heap[0] = heap[--size];
     heap[size] = null;
 
     minHeapify(0);
 
-    return min.value;
+    return min.getValue();
   }
 
   private synchronized void minHeapify(int i) {                             
@@ -144,23 +144,5 @@ public class MinHeap<T> {
       sb.append("\"" + heap[i].toString() + "\"\n");
 
     return sb.toString() + "}";
-  }
-
-  /**
-   * A nested inner class that will be used to hold key and value for the
-   * {@code MinHeap} entries.
-   */
-  private static class Entry<T> {
-    private int key;
-    private T value;
-  
-    protected Entry(int key, T value) {
-      this.key = key;
-      this.value = value;
-    }
-  
-    public String toString() {
-      return value.toString();
-    }
   }
 }

@@ -83,9 +83,10 @@ public final class Prim {
 
   public static Node[] _run(Graph G, int r) {
     int[] V = G.getVertices();
-    int i, u, v, w, numVertices = V.length;
+    int i, j, u, v, w, numVertices = V.length;
     Node[] VTS = new Node[numVertices];
     FibonacciHeap<Node> Q = new FibonacciHeap<>(compare);
+    Graph.Edge[] edges;
 
     for (i = 0; i < numVertices; i++) {
       u = V[i];
@@ -98,19 +99,15 @@ public final class Prim {
   
     while (!Q.isEmpty()) {
       u = Q.extractMin().vertex;
+      edges = G.getEdges(u);
 
-      VTS[u].visited = true;
-
-      for (i = 0; i < numVertices; i++) {
-        v = V[i];
-
-        if (G.hasEdge(u, v)) {
-          w = G.getEdgeWeight(u, v);
-          
-          if (w < VTS[v].key) {
-            VTS[v].parent = u;
-            VTS[v].key = w;
-          }
+      for (j = 0; j < edges.length; j++) {
+        v = edges[j].getVertices()[1];
+        w = edges[j].getWeight();
+        
+        if (w < VTS[v].key) {
+          VTS[v].parent = u;
+          VTS[v].key = w;
         }
       }
     }
@@ -122,13 +119,11 @@ public final class Prim {
     protected int vertex;
     protected int key;
     protected int parent;
-    protected boolean visited;
 
     protected Node(int vertex) {
       this.vertex = vertex;
       key = Integer.MAX_VALUE;
       parent = -1;
-      visited = false;
     }
   }
 }
