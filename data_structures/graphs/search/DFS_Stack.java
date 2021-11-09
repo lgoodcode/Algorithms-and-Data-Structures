@@ -87,14 +87,15 @@ public final class DFS_Stack {
   private static Node[] _run(Graph G, int s) {
     checkVertex(G, s);
 
-    int[] vertices = G.getVertices();
-    int u, time = 0, numVertices = vertices.length;
-    Node[] VTS = new Node[numVertices];
-    Stack<Integer> S = new Stack<>(numVertices);
+    int[] V = G.getVertices();
+    Node[] VTS = new Node[V.length];
+    Stack<Integer> S = new Stack<>(V.length);
+    int i, u, v, time = 0;
+    Graph.Edge[] edges;
 
     // Initialize DFS vertex nodes
-    for (u = 0; u < numVertices; u++)
-      VTS[u] = new Node();
+    for (i = 0; i < V.length; i++)
+      VTS[i] = new Node(V[i]);
 
     try {
       S.push(s);
@@ -103,13 +104,19 @@ public final class DFS_Stack {
     while (!S.isEmpty()) {
       try {
         u = S.pop();
-      } catch (StackEmptyException e) {}
+      } catch (StackEmptyException e) { 
+        System.out.println("Stack underflow");
+        u = -1;
+      }
 
       VTS[u].distance = ++time;
       VTS[u].color = GRAY;
+      edges = G.getEdges(u);
+
+      for (i = 0; i < edges.length; i++) {
+        v = edges[i].getVertices()[1];
   
-      for (int v = 0, len = G.rows; v < len; v++) {
-        if (G.hasEdge(u, v) && VTS[v].color == WHITE) {
+        if (VTS[v].color == WHITE) {
           VTS[v].parent = u;
           try {
             S.push(v);
@@ -227,6 +234,11 @@ public final class DFS_Stack {
    */
   public static class Node {
     /**
+     * The vertex index in the graph.
+     */
+    protected int vertex;
+    
+    /**
      * The status of the vertex, either undiscovered "WHITE" or discovered "GRAY".
      */
     protected int color;
@@ -249,7 +261,8 @@ public final class DFS_Stack {
     /**
      * Constructs an empty basic DFS node.
      */
-    protected Node() {
+    protected Node(int vertex) {
+      this.vertex = vertex;
       color = WHITE;
       distance = Integer.MIN_VALUE;
       parent = -1;

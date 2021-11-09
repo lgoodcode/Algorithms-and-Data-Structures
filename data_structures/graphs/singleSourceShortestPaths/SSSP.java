@@ -144,11 +144,13 @@ public class SSSP {
    * @return the {@code Node[]} containing the initialized vertices
    * 
    * @throws IllegalArgumentException if the specified {@code Graph} is not
-   *                                  weighted and directed
+   *                                  weighted and directed or the source vertex
+   *                                  is invalid
    */
   protected static Node[] initSource(Graph graph, int sourceVertex) {
     if (!graph.directed && !graph.weighted)
       throw new IllegalArgumentException("The algorithm can only run on a directed weighted graph.");
+    graph.checkVertex(sourceVertex);
 
     int[] V = graph.getVertices();
     Node[] VTS = new Node[V.length];

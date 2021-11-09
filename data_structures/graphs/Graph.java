@@ -1,7 +1,7 @@
 package data_structures.graphs;
 
-import java.util.Arrays;
 import java.util.NoSuchElementException;
+import static java.util.Arrays.copyOf;
 
 /**
  * Graph matrix that supports weighted and directed graphs. Contains a matrix
@@ -105,7 +105,7 @@ public final class Graph {
    * @throws IllegalArgumentException if the vertix is negative or greater than
    *                                  graph length
    */
-  private void checkVertex(int vertex) {
+  public void checkVertex(int vertex) {
     if (vertex < 0)
       throw new IllegalArgumentException("Vertex cannot be negative.");
     if (vertex >= rows)
@@ -143,7 +143,7 @@ public final class Graph {
     for (i = 0; i < V.length; i++)
       if (G[i] != null)
         V[j++] = i;
-    return Arrays.copyOf(V, j);
+    return copyOf(V, j);
   }
 
   /**
@@ -198,7 +198,7 @@ public final class Graph {
         E[i++] = weighted ? new Edge(u, v, G[u][v]) : new Edge(u, v);
     }
 
-    return Arrays.copyOf(E, i);
+    return copyOf(E, i);
   }
 
   /**

@@ -1,6 +1,6 @@
 package data_structures.graphs.search;
 
-import java.util.Arrays;
+import static java.util.Arrays.copyOf;
 
 import data_structures.graphs.Graph;
 import data_structures.queues.Queue;
@@ -156,17 +156,21 @@ public final class DFS {
   private static Node[] _run(Graph G, int s) {
     checkVertex(G, s);
 
-    int[] vertices = G.getVertices(), time = { 0 };
-    int u, numVertices = vertices.length;
-    Node[] VTS = new Node[numVertices];
+    int[] V = G.getVertices(), time = { 0 };
+    Node[] VTS = new Node[V.length];
+    int i, u;
 
     // Initialize DFS vertex nodes
-    for (u = 0; u < numVertices; u++)
-      VTS[u] = new Node();
+    for (i = 0; i < V.length; i++)
+      VTS[i] = new Node(V[i]);
 
-    for (u = 0; u < numVertices; u++)
+    for (i = 0; i < V.length; i++) {
+      u = V[i];
+
       if (VTS[u].color == WHITE)
         visit(G, VTS, u, time);
+    }
+    
     return VTS;
   }
 
@@ -174,8 +178,13 @@ public final class DFS {
     VTS[u].distance = ++time[0];
     VTS[u].color = GRAY;
 
-    for (int v = 0, len = G.rows; v < len; v++) {
-      if (G.hasEdge(u, v) && VTS[v].color == WHITE) {
+    Graph.Edge[] edges = G.getEdges(u);
+    int i, v;
+
+    for (i = 0; i < edges.length; i++) {
+      v = edges[i].getVertices()[1];
+
+      if (VTS[v].color == WHITE) {
         VTS[v].parent = u;
         visit(G, VTS, v, time);
       }
@@ -288,6 +297,10 @@ public final class DFS {
    */
   public static class Node {
     /**
+     * The vertex index in the graph.
+     */
+    protected int vertex;
+    /**
      * The status of the vertex, either undiscovered "WHITE" or discovered "GRAY".
      */
     protected int color;
@@ -310,7 +323,8 @@ public final class DFS {
     /**
      * Constructs an empty basic DFS node.
      */
-    protected Node() {
+    protected Node(int vertex) {
+      this.vertex = vertex;
       color = WHITE;
       distance = Integer.MIN_VALUE;
       parent = -1;
@@ -400,11 +414,11 @@ public final class DFS {
       arrayPathAux(nodes, u, v, Q);
 
       if (Q.isEmpty())
-        return Arrays.copyOf(arr, 0);
+        return copyOf(arr, 0);
 
       while (!Q.isEmpty())
         arr[i++] = Q.dequeue();
-      return Arrays.copyOf(arr, i);
+      return copyOf(arr, i);
     }
 
   }

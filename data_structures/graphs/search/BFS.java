@@ -149,14 +149,15 @@ public final class BFS {
   private static Node[] _run(Graph G, int s) {
     checkVertex(G, s);
 
-    int[] vertices = G.getVertices();
-    int u, v, numVertices = vertices.length;
-    Node[] VTS = new Node[numVertices];
-    Queue<Integer> Q = new Queue<>(numVertices);
+    int[] V = G.getVertices();
+    Node[] VTS = new Node[V.length];
+    Queue<Integer> Q = new Queue<>(V.length);
+    Graph.Edge[] edges;
+    int i, u, v;
 
     // Initialize BFS vertex nodes
-    for (u = 0; u < numVertices; u++)
-      VTS[u] = new Node();
+    for (i = 0; i < V.length; i++)
+      VTS[i] = new Node(V[i]);
 
     // Initialize starting vertex as discovered (GRAY), self (0), root (-1)
     VTS[s].color = GRAY;
@@ -168,9 +169,12 @@ public final class BFS {
 
     while (!Q.isEmpty()) {
       u = Q.dequeue();
+      edges = G.getEdges(u);
 
-      for (v = 0; v < numVertices; v++) {
-        if (G.hasEdge(u, v) && VTS[v].color == WHITE) {
+      for (i = 0; i < edges.length; i++) {
+        v = edges[i].getVertices()[1];
+
+        if (VTS[v].color == WHITE) {
           VTS[v].color = GRAY;
           VTS[v].distance = VTS[u].distance + 1;
           VTS[v].parent = u;
@@ -289,6 +293,11 @@ public final class BFS {
    */
   public static final class Node {
     /**
+     * The vertex index in the graph.
+     */
+    protected int vertex;
+
+    /**
      * The status of the vertex, either undiscovered "WHITE" or discovered "GRAY".
      */
     protected int color;
@@ -306,7 +315,8 @@ public final class BFS {
     /**
      * Constructs an empty basic BFS node.
      */
-    protected Node() {
+    protected Node(int vertex) {
+      this.vertex = vertex;
       color = WHITE;
       distance = Integer.MIN_VALUE;
       parent = -1;

@@ -45,6 +45,10 @@ public final class BellmanFord extends SSSP {
    *                     from
    * @return the {@code Node[]} results of the algorithm or {@code null} if there
    *         is a cycle
+   * 
+   * @throws IllegalArgumentException if the specified {@code Graph} is not
+   *                                  weighted and directed, or the source vertex
+   *                                  is invalid
    */
   public static Node[] run(Graph graph, int sourceVertex) {
     return _run(graph, sourceVertex);
@@ -53,28 +57,32 @@ public final class BellmanFord extends SSSP {
   private static Node[] _run(Graph G, int s) {
     Node[] VTS = initSource(G, s);
     int[] V = G.getVertices();
-    int i, j, k, u, v, len;
+    Graph.Edge[] edges;
+    int i, j, k, u, v, w, len;
   
     for (k = 0, len = V.length - 1; k < len; k++) {
       for (i = 0; i < V.length; i++) {
         u = V[i];
+        edges = G.getEdges(u);
 
-        for (j = 0; j < V.length; j++) {
-          v = V[j];
+        for (j = 0; j < edges.length; j++) {
+          v = edges[j].getVertices()[1];
+          w = edges[j].getWeight();
 
-          if (G.hasEdge(u, v))
-            relax(VTS, u, v, G.getEdgeWeight(u, v));
+          relax(VTS, u, v, w);
         }
       }
     }
 
     for (i = 0; i < V.length; i++) {
       u = V[i];
-      
-      for (j = 0; j < V.length; j++) {
-        v = V[j];
+      edges = G.getEdges(u);
+
+      for (j = 0; j < edges.length; j++) {
+        v = edges[j].getVertices()[1];
+        w = edges[j].getWeight();
         
-        if (G.hasEdge(u, v) && VTS[v].distance > VTS[u].distance + G.getEdgeWeight(u, v))
+        if (VTS[v].distance > VTS[u].distance + w)
           return null;
       }
     }

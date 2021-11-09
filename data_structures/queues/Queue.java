@@ -103,6 +103,19 @@ public final class Queue<T> {
   }
 
   /**
+   * Checks whether the specified item exists in the queue or not.
+   * 
+   * @param item the item to check
+   * @return whether the item exists or not in the queue
+   */
+  public boolean has(T item) {
+    for (int i = head; i < tail; i++)
+      if (queue[i] == item)
+        return true;
+    return false;
+  } 
+
+  /**
    * Checks if there is another element in the {@code Queue} that can be
    * {@code dequeued}.
    * 
