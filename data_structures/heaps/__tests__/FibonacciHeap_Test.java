@@ -13,6 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.NoSuchElementException;
+
 import data_structures.heaps.FibonacciHeap;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
@@ -75,6 +77,11 @@ public class FibonacciHeap_Test {
     }
 
     @Test
+    void extractMin_throws_when_empty() {
+      assertThrows(NoSuchElementException.class, () -> heap.extractMin());
+    }
+
+    @Test
     void insert() {
       heap.insert(1);
       assertEquals(1, heap.extractMin());
@@ -83,11 +90,6 @@ public class FibonacciHeap_Test {
     @Test
     void empty_heap_string() {
       assertEquals("{}", heap.toString());
-    }
-
-    @Test
-    void extract_returns_null() {
-      assertNull(heap.extractMin());
     }
 
     @ParameterizedTest

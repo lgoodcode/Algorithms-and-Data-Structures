@@ -1,9 +1,7 @@
 package data_structures.queues;
 
+import java.util.NoSuchElementException;
 import java.util.function.BiFunction;
-
-import data_structures.queues.exceptions.QueueEmptyException;
-import data_structures.queues.exceptions.QueueFullException;
 
 public class MinPriorityQueue<T> {
   private BiFunction<T, T, Boolean> compare;
@@ -27,11 +25,8 @@ public class MinPriorityQueue<T> {
 
     heap = new Entry<?>[arr.length];
 
-    for (int i=0; i<arr.length; i++) {
-      try {
-        insert(arr[i]);
-      } catch (QueueFullException e) {}
-    }
+    for (int i=0; i<arr.length; i++)
+      insert(arr[i]);
   }
 
   public MinPriorityQueue(MinPriorityQueue<T> h) {
@@ -81,11 +76,11 @@ public class MinPriorityQueue<T> {
     return (T) heap[0].value;
   }
 
-  public synchronized void insert(T value) throws QueueFullException {
+  public synchronized void insert(T value){
     if (value == null || value.toString().isBlank())
       throw new IllegalArgumentException("Value cannot be null or blank.");
     if (size == heap.length)
-      throw new QueueFullException(size);
+      throw new IllegalStateException("MinPriorityQueue is full.");
     
     heap[size] = new Entry<T>(Integer.MIN_VALUE, value);
     increaseKey(size, size);
@@ -111,9 +106,9 @@ public class MinPriorityQueue<T> {
    * we have to double check the new min value after the minHeapify operation.
    */
   @SuppressWarnings("unchecked")
-  public synchronized T extractMin() throws QueueEmptyException{
+  public synchronized T extractMin() {
     if (size < 1)
-      throw new QueueEmptyException();
+      throw new NoSuchElementException("MinPriorityQueue is empty.");
 
     Entry<T> temp, min = (Entry<T>) heap[0];
     heap[0] = heap[--size];

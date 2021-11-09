@@ -2,7 +2,6 @@ package data_structures.graphs.singleSourceShortestPaths;
 
 import data_structures.graphs.Graph;
 import data_structures.queues.Queue;
-import data_structures.queues.exceptions.QueueFullException;
 
 /**
  * Shorter Path Faster Algorithm {@code O(|V||E|)} - Expected running time is
@@ -35,14 +34,12 @@ public class ShorterPathFaster extends SSSP {
 
   public static Node[] _run(Graph G, int s) {
     int[] V = G.getVertices();
-    Queue<Integer> Q = new Queue<>(V.length);
+    Queue<Integer> Q = new Queue<>(V.length * 2);
     Node[] VTS = initSource(G, s);
     Graph.Edge[] edges;
     int i, j, u, v, w;
 
-    try {
-      Q.enqueue(s);
-    } catch (QueueFullException e) {}
+    Q.enqueue(s);
 
     while(!Q.isEmpty()) {
       u = Q.dequeue();
@@ -57,11 +54,8 @@ public class ShorterPathFaster extends SSSP {
           VTS[v].distance = VTS[u].distance + w;
           VTS[v].predecessor = u;
 
-          if (!Q.has(v)) {
-            try {
-              Q.enqueue(v);
-            } catch (QueueFullException e) {}
-          }
+          if (!Q.has(v))
+            Q.enqueue(v);
         }
       }    
     }

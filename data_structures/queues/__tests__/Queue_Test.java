@@ -16,7 +16,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.NoSuchElementException;
 
 import data_structures.queues.Queue;
-import data_structures.queues.exceptions.*;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 public class Queue_Test {
@@ -81,10 +80,7 @@ public class Queue_Test {
 
     @Test
     void enqueue() {
-      try {
-        queue.enqueue(1);
-      } catch (QueueFullException e) {}
-      
+      queue.enqueue(1);
       assertEquals(1, queue.dequeue());
     }
 
@@ -117,13 +113,11 @@ public class Queue_Test {
     void create_and_insert() {
       queue = new Queue<>(size);
 
-      try {
-        queue.enqueue(1);
-        queue.enqueue(2);
-        queue.enqueue(3);
-        queue.enqueue(4);
-        queue.enqueue(5);
-      } catch (QueueFullException e) {}
+      queue.enqueue(1);
+      queue.enqueue(2);
+      queue.enqueue(3);
+      queue.enqueue(4);
+      queue.enqueue(5);
     }
 
     @Test
@@ -148,8 +142,8 @@ public class Queue_Test {
     }
 
     @Test
-    void throws_QueueFullException() {
-      assertThrows(QueueFullException.class, () -> queue.enqueue(6));
+    void queue_throws_when_full() {
+      assertThrows(IllegalStateException.class, () -> queue.enqueue(6));
     }
 
     @Test

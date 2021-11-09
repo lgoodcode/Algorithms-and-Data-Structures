@@ -4,7 +4,6 @@ import static java.util.Arrays.copyOf;
 
 import data_structures.graphs.Graph;
 import data_structures.queues.Queue;
-import data_structures.queues.exceptions.QueueFullException;
 
 /**
  * BFS(G, s)
@@ -163,9 +162,7 @@ public final class BFS {
     VTS[s].color = GRAY;
     VTS[s].distance = 0;
 
-    try {
-      Q.enqueue(s);
-    } catch (QueueFullException e) {}
+    Q.enqueue(s);
 
     while (!Q.isEmpty()) {
       u = Q.dequeue();
@@ -179,9 +176,7 @@ public final class BFS {
           VTS[v].distance = VTS[u].distance + 1;
           VTS[v].parent = u;
 
-          try {
-            Q.enqueue(v);
-          } catch (QueueFullException e) {}
+          Q.enqueue(v);
         }
       }
     }
@@ -368,16 +363,14 @@ public final class BFS {
      * @param Q the queue to hold the vertices of the path
      */
     private static void arrayPathAux(Node[] N, int u, int v, Queue<Integer> Q) {
-      try {
-        if (u == v)
-          Q.enqueue(u);
-        else if (N[v].parent == -1)
-          Q.enqueue(-1);
-        else {
-          arrayPathAux(N, u, N[v].parent, Q);
-          Q.enqueue(v);
-        }
-      } catch (QueueFullException e) {}
+      if (u == v)
+        Q.enqueue(u);
+      else if (N[v].parent == -1)
+        Q.enqueue(-1);
+      else {
+        arrayPathAux(N, u, N[v].parent, Q);
+        Q.enqueue(v);
+      }
     }
 
     /**

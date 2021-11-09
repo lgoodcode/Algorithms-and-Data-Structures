@@ -4,7 +4,6 @@ import static java.util.Arrays.copyOf;
 
 import data_structures.graphs.Graph;
 import data_structures.queues.Queue;
-import data_structures.queues.exceptions.QueueFullException;
 
 /**
  * DFS(G)
@@ -381,18 +380,16 @@ public final class DFS {
      * @param Q the queue to hold the vertices of the path
      */
     private static void arrayPathAux(Node[] N, int u, int v, Queue<Integer> Q) {
-      try {
-        if (u == v)
-          Q.enqueue(u);
-        else if (N[v].parent == -1)
-          Q.enqueue(-1);
-        else {
-          arrayPathAux(N, u, N[v].parent, Q);
+      if (u == v)
+        Q.enqueue(u);
+      else if (N[v].parent == -1)
+        Q.enqueue(-1);
+      else {
+        arrayPathAux(N, u, N[v].parent, Q);
 
-          if (Q.peek() != -1)
-            Q.enqueue(v);
-        }
-      } catch (QueueFullException e) {}
+        if (Q.peek() != -1)
+          Q.enqueue(v);
+      }
     }
 
     /**

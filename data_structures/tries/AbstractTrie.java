@@ -9,7 +9,6 @@ import java.util.ConcurrentModificationException;
 
 import data_structures.EmptyEnumerator;
 import data_structures.queues.Queue;
-import data_structures.queues.exceptions.QueueFullException;
 
 public abstract class AbstractTrie<V> {
   /**
@@ -290,11 +289,8 @@ public abstract class AbstractTrie<V> {
     int i = 0, len;
 
     walk(start, prefix, (Node node, String chars) -> {
-      if (node.isWord()) {
-        try {
-          queue.enqueue(chars);
-        } catch (QueueFullException e) {}
-      }
+      if (node.isWord())
+        queue.enqueue(chars);
     });
 
     if (start.isWord()) {
@@ -574,11 +570,8 @@ public abstract class AbstractTrie<V> {
       entries = new Queue<>(size);
 
       walk((AbstractTrieNode<V> node) -> {
-        if (node.isWord()) {
-          try {
-            entries.enqueue(node);
-          } catch (QueueFullException e) {}
-        }
+        if (node.isWord())
+          entries.enqueue(node);
       });
     }
 
@@ -593,7 +586,7 @@ public abstract class AbstractTrie<V> {
      * @return if this object has one or more items to provide or not
      */
     public boolean hasMoreElements() {
-      return entries.hasNextElement();
+      return !entries.isEmpty();
     }
 
     /**

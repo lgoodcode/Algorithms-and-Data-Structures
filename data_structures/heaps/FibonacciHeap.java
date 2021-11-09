@@ -1,5 +1,6 @@
 package data_structures.heaps;
 
+import java.util.NoSuchElementException;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
@@ -16,9 +17,21 @@ import java.util.function.Consumer;
  * @see LinkedLists.CircularLinkedList
  */
 public final class FibonacciHeap<T> {
+  /**
+   * The function to compare a value to determine whether an element is less than
+   * another to keep the minimum {@code Node} the smallest in the heap.
+   */
   private BiFunction<T, T, Boolean> compare;
+
+  /**
+   * The current smallest element in the heap.
+   */
   private Node<T> min = null;
-  private int n = 0;
+
+  /**
+   * The number of elements in the heap.
+   */
+  private int count = 0;
 
   /**
    * Constructs an empty, FibonacciHeap, with the specified compare function to
@@ -56,7 +69,7 @@ public final class FibonacciHeap<T> {
    * @return is the heap empty
    */
   public boolean isEmpty() {
-    return n == 0;
+    return count == 0;
   }
 
   /**
@@ -65,7 +78,7 @@ public final class FibonacciHeap<T> {
    * @return the number of items in the heap
    */
   public int size() {
-    return n;
+    return count;
   }
 
   /**
@@ -122,8 +135,14 @@ public final class FibonacciHeap<T> {
     * @param key   the key
     * @param value the value
     * @see LinkedLists.CircularLinkedList
+    *
+    * @throws IllegalArgumentException if the specified item is {@code null} or
+    *                                  blank
     */
   public synchronized void insert(T item) {
+    if (item == null || item.toString().isBlank())
+      throw new IllegalArgumentException("Item cannot be null or blank.");
+    
     Node<T> node = new Node<>(item);
 
     // If heap is empty
@@ -144,7 +163,7 @@ public final class FibonacciHeap<T> {
     }
 
     // Increment size counter
-    n++;
+    count++;
   }
 
   /**
@@ -179,11 +198,13 @@ public final class FibonacciHeap<T> {
    * Returns the smallest value in the heap and re-consolidates the heap
    * afterwards.
    * 
-   * @return the smallest value in the heap or {@code null} if empty
+   * @return the smallest value in the heap
+   * 
+   * @throws NoSuchElementException if there is no element to return
    */
   public synchronized T extractMin() { 
     if (isEmpty())
-      return null;
+      throw new NoSuchElementException("FibonacciHeap is empty.");
 
     Node<T> temp, x, z = min;
      
@@ -218,7 +239,7 @@ public final class FibonacciHeap<T> {
     }
 
     // Decrement size counter
-    n--;
+    count--;
 
     return z.item;
   }
@@ -299,10 +320,10 @@ public final class FibonacciHeap<T> {
   @SuppressWarnings("unchecked")
   private void consolidate() { 
     // Auxiliary array to keep track of roots according to their degrees
-    Node<?>[] arr = new Node<?>[n];
+    Node<?>[] arr = new Node<?>[count];
     Node<T> y, x, temp;
     // Maximum degree D(n) of any node in an n-node Fibonacci heap is O(lg n)
-    int i, d, num = 0, D = log2(n);
+    int i, d, num = 0, D = log2(count);
 
     // Initialize the aux array with null values
     for (i = 0; i <= D; i++)

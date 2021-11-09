@@ -21,7 +21,11 @@ package algorithms.dynamic;
  * </p>
  */
 public interface KnapsackMultiple {
-  private static int[][] run(int capacity, int[] weights, int[] values) {
+  static int TOTAL = 0;
+  static int ITEMS = 1;
+
+  @SuppressWarnings("unchecked")
+  private static <T> T run(int type, int capacity, int[] weights, int[] values) {
     if (weights.length != values.length)
       throw new IllegalArgumentException("Weights and Values array lengths don't match.");
 
@@ -36,7 +40,7 @@ public interface KnapsackMultiple {
       for (j = 1; j <= capacity; j++) {
         for (i = 1; i <= k; i++) {
           // If current capacity is less than item weight
-          if (j < weights[i - 1])
+          if (j < weights[i-1])
             K[i][j] = K[i-1][j];  // Set table position with corresponding item/weight
           else {  
             a = K[k-1][j];                              // Previous item value
@@ -47,11 +51,12 @@ public interface KnapsackMultiple {
       }
     }
 
-    return K;
+    // TODO: need to figure out how to get the items indices
+    return (T) Integer.valueOf(K[k-1][capacity]);
   }
 
   public static int total(int capacity, int[] weights, int[] values) {
-    return run(capacity, weights, values)[weights.length][capacity];
+    return run(TOTAL, capacity, weights, values);
   }
 
   // public static int[] items(int capacity, int[] weights, int[] values) {

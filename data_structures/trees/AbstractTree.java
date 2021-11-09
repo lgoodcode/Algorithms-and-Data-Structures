@@ -9,7 +9,6 @@ import java.util.ConcurrentModificationException;
 
 import data_structures.EmptyEnumerator;
 import data_structures.queues.Queue;
-import data_structures.queues.exceptions.QueueFullException;
 
 public abstract class AbstractTree<K, V> {
   /**
@@ -596,11 +595,7 @@ public abstract class AbstractTree<K, V> {
       this.type = type;
       entries = new Queue<>(size);
 
-      inorderTreeWalk((TreeNode<K, V> node) -> {
-        try {
-          entries.enqueue(node);
-        } catch (QueueFullException e) {}
-      });
+      inorderTreeWalk((TreeNode<K, V> node) -> entries.enqueue(node));
     }
 
     // Iterable method
@@ -614,7 +609,7 @@ public abstract class AbstractTree<K, V> {
      * @return if this object has one or more items to provide or not
      */
     public boolean hasMoreElements() {
-      return entries.hasNextElement();
+      return !entries.isEmpty();
     }
 
     /**

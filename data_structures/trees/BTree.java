@@ -9,7 +9,6 @@ import java.util.ConcurrentModificationException;
 
 import data_structures.EmptyEnumerator;
 import data_structures.queues.Queue;
-import data_structures.queues.exceptions.QueueFullException;
 
 /**
  * This is a basic 2-3-4 tree default implementation, unless otherwise specified
@@ -1402,6 +1401,12 @@ public final class BTree<K, V> {
    * Iterable interfaces, but individual instances can be created with the
    * Iterator methods disabled. This is necessary to avoid unintentionally
    * increasing the capabilities granted a user by passing an Enumeration.
+   * 
+   * <p>
+   * This differs from the {@link AbstractTree.Enumerator} because of the fact
+   * that the {@code B-Tree} doesn't do 2-way splits like the others, which h s an
+   * n-way split based on the specified minimum degree {@code t}.
+   * </p>
    *
    * @param <T> the type of the object that is being enumerated
    */
@@ -1436,11 +1441,7 @@ public final class BTree<K, V> {
       this.type = type;
       nodes = new Queue<>(BTree.this.count);
 
-      walk((BTreeNode<K, V> node) -> {
-        try {
-          nodes.enqueue(node);
-        } catch (QueueFullException e) {}
-      });
+      walk((BTreeNode<K, V> node) -> nodes.enqueue(node));
     }
 
     // Iterable method
@@ -1455,7 +1456,7 @@ public final class BTree<K, V> {
      */
     public boolean hasMoreElements() {
       if (type == ENTRIES)
-        return nodes.hasNextElement();
+        return !nodes.isEmpty();
 
       // Use locals for faster looping
       BTreeNode<K, V> l = lastNode;
@@ -1464,7 +1465,7 @@ public final class BTree<K, V> {
 
       while (k == null) {
         if (l == null  || i == len)
-          if (!nodes.hasNextElement())
+          if (nodes.isEmpty())
             break;
           else {
             l = nodes.dequeue();
@@ -1490,7 +1491,7 @@ public final class BTree<K, V> {
      */
     @SuppressWarnings("unchecked")
     public T nextElement() {
-      if (type == ENTRIES && nodes.hasNextElement())
+      if (type == ENTRIES && !nodes.isEmpty())
         return (T) (lastNode = nodes.dequeue());
 
       // Use locals for faster looping
@@ -1500,7 +1501,7 @@ public final class BTree<K, V> {
 
       while (k == null) {
         if (l == null  || i == len)
-          if (!nodes.hasNextElement())
+          if (nodes.isEmpty())
             break;
           else {
             l = nodes.dequeue();

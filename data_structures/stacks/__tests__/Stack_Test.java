@@ -12,8 +12,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.NoSuchElementException;
+
 import data_structures.stacks.Stack;
-import data_structures.stacks.exceptions.*;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 public class Stack_Test {
@@ -62,9 +63,14 @@ public class Stack_Test {
       stack = new Stack<>(size);
     }
 
-    @Test 
+    @Test
     void size() {
-      assertEquals(5, stack.size());
+      assertEquals(0, stack.size());
+    }
+
+    @Test 
+    void capacity() {
+      assertEquals(5, stack.capacity());
     }
 
     @Test
@@ -74,13 +80,8 @@ public class Stack_Test {
 
     @Test
     void push() {
-      try {
-        stack.push(1);
-      } catch (StackFullException e) {}
-      
-      try {
-        assertEquals(1, stack.pop());
-      } catch (StackEmptyException e) {}
+      stack.push(1);
+      assertEquals(1, stack.pop());
     }
 
     @Test
@@ -89,8 +90,8 @@ public class Stack_Test {
     }
 
     @Test
-    void throws_StackEmptyException() {
-      assertThrows(StackEmptyException.class, () -> stack.pop());
+    void pop_throws_when_empty() {
+      assertThrows(NoSuchElementException.class, () -> stack.pop());
     }
 
     @ParameterizedTest
@@ -112,13 +113,11 @@ public class Stack_Test {
     void create_and_push() {
       stack = new Stack<>(size);
 
-      try {
-        stack.push(1);
-        stack.push(2);
-        stack.push(3);
-        stack.push(4);
-        stack.push(5);
-      } catch (StackFullException e) {}
+      stack.push(1);
+      stack.push(2);
+      stack.push(3);
+      stack.push(4);
+      stack.push(5);
     }
 
     @Test
@@ -138,8 +137,8 @@ public class Stack_Test {
     }
 
     @Test
-    void throws_StackFullException() {
-      assertThrows(StackFullException.class, () -> stack.push(6));
+    void push_throws_when_stack_full() {
+      assertThrows(IllegalStateException.class, () -> stack.push(6));
     }
 
     @Test

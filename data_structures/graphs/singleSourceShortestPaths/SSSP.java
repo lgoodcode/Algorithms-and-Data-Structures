@@ -1,6 +1,9 @@
 package data_structures.graphs.singleSourceShortestPaths;
 
+import static java.util.Arrays.copyOf;
+
 import data_structures.graphs.Graph;
+import data_structures.queues.Queue;
 
 /**
  * Comparing every possible distance from source to destination could be an
@@ -147,7 +150,7 @@ public class SSSP {
    *                                  weighted and directed or the source vertex
    *                                  is invalid
    */
-  protected static Node[] initSource(Graph graph, int sourceVertex) {
+  protected static final Node[] initSource(Graph graph, int sourceVertex) {
     if (!graph.directed && !graph.weighted)
       throw new IllegalArgumentException("The algorithm can only run on a directed weighted graph.");
     graph.checkVertex(sourceVertex);
@@ -184,10 +187,92 @@ public class SSSP {
    * @param v   the y vertex of an edge to relax
    * @param w   the weight of the edge
    */
-  protected static void relax(Node[] VTS, int u, int v, int w) {
+  protected static final void relax(Node[] VTS, int u, int v, int w) {
     if (VTS[v].distance > VTS[u].distance + w) {
       VTS[v].distance = VTS[u].distance + w;
       VTS[v].predecessor = u;
     }
+  }
+
+  /**
+   * Traces the results of the BFS tree with a given start and end vertex, to
+   * return a string of the path using the {@code StringBuilder}, if one exists.
+   * Otherwise, it will return a no path exists message.
+   *
+   * @param N  the BFS tree results
+   * @param u  the start vertex
+   * @param v  the end vertex
+   * @param sb the {@code StringBuilder} to build the path string
+   */
+  private static void printPathAux(Node[] N, int u, int v, StringBuilder sb) {
+    if (u == v)
+      sb.append(u);
+    else if (N[v].predecessor == -1)
+      sb.append("No path exists from " + u + " to " + v);
+    else {
+      printPathAux(N, u, N[v].predecessor, sb);
+      sb.append(" -> " + v);
+    }
+  }
+
+  /**
+   * Returns the path string for the start and end vertices using the BFS tree
+   * results.
+   *
+   * @param nodes       the BFS tree results
+   * @param startVertex the starting vertex of the path
+   * @param endVertex   the end vertex of the path
+   * @return the string path if one exists or a no path exists message string
+   */
+  public static final String printPath(Node[] nodes, int startVertex, int endVertex) {
+    StringBuilder sb = new StringBuilder();
+    printPathAux(nodes, startVertex, endVertex, sb);
+    return sb.toString();
+  }
+
+  /**
+   * Uses a {@link Queue} to queue the vertices of a path from the specified start
+   * and end vertices to build an array of the path of vertices.
+   *
+   * @param N the BFS tree results
+   * @param u the starting vertex of the path
+   * @param v the end vertex of the path
+   * @param Q the queue to hold the vertices of the path
+   */
+  private static void arrayPathAux(Node[] N, int u, int v, Queue<Integer> Q) {
+    if (u == v)
+      Q.enqueue(u);
+    else if (N[v].predecessor == -1)
+      Q.enqueue(-1);
+    else {
+      arrayPathAux(N, u, N[v].predecessor, Q);
+      Q.enqueue(v);
+    }
+  }
+
+  /**
+   * Creates an array of the vertices for the path of the specified start and end
+   * vertices. If no path exists, it will return an array with a single {@code -1}
+   * element.
+   *
+   * @param nodes the BFS tree results
+   * @param startVertex     the start vertex of the path
+   * @param endVertex     the end vertex of the path
+   * @return the array of vertices for a path, or a single {@code -1} element if
+   *         no path exists
+   */
+  public static final int[] arrayPath(Node[] nodes, int startVertex, int endVertex) {
+    Queue<Integer> Q = new Queue<>(nodes.length);
+    int[] arr = new int[nodes.length];
+    int i = 0;
+
+    arrayPathAux(nodes, startVertex, endVertex, Q);
+
+    if (Q.isEmpty())
+      return copyOf(arr, 0);
+
+    while (!Q.isEmpty())
+      arr[i++] = Q.dequeue();
+    return copyOf(arr, i);
   }
 }

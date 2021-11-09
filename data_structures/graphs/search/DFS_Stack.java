@@ -5,9 +5,6 @@ import java.util.Arrays;
 import data_structures.graphs.Graph;
 import data_structures.queues.Queue;
 import data_structures.stacks.Stack;
-import data_structures.stacks.exceptions.StackEmptyException;
-import data_structures.stacks.exceptions.StackFullException;
-import data_structures.queues.exceptions.QueueFullException;
 
 /**
  * Depth-first Search searches "deeper" in the graph whenever possible. DFS
@@ -97,17 +94,10 @@ public final class DFS_Stack {
     for (i = 0; i < V.length; i++)
       VTS[i] = new Node(V[i]);
 
-    try {
-      S.push(s);
-    } catch (StackFullException e) {}
+    S.push(s);
 
     while (!S.isEmpty()) {
-      try {
-        u = S.pop();
-      } catch (StackEmptyException e) { 
-        System.out.println("Stack underflow");
-        u = -1;
-      }
+      u = S.pop();
 
       VTS[u].distance = ++time;
       VTS[u].color = GRAY;
@@ -118,9 +108,7 @@ public final class DFS_Stack {
   
         if (VTS[v].color == WHITE) {
           VTS[v].parent = u;
-          try {
-            S.push(v);
-          } catch (StackFullException e) {}
+          S.push(v);
         }
       }
   
@@ -319,18 +307,16 @@ public final class DFS_Stack {
      * @param Q the queue to hold the vertices of the path
      */
     private static void arrayPathAux(Node[] N, int u, int v, Queue<Integer> Q) {
-      try {
-        if (u == v)
-          Q.enqueue(u);
-        else if (N[v].parent == -1)
-          Q.enqueue(-1);
-        else {
-          arrayPathAux(N, u, N[v].parent, Q);
+      if (u == v)
+        Q.enqueue(u);
+      else if (N[v].parent == -1)
+        Q.enqueue(-1);
+      else {
+        arrayPathAux(N, u, N[v].parent, Q);
 
-          if (Q.peek() != -1)
-            Q.enqueue(v);
-        }
-      } catch (QueueFullException e) {}
+        if (Q.peek() != -1)
+          Q.enqueue(v);
+      }
     }
 
     /**

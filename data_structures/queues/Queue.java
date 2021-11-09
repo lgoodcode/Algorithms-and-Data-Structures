@@ -2,8 +2,6 @@ package data_structures.queues;
 
 import java.util.NoSuchElementException;
 
-import data_structures.queues.exceptions.*;
-
 /**
  * Creates a basic generic {@code Queue} which can hold any non-{@code null}
  * object values. It is reusable in that once it is filled and then emptied, it
@@ -46,24 +44,25 @@ public final class Queue<T> {
     queue = (T[]) new Object[arr.length];
     head = tail = 0;
 
-    for (int i = 0; i < arr.length; ++i) {
-      try {
-        enqueue(arr[i]);
-      } catch (QueueFullException e) {
-      }
-    }
+    for (int i = 0; i < arr.length; ++i)
+      enqueue(arr[i]);
   }
 
   /**
    * Constructs a {@code Queue} from another {@code Queue} instance. Will copy all
    * it's values.
    *
-   * @param q the {@code Queue} instance to copy
+   * @param queue the {@code Queue} instance to copy
+   * 
+   * @throws NullPointerException if the queue is {@code null}
    */
-  public Queue(Queue<T> q) {
-    queue = q.queue;
-    head = q.head;
-    tail = q.tail;
+  public Queue(Queue<T> queue) {
+    if (queue == null)
+      throw new NullPointerException("Queue cannot be null.");
+      
+    this.queue = queue.queue;
+    head = queue.head;
+    tail = queue.tail;
   }
 
   /**
@@ -116,16 +115,6 @@ public final class Queue<T> {
   } 
 
   /**
-   * Checks if there is another element in the {@code Queue} that can be
-   * {@code dequeued}.
-   * 
-   * @return If there is another element to dequeue
-   */
-  public boolean hasNextElement() {
-    return head != queue.length && queue[head] != null;
-  }
-
-  /**
    * Inserts an item into the {@code Queue}. If the {@code head} and {@code tail}
    * properties of are both at the capacity and there is no item stored at that
    * position, then the {@code Queue} is empty and will reset the counters back to
@@ -133,19 +122,18 @@ public final class Queue<T> {
    *
    * @param item the item to insert into the queue
    *
-   * @throws QueueFullException       if attempting to insert an item when the
-   *                                  queue is full
-   *
    * @throws IllegalArgumentException if the supplied item is {@code null} or
    *                                  blank
+   * @throws IllegalStateException    if attempting to insert an item when the
+   *                                  queue is full
    */
-  public synchronized void enqueue(T item) throws QueueFullException {
+  public synchronized void enqueue(T item) {
     if (item == null || item.toString().isBlank())
       throw new IllegalArgumentException("Item cannot be null or blank.");
     if (head == tail && (head == queue.length || queue[head] == null))
       head = tail = 0;
     else if (tail == queue.length)
-      throw new QueueFullException(queue.length);
+      throw new IllegalStateException("Queue capacity exceeded.");
 
     queue[tail++] = item;
   }
@@ -158,7 +146,7 @@ public final class Queue<T> {
    * @throws NoSuchElementException if attempting to dequeue an item while empty
    */
   public synchronized T dequeue() {
-    if (!hasNextElement())
+    if (isEmpty())
       throw new NoSuchElementException("No items in queue.");
 
     T item = queue[head];
