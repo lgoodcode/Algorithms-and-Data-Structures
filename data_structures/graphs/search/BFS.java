@@ -1,7 +1,5 @@
 package data_structures.graphs.search;
 
-import static java.util.Arrays.copyOf;
-
 import data_structures.graphs.Graph;
 import data_structures.queues.Queue;
 
@@ -122,19 +120,6 @@ public final class BFS {
   }
 
   /**
-   * Checks if the given vertex is a valid index for the {@code Node} results.
-   *
-   * @param nodes  the BFS results to check against
-   * @param vertex the vertex index to check
-   *
-   * @throws IllegalArgumentException if the vertex is negative or greater than
-   *                                  the graph length
-   */
-  private static void checkVertex(Node[] nodes, int vertex) {
-    checkVertex(nodes.length, vertex);
-  }
-
-  /**
    * Runs the Breadth-First Search algorithm on the supplied graph matrix and
    * start vertex to serve as the root of the BFS tree.
    *
@@ -174,7 +159,7 @@ public final class BFS {
         if (VTS[v].color == WHITE) {
           VTS[v].color = GRAY;
           VTS[v].distance = VTS[u].distance + 1;
-          VTS[v].parent = u;
+          VTS[v].predecessor = u;
 
           Q.enqueue(v);
         }
@@ -200,204 +185,75 @@ public final class BFS {
   }
 
   /**
-   * Runs the Breadth-First Search algorithm on the supplied graph matrix and
-   * start vertex to serve as the root of the BFS tree. Then runs a up-tracing on
-   * the specified end vertex, checking each parent of end vertex until either the
-   * start vertex is reached, resulting in a path, or not, and no path exists
-   * between the two vertices.
+   * Runs the BFS algorithm and returns the path string for the start and end
+   * vertices.
    *
-   * @param graph       the graph matrix
-   * @param startVertex the starting vertex
-   * @param endVertex   the end vertex
-   *
-   * @return the path string if found, or a no path found message
-   *
-   * @throws IllegalArgumentException if either vertex is negative or greater than
-   *                                  the graph length
+   * @param graph       the graph to run the algorithm on
+   * @param startVertex the starting vertex of the path
+   * @param endVertex   the end vertex of the path
+   * @return the string path if one exists or a no path exists message string
    */
   public static String printPath(Graph graph, int startVertex, int endVertex) {
-    checkVertex(graph, endVertex);
-    Node[] nodes = _run(graph, startVertex);
-    return Node.printPath(nodes, startVertex, endVertex);
+    Node[] results = _run(graph, startVertex);
+    return Graph.printPath(results, startVertex, endVertex);
   }
 
   /**
-   * Performs the path tracing for the specified start and end vertex with the
-   * given {@link BFS.Node} results. Checks each parent of end vertex until either
-   * the start vertex is reached, resulting in a path, or not, and no path exists
-   * between the two vertices.
+   * Returns the path string for the start and end vertices using the results of
+   * the BFS algorithm.
    *
-   * @param nodes       the BFS tree results
-   * @param startVertex the starting vertex
-   * @param endVertex   the end vertex
-   *
-   * @return the path string if found, or a no path found message
-   *
-   * @throws IllegalArgumentException if either vertex is negative or greater than
-   *                                  the graph length
+   * @param graph       the graph to run the algorithm on
+   * @param startVertex the starting vertex of the path
+   * @param endVertex   the end vertex of the path
+   * @return the string path if one exists or a no path exists message string
    */
   public static String printPath(Node[] nodes, int startVertex, int endVertex) {
-    checkVertex(nodes, endVertex);
-    return Node.printPath(nodes, startVertex, endVertex);
+    return Graph.printPath(nodes, startVertex, endVertex);
   }
 
   /**
-   * Runs the Breadth-First Search algorithm on the supplied graph matrix and
-   * start vertex to serve as the root of the BFS tree. Then runs a up-tracing on
-   * the specified end vertex, checking each parent of end vertex until either the
-   * start vertex is reached, resulting in a path, or not, and no path exists
-   * between the two vertices.
+   * Runs the BFS algorithm and returns the array of path vertices for the start
+   * and end vertices.
    *
-   * @param graph       the graph matrix
-   * @param startVertex the starting vertex
-   * @param endVertex   the end vertex
-   *
-   * @return the path array if found, or an array of a single {@code -1} element
-   *
-   * @throws IllegalArgumentException if either vertex is negative or greater than
-   *                                  the graph length
+   * @param graph       the graph to run the algorithm on
+   * @param startVertex the starting vertex of the path
+   * @param endVertex   the end vertex of the path
+   * @return the string path if one exists or a no path exists message string
    */
   public static int[] arrayPath(Graph graph, int startVertex, int endVertex) {
-    checkVertex(graph, endVertex);
-    Node[] nodes = _run(graph, startVertex);
-    return Node.arrayPath(nodes, startVertex, endVertex);
+    Node[] results = _run(graph, startVertex);
+    return Graph.arrayPath(results, startVertex, endVertex);
   }
 
   /**
-   * Performs the path tracing for the specified start and end vertex with the
-   * given {@link BFS.Node} results. Checks each parent of end vertex until either
-   * the start vertex is reached, resulting in a path, or not, and no path exists
-   * between the two vertices.
+   * Returns the array of path vertices for the start and end vertices using the
+   * results of the BFS algorithm.
    *
-   * @param nodes       the BFS tree results
-   * @param startVertex the starting vertex
-   * @param endVertex   the end vertex
-   *
-   * @return the path array if found, or an array of a single {@code -1} element
-   *
-   * @throws IllegalArgumentException if either vertex is negative or greater than
-   *                                  the graph length
+   * @param graph       the graph to run the algorithm on
+   * @param startVertex the starting vertex of the path
+   * @param endVertex   the end vertex of the path
+   * @return the string path if one exists or a no path exists message string
    */
   public static int[] arrayPath(Node[] nodes, int startVertex, int endVertex) {
-    checkVertex(nodes, endVertex);
-    return Node.arrayPath(nodes, startVertex, endVertex);
+    return Graph.arrayPath(nodes, startVertex, endVertex);
   }
 
   /**
-   * Vertex node of the Breadth-First Search. Used to hold the attributes of BFS.
+   * Vertex node of the Breadth-first Search. Used to hold the attributes of BFS.
    */
-  public static final class Node {
-    /**
-     * The vertex index in the graph.
-     */
-    protected int vertex;
-
+  public static final class Node extends Graph.Vertex {
     /**
      * The status of the vertex, either undiscovered "WHITE" or discovered "GRAY".
      */
     protected int color;
 
     /**
-     * The number of nodes from the start vertex to the current vertex.
-     */
-    protected int distance;
-
-    /**
-     * The preceding vertex on a given path.
-     */
-    protected int parent;
-
-    /**
      * Constructs an empty basic BFS node.
      */
-    protected Node(int vertex) {
-      this.vertex = vertex;
+    private Node(int vertex) {
+      super(vertex);
       color = WHITE;
-      distance = Integer.MIN_VALUE;
-      parent = -1;
     }
-
-    /**
-     * Traces the results of the BFS tree with a given start and end vertex, to
-     * return a string of the path using the {@code StringBuilder}, if one exists.
-     * Otherwise, it will return a no path exists message.
-     *
-     * @param N  the BFS tree results
-     * @param u  the start vertex
-     * @param v  the end vertex
-     * @param sb the {@code StringBuilder} to build the path string
-     */
-    private static void printPathAux(Node[] N, int u, int v, StringBuilder sb) {
-      if (u == v)
-        sb.append(u);
-      else if (N[v].parent == -1)
-        sb.append("No path exists from " + u + " to " + v);
-      else {
-        printPathAux(N, u, N[v].parent, sb);
-        sb.append(" -> " + v);
-      }
-    }
-
-    /**
-     * Returns the path string for the start and end vertices using the BFS tree
-     * results.
-     *
-     * @param nodes the BFS tree results
-     * @param u     the starting vertex of the path
-     * @param v     the end vertex of the path
-     * @return the string path if one exists or a no path exists message string
-     */
-    protected static String printPath(Node[] nodes, int u, int v) {
-      StringBuilder sb = new StringBuilder();
-      printPathAux(nodes, u, v, sb);
-      return sb.toString();
-    }
-
-    /**
-     * Uses a {@link Queue} to queue the vertices of a path from the specified start
-     * and end vertices to build an array of the path of vertices.
-     *
-     * @param N the BFS tree results
-     * @param u the starting vertex of the path
-     * @param v the end vertex of the path
-     * @param Q the queue to hold the vertices of the path
-     */
-    private static void arrayPathAux(Node[] N, int u, int v, Queue<Integer> Q) {
-      if (u == v)
-        Q.enqueue(u);
-      else if (N[v].parent == -1)
-        Q.enqueue(-1);
-      else {
-        arrayPathAux(N, u, N[v].parent, Q);
-        Q.enqueue(v);
-      }
-    }
-
-    /**
-     * Creates an array of the vertices for the path of the specified start and end
-     * vertices. If no path exists, it will return an array with a single {@code -1}
-     * element.
-     *
-     * @param nodes the BFS tree results
-     * @param u     the start vertex of the path
-     * @param v     the end vertex of the path
-     * @return the array of vertices for a path, or a single {@code -1} element if
-     *         no path exists
-     */
-    protected static int[] arrayPath(Node[] nodes, int u, int v) {
-      Queue<Integer> Q = new Queue<>(nodes.length);
-      int[] arr = new int[nodes.length];
-      int i = 0;
-
-      arrayPathAux(nodes, u, v, Q);
-
-      if (Q.isEmpty())
-        return copyOf(arr, 0);
-
-      while (!Q.isEmpty())
-        arr[i++] = Q.dequeue();
-      return copyOf(arr, i);
-    }
-
   }
+  
 }

@@ -13,6 +13,13 @@ import data_structures.queues.Queue;
  * is maintained and a vertex is added to the queue only if that vertex is
  * relaxed. This process repeats until no more vertex can be relaxed.
  * </p>
+ * 
+ * <p>
+ * This is faster because of the fact that the BellmanFord repeats the process
+ * on all vertices for {@code |V| - 1} times. Whereas, the SPF only repeats the
+ * search for edges to relax, on vertices of edges that already have been
+ * relaxed to see if it can be relaxed again, by placing them in a queue.
+ * </p>
  */
 public class ShorterPathFaster extends SSSP {
   /**
@@ -32,7 +39,7 @@ public class ShorterPathFaster extends SSSP {
     return _run(graph, sourceVertex);
   }
 
-  public static Node[] _run(Graph G, int s) {
+  private static Node[] _run(Graph G, int s) {
     int[] V = G.getVertices();
     Queue<Integer> Q = new Queue<>(V.length * 2);
     Node[] VTS = initSource(G, s);

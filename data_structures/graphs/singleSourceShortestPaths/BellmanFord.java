@@ -36,9 +36,9 @@ import data_structures.graphs.Graph;
  */
 public final class BellmanFord extends SSSP {
   /**
-   * Runs the BellmanFord SSSP algorithm on the specified graph for the source ve
-   * tex of all the paths If a negative-weight cycle is detected, it will return
-   * {@code null} to indicate so.
+   * Runs the BellmanFord SSSP algorithm on the specified graph for the source
+   * vertex of all the paths If a negative-weight cycle is detected, it will
+   * return {@code null} to indicate so.
    * 
    * @param graph        the weighted directed graph to run the algorithm on
    * @param sourceVertex the single source vertex from which all paths originate
@@ -88,5 +88,33 @@ public final class BellmanFord extends SSSP {
     }
 
     return VTS;
+  }
+
+  /**
+   * Runs the BFS algorithm and returns the path string for the start and end
+   * vertices.
+   *
+   * @param graph       the graph to run the algorithm on
+   * @param startVertex the starting vertex of the path
+   * @param endVertex   the end vertex of the path
+   * @return the string path if one exists or a no path exists message string
+   */
+  public static String printPath(Graph graph, int startVertex, int endVertex) {
+    Node[] results = _run(graph, startVertex);
+    return Graph.printPath(results, startVertex, endVertex);
+  }
+
+  /**
+   * Runs the BFS algorithm and returns the array of path vertices for the start
+   * and end vertices.
+   *
+   * @param graph       the graph to run the algorithm on
+   * @param startVertex the starting vertex of the path
+   * @param endVertex   the end vertex of the path
+   * @return the string path if one exists or a no path exists message string
+   */
+  public static int[] arrayPath(Graph graph, int startVertex, int endVertex) {
+    Node[] results = _run(graph, startVertex);
+    return Graph.arrayPath(results, startVertex, endVertex);
   }
 }

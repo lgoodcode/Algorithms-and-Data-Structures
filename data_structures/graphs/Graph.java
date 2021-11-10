@@ -3,6 +3,8 @@ package data_structures.graphs;
 import java.util.NoSuchElementException;
 import static java.util.Arrays.copyOf;
 
+import data_structures.queues.Queue;
+
 /**
  * Graph matrix that supports weighted and directed graphs. Contains a matrix
  * array that is used to determine vertices and edges. Uses a sentinel
@@ -496,4 +498,112 @@ public final class Graph {
       return w;
     }
   }
+
+  /**
+   * Used to hold attributes of an algorithm for each vertex. Is meant to be
+   * extended for algorithm-specific implementations.
+   */
+  public static class Vertex {
+    private int vertex;
+    public int distance;
+    public int predecessor;
+  
+    protected Vertex(int vertex) {
+      this.vertex = vertex;
+      distance = Integer.MAX_VALUE;
+      predecessor = -1;
+    }
+  
+    public int getVertex() {
+      return vertex;
+    }
+  }
+
+  /**
+   * Traces the results of an algorithm with the {@code Vertex} subclass nodes and
+   * with a given start and end vertex, to return a string of the path using the
+   * {@code StringBuilder}, if one exists. Otherwise, it will return a no path
+   * exists message.
+   *
+   * @param N  the {@code Vertex} subclass containing the data from an algorithm
+   *           to build a path
+   * @param u  the start vertex
+   * @param v  the end vertex
+   * @param sb the {@code StringBuilder} to build the path string
+   */
+  private static void printPathAux(Vertex[] N, int u, int v, StringBuilder sb) {
+    if (u == v)
+      sb.append(u);
+    else if (N[v].predecessor == -1)
+      sb.append("No path exists from " + u + " to " + v);
+    else {
+      printPathAux(N, u, N[v].predecessor, sb);
+      sb.append(" -> " + v);
+    }
+  }
+
+  /**
+   * Returns the path string for the start and end vertices of an algorithm that
+   * extends the {@link Graph.Vertex}.
+   *
+   * @param nodes       the {@code Vertex} subclass containing the data from an
+   *                    algorithm to build a path
+   * @param startVertex the starting vertex of the path
+   * @param endVertex   the end vertex of the path
+   * @return the string path if one exists or a no path exists message string
+   */
+  public static final String printPath(Vertex[] nodes, int startVertex, int endVertex) {
+    StringBuilder sb = new StringBuilder();
+    printPathAux(nodes, startVertex, endVertex, sb);
+    return sb.toString();
+  }
+
+  /**
+   * Uses a {@link Queue} to queue the vertices of a path from the specified start
+   * and end vertices to build an array of the path of vertices.
+   *
+   * @param N the {@code Vertex} subclass containing the data from an algorithm to
+   *          build a path
+   * @param u the starting vertex of the path
+   * @param v the end vertex of the path
+   * @param Q the queue to hold the vertices of the path
+   */
+  private static void arrayPathAux(Vertex[] N, int u, int v, Queue<Integer> Q) {
+    if (u == v)
+      Q.enqueue(u);
+    else if (N[v].predecessor == -1)
+      Q.enqueue(-1);
+    else {
+      arrayPathAux(N, u, N[v].predecessor, Q);
+      Q.enqueue(v);
+    }
+  }
+
+  /**
+   * Creates an array of the vertices for the path of the specified start and end
+   * vertices. If no path exists, it will return an array with a single {@code -1}
+   * element.
+   *
+   * @param nodes       the {@code Vertex} subclass containing the data from an
+   *                    algorithm to build a path
+   * @param startVertex the start vertex of the path
+   * @param endVertex   the end vertex of the path
+   * @return the array of vertices for a path, or a single {@code -1} element if
+   *         no path exists
+   */
+  public static final int[] arrayPath(Vertex[] nodes, int startVertex, int endVertex) {
+    Queue<Integer> Q = new Queue<>(nodes.length);
+    int[] arr = new int[nodes.length];
+    int i = 0;
+
+    arrayPathAux(nodes, startVertex, endVertex, Q);
+
+    if (Q.isEmpty())
+      return copyOf(arr, 0);
+
+    while (!Q.isEmpty())
+      arr[i++] = Q.dequeue();
+    return copyOf(arr, i);
+  }
+
 }

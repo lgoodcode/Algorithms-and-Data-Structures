@@ -8,11 +8,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.*;
 
 import data_structures.graphs.Graph;
-import data_structures.graphs.singleSourceShortestPaths.BellmanFord;
+import data_structures.graphs.singleSourceShortestPaths.Dijkstra;
 import data_structures.graphs.singleSourceShortestPaths.SSSP;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-public class BellmanFord_Test {
+public class Dijkstra_Test {
   Graph G = new Graph(9, true, true);
   SSSP.Node[] nodes;
 
@@ -32,35 +32,35 @@ public class BellmanFord_Test {
 
   @Test
   void bellmanford() {
-    assertNotNull(BellmanFord.run(G, 0));
+    assertNotNull(Dijkstra.run(G, 0));
   }
 
   @Test
   void throws_on_invalid_graph() {
-    assertThrows(IllegalArgumentException.class, () -> BellmanFord.run(new Graph(1, false, false), 0));
+    assertThrows(IllegalArgumentException.class, () -> Dijkstra.run(new Graph(1, false, false), 0));
   }
 
   @Test
   void prints_path() {
-    assertEquals("0 -> 2 -> 1 -> 3", BellmanFord.printPath(G, 0, 3));
+    assertEquals("0 -> 2 -> 1 -> 3", Dijkstra.printPath(G, 0, 3));
   }
 
   @Test
   void nodes_prints_path() {
-    nodes = BellmanFord.run(G, 0);
-    assertEquals("0 -> 2 -> 1 -> 3", BellmanFord.printPath(nodes, 0, 3));
+    nodes = Dijkstra.run(G, 0);
+    assertEquals("0 -> 2 -> 1 -> 3", Dijkstra.printPath(nodes, 0, 3));
   }
 
   @Test 
   void array_path() {
     int[] path = { 0, 2, 1, 3 };
-    assertArrayEquals(path, BellmanFord.arrayPath(G, 0, 3));
+    assertArrayEquals(path, Dijkstra.arrayPath(G, 0, 3));
   }
 
   @Test 
   void nodes_array_path() {
     int[] path = { 0, 2, 1, 3 };
-    nodes = BellmanFord.run(G, 0);
-    assertArrayEquals(path, BellmanFord.arrayPath(nodes, 0, 3));
+    nodes = Dijkstra.run(G, 0);
+    assertArrayEquals(path, Dijkstra.arrayPath(nodes, 0, 3));
   }
 }
