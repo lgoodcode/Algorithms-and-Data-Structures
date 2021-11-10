@@ -238,4 +238,38 @@ public class Graph_Test {
     }
   }
 
+  @Test
+  void clone_graph() {
+    g = new Graph(rows);
+    
+    g.addEdge(1, 3);
+    g.addEdge(2, 3);
+    g.addEdge(0, 2);
+
+    Graph graph = new Graph(g);
+
+    assertEquals(4, graph.getNumVertices());
+    assertEquals(3, graph.getNumEdges());
+    assertTrue(graph.hasEdge(1, 3));
+    assertTrue(graph.hasEdge(2, 3));
+    assertTrue(graph.hasEdge(0, 2));
+  }
+
+  @Test
+  void transpose() {
+    g = new Graph(rows);
+    
+    g.addEdge(1, 3);
+    g.addEdge(2, 3);
+    g.addEdge(0, 2);
+
+    Graph graph = g.transpose();
+
+    assertEquals(4, graph.getNumVertices());
+    assertEquals(3, graph.getNumEdges());
+    assertTrue(graph.hasEdge(3, 1));
+    assertTrue(graph.hasEdge(3, 2));
+    assertTrue(graph.hasEdge(2, 0));
+  }
+
 }

@@ -100,6 +100,62 @@ public final class Graph {
   }
 
   /**
+   * Constructs a copy of the specified graph.
+   * 
+   * @param graph the graph to copy
+   * 
+   * @throws NullPointerException if the graph is {@code null}
+   */
+  public Graph(Graph graph) {
+    if (graph == null)
+      throw new NullPointerException("Graph cannot be null.");
+
+    rows = graph.rows;
+    directed = graph.directed;
+    weighted = graph.weighted;
+    vertices = graph.vertices;
+    edges = graph.edges;
+
+    int[] V = graph.getVertices();
+    G = new int[rows][];
+    
+    for (int i = 0, u; i < V.length; i++) {
+      u = V[i];
+      G[u] = copyOf(graph.G[u], rows);
+    }
+  }
+
+  /**
+   * Returns the transpose of the current graph, which is all the edges reversed.
+   * 
+   * @return the transpose of the graph
+   */
+  public Graph transpose() {
+    int i, j, u, v;
+    Graph G = new Graph(rows, directed, weighted);
+    int[] V = getVertices();
+    Graph.Edge[] edges;
+
+    for (i = 0; i < V.length; i++) {
+      u = V[i];
+      edges = getEdges(u);
+
+      for (j = 0; j < edges.length; j++) {
+        v = edges[j].getVertices()[1];
+
+        if (!G.hasEdge(u, v)) {
+          if (weighted)
+            G.addEdge(v, u, edges[j].getWeight());
+          else
+            G.addEdge(v, u);
+        }
+      }
+    }
+
+    return G;
+  }
+
+  /**
    * Checks that the specified vertex index is valid.
    *
    * @param vertex the vertex index
