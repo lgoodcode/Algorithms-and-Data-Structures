@@ -39,18 +39,20 @@ public final class BellmanFord extends SSSP {
    * Runs the BellmanFord SSSP algorithm on the specified graph for the source
    * vertex of all the paths If a negative-weight cycle is detected, it will
    * return {@code null} to indicate so.
-   * 
+   *
    * @param graph        the weighted directed graph to run the algorithm on
    * @param sourceVertex the single source vertex from which all paths originate
    *                     from
    * @return the {@code Node[]} results of the algorithm or {@code null} if there
    *         is a cycle
-   * 
+   *
    * @throws IllegalArgumentException if the specified {@code Graph} is not
    *                                  weighted and directed, or the source vertex
    *                                  is invalid
    */
   public static Node[] run(Graph graph, int sourceVertex) {
+    checkGraph(graph);
+    graph.checkVertex(sourceVertex);
     return _run(graph, sourceVertex);
   }
 
@@ -59,7 +61,7 @@ public final class BellmanFord extends SSSP {
     int[] V = G.getVertices();
     Graph.Edge[] edges;
     int i, j, k, u, v, w, len;
-  
+
     for (k = 0, len = V.length - 1; k < len; k++) {
       for (i = 0; i < V.length; i++) {
         u = V[i];
@@ -81,7 +83,7 @@ public final class BellmanFord extends SSSP {
       for (j = 0; j < edges.length; j++) {
         v = edges[j].getVertices()[1];
         w = edges[j].getWeight();
-        
+
         if (VTS[v].distance > VTS[u].distance + w)
           return null;
       }

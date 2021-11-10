@@ -87,61 +87,57 @@ public final class DFS {
   private static final int GRAY = 1;
 
   /**
-   * Checks if the given vertex is a valid index for the given number of rows of
-   * the graph or {@code Node} results.
-   *
-   * @param rows   the maximum number of rows
-   * @param vertex the vertex index to check
-   *
-   * @throws IllegalArgumentException if the vertex is negative or greater than
-   *                                  the graph length
+   * Vertex node of the Depth-first Search. Used to hold the attributes of DFS.
    */
-  private static void checkVertex(int rows, int vertex) {
-    if (vertex < 0)
-      throw new IllegalArgumentException("Vertex cannot be negative.");
-    if (vertex >= rows)
-      throw new IllegalArgumentException("Vertex cannot be greater than graph length.");
+  public static final class Node extends Graph.Vertex {
+    /**
+     * The status of the vertex, either undiscovered "WHITE" or discovered "GRAY".
+     */
+    protected int color;
+
+    /**
+     * The number of vertices visited before this node was compeleted.
+     */
+    protected int finish;
+
+    /**
+     * Constructs an empty basic DFS node.
+     */
+    private Node(int vertex) {
+      super(vertex);
+      color = WHITE;
+      finish = Integer.MIN_VALUE;
+    }
   }
 
   /**
-   * Checks if the given vertex is a valid index for the given number of rows of
-   * the graph.
-   *
-   * @param graph  the graph to validate the vertex with
-   * @param vertex the vertex index to check
-   *
-   * @throws IllegalArgumentException if the vertex is negative or greater than
-   *                                  the graph length
-   */
-  private static void checkVertex(Graph graph, int vertex) {
-    checkVertex(graph.rows, vertex);
-  }
-
-  /**
-   * Runs the Depth-first Search algorithm on the supplied graph matrix and
-   * start vertex to serve as the root of the DFS tree.
-   *
+   * Runs the Depth-first Search algorithm on the supplied graph matrix and start
+   * vertex to serve as the root of the DFS tree.
+   * 
    * <p>
    * This uses a single element array to hold the {@code time} value so that it
    * can be passed through each recursive call.
    * </p>
-   * 
+   *
    * <p>
    * This implementation omits the use of the "black" color, which marks a vertex
    * as completed, which isn't necessary because the vertex won't be revisted as
    * long as it isn't white.
    * </p>
-   *
-   * @param G the graph matrix
-   * @param s the starting vertex
+   * 
+   * @param graph       the graph matrix
+   * @param startVertex the starting vertex
    * @return the {@link DFS.Node} array results
    *
    * @throws IllegalArgumentException if the start vertex is negative or greater
    *                                  than the graph length
    */
-  private static Node[] _run(Graph G, int s) {
-    checkVertex(G, s);
+  public static Node[] run(Graph graph, int startVertex) {
+    graph.checkVertex(startVertex);
+    return _run(graph, startVertex);
+  }
 
+  private static Node[] _run(Graph G, int s) {
     int[] V = G.getVertices(), time = { 0 };
     Node[] VTS = new Node[V.length];
     int i, u;
@@ -156,7 +152,7 @@ public final class DFS {
       if (VTS[u].color == WHITE)
         visit(G, VTS, u, time);
     }
-    
+
     return VTS;
   }
 
@@ -177,21 +173,6 @@ public final class DFS {
     }
 
     VTS[u].finish = ++time[0];
-  }
-
-  /**
-   * Runs the Depth-first Search algorithm on the supplied graph matrix and
-   * start vertex to serve as the root of the DFS tree.
-   *
-   * @param graph the graph matrix
-   * @param startVertex the starting vertex
-   * @return the {@link DFS.Node} array results
-   *
-   * @throws IllegalArgumentException if the start vertex is negative or greater
-   *                                  than the graph length
-   */
-  public static Node[] run(Graph graph, int startVertex) {
-    return _run(graph, startVertex);
   }
 
   /**
@@ -310,30 +291,6 @@ public final class DFS {
   public static int[] arrayPath(Graph graph, int startVertex, int endVertex) {
     Node[] results = _run(graph, startVertex);
     return arrayPath(results, startVertex, endVertex);
-  }
-
-  /**
-   * Vertex node of the Depth-first Search. Used to hold the attributes of DFS.
-   */
-  public static final class Node extends Graph.Vertex {
-    /**
-     * The status of the vertex, either undiscovered "WHITE" or discovered "GRAY".
-     */
-    protected int color;
-
-    /**
-     * The number of vertices visited before this node was compeleted.
-     */
-    protected int finish;
-
-    /**
-     * Constructs an empty basic DFS node.
-     */
-    private Node(int vertex) {
-      super(vertex);
-      color = WHITE;
-      finish = Integer.MIN_VALUE;
-    }
   }
 
 }

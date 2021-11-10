@@ -102,10 +102,24 @@ import data_structures.graphs.Graph;
  * </p>
  */
 public class SSSP {
-  public static final class Node extends Graph.Vertex {
+  public static class Node extends Graph.Vertex {
     protected Node(int vertex) {
       super(vertex);
     }
+  }
+
+  /**
+   * Verifies that the supplied {@link Graph} is valid, being directed and
+   * weighted.
+   * 
+   * @param graph the graph to check
+   * 
+   * @throws IllegalArgumentException if the specified {@code Graph} is not
+   *                                  weighted and directed
+   */
+  protected static final void checkGraph(Graph graph) {
+    if (!graph.directed && !graph.weighted)
+      throw new IllegalArgumentException("The algorithm can only run on a directed weighted graph.");
   }
   
   /**
@@ -124,16 +138,8 @@ public class SSSP {
    * @param graph        the weighted directed graph to run the SSSP algorithm on
    * @param sourceVertex the root vertex of all the paths
    * @return the {@code Node[]} containing the initialized vertices
-   * 
-   * @throws IllegalArgumentException if the specified {@code Graph} is not
-   *                                  weighted and directed or the source vertex
-   *                                  is invalid
    */
   protected static final Node[] initSource(Graph graph, int sourceVertex) {
-    if (!graph.directed && !graph.weighted)
-      throw new IllegalArgumentException("The algorithm can only run on a directed weighted graph.");
-    graph.checkVertex(sourceVertex);
-
     int[] V = graph.getVertices();
     Node[] VTS = new Node[V.length];
 

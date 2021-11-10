@@ -1,7 +1,7 @@
 package algorithms.dynamic;
 
 /**
- * Longest Common Subsequence {@code O(m n) time}
+ * <h3>Longest Common Subsequence {@code O(mn) time}</h3>
  *
  * <p>
  * Top-down approach with the 0th row/column initialized with zeroes as a dummy

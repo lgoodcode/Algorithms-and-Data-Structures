@@ -33,9 +33,12 @@ public class ShorterPathFaster extends SSSP {
    *         is a cycle
    * 
    * @throws IllegalArgumentException if the specified {@code Graph} is not
-   *                                  weighted and directed
+   *                                  weighted and directed or the source vertex
+   *                                  is invalid
    */
   public static Node[] run(Graph graph, int sourceVertex) {
+    checkGraph(graph);
+    graph.checkVertex(sourceVertex);
     return _run(graph, sourceVertex);
   }
 

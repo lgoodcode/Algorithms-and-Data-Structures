@@ -1,5 +1,12 @@
 package algorithms.dynamic;
 
+/**
+ * <h3>Matrix Chain Order {@code O(n^3) time}</h3>
+ * 
+ * <p>
+ * Computes the smallest number of matrix multplications.
+ * </p>
+ */
 public interface MatrixChainOrder {
   static int MATRICES = 0;
   static int SOLUTION = 1;

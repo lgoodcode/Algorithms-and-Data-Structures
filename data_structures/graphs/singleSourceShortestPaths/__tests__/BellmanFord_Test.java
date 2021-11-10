@@ -41,6 +41,12 @@ public class BellmanFord_Test {
   }
 
   @Test
+  void throws_on_invalid_vertex() {
+    assertThrows(IllegalArgumentException.class, () -> BellmanFord.run(G, -1));
+    assertThrows(IllegalArgumentException.class, () -> BellmanFord.run(G, 10));
+  }
+
+  @Test
   void prints_path() {
     assertEquals("0 -> 2 -> 1 -> 3", BellmanFord.printPath(G, 0, 3));
   }

@@ -101,9 +101,9 @@ public final class Graph {
 
   /**
    * Constructs a copy of the specified graph.
-   * 
+   *
    * @param graph the graph to copy
-   * 
+   *
    * @throws NullPointerException if the graph is {@code null}
    */
   public Graph(Graph graph) {
@@ -118,7 +118,7 @@ public final class Graph {
 
     int[] V = graph.getVertices();
     G = new int[rows][];
-    
+
     for (int i = 0, u; i < V.length; i++) {
       u = V[i];
       G[u] = copyOf(graph.G[u], rows);
@@ -127,7 +127,7 @@ public final class Graph {
 
   /**
    * Returns the transpose of the current graph, which is all the edges reversed.
-   * 
+   *
    * @return the transpose of the graph
    */
   public Graph transpose() {
@@ -236,10 +236,10 @@ public final class Graph {
 
   /**
    * Returns the edges for the specified vertex.
-   * 
+   *
    * @param vertex the vertex whose edges is being retrieved
    * @return the {@code Edge} array
-   * 
+   *
    * @throws IllegalArgumentException if the vertex doesn't exist in the graph
    */
   public Edge[] getEdges(int vertex) {
@@ -563,13 +563,13 @@ public final class Graph {
     private int vertex;
     public int distance;
     public int predecessor;
-  
+
     protected Vertex(int vertex) {
       this.vertex = vertex;
       distance = Integer.MAX_VALUE;
       predecessor = -1;
     }
-  
+
     public int getVertex() {
       return vertex;
     }

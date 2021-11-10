@@ -5,7 +5,7 @@ import data_structures.graphs.Graph;
 import data_structures.heaps.FibonacciHeap;
 
 /**
- * Dijkstra(G, w, s)    
+ * Dijkstra(G, w, s)
  * 1   Initialize-Single-Source(G, s)
  * 2   S = 0 (empty set)
  * 3   Q = G.V
@@ -36,7 +36,7 @@ import data_structures.heaps.FibonacciHeap;
  * keyed by their {@code d} (distance) values, similar to Kruskal's
  * implementation.
  * </p>
- * 
+ *
  * <p>
  * This implementation uses the {@link FibonacciHeap} for the MinPriorityQueue
  * over a Binary MinHeap for improved performance. It also omits the set
@@ -44,16 +44,16 @@ import data_structures.heaps.FibonacciHeap;
  * all the information to produce the path, which also has all the vertices in
  * the graph.
  * </p>
- * 
+ *
  * <p>
  * It also iterates for {@code |V| - 1} times, removing all but one vertex and
  * will still give the same solution.
  * </p>
- * 
+ *
  * <hr/>
  * <h3>Aggregate Analysis</h3>
  * <h4>FibHeap - {@code  O(V lg V + E)} BinMinHeap - {@code O(V + E lg V)}</h4>
- * 
+ *
  * <p>
  * The running time of the algorithm with the FibonacciHeap operations is
  * improved over the BinaryMinHeap implementation. The insert and extractMin
@@ -61,7 +61,7 @@ import data_structures.heaps.FibonacciHeap;
  * runs once for every edge which is {@code |E|}. with the Fibonacci heap, the
  * Extract-Min operations are {@code O(lg V)}.
  * </p>
- * 
+ *
  * <p>
  * The running time of the algorithm depends on the implementation of the
  * min-priority queue and the operations called: insert, extract min, and the
@@ -76,17 +76,19 @@ public final class Dijkstra extends SSSP {
    * Runs the Dijkstra SSSP algorithm on the specified graph for the source vertex
    * of all the paths. Details on the specifics of this implementation is noted in
    * the documentation of the class.
-   * 
+   *
    * @param graph        the weighted directed graph to run the algorithm on
    * @param sourceVertex the single source vertex from which all paths originate
    *                     from
    * @return the {@code Node[]} results of the algorithm
-   * 
+   *
    * @throws IllegalArgumentException if the specified {@code Graph} is not
    *                                  weighted and directed, or the source vertex
    *                                  is invalid
    */
   public static Node[] run(Graph graph, int sourceVertex) {
+    checkGraph(graph);
+    graph.checkVertex(sourceVertex);
     return _run(graph, sourceVertex);
   }
 
@@ -99,11 +101,11 @@ public final class Dijkstra extends SSSP {
     // Initialize the PriorityQueue with all the vertex nodes
     for (i = 0; i < VTS.length; i++)
       Q.insert(VTS[i]);
-    
+
     while (Q.size() > 1) {
       u = Q.extractMin().getVertex();
       edges = G.getEdges(u);
-      
+
       for (i = 0; i < edges.length; i++) {
         v = edges[i].getVertices()[1];
         w = edges[i].getWeight();

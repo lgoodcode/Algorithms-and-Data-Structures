@@ -13,7 +13,6 @@ import org.junit.jupiter.api.*;
 
 import data_structures.graphs.Graph;
 
-
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 public class Graph_Test {
   Graph g;

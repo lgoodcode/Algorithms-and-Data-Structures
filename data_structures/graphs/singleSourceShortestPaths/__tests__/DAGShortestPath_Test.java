@@ -8,11 +8,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.*;
 
 import data_structures.graphs.Graph;
-import data_structures.graphs.singleSourceShortestPaths.Dijkstra;
 import data_structures.graphs.singleSourceShortestPaths.SSSP;
+import data_structures.graphs.singleSourceShortestPaths.DAGShortestPath;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-public class Dijkstra_Test {
+public class DAGShortestPath_Test {
   Graph G = new Graph(9, true, true);
   SSSP.Node[] nodes;
 
@@ -31,42 +31,31 @@ public class Dijkstra_Test {
   }
 
   @Test
-  void dijkstra() {
-    assertNotNull(Dijkstra.run(G, 0));
+  void dagSP() {
+    assertNotNull(DAGShortestPath.run(G, 0));
   }
 
   @Test
   void throws_on_invalid_graph() {
-    assertThrows(IllegalArgumentException.class, () -> Dijkstra.run(new Graph(1, false, false), 0));
+    assertThrows(IllegalArgumentException.class, () -> DAGShortestPath.run(new Graph(1, false, false), 0));
   }
 
   @Test
   void throws_on_invalid_vertex() {
-    assertThrows(IllegalArgumentException.class, () -> Dijkstra.run(G, -1));
-    assertThrows(IllegalArgumentException.class, () -> Dijkstra.run(G, 10));
+    assertThrows(IllegalArgumentException.class, () -> DAGShortestPath.run(G, -1));
+    assertThrows(IllegalArgumentException.class, () -> DAGShortestPath.run(G, 10));
   }
 
   @Test
   void prints_path() {
-    assertEquals("0 -> 2 -> 1 -> 3", Dijkstra.printPath(G, 0, 3));
-  }
-
-  @Test
-  void nodes_prints_path() {
-    nodes = Dijkstra.run(G, 0);
-    assertEquals("0 -> 2 -> 1 -> 3", Dijkstra.printPath(nodes, 0, 3));
+    nodes = DAGShortestPath.run(G, 0);
+    assertEquals("0 -> 2 -> 1 -> 3", DAGShortestPath.printPath(nodes, 0, 3));
   }
 
   @Test 
   void array_path() {
     int[] path = { 0, 2, 1, 3 };
-    assertArrayEquals(path, Dijkstra.arrayPath(G, 0, 3));
-  }
-
-  @Test 
-  void nodes_array_path() {
-    int[] path = { 0, 2, 1, 3 };
-    nodes = Dijkstra.run(G, 0);
-    assertArrayEquals(path, Dijkstra.arrayPath(nodes, 0, 3));
+    nodes = DAGShortestPath.run(G, 0);
+    assertArrayEquals(path, DAGShortestPath.arrayPath(nodes, 0, 3));
   }
 }

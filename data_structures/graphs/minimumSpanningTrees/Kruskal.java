@@ -62,7 +62,7 @@ public interface Kruskal {
 
   /**
    * Runs the Kruskal algorithm on the given graph.
-   * 
+   *
    * <p>
    * {@code A} is the set that will hold the edges of the MST. {@code S} is the
    * array to hold the {@code DisjointSets}. The array of edges are sorted by
@@ -80,7 +80,7 @@ public interface Kruskal {
    * function to have them point to the same tree, so either vertex cannot be used
    * again.
    * </p>
-   * 
+   *
    * @param graph the graph to find the MST using the Kruskal algorithm
    * @return the array of {@link Graph.Edge} for the MST
    */

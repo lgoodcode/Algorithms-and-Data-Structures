@@ -31,13 +31,19 @@ public class ShorterPathFaster_Test {
   }
 
   @Test
-  void ShorterPathFaster() {
+  void shorterPathFaster() {
     assertNotNull(ShorterPathFaster.run(G, 0));
   }
 
   @Test
   void throws_on_invalid_graph() {
     assertThrows(IllegalArgumentException.class, () -> ShorterPathFaster.run(new Graph(1, false, false), 0));
+  }
+
+  @Test
+  void throws_on_invalid_vertex() {
+    assertThrows(IllegalArgumentException.class, () -> ShorterPathFaster.run(G, -1));
+    assertThrows(IllegalArgumentException.class, () -> ShorterPathFaster.run(G, 10));
   }
 
   @Test

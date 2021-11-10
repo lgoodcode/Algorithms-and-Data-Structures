@@ -25,7 +25,7 @@ import data_structures.heaps.FibonacciHeap;
  * grows until the tree spans all the vertices in {@code V}. Each step adds to
  * the tree {@code E} a light edge that connects {@code E} to an isolated vertex
  * - one on which no edge of {@code E} is incident.
- * 
+ *
  * <p>
  * This implementation uses the {@link FibonacciHeap} to get improved
  * performance over the {@code Binary Min Heap}. It also includes a
@@ -47,7 +47,7 @@ import data_structures.heaps.FibonacciHeap;
  * <p>
  * <i><b>A = { (v, v.p ) : v of V - {r} - Q }</b></i>
  * </p>
- * 
+ *
  * <p>
  * When the min-priority queue Q is empty; the MST A for G is thus:
  * </p>
@@ -96,7 +96,7 @@ public final class Prim {
       if (u == r)
         VTS[i].key = 0;
     }
-  
+
     while (!Q.isEmpty()) {
       u = Q.extractMin().vertex;
       edges = G.getEdges(u);
@@ -104,7 +104,7 @@ public final class Prim {
       for (j = 0; j < edges.length; j++) {
         v = edges[j].getVertices()[1];
         w = edges[j].getWeight();
-        
+
         if (w < VTS[v].key) {
           VTS[v].parent = u;
           VTS[v].key = w;
