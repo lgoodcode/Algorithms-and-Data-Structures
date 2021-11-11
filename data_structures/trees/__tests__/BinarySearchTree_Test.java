@@ -17,23 +17,17 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import data_structures.trees.BinarySearchTree;
-import data_structures.trees.TreeNode;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 public class BinarySearchTree_Test {
   BinarySearchTree<Integer, String> tree;
   BinarySearchTree<String, String> tree2;
-  TreeNode<Integer, String> node;
-  TreeNode<Integer, String> node2;
+  BinarySearchTree.Node<Integer, String> node;
+  BinarySearchTree.Node<Integer, String> node2;
 
   @Test
   void is_instantiated() {
     tree  = new BinarySearchTree<>();
-  }
-
-  @Test
-  void tree_node_instantiates() {
-    node = new TreeNode<>(1, "one");
   }
 
   @Nested 
@@ -115,7 +109,7 @@ public class BinarySearchTree_Test {
 
     @Test
     void entries_is_empty() {
-      Iterator<TreeNode<Integer, String>> entries = tree.entriesIterator();
+      Iterator<BinarySearchTree.Node<Integer, String>> entries = tree.entriesIterator();
       assertFalse(entries.hasNext());
       assertThrows(NoSuchElementException.class, () -> entries.next());
       assertThrows(IllegalStateException.class, () -> entries.remove());
@@ -150,11 +144,9 @@ public class BinarySearchTree_Test {
 
     @Test
     void search() {
-      node = new TreeNode<>(4, "four");
-      node2 = tree.search(4);
-
-      assertEquals(node.getKey(), node2.getKey());
-      assertEquals(node.getValue(), node2.getValue());
+      node = tree.search(4);
+      assertEquals(4, node.getKey());
+      assertEquals("four", node.getValue());
     }
 
     @Test
@@ -188,7 +180,7 @@ public class BinarySearchTree_Test {
     @Test
     void postorderTreeWalk() {
       StringBuilder str = new StringBuilder();
-      tree.postorderTreeWalk((TreeNode<Integer, String> node) -> 
+      tree.postorderTreeWalk((node) -> 
         str.append(node.toString() + "\n"));
       
       assertEquals("5 -> five\n"
@@ -227,7 +219,7 @@ public class BinarySearchTree_Test {
 
     @Test
     void entries() {
-      Iterator<TreeNode<Integer, String>> entries = tree.entriesIterator();
+      Iterator<BinarySearchTree.Node<Integer, String>> entries = tree.entriesIterator();
       assertTrue(entries.hasNext());
       assertEquals("one", entries.next().getValue());
       assertEquals("two", entries.next().getValue());

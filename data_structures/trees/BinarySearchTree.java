@@ -7,7 +7,7 @@ public class BinarySearchTree<K, V> extends AbstractTree<K, V> {
   /**
    * The root of the tree
    */
-  private TreeNode<K, V> root;
+  private Node<K, V> root;
 
   /**
    * Creates an empty, BinaryTree, using the specified compare function to
@@ -32,8 +32,8 @@ public class BinarySearchTree<K, V> extends AbstractTree<K, V> {
    * {@inheritDoc}
    */
   @SuppressWarnings("unchecked")
-  public final <Node extends TreeNode<K, V>> Node getRoot() {
-    return (Node) root;
+  public final Node<K, V> getRoot() {
+    return root;
   }
 
   /**
@@ -69,9 +69,9 @@ public class BinarySearchTree<K, V> extends AbstractTree<K, V> {
     checkValue(value);
     checkDuplicate(key);
 
-    TreeNode<K, V> x = root;
-    TreeNode<K, V> y = null;
-    TreeNode<K, V> z = new TreeNode<>(key, value);
+    Node<K, V> x = root;
+    Node<K, V> y = null;
+    Node<K, V> z = new Node<>(key, value);
 
     while (x != null) {
       y = x;
@@ -114,25 +114,25 @@ public class BinarySearchTree<K, V> extends AbstractTree<K, V> {
    * @throws IllegalArgumentException {@inheritDoc}
    */
   @SuppressWarnings("unchecked")
-  public <Node extends TreeNode<K, V>> Node search(Node node, K key) {
+  public <TreeNode extends Node<K, V>> TreeNode search(TreeNode node, K key) {
     checkKey(key);
 
     if (node == null || key == node.getKey())
       return node;
     if (isLessThan(key, node.getKey()))
-      return (Node) search(node.left, key);
-    return (Node) search(node.right, key);
+      return (TreeNode) search(node.left, key);
+    return (TreeNode) search(node.right, key);
   }
 
   /**
    * {@inheritDoc}
    */
   @SuppressWarnings("unchecked")
-  public <Node extends TreeNode<K, V>> Node minimum(Node node) {
+  public <TreeNode extends Node<K, V>> TreeNode minimum(TreeNode node) {
     if (node == null)
       return null;
     if (node.left != null)
-      return (Node) minimum(node.left);
+      return (TreeNode) minimum(node.left);
     return node;
   }
 
@@ -140,11 +140,11 @@ public class BinarySearchTree<K, V> extends AbstractTree<K, V> {
    * {@inheritDoc}
    */
   @SuppressWarnings("unchecked")
-  public <Node extends TreeNode<K, V>> Node maximum(Node node) {
+  public <TreeNode extends Node<K, V>> TreeNode maximum(TreeNode node) {
     if (node == null)
       return null;
     if (node.right != null)
-      return (Node) maximum(node.right);
+      return (TreeNode) maximum(node.right);
     return node;
   }
 
@@ -171,7 +171,7 @@ public class BinarySearchTree<K, V> extends AbstractTree<K, V> {
   /**
    * {@inheritDoc}
    */
-  protected <Node extends TreeNode<K, V>> void transplant(Node x, Node y) {
+  protected <TreeNode extends Node<K, V>> void transplant(TreeNode x, TreeNode y) {
     // If x is the root of the tree, make y the root
     if (x.parent == null)
       root = y;
@@ -210,7 +210,7 @@ public class BinarySearchTree<K, V> extends AbstractTree<K, V> {
    *
    * @throws NullPointerException {@inheritDoc}
    */
-  public synchronized <Node extends TreeNode<K, V>> void deleteNode(Node node) {
+  public synchronized <TreeNode extends Node<K, V>> void deleteNode(TreeNode node) {
     checkNode(node);
 
     /**
@@ -243,7 +243,7 @@ public class BinarySearchTree<K, V> extends AbstractTree<K, V> {
        * successor must be the node in that subtree with the smallest key; hence the
        * call to minimum(z.right).
        */
-      TreeNode<K, V> y = minimum(node.right);
+      Node<K, V> y = minimum(node.right);
 
       if (y.parent != node) {
         /**
@@ -293,17 +293,17 @@ public class BinarySearchTree<K, V> extends AbstractTree<K, V> {
    * @throws NullPointerException {@inheritDoc}
    */
   @SuppressWarnings("unchecked")
-  public <Node extends TreeNode<K, V>> Node successor(Node node) {
+  public <TreeNode extends Node<K, V>> TreeNode successor(TreeNode node) {
     checkNode(node);
 
     if (node.right != null)
-      return (Node) minimum(node.right);
+      return (TreeNode) minimum(node.right);
 
-    Node y = (Node) node.parent;
+    TreeNode y = (TreeNode) node.parent;
 
     while (y != null && node.equals(y.right)) {
       node = y;
-      y = (Node) y.parent;
+      y = (TreeNode) y.parent;
     }
 
     return y;
@@ -332,17 +332,17 @@ public class BinarySearchTree<K, V> extends AbstractTree<K, V> {
    * @throws NullPointerException {@inheritDoc}
    */
   @SuppressWarnings("unchecked")
-  public <Node extends TreeNode<K, V>> Node predecessor(Node node) {
+  public <TreeNode extends Node<K, V>> TreeNode predecessor(TreeNode node) {
     checkNode(node);
 
     if (node.left != null)
-      return (Node) maximum(node.left);
+      return (TreeNode) maximum(node.left);
 
-    Node y = (Node) node.parent;
+    TreeNode y = (TreeNode) node.parent;
 
     while (y != null && node.equals(y.left)) {
       node = y;
-      y = (Node) y.parent;
+      y = (TreeNode) y.parent;
     }
 
     return y;
@@ -352,11 +352,11 @@ public class BinarySearchTree<K, V> extends AbstractTree<K, V> {
    * {@inheritDoc}
    */
   @SuppressWarnings("unchecked")
-  public <Node extends TreeNode<K, V>> void inorderTreeWalk(Node node, Consumer<Node> callback) {
+  public <TreeNode extends Node<K, V>> void inorderTreeWalk(TreeNode node, Consumer<TreeNode> callback) {
     if (node != null) {
-      this.inorderTreeWalk((Node) node.left, callback);
+      this.inorderTreeWalk((TreeNode) node.left, callback);
       callback.accept(node);
-      this.inorderTreeWalk((Node) node.right, callback);
+      this.inorderTreeWalk((TreeNode) node.right, callback);
     }
   }
 
@@ -364,11 +364,11 @@ public class BinarySearchTree<K, V> extends AbstractTree<K, V> {
    * {@inheritDoc}
    */
   @SuppressWarnings("unchecked")
-  public <Node extends TreeNode<K, V>> void preorderTreeWalk(Node node, Consumer<Node> callback) {
+  public <TreeNode extends Node<K, V>> void preorderTreeWalk(TreeNode node, Consumer<TreeNode> callback) {
     if (node != null) {
       callback.accept(node);
-      this.preorderTreeWalk((Node) node.left, callback);
-      this.preorderTreeWalk((Node) node.right, callback);
+      this.preorderTreeWalk((TreeNode) node.left, callback);
+      this.preorderTreeWalk((TreeNode) node.right, callback);
     }
   }
 
@@ -376,10 +376,10 @@ public class BinarySearchTree<K, V> extends AbstractTree<K, V> {
    * {@inheritDoc}
    */
   @SuppressWarnings("unchecked")
-  public <Node extends TreeNode<K, V>> void postorderTreeWalk(Node node, Consumer<Node> callback) {
+  public <TreeNode extends Node<K, V>> void postorderTreeWalk(TreeNode node, Consumer<TreeNode> callback) {
     if (node != null) {
-      this.postorderTreeWalk((Node) node.left, callback);
-      this.postorderTreeWalk((Node) node.right, callback);
+      this.postorderTreeWalk((TreeNode) node.left, callback);
+      this.postorderTreeWalk((TreeNode) node.right, callback);
       callback.accept(node);
     }
   }

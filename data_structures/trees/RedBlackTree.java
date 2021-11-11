@@ -41,16 +41,80 @@ import java.util.function.Consumer;
  * </p>
  */
 public class RedBlackTree<K, V> extends AbstractTree<K, V> {
+  public static class RBNode<T, E> extends Node<T, E> {
+    protected RBNode<T, E> parent;
+    protected RBNode<T, E> left;
+    protected RBNode<T, E> right;
+  
+    /**
+     * Used to determine the type of {@code RedBlackTreeNode}. The two types are
+     * {@code Black (0)} and {@code Red (1)}.
+     */
+    protected int color = 0;
+  
+    /**
+     * Since the {@code RedBlackTree} may need to check the parent of a parent of a
+     * node and/or the color of that node, which may not even exist, it requires a
+     * circular structure {@code NIL} value which will hold pointers to itself and a
+     * default color of {@code Black}.
+     *
+     * <p>
+     * This is a static property which is used to initialize the
+     * {@code RedBlackTree} {@code NIL} value so it is only instantiated once as a
+     * constant and then referenced throughout the data struture to reduce memory
+     * usage.
+     * </p>
+     */
+    protected static final RBNode<?, ?> NIL = new RedBlackTree.RBNode<>();
+  
+    /**
+     * Creates a tree node with the specified key and value. It initializes the
+     * pointers of the {@code parent}, {@code left}, and {@code right} to an initial
+     * {@code NIL} node. This is to prevent {@code NullPointerException} when
+     * attempting to access its members if none exist yet.
+     *
+     * @param key   the key of the node
+     * @param value the value of the node
+     *
+     * @throws IllegalArgumentException if the key or value is {@code null} or blank
+     */
+    protected RBNode(T key, E value) {
+      super(key, value);
+      parent = left = right = new RBNode<>();
+    }
+  
+    /**
+     * Creates a circular {@code NIL} tree node that points to itself and has no key
+     * or value. It is simply used as an indicator that no node exists for another
+     * {@code RedBlackTreeNode} to prevent errors from occuring and for the tree to
+     * perform its operations.
+     */
+    protected RBNode() {
+      parent = left = right = this;
+    }
+  
+    /**
+     * Determines whether the current {@code RedBlackTreeNode} is a {@code NIL} node
+     * or not since the tree cannot perform relation checks if the a node is
+     * {@code null}.
+     *
+     * @return if the node is {@code NIL} or not
+     */
+    protected boolean isNIL() {
+      return getKey() == null;
+    }
+  
+  }
+
   /**
    * The sentinel {@code NIL}.
    */
-  @SuppressWarnings("unchecked")
-  private final RedBlackTreeNode<K, V> NIL = (RedBlackTreeNode<K, V>) RedBlackTreeNode.NIL;
+  private final RBNode<K, V> NIL = new RBNode<>();
 
   /**
    * The root of the tree which is initially the {@code NIL} sentinel.
    */
-  private RedBlackTreeNode<K, V> root = NIL;
+  private RBNode<K, V> root;
 
   // Color constants
   private final int BLACK = 0;
@@ -65,29 +129,7 @@ public class RedBlackTree<K, V> extends AbstractTree<K, V> {
    */
   public RedBlackTree(BiFunction<K, K, Boolean> compare) {
     super(compare);
-  }
-
-  /**
-   * Internal method to verify the {@code TreeNode} used for methods are
-   * {@code RedBlackNodes} that require it.
-   *
-   * @param <Node> {@link TreeNode} or a subclass of
-   * @param node   the node to verify
-   *
-   * @throws IllegalArgumentException if the supplied node is not an instance of
-   *                                  {@code RedBlackNodes}
-   */
-  private <Node extends TreeNode<K, V>> void checkType(Node node) {
-    if (node != null && node.getClass() != RedBlackTreeNode.class)
-      throw new IllegalArgumentException("Node must be an instance of AVLTreeNode.");
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @SuppressWarnings("unchecked")
-  public final <Node extends TreeNode<K, V>> Node getRoot() {
-    return (Node) root;
+    root = NIL;
   }
 
   /**
@@ -96,10 +138,36 @@ public class RedBlackTree<K, V> extends AbstractTree<K, V> {
    */
   public RedBlackTree() {
     super();
+    root = NIL;
   }
 
-  private void leftRotate(RedBlackTreeNode<K, V> x) {
-    RedBlackTreeNode<K, V> y = x.right;
+  /**
+   * Internal method to verify the {@code TreeNode} used for methods are
+   * {@code RBNode} that require it.
+   *
+   * @param <TreeNode> {@link RBNode}
+   * @param node       the node to verify
+   *
+   * @throws IllegalArgumentException if the supplied node is not an instance of
+   *                                  {@code RBNode}
+   */
+  private <TreeNode extends Node<K, V>> void checkType(TreeNode node) {
+    if (node != null && node.getClass() != RBNode.class)
+      throw new IllegalArgumentException("TreeNode must be an instance of RedBlackTree.RBNode");
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @param <TreeNode> {@link RBNode}
+   */
+  @SuppressWarnings("unchecked")
+  public final RBNode<K, V> getRoot() {
+    return root;
+  }
+
+  private void leftRotate(RBNode<K, V> x) {
+    RBNode<K, V> y = x.right;
 
     // Make x's right subtree be y's left subtree
     x.right = y.left;
@@ -121,8 +189,8 @@ public class RedBlackTree<K, V> extends AbstractTree<K, V> {
     x.parent = y;
   }
 
-  private void rightRotate(RedBlackTreeNode<K, V> x) {
-    RedBlackTreeNode<K, V> y = x.left;
+  private void rightRotate(RBNode<K, V> x) {
+    RBNode<K, V> y = x.left;
 
     x.left = y.right;
 
@@ -170,9 +238,9 @@ public class RedBlackTree<K, V> extends AbstractTree<K, V> {
 
     count++;
 
-    RedBlackTreeNode<K, V> x = root;
-    RedBlackTreeNode<K, V> y = NIL;
-    RedBlackTreeNode<K, V> z = new RedBlackTreeNode<>(key, value);
+    RBNode<K, V> x = root;
+    RBNode<K, V> y = NIL;
+    RBNode<K, V> z = new RBNode<>(key, value);
 
     while (!x.isNIL()) {
       y = x;
@@ -214,8 +282,8 @@ public class RedBlackTree<K, V> extends AbstractTree<K, V> {
    * if {@code z}'s parent is red.
    * </p>
    */
-  private void insertFixup(RedBlackTreeNode<K, V> z) {
-    RedBlackTreeNode<K, V> y;
+  private void insertFixup(RBNode<K, V> z) {
+    RBNode<K, V> y;
 
     while (z.parent.color == RED) {
       if (z.parent == z.parent.parent.left) {
@@ -289,23 +357,24 @@ public class RedBlackTree<K, V> extends AbstractTree<K, V> {
   /**
    * {@inheritDoc}
    *
+   * @param <TreeNode> {@link RBNode}
    * @throws IllegalArgumentException {@inheritDoc}, or if the supplied node is
    *                                  not an {@code RedBlackTreeNode}
    */
   @SuppressWarnings("unchecked")
-  public <Node extends TreeNode<K, V>> Node search(Node node, K key) {
+  public <TreeNode extends Node<K, V>> TreeNode search(TreeNode node, K key) {
     checkType(node);
     checkKey(key);
 
-    RedBlackTreeNode<K, V> _node = (RedBlackTreeNode<K, V>) node;
+    RBNode<K, V> _node = (RBNode<K, V>) node;
 
     if (_node.isNIL())
       return null;
     if (key == _node.getKey())
-      return (Node) _node;
+      return (TreeNode) _node;
     if (isLessThan(key, _node.getKey()))
-      return (Node) search(_node.left, key);
-    return (Node) search(_node.right, key);
+      return (TreeNode) search(_node.left, key);
+    return (TreeNode) search(_node.right, key);
   }
 
   /**
@@ -316,20 +385,22 @@ public class RedBlackTree<K, V> extends AbstractTree<K, V> {
    * check for {@code null} node and then if the node is {@code NIL}.
    * </p>
    *
+   * @param <TreeNode> {@link RBNode}
+   * 
    * @throws IllegalArgumentException if the supplied node is not an
    *                                  {@code RedBlackTreeNode}
    */
   @SuppressWarnings("unchecked")
-  public <Node extends TreeNode<K, V>> Node minimum(Node node) {
+  public <TreeNode extends Node<K, V>> TreeNode minimum(TreeNode node) {
     checkType(node);
 
-    RedBlackTreeNode<K, V> _node = (RedBlackTreeNode<K, V>) node;
+    RBNode<K, V> _node = (RBNode<K, V>) node;
 
     if (_node == null || _node.isNIL())
       return null;
     if (!_node.left.isNIL())
-      return (Node) minimum(_node.left);
-    return (Node) _node;
+      return (TreeNode) minimum(_node.left);
+    return (TreeNode) _node;
   }
 
   /**
@@ -340,29 +411,33 @@ public class RedBlackTree<K, V> extends AbstractTree<K, V> {
    * check for {@null} node and then if the node is {@code NIL}.
    * </p>
    *
+   * @param <TreeNode> {@link RBNode}
+   * 
    * @throws IllegalArgumentException if the supplied node is not an
    *                                  {@code RedBlackTreeNode}
    */
   @SuppressWarnings("unchecked")
-  public <Node extends TreeNode<K, V>> Node maximum(Node node) {
+  public <TreeNode extends Node<K, V>> TreeNode maximum(TreeNode node) {
     checkType(node);
 
-    RedBlackTreeNode<K, V> _node = (RedBlackTreeNode<K, V>) node;
+    RBNode<K, V> _node = (RBNode<K, V>) node;
 
     if (_node == null || _node.isNIL())
       return null;
     if (!_node.right.isNIL())
-      return (Node) maximum(_node.right);
-    return (Node) _node;
+      return (TreeNode) maximum(_node.right);
+    return (TreeNode) _node;
   }
 
   /**
    * {@inheritDoc}
+   * 
+   * @param <TreeNode> {@link RBNode}
    */
   @SuppressWarnings("unchecked")
-  protected <Node extends TreeNode<K, V>> void transplant(Node x, Node y) {
-    RedBlackTreeNode<K, V> _x = (RedBlackTreeNode<K, V>) x;
-    RedBlackTreeNode<K, V> _y = (RedBlackTreeNode<K, V>) y;
+  protected <TreeNode extends Node<K, V>> void transplant(TreeNode x, TreeNode y) {
+    RBNode<K, V> _x = (RBNode<K, V>) x;
+    RBNode<K, V> _y = (RBNode<K, V>) y;
 
     if (_x.parent.isNIL())
       root = _y;
@@ -425,18 +500,20 @@ public class RedBlackTree<K, V> extends AbstractTree<K, V> {
    * remains black</li>
    * </ol>
    *
+   * @param <TreeNode> {@link RBNode}
+   * 
    * @throws NullPointerException {@inheritDoc}, or if the supplied node is not an
    *                              {@code RedBlackTreeNode}
    */
   @SuppressWarnings("unchecked")
-  public synchronized <Node extends TreeNode<K, V>> void deleteNode(Node node) {
+  public synchronized <TreeNode extends Node<K, V>> void deleteNode(TreeNode node) {
     if (node == null)
-      throw new NullPointerException("Node cannot be null.");
+      throw new NullPointerException("TreeNode cannot be null.");
 
     checkType(node);
     count--;
 
-    RedBlackTreeNode<K, V> x, y = (RedBlackTreeNode<K, V>) node, _node = y;
+    RBNode<K, V> x, y = (RBNode<K, V>) node, _node = y;
     int y_color = y.color;
 
     if (_node.left.isNIL()) {
@@ -494,8 +571,8 @@ public class RedBlackTree<K, V> extends AbstractTree<K, V> {
    *
    * @param node the node to fix the properties from the removal process
    */
-  private void deleteFixup(RedBlackTreeNode<K, V> node) {
-    RedBlackTreeNode<K, V> w;
+  private void deleteFixup(RBNode<K, V> node) {
+    RBNode<K, V> w;
 
     while (node != root && node.color == BLACK) {
       if (node == node.parent.left) {
@@ -596,21 +673,22 @@ public class RedBlackTree<K, V> extends AbstractTree<K, V> {
   /**
    * {@inheritDoc}
    *
+   * @param <TreeNode> {@link RBNode}
    * @throws NullPointerException {@inheritDoc}, or if the supplied node is not an
    *                              {@code RedBlackTreeNode}
    */
   @SuppressWarnings("unchecked")
-  public <Node extends TreeNode<K, V>> Node successor(Node node) {
+  public <TreeNode extends Node<K, V>> TreeNode successor(TreeNode node) {
     if (node == null)
-      throw new NullPointerException("Node cannot be null.");
+      throw new NullPointerException("TreeNode cannot be null.");
 
     checkType(node);
-    RedBlackTreeNode<K, V> y, _node = (RedBlackTreeNode<K, V>) node;
+    RBNode<K, V> y, _node = (RBNode<K, V>) node;
 
     if (_node.isNIL())
       return null;
     if (!_node.right.isNIL())
-      return (Node) minimum(_node.right);
+      return (TreeNode) minimum(_node.right);
 
     y = _node.parent;
 
@@ -619,27 +697,28 @@ public class RedBlackTree<K, V> extends AbstractTree<K, V> {
       y = y.parent;
     }
 
-    return (Node) y;
+    return (TreeNode) y;
   }
 
   /**
    * {@inheritDoc}
    *
+   * @param <TreeNode> {@link RBNode}
    * @throws NullPointerException {@inheritDoc}, or if the supplied node is not an
    *                              {@code RedBlackTreeNode}
    */
   @SuppressWarnings("unchecked")
-  public <Node extends TreeNode<K, V>> Node predecessor(Node node) {
+  public <TreeNode extends Node<K, V>> TreeNode predecessor(TreeNode node) {
     if (node == null)
-      throw new NullPointerException("Node cannot be null.");
+      throw new NullPointerException("TreeNode cannot be null.");
 
     checkType(node);
-    RedBlackTreeNode<K, V> y, _node = (RedBlackTreeNode<K, V>) node;
+    RBNode<K, V> y, _node = (RBNode<K, V>) node;
 
     if (_node.isNIL())
       return null;
     if (!_node.left.isNIL())
-      return (Node) maximum(_node.left);
+      return (TreeNode) maximum(_node.left);
 
     y = _node.parent;
 
@@ -648,60 +727,63 @@ public class RedBlackTree<K, V> extends AbstractTree<K, V> {
       y = y.parent;
     }
 
-    return (Node) y;
+    return (TreeNode) y;
   }
 
   /**
    * {@inheritDoc}
    *
+   * @param <TreeNode> {@link RBNode}
    * @throws IllegalArgumentException if the supplied node is not an
    *                                  {@code RedBlackTreeNode}
    */
   @SuppressWarnings("unchecked")
-  public <Node extends TreeNode<K, V>> void inorderTreeWalk(Node node, Consumer<Node> callback) {
+  public <TreeNode extends Node<K, V>> void inorderTreeWalk(TreeNode node, Consumer<TreeNode> callback) {
     checkType(node);
-    RedBlackTreeNode<K, V> _node = (RedBlackTreeNode<K, V>) node;
+    RBNode<K, V> _node = (RBNode<K, V>) node;
 
     if (_node != null && !_node.isNIL()) {
-      this.inorderTreeWalk((Node) _node.left, callback);
-      callback.accept((Node) _node);
-      this.inorderTreeWalk((Node) _node.right, callback);
+      this.inorderTreeWalk((TreeNode) _node.left, callback);
+      callback.accept((TreeNode) _node);
+      this.inorderTreeWalk((TreeNode) _node.right, callback);
     }
   }
 
   /**
    * {@inheritDoc}
    *
+   * @param <TreeNode> {@link RBNode}
    * @throws IllegalArgumentException if the supplied node is not an
    *                                  {@code RedBlackTreeNode}
    */
   @SuppressWarnings("unchecked")
-  public <Node extends TreeNode<K, V>> void preorderTreeWalk(Node node, Consumer<Node> callback) {
+  public <TreeNode extends Node<K, V>> void preorderTreeWalk(TreeNode node, Consumer<TreeNode> callback) {
     checkType(node);
-    RedBlackTreeNode<K, V> _node = (RedBlackTreeNode<K, V>) node;
+    RBNode<K, V> _node = (RBNode<K, V>) node;
 
     if (_node != null && !_node.isNIL()) {
-      callback.accept((Node) _node);
-      this.preorderTreeWalk((Node) _node.left, callback);
-      this.preorderTreeWalk((Node) _node.right, callback);
+      callback.accept((TreeNode) _node);
+      this.preorderTreeWalk((TreeNode) _node.left, callback);
+      this.preorderTreeWalk((TreeNode) _node.right, callback);
     }
   }
 
   /**
    * {@inheritDoc}
    *
+   * @param <TreeNode> {@link RBNode}
    * @throws IllegalArgumentException if the supplied node is not an
    *                                  {@code RedBlackTreeNode}
    */
   @SuppressWarnings("unchecked")
-  public <Node extends TreeNode<K, V>> void postorderTreeWalk(Node node, Consumer<Node> callback) {
+  public <TreeNode extends Node<K, V>> void postorderTreeWalk(TreeNode node, Consumer<TreeNode> callback) {
     checkType(node);
-    RedBlackTreeNode<K, V> _node = (RedBlackTreeNode<K, V>) node;
+    RBNode<K, V> _node = (RBNode<K, V>) node;
 
     if (_node != null && !_node.isNIL()) {
-      this.postorderTreeWalk((Node) _node.left, callback);
-      this.postorderTreeWalk((Node) _node.right, callback);
-      callback.accept((Node) _node);
+      this.postorderTreeWalk((TreeNode) _node.left, callback);
+      this.postorderTreeWalk((TreeNode) _node.right, callback);
+      callback.accept((TreeNode) _node);
     }
   }
 

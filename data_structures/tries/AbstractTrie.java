@@ -210,7 +210,7 @@ public abstract class AbstractTrie<V> {
    * any parent node if the current node is a word or contains nodes with words.
    * </p>
    *
-   * @param <Node> a subclass of {@link AbstractTrieNode}
+   * @param <AVLNode> a subclass of {@link AbstractTrieNode}
    * @param word the word of the {@code TrieNode} to delete
    *
    * @throws IllegalArgumentException if the word or value is {@code null} or

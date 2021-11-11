@@ -11,6 +11,49 @@ import data_structures.EmptyEnumerator;
 import data_structures.queues.Queue;
 
 public abstract class AbstractTree<K, V> {
+  public static class Node<T, E> {
+    protected Node<T, E> parent;
+    protected Node<T, E> left;
+    protected Node<T, E> right;
+    private T key;
+    private E value;
+
+    /**
+     * Constructor that initializes a tree node with the specified key and value.
+     *
+     * @param key   the key of the node
+     * @param value the value of the node
+     *
+     * @throws IllegalArgumentException if the key or value is {@code null} or blank
+     */
+    protected Node(T key, E value) {
+      if (key == null || key.toString().isBlank())
+        throw new IllegalArgumentException("Key cannot be null or empty.");
+      if (value == null || value.toString().isBlank())
+        throw new IllegalArgumentException("Value cannot be null or empty.");
+
+      this.key = key;
+      this.value = value;
+    }
+
+    /**
+     * Default constructor used for {@code RedBlackTree} sentinel.
+     */
+    protected Node() {}
+
+    public final T getKey() {
+      return key;
+    }
+
+    public final E getValue() {
+      return value;
+    }
+
+    public final String toString() {
+      return key + " -> " + value;
+    }
+  }
+
   /**
    * The function used to compare two keys and returns a boolean value indicating
    * whether the first argument is less than the second argument.
@@ -83,7 +126,7 @@ public abstract class AbstractTree<K, V> {
    * @throws NullPointerException     if the either node is {@code null}
    * @throws IllegalArgumentException if either key is {@code null} or blank
    */
-  protected final <Node extends TreeNode<K, V>> boolean isLessThan(Node x, Node y) {
+  protected final <T extends Node<K, V>> boolean isLessThan(T x, T y) {
     if (x == null || y == null)
       throw new NullPointerException("Node cannot be null.");
     return isLessThan(x.getKey(), y.getKey());
@@ -128,13 +171,13 @@ public abstract class AbstractTree<K, V> {
   }
 
   /**
-   * Checks to make sure the specified {@code TreeNode} is not {@code null}.
+   * Checks to make sure the specified tree node is not {@code null}.
    *
-   * @param <Node> {@link TreeNode} or a subclass of
+   * @param <TreeNode> {@code Abstract.Node} or a subclass of
    *
    * @throws NullPointerException if the specified node is {@code null}
    */
-  protected final <Node extends TreeNode<K, V>> void checkNode(Node node) {
+  protected final <TreeNode extends Node<K, V>> void checkNode(TreeNode node) {
     if (node == null)
       throw new NullPointerException("Node cannot be null.");
   }
@@ -158,12 +201,12 @@ public abstract class AbstractTree<K, V> {
   }
 
   /**
-   * Retrieves the {@code root} {@code TreeNode}.
+   * Retrieves the root {@code TreeNode}.
    *
-   * @param <Node> {@link TreeNode} or a subclass of
-   * @return the {@code root} {@code TreeNode}
+   * @param <TreeNode> {@code Abstract.Node} or a subclass of
+   * @return the root {@code TreeNode}
    */
-  public abstract <Node extends TreeNode<K, V>> Node getRoot();
+  public abstract <TreeNode extends Node<K, V>> TreeNode getRoot();
 
   /**
    * Inserts a new {@code TreeNode} into the tree with the given key and value.
@@ -182,25 +225,25 @@ public abstract class AbstractTree<K, V> {
    * {@code TreeNode} so that it can descend further until either the the correct
    * node is found with the matching key, or we reach the end.
    *
-   * @param <Node> {@link TreeNode} or a subclass of
+   * @param <TreeNode> {@code Abstract.Node} or a subclass of
    * @param node   the current tree node
    * @param key    the key of the node to find
    * @return the tree node or {@code null} if not found
    *
    * @throws IllegalArgumentException if the key is {@code null} or blank
    */
-  public abstract <Node extends TreeNode<K, V>> Node search(Node node, K key);
+  public abstract <TreeNode extends Node<K, V>> TreeNode search(TreeNode node, K key);
 
   /**
    * Search for a node for the specified key starting at the {@code root}.
    *
-   * @param <Node> {@link TreeNode} or a subclass of
+   * @param <TreeNode> {@code Abstract.Node} or a subclass of
    * @param key    the key of the node to find
    * @return the tree node or {@code null} if not found
    *
    * @throws IllegalArgumentException if the key is {@code null} or blank
    */
-  public final <Node extends TreeNode<K, V>> Node search(K key) {
+  public final <TreeNode extends Node<K, V>> TreeNode search(K key) {
     return search(getRoot(), key);
   }
 
@@ -216,20 +259,20 @@ public abstract class AbstractTree<K, V> {
    * Finds the {@code TreeNode} with the smallest key by recursively traversing
    * down the left subtree.
    *
-   * @param <Node> {@link TreeNode} or a subclass of
+   * @param <TreeNode> {@code Abstract.Node} or a subclass of
    * @param node   the {@code TreeNode} to start traversing from
    * @return the {@code TreeNode} with the smallest key or {@null} if none
    */
-  public abstract <Node extends TreeNode<K, V>> Node minimum(Node node);
+  public abstract <TreeNode extends Node<K, V>> TreeNode minimum(TreeNode node);
 
   /**
    * Finds the {@code TreeNode} with the smallest key by recursively traversing
    * down the left subtree starting at the root of the tree.
    *
-   * @param <Node> {@link TreeNode} or a subclass of
+   * @param <TreeNode> {@code Abstract.Node} or a subclass of
    * @return the {@code TreeNode} with the smallest key or {@null} if none
    */
-  public final <Node extends TreeNode<K, V>> Node minimum() {
+  public final <TreeNode extends Node<K, V>> TreeNode minimum() {
     return minimum(getRoot());
   }
 
@@ -245,20 +288,20 @@ public abstract class AbstractTree<K, V> {
    * Finds the {@code TreeNode} with the largest key by recursively traversing
    * down the right subtree.
    *
-   * @param <Node> {@link TreeNode} or a subclass of
+   * @param <TreeNode> {@code Abstract.Node} or a subclass of
    * @param node   the {@code TreeNode} to start traversing at
    * @return the {@code TreeNode} with the largest key or {@null} if none
    */
-  public abstract <Node extends TreeNode<K, V>> Node maximum(Node node);
+  public abstract <TreeNode extends Node<K, V>> TreeNode maximum(TreeNode node);
 
   /**
    * Finds the {@code TreeNode} with the largest key by recursively traversing
    * down the left subtree starting at the root of the tree.
    *
-   * @param <Node> {@link TreeNode} or a subclass of
+   * @param <TreeNode> {@code Abstract.Node} or a subclass of
    * @return the {@code TreeNode} with the largest key or {@null} if none
    */
-  public final <Node extends TreeNode<K, V>> Node maximum() {
+  public final <TreeNode extends Node<K, V>> TreeNode maximum() {
     return maximum(getRoot());
   }
 
@@ -279,14 +322,14 @@ public abstract class AbstractTree<K, V> {
    * Retrieves the value for the corresponding tree node of the given key or
    * {@code null} if not found.
    *
-   * @param <Node> {@link TreeNode} or a subclass of
+   * @param <TreeNode> {@code Abstract.Node} or a subclass of
    * @param key    the key of the tree node
    * @return the value or {@code null} if not found
    *
    * @throws IllegalArgumentException if the key or value is {@code null} or blank
    */
-  public final <Node extends TreeNode<K, V>> V get(K key) {
-    Node node = search(key);
+  public final <TreeNode extends Node<K, V>> V get(K key) {
+    TreeNode node = search(key);
     return node != null ? node.getValue() : null;
   }
 
@@ -295,35 +338,35 @@ public abstract class AbstractTree<K, V> {
    * of its parent with another subtree. x's parent becomes y's parent and x's
    * parent ends up having y as its child.
    *
-   * @param <Node> {@link TreeNode} or a subclass of
+   * @param <TreeNode> {@code Abstract.Node} or a subclass of
    * @param x      {@code TreeNode}
    * @param y      {@code TreeNode}
    */
-  protected abstract <Node extends TreeNode<K, V>> void transplant(Node x, Node y);
+  protected abstract <TreeNode extends Node<K, V>> void transplant(TreeNode x, TreeNode y);
 
   /**
    * Deletes the specified {@code TreeNode} from the tree. Calls the
    * {@code transplant()} method to adjust the tree nodes to replace the removed
    * node.
    *
-   * @param <Node> {@link TreeNode} or a subclass of
+   * @param <TreeNode> {@code Abstract.Node} or a subclass of
    * @param node   the {@code TreeNode} to remove
    * @see #transplant()
    *
    * @throws NullPointerException if the {@code TreeNode} is {@code null}
    */
-  public abstract <Node extends TreeNode<K, V>> void deleteNode(Node node);
+  public abstract <TreeNode extends Node<K, V>> void deleteNode(TreeNode node);
 
   /**
    * Deletes a tree node with the specified key.
    *
-   * @param <Node> {@link TreeNode} or a subclass of
+   * @param <TreeNode> {@code Abstract.Node} or a subclass of
    * @param key    the key of the tree node to delete
    *
    * @throws IllegalArgumentException if the key or value is {@code null} or blank
    */
-  public final <Node extends TreeNode<K, V>> void delete(K key) {
-    Node node = search(key);
+  public final <TreeNode extends Node<K, V>> void delete(K key) {
+    TreeNode node = search(key);
     if (node != null)
       deleteNode(node);
   }
@@ -333,26 +376,26 @@ public abstract class AbstractTree<K, V> {
    * without comparing keys. This is done by simply returning the child node with
    * the largest key down the right subtree.
    *
-   * @param <Node> {@link TreeNode} or a subclass of
+   * @param <TreeNode> {@code Abstract.Node} or a subclass of
    * @param node   the {@code TreeNode} to find the successor of
    * @return the successor or {@code null} if none
    *
    * @throws NullPointerException if the node specified is {@code null}
    */
-  public abstract <Node extends TreeNode<K, V>> Node successor(Node node);
+  public abstract <TreeNode extends Node<K, V>> TreeNode successor(TreeNode node);
 
   /**
    * Finds the node that will immediately precede the given {@code TreeNode}
    * without comparing keys. This is done by simply returning the child node with
    * the smallest key down the left subtree.
    *
-   * @param <Node> {@link TreeNode} or a subclass of
+   * @param <TreeNode> {@code Abstract.Node} or a subclass of
    * @param node   the {@code TreeNode} to find the predecessor of
    * @return the predecessor or {@code null} if none
    *
    * @throws NullPointerException if the node specified is {@code null}
    */
-  public abstract <Node extends TreeNode<K, V>> Node predecessor(Node node);
+  public abstract <TreeNode extends Node<K, V>> TreeNode predecessor(TreeNode node);
 
   /**
    * Tree-Walk takes (-)(n) time to walk an n-node binary tree, since after the
@@ -379,12 +422,12 @@ public abstract class AbstractTree<K, V> {
    * through side-effects.
    * </p>
    *
-   * @param <Node>   {@link TreeNode} or a subclass of
+   * @param <TreeNode>   {@link Abtract.AVLNode} or a subclass of
    * @param node     the node to start traversing from
    * @param callback the function with the given action to perform on each
    *                 {@code TreeNode}
    */
-  public abstract <Node extends TreeNode<K, V>> void inorderTreeWalk(Node node, Consumer<Node> callback);
+  public abstract <TreeNode extends Node<K, V>> void inorderTreeWalk(TreeNode node, Consumer<TreeNode> callback);
 
   /**
    * Traverse the tree by visiting the current node before the child nodes.
@@ -394,12 +437,12 @@ public abstract class AbstractTree<K, V> {
    * through side-effects.
    * </p>
    *
-   * @param <Node>   {@link TreeNode} or a subclass of
+   * @param <TreeNode>   {@link Abtract.AVLNode} or a subclass of
    * @param node     the node to start traversing from
    * @param callback the function with the given action to perform on each
    *                 {@code TreeNode}
    */
-  public abstract <Node extends TreeNode<K, V>> void preorderTreeWalk(Node node, Consumer<Node> callback);
+  public abstract <TreeNode extends Node<K, V>> void preorderTreeWalk(TreeNode node, Consumer<TreeNode> callback);
 
   /**
    * Traverse the tree by visiting the child nodes before the current node.
@@ -409,12 +452,12 @@ public abstract class AbstractTree<K, V> {
    * through side-effects.
    * </p>
    *
-   * @param <Node>   {@link TreeNode} or a subclass of
+   * @param <TreeNode>   {@link Abtract.AVLNode} or a subclass of
    * @param node     the node to start traversing from
    * @param callback the function with the given action to perform on each
    *                 {@code TreeNode}
    */
-  public abstract <Node extends TreeNode<K, V>> void postorderTreeWalk(Node node, Consumer<Node> callback);
+  public abstract <TreeNode extends Node<K, V>> void postorderTreeWalk(TreeNode node, Consumer<TreeNode> callback);
 
   /**
    * Traverse the tree by visiting the left most nodes, which will be in sorted
@@ -424,11 +467,11 @@ public abstract class AbstractTree<K, V> {
    * Begins traversal from the {@code root} of the tree.
    * </p>
    *
-   * @param <Node>   {@link TreeNode} or a subclass of
+   * @param <TreeNode>   {@link Abtract.AVLNode} or a subclass of
    * @param callback the function with the given action to perform on each
    *                 {@code TreeNode}
    */
-  public final <Node extends TreeNode<K, V>> void inorderTreeWalk(Consumer<Node> callback) {
+  public final <TreeNode extends Node<K, V>> void inorderTreeWalk(Consumer<TreeNode> callback) {
     inorderTreeWalk(getRoot(), callback);
   }
 
@@ -439,11 +482,11 @@ public abstract class AbstractTree<K, V> {
    * Begins traversal from the {@code root} of the tree.
    * </p>
    *
-   * @param <Node>   {@link TreeNode} or a subclass of
+   * @param <TreeNode>   {@link Abtract.AVLNode} or a subclass of
    * @param callback the function with the given action to perform on each
    *                 {@code TreeNode}
    */
-  public final <Node extends TreeNode<K, V>> void preorderTreeWalk(Consumer<Node> callback) {
+  public final <TreeNode extends Node<K, V>> void preorderTreeWalk(Consumer<TreeNode> callback) {
     preorderTreeWalk(getRoot(), callback);
   }
 
@@ -454,11 +497,11 @@ public abstract class AbstractTree<K, V> {
    * Begins traversal from the {@code root} of the tree.
    * </p>
    *
-   * @param <Node>   {@link TreeNode} or a subclass of
+   * @param <TreeNode>   {@link Abtract.AVLNode} or a subclass of
    * @param callback the function with the given action to perform on each
    *                 {@code TreeNode}
    */
-  public final <Node extends TreeNode<K, V>> void postorderTreeWalk(Consumer<Node> callback) {
+  public final <TreeNode extends Node<K, V>> void postorderTreeWalk(Consumer<TreeNode> callback) {
     postorderTreeWalk(getRoot(), callback);
   }
 
@@ -475,7 +518,7 @@ public abstract class AbstractTree<K, V> {
 
     StringBuilder sb = new StringBuilder("{\n");
 
-    inorderTreeWalk((TreeNode<K, V> x) -> sb.append("\s\s\"" + x.toString() + "\",\n"));
+    inorderTreeWalk((Node<K, V> x) -> sb.append("\s\s\"" + x.toString() + "\",\n"));
 
     return sb.toString() + "}";
   }
@@ -527,7 +570,7 @@ public abstract class AbstractTree<K, V> {
     return getIterable(VALUES);
   }
 
-  public final <E extends TreeNode<K, V>> Iterable<E> entries() {
+  public final <E extends Node<K, V>> Iterable<E> entries() {
     return getIterable(ENTRIES);
   }
 
@@ -539,7 +582,7 @@ public abstract class AbstractTree<K, V> {
     return getIterator(VALUES);
   }
 
-  public final <E extends TreeNode<K, V>> Iterator<E> entriesIterator() {
+  public final <E extends Node<K, V>> Iterator<E> entriesIterator() {
     return getIterator(ENTRIES);
   }
 
@@ -551,7 +594,7 @@ public abstract class AbstractTree<K, V> {
     return getEnumeration(VALUES);
   }
 
-  public final <E extends TreeNode<K, V>> Enumeration<E> entriesEnumeration() {
+  public final <E extends Node<K, V>> Enumeration<E> entriesEnumeration() {
     return getEnumeration(ENTRIES);
   }
 
@@ -565,8 +608,8 @@ public abstract class AbstractTree<K, V> {
    * @param <T> the type of the object that is being enumerated
    */
   protected final class Enumerator<T> implements Enumeration<T>, Iterator<T>, Iterable<T> {
-    protected Queue<TreeNode<K, V>> entries;
-    protected TreeNode<K, V> last;
+    protected Queue<Node<K, V>> entries;
+    protected Node<K, V> last;
     protected int type, size;
 
     /**
@@ -595,7 +638,7 @@ public abstract class AbstractTree<K, V> {
       this.type = type;
       entries = new Queue<>(size);
 
-      inorderTreeWalk((TreeNode<K, V> node) -> entries.enqueue(node));
+      inorderTreeWalk((Node<K, V> node) -> entries.enqueue(node));
     }
 
     // Iterable method

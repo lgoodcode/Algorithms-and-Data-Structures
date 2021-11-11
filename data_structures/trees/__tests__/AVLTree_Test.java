@@ -17,23 +17,17 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import data_structures.trees.AVLTree;
-import data_structures.trees.AVLTreeNode;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 public class AVLTree_Test {
   AVLTree<Integer, String> tree;
   AVLTree<String, String> tree2;
-  AVLTreeNode<Integer, String> node;
-  AVLTreeNode<Integer, String> node2;
+  AVLTree.AVLNode<Integer, String> node;
+  AVLTree.AVLNode<String, String> node2;
 
   @Test
   void is_instantiated() {
     tree  = new AVLTree<>();
-  }
-
-  @Test
-  void tree_node_instantiates() {
-    node = new AVLTreeNode<>(1, "one");
   }
 
   @Nested 
@@ -115,7 +109,7 @@ public class AVLTree_Test {
 
     @Test
     void entries_is_empty() {
-      Iterator<AVLTreeNode<Integer, String>> entries = tree.entriesIterator();
+      Iterator<AVLTree.AVLNode<Integer, String>> entries = tree.entriesIterator();
       assertFalse(entries.hasNext());
       assertThrows(NoSuchElementException.class, () -> entries.next());
       assertThrows(IllegalStateException.class, () -> entries.remove());
@@ -150,11 +144,10 @@ public class AVLTree_Test {
 
     @Test
     void search() {
-      node = new AVLTreeNode<>(4, "four");
-      node2 = tree.search(4);
+      node = tree.search(4);
 
-      assertEquals(node.getKey(), node2.getKey());
-      assertEquals(node.getValue(), node2.getValue());
+      assertEquals(4, node.getKey());
+      assertEquals("four", node.getValue());
     }
 
     @Test
@@ -188,7 +181,7 @@ public class AVLTree_Test {
     @Test
     void postorderTreeWalk() {
       StringBuilder str = new StringBuilder();
-      tree.postorderTreeWalk((AVLTreeNode<Integer, String> node) -> 
+      tree.postorderTreeWalk((node) -> 
         str.append(node.toString() + "\n"));
       
       assertEquals(
@@ -228,7 +221,7 @@ public class AVLTree_Test {
 
     @Test
     void entries() {
-      Iterator<AVLTreeNode<Integer, String>> entries = tree.entriesIterator();
+      Iterator<AVLTree.AVLNode<Integer, String>> entries = tree.entriesIterator();
       assertTrue(entries.hasNext());
       assertEquals("one", entries.next().getValue());
       assertEquals("two", entries.next().getValue());

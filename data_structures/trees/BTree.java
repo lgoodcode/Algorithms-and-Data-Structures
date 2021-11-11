@@ -15,7 +15,7 @@ import data_structures.queues.Queue;
  * with the initializing minimum degree {@code t}. This includes a parallel
  * array to hold a value with the associated key. Since the data structure is
  * generic, it can be anything. A mention at the bottom includes more on this.
- * 
+ *
  * <p>
  * B-Tree 'T' is a rooted tree having the following properties:
  * </p>
@@ -89,6 +89,108 @@ import data_structures.queues.Queue;
  * </p>
  */
 public final class BTree<K, V> {
+  public static final class BTreeNode<K, V> {
+    /**
+     * The child {@code BTreeNodes}.
+     */
+    protected BTreeNode<K, V>[] children;
+
+    /**
+     * The number of keys currently stored under this node.
+     */
+    protected int count;
+
+    /**
+     * Whether this node is a leaf or internal node.
+     */
+    protected boolean leaf;
+
+    /**
+     * The actual keys
+     */
+    protected K[] keys;
+
+    /**
+     * The values
+     */
+    protected V[] values;
+
+    /**
+     * Constructs an empty {@code BTreeNode} with the specified {@code t},
+     * <i>maximum degree</i> to determine the maximum number of keys and child nodes
+     * for a <i>full node</i>.
+     *
+     * @param t the maximum degree
+     *
+     * @throws IllegalArgumentException if the specified maximum degree is less than
+     *                                  {@code 2}
+     */
+    @SuppressWarnings("unchecked")
+    public BTreeNode(int t) {
+      if (t < 1)
+        throw new IllegalArgumentException("Minimum degree must be >= 2");
+
+      int full = 2 * t - 1;
+      children = (BTreeNode<K, V>[]) new BTreeNode<?, ?>[2 * t];
+      keys = (K[]) new Object[full];
+      values = (V[]) new Object[full];
+      count = 0;
+      leaf = true;
+    }
+
+    public K getMinKey() {
+      return keys[0];
+    }
+
+    public K getMaxKey() {
+      return count > 0 ? keys[count - 1] : null;
+    }
+
+    public V getMinValue() {
+      return values[0];
+    }
+
+    public V getMaxValue() {
+      return count > 0 ? values[count - 1] : null;
+    }
+
+    protected void shiftKeys(int start, int end) {
+      if (start < end) {
+        for (int i = start, j = end; i < j; i++) {
+          keys[i] = keys[i+1];
+          values[i] = values[i+1];
+        }
+      }
+      else {
+        for (int i = start, j = end; i > j; i--) {
+          keys[i] = keys[i-1];
+          values[i] = values[i-1];
+        }
+      }
+    }
+
+    protected void removeKeys(int i, int j) {
+      if (i > j)
+        throw new IllegalArgumentException("Start cannot be greater than end");
+      for (; i < j; i++) {
+        keys[i] = null;
+        values[i] = null;
+      }
+    }
+
+    protected void removeKeys(int i) {
+      removeKeys(i, keys.length);
+    }
+
+    protected void removeChildren(int i) {
+      if (i >= children.length)
+        throw new IllegalArgumentException("Start cannot be >= children length.");
+      for (; i<children.length; i++)
+        children[i] = null;
+    }
+
+  }
+
   /**
    * The function used to compare two keys and returns a boolean value indicating
    * whether the first argument is less than the second argument.
@@ -156,7 +258,6 @@ public final class BTree<K, V> {
     this.compare = compare;
     this.t = t;
     root = new BTreeNode<K, V>(t);
-    root.leaf = true;
     C_LEN = 2 * t;
     K_LEN = C_LEN - 1;
   }
@@ -278,7 +379,7 @@ public final class BTree<K, V> {
 
   /**
    * Returns the root of the tree
-   * 
+   *
    * @return the tree root
    */
   public final BTreeNode<K, V> getRoot() {
@@ -332,7 +433,8 @@ public final class BTree<K, V> {
 
     // Moves the children up one if needed to place child z if it has
     // larger values than the child before it
-    node.shiftChildren(node.count + 1, i);
+    for (j = node.count + 1; j > i; j--)
+      node.children[j] = node.children[j-1];
     node.children[i + 1] = z;
 
     // Moves the keys around on the root for the new one to be inserted
@@ -366,7 +468,7 @@ public final class BTree<K, V> {
   private void insertNonfull(BTreeNode<K, V> node, K key, V value) {
     int i = node.count - 1;
 
-    // If the node is a leaf, move the current keys up one until we reach a 
+    // If the node is a leaf, move the current keys up one until we reach a
     // position where the key is greater than a key
     if (node.leaf) {
       while (i >= 0 && isLessThan(key, node.keys[i])) {
@@ -490,7 +592,7 @@ public final class BTree<K, V> {
    * @param key the key of the node to search for
    * @return the {@code Pair} result node or {@code null} not found or tree is
    *         empty
-   * 
+   *
    * @throws IllegalArgumentException if the specified key is {@code null} or
    *                                  blank
    */
@@ -502,7 +604,7 @@ public final class BTree<K, V> {
    * The main search function. Because the function is recursive, the
    * {@link #search()} performs the checks and this performs the actual lookup, so
    * the checks aren't performed on every rescursive call down the path.
-   * 
+   *
    * @param node the node to start the search from
    * @param key  the key of the node to search for
    * @return the {@code Pair} result node or {@code null} if not found
@@ -524,11 +626,11 @@ public final class BTree<K, V> {
   /**
    * Determines whether a specified key exists in the specified node or in any of
    * its subtrees.
-   * 
+   *
    * @param node the node to begin searching from
    * @param key  the key to find if it exists
    * @return whether the key exists in the node or its subtrees
-   * 
+   *
    * @throws NullPointerException     if the specified node is {@code null}
    * @throws IllegalArgumentException if the specified key is {@code null} or
    *                                  blank
@@ -539,10 +641,10 @@ public final class BTree<K, V> {
 
   /**
    * Determines whether a specified key exists in the tree.
-   * 
+   *
    * @param key the key to find if it exists
    * @return whether the key exists in the tree or not
-   * 
+   *
    * @throws IllegalArgumentException if the specified key is {@code null} or
    *                                  blank
    */
@@ -557,7 +659,7 @@ public final class BTree<K, V> {
    * @param node the node to begin looking for the value from
    * @param key  the key of the corresponding value to find
    * @return the value or {@code null} if not found
-   * 
+   *
    * @throws NullPointerException     if the specified node is {@code null}
    * @throws IllegalArgumentException if the specified key is {@code null} or
    *                                  blank
@@ -569,10 +671,10 @@ public final class BTree<K, V> {
 
   /**
    * Retrieves the value from the specified key from the tree.
-   * 
+   *
    * @param key the key of the corresponding value to find
    * @return the value or {@code null} if not found
-   * 
+   *
    * @throws IllegalArgumentException if the specified key is {@code null} or
    *                                  blank
    */
@@ -583,10 +685,10 @@ public final class BTree<K, V> {
   /**
    * Retrieves the {@code BTreeNode} with the smallest key. From the specified
    * nodes subtree.
-   * 
+   *
    * @param node the node to start searching from
    * @return the node with the smallest key of the specified nodes subtree
-   * 
+   *
    * @throws NullPointerException if the specified node is {@code null}
    */
   public BTreeNode<K, V> minimum(BTreeNode<K, V> node) {
@@ -596,7 +698,7 @@ public final class BTree<K, V> {
 
   /**
    * Retrieves the {@code BTreeNode} with the smallest key in the tree.
-   * 
+   *
    * @return the node with the smallest key in the tree or {@code null} if tree is
    *         empty
    */
@@ -609,7 +711,7 @@ public final class BTree<K, V> {
   /**
    * The main function minimum function. {@link #minimum()} performs the node
    * check so every recursive call down the path doesn't call it again.
-   * 
+   *
    * @param node the node start searching from
    * @return the node with the smallest key of the given nodes subtree
    */
@@ -622,10 +724,10 @@ public final class BTree<K, V> {
   /**
    * Retrieves the {@code BTreeNode} with the largest key. From the specified
    * nodes subtree.
-   * 
+   *
    * @param node the node to start searching from
    * @return the node with the largest key of the specified nodes subtree
-   * 
+   *
    * @throws NullPointerException if the specified node is {@code null}
    */
   public BTreeNode<K, V> maximum(BTreeNode<K, V> node) {
@@ -635,7 +737,7 @@ public final class BTree<K, V> {
 
   /**
    * Retrieves the {@code BTreeNode} with the largest key in the tree.
-   * 
+   *
    * @return the node with the largest key in the tree or {@code null} if tree is
    *         empty
    */
@@ -648,7 +750,7 @@ public final class BTree<K, V> {
   /**
    * The main function maximum function. {@link #maximum()} performs the node
    * check so every recursive call down the path doesn't call it again.
-   * 
+   *
    * @param node the node start searching from
    * @return the node with the largest key of the given nodes subtree
    */
@@ -668,7 +770,7 @@ public final class BTree<K, V> {
    * @param parent the parent of the specified node if the node is a leaf and
    *               doesn't contain a valid predecessor value
    * @return the predecessor key {@code k'} or {@code null} if none
-   * 
+   *
    * @throws NullPointerException     if the specified node or parent is
    *                                  {@code null}
    * @throws IllegalArgumentException if the specified key is {@code null} or
@@ -692,7 +794,7 @@ public final class BTree<K, V> {
    * @param parent the parent of the specified node if the node is a leaf and
    *               doesn't contain a valid predecessor value
    * @return the predecessor {@link Pair} or {@code null} if none
-   * 
+   *
    * @throws NullPointerException     if the specified node or parent is
    *                                  {@code null}
    * @throws IllegalArgumentException if the specified key is {@code null} or
@@ -712,7 +814,7 @@ public final class BTree<K, V> {
    *
    * @param key the key whose predecessor is being searched for
    * @return the predecessor key {@code k'} or {@code null} if none
-   * 
+   *
    * @throws IllegalArgumentException if the specified key is {@code null} or
    *                                  blank
    */
@@ -762,7 +864,7 @@ public final class BTree<K, V> {
    * The main predecessor function. {@link #predecessor()} performs the checks and
    * this performs the actual lookup since it is recursive, to prevent redundant
    * checks.
-   * 
+   *
    * @param <T>    generic to allow the return of the {@code K} key or
    *               {@link Pair}
    * @param type   whether the function is returning a key or {@link Pair}
@@ -804,11 +906,11 @@ public final class BTree<K, V> {
    * @param parent the parent of the specified node if the node is a leaf and
    *               doesn't contain a valid successor value
    * @return the successor key {@code k'} or {@code null} if none
-   * 
+   *
    * @throws NullPointerException     if the specified node or parent is
    *                                  {@code null}
    * @throws IllegalArgumentException if the specified key is {@code null} or
-   *                                  blank 
+   *                                  blank
    */
   public K successor(BTreeNode<K, V> node, K key, BTreeNode<K, V> parent) {
     checkNode(node);
@@ -828,7 +930,7 @@ public final class BTree<K, V> {
    * @param parent the parent of the specified node if the node is a leaf and
    *               doesn't contain a valid successor value
    * @return the successor {@link Pair} or {@code null} if none
-   * 
+   *
    * @throws NullPointerException     if the specified node or parent is
    *                                  {@code null}
    * @throws IllegalArgumentException if the specified key is {@code null} or
@@ -848,7 +950,7 @@ public final class BTree<K, V> {
    *
    * @param key the key whose successor is being searched for
    * @return the successor key {@code k'} or {@code null} if none
-   * 
+   *
    * @throws IllegalArgumentException if the specified key is {@code null} or
    *                                  blank
    */
@@ -898,7 +1000,7 @@ public final class BTree<K, V> {
    * The main successor function. {@link #successor()} performs the checks and
    * this performs the actual lookup since it is recursive, to prevent redundant
    * checks.
-   * 
+   *
    * @param <T>    generic to allow the return of the {@code K} key or
    *               {@link Pair}
    * @param type   whether the function is returning a key or {@link Pair}
@@ -956,7 +1058,7 @@ public final class BTree<K, V> {
    *
    * @param node the node to start key removal process
    * @param key  the key to remove
-   * 
+   *
    * @throws NullPointerException     if the specified node is {@code null}
    * @throws IllegalArgumentException if the specified key is {@code null} or
    *                                  blank
@@ -969,9 +1071,9 @@ public final class BTree<K, V> {
 
   /**
    * Deletes a key from the tree. starting the recursion process from the root.
-   * 
+   *
    * @param key the key to remove
-   * 
+   *
    * @throws NoSuchElementException   if the tree is empty
    * @throws IllegalArgumentException if the specified key is {@code null} or
    *                                  blank
@@ -985,7 +1087,7 @@ public final class BTree<K, V> {
   /**
    * The main delete function. {@link #delete()} performs the checks and this
    * performs the deletion since it is recursive, to prevent redundant checks.
-   * 
+   *
    * @param node the node to start the deletion process from
    * @param key  the key to remove
    */
@@ -1401,7 +1503,7 @@ public final class BTree<K, V> {
    * Iterable interfaces, but individual instances can be created with the
    * Iterator methods disabled. This is necessary to avoid unintentionally
    * increasing the capabilities granted a user by passing an Enumeration.
-   * 
+   *
    * <p>
    * This differs from the {@link AbstractTree.Enumerator} because of the fact
    * that the {@code B-Tree} doesn't do 2-way splits like the others, which h s an

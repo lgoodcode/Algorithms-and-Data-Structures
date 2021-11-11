@@ -17,14 +17,13 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import data_structures.trees.RedBlackTree;
-import data_structures.trees.RedBlackTreeNode;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 public class RedBlackTree_Test {
   RedBlackTree<Integer, String> tree;
   RedBlackTree<String, String> tree2;
-  RedBlackTreeNode<Integer, String> node;
-  RedBlackTreeNode<Integer, String> node2;
+  RedBlackTree.RBNode<Integer, String> node;
+  RedBlackTree.RBNode<Integer, String> node2;
 
   @Test
   void is_instantiated() {
@@ -110,7 +109,7 @@ public class RedBlackTree_Test {
 
     @Test
     void entries_is_empty() {
-      Iterator<RedBlackTreeNode<Integer, String>> entries = tree.entriesIterator();
+      Iterator<RedBlackTree.RBNode<Integer, String>> entries = tree.entriesIterator();
       assertFalse(entries.hasNext());
       assertThrows(NoSuchElementException.class, () -> entries.next());
       assertThrows(IllegalStateException.class, () -> entries.remove());
@@ -145,11 +144,10 @@ public class RedBlackTree_Test {
 
     @Test
     void search() {
-      node = new RedBlackTreeNode<>(4, "four");
-      node2 = tree.search(4);
+      node = tree.search(4);
 
-      assertEquals(node.getKey(), node2.getKey());
-      assertEquals(node.getValue(), node2.getValue());
+      assertEquals(4, node.getKey());
+      assertEquals("four", node.getValue());
     }
 
     @Test
@@ -183,7 +181,7 @@ public class RedBlackTree_Test {
     @Test
     void postorderTreeWalk() {
       StringBuilder str = new StringBuilder();
-      tree.postorderTreeWalk((RedBlackTreeNode<Integer, String> node) ->
+      tree.postorderTreeWalk((node) ->
         str.append(node.toString() + "\n"));
 
       assertEquals(
@@ -223,7 +221,7 @@ public class RedBlackTree_Test {
 
     @Test
     void entries() {
-      Iterator<RedBlackTreeNode<Integer, String>> entries = tree.entriesIterator();
+      Iterator<RedBlackTree.RBNode<Integer, String>> entries = tree.entriesIterator();
       assertTrue(entries.hasNext());
       assertEquals("one", entries.next().getValue());
       assertEquals("two", entries.next().getValue());

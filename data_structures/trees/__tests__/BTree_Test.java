@@ -16,14 +16,13 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import data_structures.trees.BTree;
-import data_structures.trees.BTreeNode;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 public class BTree_Test {
   BTree<Integer, String> tree;
   BTree<String, String> tree2;
-  BTreeNode<Integer, String> node;
-  BTreeNode<Integer, String> node2;
+  BTree.BTreeNode<Integer, String> node;
+  BTree.BTreeNode<Integer, String> node2;
 
   @Nested 
   class When_New {
@@ -104,7 +103,7 @@ public class BTree_Test {
 
     @Test
     void entries_is_empty() {
-      Iterator<BTreeNode<Integer, String>> entries = tree.entriesIterator();
+      Iterator<BTree.BTreeNode<Integer, String>> entries = tree.entriesIterator();
       assertFalse(entries.hasNext());
       assertThrows(NoSuchElementException.class, () -> entries.next());
       assertThrows(IllegalStateException.class, () -> entries.remove());
@@ -241,11 +240,11 @@ public class BTree_Test {
 
     @Test
     void entries() {
-      Iterator<BTreeNode<Integer, String>> entries = tree.entriesIterator();
+      Iterator<BTree.BTreeNode<Integer, String>> entries = tree.entriesIterator();
       assertTrue(entries.hasNext());
-      assertEquals(BTreeNode.class, entries.next().getClass());
-      assertEquals(BTreeNode.class, entries.next().getClass());
-      assertEquals(BTreeNode.class, entries.next().getClass());
+      assertEquals(BTree.BTreeNode.class, entries.next().getClass());
+      assertEquals(BTree.BTreeNode.class, entries.next().getClass());
+      assertEquals(BTree.BTreeNode.class, entries.next().getClass());
       assertFalse(entries.hasNext());
       assertThrows(NoSuchElementException.class, () -> entries.next());
     }
