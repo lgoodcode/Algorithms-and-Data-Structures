@@ -16,14 +16,13 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import data_structures.linkedLists.SortedLinkedList;
-import data_structures.linkedLists.LinkedListNode;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 public class SortedLinkedList_Test {
   SortedLinkedList<String> list;
   SortedLinkedList<String> list2;
-  LinkedListNode<String> node;
-  LinkedListNode<String> node2;
+  SortedLinkedList<String>.Node<String> node;
+  SortedLinkedList<String>.Node<String> node2;
 
   @Nested
   class When_New {

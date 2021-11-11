@@ -14,7 +14,7 @@ public class LinkedList<T> extends AbstractLinkedList<T> {
   public synchronized void insert(T item) {
     checkItem(item);
 
-    LinkedListNode<T> node = new LinkedListNode<>(item);
+    Node<T> node = new Node<>(item);
 
     if (head == null)
       head = tail = node;
@@ -38,11 +38,11 @@ public class LinkedList<T> extends AbstractLinkedList<T> {
    *                                  blank
    * @throws NullPointerException     if the specified node is {@code null}
    */
-  public synchronized void insertBefore(T item, LinkedListNode<T> node) {
+  public synchronized void insertBefore(T item, Node<T> node) {
     checkItem(item);
     checkNode(node);
 
-    LinkedListNode<T> newNode = new LinkedListNode<>(item);
+    Node<T> newNode = new Node<>(item);
 
     if (node.prev != null)
       link(node.prev, newNode, node);
@@ -66,11 +66,11 @@ public class LinkedList<T> extends AbstractLinkedList<T> {
    *                                  blank
    * @throws NullPointerException     if the specified node is {@code null}
    */
-  public synchronized void insertAfter(T item, LinkedListNode<T> node) {
+  public synchronized void insertAfter(T item, Node<T> node) {
     checkItem(item);
     checkNode(node);
 
-    LinkedListNode<T> newNode = new LinkedListNode<>(item);
+    Node<T> newNode = new Node<>(item);
 
     if (node.next != null)
       link(node, newNode, node.next);
@@ -95,7 +95,7 @@ public class LinkedList<T> extends AbstractLinkedList<T> {
   public synchronized void insertLast(T item) {
     checkItem(item);
 
-    LinkedListNode<T> node = new LinkedListNode<>(item);
+    Node<T> node = new Node<>(item);
 
     if (head == null)
       head = tail = node;
@@ -124,7 +124,7 @@ public class LinkedList<T> extends AbstractLinkedList<T> {
     checkItem(item);
 
     if (head == null) {
-      head = tail = new LinkedListNode<>(item);
+      head = tail = new Node<>(item);
       size++;
       modCount++;
     }
@@ -148,7 +148,7 @@ public class LinkedList<T> extends AbstractLinkedList<T> {
   public int indexOf(T item) {
     checkItem(item);
 
-    LinkedListNode<T> node = head;
+    Node<T> node = head;
     int index = 0;
 
     while (node != null && node.getItem() != item) {
@@ -167,7 +167,7 @@ public class LinkedList<T> extends AbstractLinkedList<T> {
   public int lastIndexOf(T item) {
     checkItem(item);
 
-    LinkedListNode<T> node = tail;
+    Node<T> node = tail;
     int index = size - 1;
 
     while (node != null && node.getItem() != item) {
@@ -183,10 +183,10 @@ public class LinkedList<T> extends AbstractLinkedList<T> {
    *
    * @throws IndexOutOfBoundsException {@inheritDoc}
    */
-  public LinkedListNode<T> search(int index) {
+  public Node<T> search(int index) {
     checkIndex(index);
 
-    LinkedListNode<T> node = null;
+    Node<T> node = null;
 
     if (index < (size >> 1)) {
       node = head;
@@ -210,7 +210,7 @@ public class LinkedList<T> extends AbstractLinkedList<T> {
    * @throws IndexOutOfBoundsException {@inheritDoc}
    */
   public T get(int index) {
-    LinkedListNode<T> node = search(index);
+    Node<T> node = search(index);
     return node != null ? node.getItem() : null;
   }
 
@@ -220,7 +220,7 @@ public class LinkedList<T> extends AbstractLinkedList<T> {
    * @throws IndexOutOfBoundsException {@inheritDoc}
    */
   public synchronized void remove(int index) {
-    LinkedListNode<T> node = search(index);
+    Node<T> node = search(index);
 
     if (node != null) {
       unlink(node);
@@ -234,7 +234,7 @@ public class LinkedList<T> extends AbstractLinkedList<T> {
    *
    * @throws NullPointerException {@inheritDoc}
    */
-  public synchronized void remove(LinkedListNode<T> node) {
+  public synchronized void remove(Node<T> node) {
     checkNode(node);
     unlink(node);
     size--;

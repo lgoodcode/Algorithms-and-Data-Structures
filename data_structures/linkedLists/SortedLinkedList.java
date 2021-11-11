@@ -36,7 +36,7 @@ public class SortedLinkedList<T> extends LinkedList<T> {
    *
    * @throws NullPointerException if the either node is {@code null}
    */
-  private boolean isLessThan(LinkedListNode<T> x, LinkedListNode<T> y) {
+  private boolean isLessThan(Node<T> x, Node<T> y) {
     checkNode(x);
     checkNode(y);
     return compareFn.apply(x.getItem(), y.getItem());
@@ -55,7 +55,7 @@ public class SortedLinkedList<T> extends LinkedList<T> {
   public synchronized void insert(T item) {
     checkItem(item);
 
-    LinkedListNode<T> temp, node = new LinkedListNode<>(item);
+    Node<T> temp, node = new Node<>(item);
 
     if (head == null)
       head = tail = node;

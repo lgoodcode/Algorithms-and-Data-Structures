@@ -18,7 +18,7 @@ public final class CircularLinkedList<T> extends LinkedList<T> {
   public synchronized void insert(T item) {
     checkItem(item);
 
-    LinkedListNode<T> node = new LinkedListNode<>(item);
+    Node<T> node = new Node<>(item);
 
     if (head == null) {
       head = tail = node;
@@ -40,11 +40,11 @@ public final class CircularLinkedList<T> extends LinkedList<T> {
    * @throws NullPointerException     {@inheritDoc}
    */
   @Override
-  public synchronized void insertBefore(T item, LinkedListNode<T> node) {
+  public synchronized void insertBefore(T item, Node<T> node) {
     checkItem(item);
     checkNode(node);
 
-    LinkedListNode<T> newNode = new LinkedListNode<>(item);
+    Node<T> newNode = new Node<>(item);
 
     link(node.prev, newNode, node);
 
@@ -62,11 +62,11 @@ public final class CircularLinkedList<T> extends LinkedList<T> {
    * @throws NullPointerException     {@inheritDoc}
    */
   @Override
-  public synchronized void insertAfter(T item, LinkedListNode<T> node) {
+  public synchronized void insertAfter(T item, Node<T> node) {
     checkItem(item);
     checkNode(node);
 
-    LinkedListNode<T> newNode = new LinkedListNode<>(item);
+    Node<T> newNode = new Node<>(item);
 
     link(node, newNode, node.next);
 
@@ -86,7 +86,7 @@ public final class CircularLinkedList<T> extends LinkedList<T> {
   public synchronized void insertLast(T item) {
     checkItem(item);
 
-    LinkedListNode<T> node = new LinkedListNode<>(item);
+    Node<T> node = new Node<>(item);
 
     if (head == null) {
       head = tail = node;
@@ -113,7 +113,7 @@ public final class CircularLinkedList<T> extends LinkedList<T> {
     checkItem(item);
 
     if (head == null) {
-      head = tail = new LinkedListNode<>(item);
+      head = tail = new Node<>(item);
       size++;
       modCount++;
     }
@@ -143,7 +143,7 @@ public final class CircularLinkedList<T> extends LinkedList<T> {
     else if (head.getItem() == item)
       return 0;
 
-    LinkedListNode<T> node = head;
+    Node<T> node = head;
     int index = 0;
 
     do {
@@ -168,7 +168,7 @@ public final class CircularLinkedList<T> extends LinkedList<T> {
     else if (tail.getItem() == item)
       return size - 1;
 
-    LinkedListNode<T> node = tail;
+    Node<T> node = tail;
     int index = size - 1;
 
     do {

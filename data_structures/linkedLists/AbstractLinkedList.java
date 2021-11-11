@@ -17,8 +17,28 @@ import data_structures.EmptyEnumerator;
  * to the head or tail, making the search perform {@code O(n / 2)}.
  */
 public abstract class AbstractLinkedList<T> {
-  protected LinkedListNode<T> head = null;
-  protected LinkedListNode<T> tail = null;
+  public class Node<E> {
+    protected Node<E> next;
+    protected Node<E> prev;
+    private E item;
+  
+    public Node(E item) {
+      if (item == null || item.toString().isBlank())
+        throw new IllegalArgumentException("Item cannot be null or empty.");
+      this.item = item;
+    }
+  
+    public E getItem() {
+      return item;
+    }
+  
+    public String toString() {
+      return item.toString();
+    }
+  }
+
+  protected Node<T> head = null;
+  protected Node<T> tail = null;
 
   /**
    * The counter to track the number of entries total in the linkedlist.
@@ -78,14 +98,14 @@ public abstract class AbstractLinkedList<T> {
   }
 
   /**
-   * Checks to make sure the {@code LinkedListNode} isn't {@code null}.
+   * Checks to make sure the {@code Node} isn't {@code null}.
    *
    * @param node the node to check
    *
-   * @throws IllegalArgumentException if the {@code LinkedListNode} is
+   * @throws IllegalArgumentException if the {@code Node} is
    *                                  {@code null}
    */
-  protected final void checkNode(LinkedListNode<T> node) {
+  protected final void checkNode(Node<T> node) {
     if (node == null)
       throw new NullPointerException("Node cannot be null.");
   }
@@ -113,7 +133,7 @@ public abstract class AbstractLinkedList<T> {
    *
    * @return the head of the list or {@code null} if none
    */
-  public final LinkedListNode<T> getHead() {
+  public final Node<T> getHead() {
     return head;
   }
 
@@ -122,7 +142,7 @@ public abstract class AbstractLinkedList<T> {
    *
    * @return the tail of the list or {@code null} if none
    */
-  public final LinkedListNode<T> getTail() {
+  public final Node<T> getTail() {
     return tail;
   }
 
@@ -175,19 +195,19 @@ public abstract class AbstractLinkedList<T> {
   }
 
   /**
-   * Internal method that links two {@code LinkedListNodes} together. The first
+   * Internal method that links two {@code Nodes} together. The first
    * node argument is linked as the predecessor of the second node argument.
    *
    * @param pred the predecessor of the second node
    * @param node the successor of the first node
    */
-  protected final void link(LinkedListNode<T> pred, LinkedListNode<T> node) {
+  protected final void link(Node<T> pred, Node<T> node) {
     node.prev = pred;
     pred.next = node;
   }
 
   /**
-   * Internal method that links three {@code LinkedListNodes} together. The first
+   * Internal method that links three {@code Nodes} together. The first
    * node argument is linked as the predecessor of the second node argument and
    * the third is linked as the successor of the second node argument.
    *
@@ -195,7 +215,7 @@ public abstract class AbstractLinkedList<T> {
    * @param node the node to insert between the first and third
    * @param succ the successor of the second node
    */
-  protected final void link(LinkedListNode<T> pred, LinkedListNode<T> node, LinkedListNode<T> succ) {
+  protected final void link(Node<T> pred, Node<T> node, Node<T> succ) {
     node.prev = pred;
     node.next = succ;
     pred.next = node;
@@ -203,13 +223,13 @@ public abstract class AbstractLinkedList<T> {
   }
 
   /**
-   * Internal method that unlinks a {@code LinkedListNode} from its predecessor
+   * Internal method that unlinks a {@code Node} from its predecessor
    * and successor, adjusting the pointers to the previous of the node to be
    * removed and the next node of the node to be removed.
    *
    * @param node the node to unlink
    */
-  protected final void unlink(LinkedListNode<T> node) {
+  protected final void unlink(Node<T> node) {
     if (node == head && node == tail) {
       head = tail = null;
     }
@@ -228,7 +248,7 @@ public abstract class AbstractLinkedList<T> {
   }
 
   /**
-   * Inserts a new {@code LinkedListNode} with the specified item value.
+   * Inserts a new {@code Node} with the specified item value.
    *
    * @param item the item to insert into the list
    *
@@ -278,11 +298,11 @@ public abstract class AbstractLinkedList<T> {
    * specified index is invalid or not within the range.
    *
    * @param index the index of the specified node to retrieve
-   * @return the {@code LinkedListNode} or {@code null} if not found
+   * @return the {@code Node} or {@code null} if not found
    *
    * @throws IndexOutOfBoundsException if the specified index is invalid
    */
-  public abstract LinkedListNode<T> search(int index);
+  public abstract Node<T> search(int index);
 
   /**
    * Retrieves the item of the node with the specified index or {@code null} if
@@ -306,14 +326,14 @@ public abstract class AbstractLinkedList<T> {
   public abstract void remove(int index);
 
   /**
-   * Removes the specified {@code LinkedListNode} from the list by adjusting
+   * Removes the specified {@code Node} from the list by adjusting
    * the pointers of the surrounding nodes of the specified node.
    *
    * @param index the node to remove
    *
    * @throws NullPointerException if the specified node is {@code null}
    */
-  public abstract void remove(LinkedListNode<T> node);
+  public abstract void remove(Node<T> node);
 
   /**
    * Displays the contents of the list in order in a JSON format. Overrides due to
@@ -400,8 +420,8 @@ public abstract class AbstractLinkedList<T> {
    * @param <T> the type of the object that is being enumerated
    */
   protected final class Enumerator<E> implements Enumeration<E>, Iterator<E>, Iterable<E> {
-    protected LinkedListNode<?>[] list;
-    protected LinkedListNode<?> entry, last;
+    protected Node<E>[] list;
+    protected Node<E> entry, last;
     protected int size, index = 0;
 
     /**
@@ -423,13 +443,14 @@ public abstract class AbstractLinkedList<T> {
      * @param iterator whether this will serve as an {@code Enumeration} or
      *                 {@code Iterator}
      */
+    @SuppressWarnings("unchecked")
     protected Enumerator(boolean iterator) {
       this.size = AbstractLinkedList.this.size;
       this.iterator = iterator;
-      list = new LinkedListNode<?>[size];
+      list = (Node<E>[]) new AbstractLinkedList<?>.Node<?>[size];
       int i = 0;
 
-      LinkedListNode<T> node = getHead();
+      Node<E> node = (Node<E>) getHead();
 
       do {
         list[i++] = node;
@@ -460,7 +481,6 @@ public abstract class AbstractLinkedList<T> {
      *
      * @throws NoSuchElementException if no more elements exist
      */
-    @SuppressWarnings("unchecked")
     public E nextElement() {
       if (index >= size)
         throw new NoSuchElementException("LinkedList Enumerator");
@@ -527,7 +547,7 @@ public abstract class AbstractLinkedList<T> {
       // Synchronized block to lock the linkedlist object while removing entry
       synchronized (AbstractLinkedList.this) {
         // Pass the current index to remove the last item
-        AbstractLinkedList.this.remove((LinkedListNode<T>) last);
+        AbstractLinkedList.this.remove((Node<T>) last);
         expectedModCount++;
         last = null;
       }

@@ -16,14 +16,13 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import data_structures.linkedLists.CircularLinkedList;
-import data_structures.linkedLists.LinkedListNode;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 public class CircularLinkedList_Test {
   CircularLinkedList<String> list;
   CircularLinkedList<String> list2;
-  LinkedListNode<String> node;
-  LinkedListNode<String> node2;
+  CircularLinkedList<String>.Node<String> node;
+  CircularLinkedList<String>.Node<String> node2;
 
   @Nested
   class When_New {

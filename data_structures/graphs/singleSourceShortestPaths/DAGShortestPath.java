@@ -36,12 +36,13 @@ import data_structures.graphs.TopologicalSort;
  */
 public final class DAGShortestPath extends SSSP {
   /**
-   * Runs the Depth-first Search algorithm on the supplied graph matrix and
-   * start vertex to serve as the root of the DFS tree.
+   * Topologically sorts all the vertices of the DAG (Directed Acylic Graph) and
+   * then relaxes them in sorted order to derive the shortest paths for the
+   * specified start vertex.
    *
-   * @param graph the graph matrix
+   * @param graph       the graph matrix
    * @param startVertex the starting vertex
-   * @return the {@link DFS.Node} array results
+   * @return the {@code Node[]} results of the algorithm
    *
    * @throws IllegalArgumentException if the specified {@code Graph} is not
    *                                  weighted and directed, or the start vertex
