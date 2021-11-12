@@ -124,8 +124,13 @@ public final class Dijkstra extends SSSP {
    * @param startVertex the starting vertex of the path
    * @param endVertex   the end vertex of the path
    * @return the string path if one exists or a no path exists message string
+   * 
+   * @throws IllegalArgumentException if the specified {@code Graph} is not
+   *                                  weighted and directed, or the start or end
+   *                                  vertices are invalid
    */
   public static String printPath(Graph graph, int startVertex, int endVertex) {
+    graph.checkVertex(endVertex);
     Node[] results = run(graph, startVertex);
     return Graph.printPath(results, startVertex, endVertex);
   }
@@ -138,8 +143,13 @@ public final class Dijkstra extends SSSP {
    * @param startVertex the starting vertex of the path
    * @param endVertex   the end vertex of the path
    * @return the array of vertices for the path
+   * 
+   * @throws IllegalArgumentException if the specified {@code Graph} is not
+   *                                  weighted and directed, or the start or end
+   *                                  vertices are invalid
    */
   public static int[] arrayPath(Graph graph, int startVertex, int endVertex) {
+    graph.checkVertex(endVertex);
     Node[] results = run(graph, startVertex);
     return Graph.arrayPath(results, startVertex, endVertex);
   }

@@ -99,8 +99,13 @@ public class ShorterPathFaster extends SSSP {
    * @param endVertex   the end vertex of the path
    * @return the string for a cycle detected, if there is one, or the path if one
    *         exists or a no path exists message string
+   * 
+   * @throws IllegalArgumentException if the specified {@code Graph} is not
+   *                                  weighted and directed, or the start or end
+   *                                  vertices are invalid
    */
   public static String printPath(Graph graph, int startVertex, int endVertex) {
+    graph.checkVertex(endVertex);
     Node[] results = run(graph, startVertex);
     
     if (results == null)
@@ -120,8 +125,13 @@ public class ShorterPathFaster extends SSSP {
    * @return the array path containing only {@code -1} if a cycle is detected or
    *         there is no path, or the array of vertices for the path, if one
    *         exists.
+   * 
+   * @throws IllegalArgumentException if the specified {@code Graph} is not
+   *                                  weighted and directed, or the start or end
+   *                                  vertices are invalid
    */
   public static int[] arrayPath(Graph graph, int startVertex, int endVertex) {
+    graph.checkVertex(endVertex);
     Node[] results = run(graph, startVertex);
     int[] cycle = { -1 };
 

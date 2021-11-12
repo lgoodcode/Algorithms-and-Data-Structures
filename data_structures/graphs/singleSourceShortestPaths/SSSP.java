@@ -217,7 +217,7 @@ public class SSSP {
    * @param endVertex   the end vertex of the path
    * @return the string path if one exists or a no path exists message string
    */
-  public static String printPath(Node[] nodes, int startVertex, int endVertex) {
+  public static final String printPath(Node[] nodes, int startVertex, int endVertex) {
     return Graph.printPath(nodes, startVertex, endVertex);
   }
 
@@ -230,7 +230,7 @@ public class SSSP {
    * @param endVertex   the end vertex of the path
    * @return the string path if one exists or a no path exists message string
    */
-  public static int[] arrayPath(Node[] nodes, int startVertex, int endVertex) {
+  public static final int[] arrayPath(Node[] nodes, int startVertex, int endVertex) {
     return Graph.arrayPath(nodes, startVertex, endVertex);
   }
 }

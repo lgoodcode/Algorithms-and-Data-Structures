@@ -47,7 +47,7 @@ public final class Graph {
   /**
    * The sentinel value used to represent non-vertices and non-edges.
    */
-  public static final int NIL = Integer.MIN_VALUE;
+  public static final int NIL = Integer.MAX_VALUE;
 
   /**
    * Constructs an empty, graph matrix, with the specified number of rows for an n
@@ -164,6 +164,23 @@ public final class Graph {
    *                                  graph length
    */
   public void checkVertex(int vertex) {
+    if (vertex < 0)
+      throw new IllegalArgumentException("Vertex cannot be negative.");
+    if (vertex >= rows)
+      throw new IllegalArgumentException("Vertex cannot be greater than graph length.");
+  }
+
+  /**
+   * Checks that the specified vertex index is valid for the specified length of
+   * the graph.
+   *
+   * @param rows   the length of the graph
+   * @param vertex the vertex index
+   *
+   * @throws IllegalArgumentException if the vertix is negative or greater than
+   *                                  graph length
+   */
+  public static void checkVertex(int rows, int vertex) {
     if (vertex < 0)
       throw new IllegalArgumentException("Vertex cannot be negative.");
     if (vertex >= rows)
@@ -622,6 +639,45 @@ public final class Graph {
   }
 
   /**
+   * Traces the results of an ASPS (All-Pairs Shortest Paths) algorithm with the
+   * predecessor matrix to determine the vertices for a path with the smallest
+   * weight for the specified vertex indices {@code i} and {@code j}.
+   *
+   * @param p   the predecessor matrix results from the algorithm
+   * @param i   the start vertex
+   * @param j   the end vertex
+   * @param str the path string
+   */
+  private static String printPathAux(int[][] P, int i, int j, String str) {
+    if (i == j)
+      return str == null ? null : str + i;
+    else if (P[i][j] == Graph.NIL)
+      return null;
+    String s = printPathAux(P, i, P[i][j], str);
+    return s == null ? null : s + " -> " + j;
+  }
+
+  /**
+   * Returns the path string for a given ASPS (All-Pairs Shortest Paths) algorithm
+   * with the derived predecessor matrix and the specified start and end vertices.
+   *
+   * @param table       the predecessor matrix of the algorithm
+   * @param startVertex the starting vertex of the path
+   * @param endVertex   the end vertex of the path
+   * @return the string path
+   *
+   * @throws IllegalArgumentException if the specified {@code Graph} is not
+   *                                  weighted and directed, or the start or end
+   *                                  vertices are invalid
+   */
+  public static final String printPath(int[][] table, int startVertex, int endVertex) {
+    checkVertex(table.length, startVertex);
+    checkVertex(table.length, endVertex);
+    String path = printPathAux(table, startVertex, endVertex, "");
+    return path != null ? path : "No path exists from " + startVertex + " to " + endVertex;
+  }
+
+  /**
    * Uses a {@link Queue} to queue the vertices of a path from the specified start
    * and end vertices to build an array of the path of vertices. Will check if the
    * last queued item, if one exists, is not {@code -1}, which means no path
@@ -664,6 +720,64 @@ public final class Graph {
     int i = 0;
 
     arrayPathAux(nodes, startVertex, endVertex, Q);
+
+    if (Q.isEmpty())
+      return copyOf(arr, 0);
+
+    while (!Q.isEmpty())
+      arr[i++] = Q.dequeue();
+    return copyOf(arr, i);
+  }
+
+  /**
+   * Used for ASPS algorithsm that produce a predecessor matrix table. Uses a
+   * {@link Queue} to queue the vertices of a path from the specified start and
+   * end vertices to build an array of the path of vertices. Will check if the
+   * last queued item, if one exists, is not {@code -1}, which means no path
+   * exists and to not queue any of the vertices.
+   *
+   * @param P the predecessor matrix
+   * @param i the starting vertex of the path
+   * @param j the end vertex of the path
+   * @param Q the queue to hold the vertices of the path
+   */
+  private static void arrayPathAux(int[][] P, int i, int j, Queue<Integer> Q) {
+    if (i == j)
+      Q.enqueue(i);
+    else if (P[i][j] == Graph.NIL)
+      Q.enqueue(-1);
+    else {
+      arrayPathAux(P, i, P[i][j], Q);
+
+    if (Q.peek() != -1)
+      Q.enqueue(j);
+    }
+  }
+
+  /**
+   * Used for ASPS algorithms that produce a predecessor matrix table. Creates an
+   * array of the vertices for the path of the specified start and end vertices.
+   * If no path exists, it will return an array with a single {@code -1} element.
+   *
+   * @param table       the predcessor matrix
+   * @param startVertex the start vertex of the path
+   * @param endVertex   the end vertex of the path
+   * @return the array of vertices for a path, or a single {@code -1} element if
+   *         no path exists
+   *
+   * @throws IllegalArgumentException if the specified {@code Graph} is not
+   *                                  weighted and directed, or the start or end
+   *                                  vertices are invalid
+   */
+  public static final int[] arrayPath(int[][] table, int startVertex, int endVertex) {
+    checkVertex(table.length, startVertex);
+    checkVertex(table.length, endVertex);
+
+    Queue<Integer> Q = new Queue<>(table.length);
+    int[] arr = new int[table.length];
+    int i = 0;
+
+    arrayPathAux(table, startVertex, endVertex, Q);
 
     if (Q.isEmpty())
       return copyOf(arr, 0);
