@@ -95,7 +95,7 @@ public final class Queue<T> {
   /**
    * Returns the next item to be dequeued
    * 
-   * @return the next item to be dequeued
+   * @return the next item to be dequeued or {@code null} if none
    */
   public T peek() {
     return queue[head];

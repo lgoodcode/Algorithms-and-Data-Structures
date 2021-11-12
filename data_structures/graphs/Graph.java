@@ -577,25 +577,24 @@ public final class Graph {
 
   /**
    * Traces the results of an algorithm with the {@code Vertex} subclass nodes and
-   * with a given start and end vertex, to return a string of the path using the
-   * {@code StringBuilder}, if one exists. Otherwise, it will return a no path
-   * exists message.
+   * with a given start and end vertex, to return a string of the path. Passes the
+   * string value so that if it runs into no path found and returns {@code null},
+   * if will retrieve that value and cascade return the {@code null}. Otherwise,
+   * it simply appends the string and returns it to result in the path string.
    *
-   * @param N  the {@code Vertex} subclass containing the data from an algorithm
-   *           to build a path
-   * @param u  the start vertex
-   * @param v  the end vertex
-   * @param sb the {@code StringBuilder} to build the path string
+   * @param N   the {@code Vertex} subclass containing the data from an algorithm
+   *            to build a path
+   * @param u   the start vertex
+   * @param v   the end vertex
+   * @param str the path string
    */
-  private static void printPathAux(Vertex[] N, int u, int v, StringBuilder sb) {
+  private static String printPathAux(Vertex[] N, int u, int v, String str) {
     if (u == v)
-      sb.append(u);
+      return str == null ? null : str + u;
     else if (N[v].predecessor == -1)
-      sb.append("No path exists from " + u + " to " + v);
-    else {
-      printPathAux(N, u, N[v].predecessor, sb);
-      sb.append(" -> " + v);
-    }
+      return null;
+    String s = printPathAux(N, u, N[v].predecessor, str);
+    return s == null ? null : s + " -> " + v;
   }
 
   /**
@@ -609,14 +608,15 @@ public final class Graph {
    * @return the string path if one exists or a no path exists message string
    */
   public static final String printPath(Vertex[] nodes, int startVertex, int endVertex) {
-    StringBuilder sb = new StringBuilder();
-    printPathAux(nodes, startVertex, endVertex, sb);
-    return sb.toString();
+    String path = printPathAux(nodes, startVertex, endVertex, "");
+    return path != null ? path : "No path exists from " + startVertex + " to " + endVertex;
   }
 
   /**
    * Uses a {@link Queue} to queue the vertices of a path from the specified start
-   * and end vertices to build an array of the path of vertices.
+   * and end vertices to build an array of the path of vertices. Will check if the
+   * last queued item, if one exists, is not {@code -1}, which means no path
+   * exists and to not queue any of the vertices.
    *
    * @param N the {@code Vertex} subclass containing the data from an algorithm to
    *          build a path
@@ -631,7 +631,9 @@ public final class Graph {
       Q.enqueue(-1);
     else {
       arrayPathAux(N, u, N[v].predecessor, Q);
-      Q.enqueue(v);
+
+      if (Q.peek() != -1)
+        Q.enqueue(v);
     }
   }
 

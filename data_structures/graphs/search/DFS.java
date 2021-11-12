@@ -1,9 +1,6 @@
 package data_structures.graphs.search;
 
-import static java.util.Arrays.copyOf;
-
 import data_structures.graphs.Graph;
-import data_structures.queues.Queue;
 
 /**
  * DFS(G)
@@ -176,43 +173,6 @@ public final class DFS {
   }
 
   /**
-   * Traces the results of the DFS tree with a given start and end vertex, to
-   * return a string of the path. Because the DFS produces a forest of subtrees
-   * for each individual vertex traveled, this print function differs from the BFS
-   * implementation. This will return {@code null} if the start vertex wasn't
-   * reached from the end vertex and any node traveled up to this path will check
-   * if the path it traveled reached a dead end and returns {@code null} back up
-   * the call stack. If there is a path, it will instead pass the string back up.
-   *
-   * @param N   the DFS tree results
-   * @param u   the start vertex
-   * @param v   the end vertex
-   * @param str the string holding the path or {@code null} if none
-   */
-  private static String printPathAux(Node[] N, int u, int v, String str) {
-    if (u == v)
-      return str == null ? null : str + u;
-    else if (N[v].predecessor == -1)
-      return null;
-    String s = printPathAux(N, u, N[v].predecessor, str);
-    return s == null ? null : s + " -> " + v;
-  }
-
-  /**
-   * Returns the path string for the start and end vertices using the DFS tree
-   * results.
-   *
-   * @param nodes       the DFS tree results
-   * @param startVertex the starting vertex of the path
-   * @param endVertex   the end vertex of the path
-   * @return the string path if one exists or a no path exists message string
-   */
-  public static String printPath(Node[] nodes, int startVertex, int endVertex) {
-    String path = printPathAux(nodes, startVertex, endVertex, "");
-    return path != null ? path : "No path exists from " + startVertex + " to " + endVertex;
-  }
-
-  /**
    * Runs the DFS algorithm and returns the path string for the start and end
    * vertices.
    *
@@ -223,60 +183,20 @@ public final class DFS {
    */
   public static String printPath(Graph graph, int startVertex, int endVertex) {
     Node[] results = _run(graph, startVertex);
-    String path = printPathAux(results, startVertex, endVertex, "");
-    return path != null ? path : "No path exists from " + startVertex + " to " + endVertex;
+    return Graph.printPath(results, startVertex, endVertex);
   }
 
   /**
-   * Uses a {@link Queue} to queue the vertices of a path from the specified start
-   * and end vertices to build an array of the path of vertices. Because of the
-   * DFS forest of subtrees, it could travel a path that results in not a complete
-   * path and add the nodes, so it peeks the last queued item to check if it is
-   * {@code -1} and if so, doesn't enqueue the vertex.
+   * Returns the path string for the start and end vertices using the results of
+   * the DFS algorithm.
    *
-   * @param N the DFS tree results
-   * @param u the starting vertex of the path
-   * @param v the end vertex of the path
-   * @param Q the queue to hold the vertices of the path
-   */
-  private static void arrayPathAux(Node[] N, int u, int v, Queue<Integer> Q) {
-    if (u == v)
-      Q.enqueue(u);
-    else if (N[v].predecessor == -1)
-      Q.enqueue(-1);
-    else {
-      arrayPathAux(N, u, N[v].predecessor, Q);
-
-      if (Q.peek() != -1)
-        Q.enqueue(v);
-    }
-  }
-
-  /**
-   * Creates an array of the vertices for the path of the specified start and end
-   * vertices. If no path exists, it will return an array with a single {@code -1}
-   * element.
-   *
-   * @param nodes       the {@code Vertex} subclass containing the data from an
-   *                    algorithm to build a path
-   * @param startVertex the start vertex of the path
+   * @param graph       the graph to run the algorithm on
+   * @param startVertex the starting vertex of the path
    * @param endVertex   the end vertex of the path
-   * @return the array of vertices for a path, or a single {@code -1} element if
-   *         no path exists
+   * @return the string path if one exists or a no path exists message string
    */
-  public static final int[] arrayPath(Node[] nodes, int startVertex, int endVertex) {
-    Queue<Integer> Q = new Queue<>(nodes.length);
-    int[] arr = new int[nodes.length];
-    int i = 0;
-
-    arrayPathAux(nodes, startVertex, endVertex, Q);
-
-    if (Q.isEmpty())
-      return copyOf(arr, 0);
-
-    while (!Q.isEmpty())
-      arr[i++] = Q.dequeue();
-    return copyOf(arr, i);
+  public static String printPath(Node[] nodes, int startVertex, int endVertex) {
+    return Graph.printPath(nodes, startVertex, endVertex);
   }
 
   /**
@@ -290,7 +210,20 @@ public final class DFS {
    */
   public static int[] arrayPath(Graph graph, int startVertex, int endVertex) {
     Node[] results = _run(graph, startVertex);
-    return arrayPath(results, startVertex, endVertex);
+    return Graph.arrayPath(results, startVertex, endVertex);
+  }
+
+  /**
+   * Returns the array of path vertices for the start and end vertices using the
+   * results of the DFS algorithm.
+   *
+   * @param graph       the graph to run the algorithm on
+   * @param startVertex the starting vertex of the path
+   * @param endVertex   the end vertex of the path
+   * @return the string path if one exists or a no path exists message string
+   */
+  public static int[] arrayPath(Node[] nodes, int startVertex, int endVertex) {
+    return Graph.arrayPath(nodes, startVertex, endVertex);
   }
 
 }

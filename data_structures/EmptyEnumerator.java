@@ -26,8 +26,8 @@ import java.util.function.Consumer;
 public final class EmptyEnumerator<T> implements Enumeration<T>, Iterator<T>, Iterable<T> {
   // TODO: need to disable the warning here for unused variable
   // static final EmptyIterable<?> EMPTY_ITERABLE = new EmptyIterable<>();
-  public EmptyEnumerator() {
-  }
+
+  public EmptyEnumerator() {}
 
   // Enumeration methods
   public boolean hasMoreElements() {
