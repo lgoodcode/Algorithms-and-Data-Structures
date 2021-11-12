@@ -28,6 +28,7 @@ public class ShorterPathFaster_Test {
     G.addEdge(2, 4, 2);
     G.addEdge(4, 3, 6);
     G.addEdge(4, 0, 7);
+    G.addEdge(7, 8, 4);
   }
 
   @Test
@@ -48,14 +49,37 @@ public class ShorterPathFaster_Test {
 
   @Test
   void prints_path() {
+    assertEquals("0 -> 2 -> 1 -> 3", ShorterPathFaster.printPath(G, 0, 3));
+  }
+
+  @Test
+  void nodes_prints_path() {
     nodes = ShorterPathFaster.run(G, 0);
     assertEquals("0 -> 2 -> 1 -> 3", ShorterPathFaster.printPath(nodes, 0, 3));
+  }
+
+  @Test
+  void no_path() {
+    assertEquals("No path exists from 0 to 5", ShorterPathFaster.printPath(G, 0, 5));
   }
 
   @Test 
   void array_path() {
     int[] path = { 0, 2, 1, 3 };
+    assertArrayEquals(path, ShorterPathFaster.arrayPath(G, 0, 3));
+  }
+
+  @Test 
+  void nodes_array_path() {
+    int[] path = { 0, 2, 1, 3 };
     nodes = ShorterPathFaster.run(G, 0);
     assertArrayEquals(path, ShorterPathFaster.arrayPath(nodes, 0, 3));
   }
+
+  @Test
+  void no_array_path() {
+    int[] noPath = { -1 };
+    assertArrayEquals(noPath, ShorterPathFaster.arrayPath(G, 0, 5));
+  }
+
 }

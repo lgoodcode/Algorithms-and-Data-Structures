@@ -110,7 +110,7 @@ public final class DFS {
   /**
    * Runs the Depth-first Search algorithm on the supplied graph matrix and start
    * vertex to serve as the root of the DFS tree.
-   * 
+   *
    * <p>
    * This uses a single element array to hold the {@code time} value so that it
    * can be passed through each recursive call.
@@ -121,7 +121,13 @@ public final class DFS {
    * as completed, which isn't necessary because the vertex won't be revisted as
    * long as it isn't white.
    * </p>
-   * 
+   *
+   * <p>
+   * Uses the {@code Graph.getAllVertices()} to access the {@code Node} directly
+   * with the vertex as the index. With this, the {@code visit()} method has to
+   * check if the vertex exists in the graph before attempting to get its edges.
+   * </p>
+   *
    * @param graph       the graph matrix
    * @param startVertex the starting vertex
    * @return the {@link DFS.Node} array results
@@ -135,17 +141,14 @@ public final class DFS {
   }
 
   private static Node[] _run(Graph G, int s) {
-    int[] V = G.getVertices(), time = { 0 };
-    Node[] VTS = new Node[V.length];
-    int i, u;
+    int u, V = G.rows;
+    int[] time = { 0 };
+    Node[] VTS = new Node[V];
 
-    // Initialize DFS vertex nodes
-    for (i = 0; i < V.length; i++)
-      VTS[i] = new Node(V[i]);
+    for (u = 0; u < V; u++)
+      VTS[u] = new Node(u);
 
-    for (i = 0; i < V.length; i++) {
-      u = V[i];
-
+    for (u = 0; u < V; u++) {
       if (VTS[u].color == WHITE)
         visit(G, VTS, u, time);
     }
@@ -154,6 +157,10 @@ public final class DFS {
   }
 
   private static void visit(Graph G, Node[] VTS, int u, int[] time) {
+    // If vertex doesn't exist in the graph, don't check for edges
+    if (!G.hasVertex(u))
+      return;
+
     VTS[u].distance = ++time[0];
     VTS[u].color = GRAY;
 
@@ -182,7 +189,7 @@ public final class DFS {
    * @return the string path if one exists or a no path exists message string
    */
   public static String printPath(Graph graph, int startVertex, int endVertex) {
-    Node[] results = _run(graph, startVertex);
+    Node[] results = run(graph, startVertex);
     return Graph.printPath(results, startVertex, endVertex);
   }
 
@@ -206,10 +213,10 @@ public final class DFS {
    * @param graph       the graph to run the algorithm on
    * @param startVertex the starting vertex of the path
    * @param endVertex   the end vertex of the path
-   * @return the string path if one exists or a no path exists message string
+   * @return the array of vertices for the path
    */
   public static int[] arrayPath(Graph graph, int startVertex, int endVertex) {
-    Node[] results = _run(graph, startVertex);
+    Node[] results = run(graph, startVertex);
     return Graph.arrayPath(results, startVertex, endVertex);
   }
 
@@ -220,7 +227,7 @@ public final class DFS {
    * @param graph       the graph to run the algorithm on
    * @param startVertex the starting vertex of the path
    * @param endVertex   the end vertex of the path
-   * @return the string path if one exists or a no path exists message string
+   * @return the array of vertices for the path
    */
   public static int[] arrayPath(Node[] nodes, int startVertex, int endVertex) {
     return Graph.arrayPath(nodes, startVertex, endVertex);

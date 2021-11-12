@@ -98,7 +98,6 @@ public final class Dijkstra extends SSSP {
     Graph.Edge[] edges;
     int i, u, v, w;
 
-    // Initialize the PriorityQueue with all the vertex nodes
     for (i = 0; i < VTS.length; i++)
       Q.insert(VTS[i]);
 
@@ -118,7 +117,7 @@ public final class Dijkstra extends SSSP {
   }
 
   /**
-   * Runs the BFS algorithm and returns the path string for the start and end
+   * Runs the algorithm and returns the path string for the start and end
    * vertices.
    *
    * @param graph       the graph to run the algorithm on
@@ -127,21 +126,21 @@ public final class Dijkstra extends SSSP {
    * @return the string path if one exists or a no path exists message string
    */
   public static String printPath(Graph graph, int startVertex, int endVertex) {
-    Node[] results = _run(graph, startVertex);
+    Node[] results = run(graph, startVertex);
     return Graph.printPath(results, startVertex, endVertex);
   }
 
   /**
-   * Runs the BFS algorithm and returns the array of path vertices for the start
-   * and end vertices.
+   * Runs the algorithm and returns the array of path vertices for the start and
+   * end vertices.
    *
    * @param graph       the graph to run the algorithm on
    * @param startVertex the starting vertex of the path
    * @param endVertex   the end vertex of the path
-   * @return the string path if one exists or a no path exists message string
+   * @return the array of vertices for the path
    */
   public static int[] arrayPath(Graph graph, int startVertex, int endVertex) {
-    Node[] results = _run(graph, startVertex);
+    Node[] results = run(graph, startVertex);
     return Graph.arrayPath(results, startVertex, endVertex);
   }
 

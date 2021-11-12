@@ -69,20 +69,23 @@ public final class DFS_Stack {
   }
 
   private static Node[] _run(Graph G, int s) {
-    int[] V = G.getVertices();
-    Node[] VTS = new Node[V.length];
-    Stack<Integer> S = new Stack<>(V.length);
+    int V = G.rows;
+    Node[] VTS = new Node[V];
+    Stack<Integer> S = new Stack<>(V);
     int i, u, v, time = 0;
     Graph.Edge[] edges;
 
-    // Initialize DFS vertex nodes
-    for (i = 0; i < V.length; i++)
-      VTS[i] = new Node(V[i]);
+    for (i = 0; i < V; i++)
+      VTS[i] = new Node(i);
 
     S.push(s);
 
     while (!S.isEmpty()) {
       u = S.pop();
+
+      // If the vertex doesn't exist in graph, don't check edges
+      if (!G.hasVertex(u))
+        continue;
 
       VTS[u].distance = ++time;
       VTS[u].color = GRAY;
@@ -113,7 +116,7 @@ public final class DFS_Stack {
    * @return the string path if one exists or a no path exists message string
    */
   public static String printPath(Graph graph, int startVertex, int endVertex) {
-    Node[] results = _run(graph, startVertex);
+    Node[] results = run(graph, startVertex);
     return Graph.printPath(results, startVertex, endVertex);
   }
 
@@ -137,10 +140,10 @@ public final class DFS_Stack {
    * @param graph       the graph to run the algorithm on
    * @param startVertex the starting vertex of the path
    * @param endVertex   the end vertex of the path
-   * @return the string path if one exists or a no path exists message string
+   * @return the array of vertices for the path
    */
   public static int[] arrayPath(Graph graph, int startVertex, int endVertex) {
-    Node[] results = _run(graph, startVertex);
+    Node[] results = run(graph, startVertex);
     return Graph.arrayPath(results, startVertex, endVertex);
   }
 
@@ -151,7 +154,7 @@ public final class DFS_Stack {
    * @param graph       the graph to run the algorithm on
    * @param startVertex the starting vertex of the path
    * @param endVertex   the end vertex of the path
-   * @return the string path if one exists or a no path exists message string
+   * @return the array of vertices for the path
    */
   public static int[] arrayPath(Node[] nodes, int startVertex, int endVertex) {
     return Graph.arrayPath(nodes, startVertex, endVertex);

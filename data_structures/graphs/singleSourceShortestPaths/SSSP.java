@@ -19,7 +19,7 @@ import data_structures.graphs.Graph;
  * penalties, loss, or any other quantity that accumulates linearly along a path
  * and that we would want to minimize.
  * </p>
- * 
+ *
  * <h4>Negative-Weight Edges:</h4>
  *
  * <p>
@@ -52,11 +52,11 @@ import data_structures.graphs.Graph;
  * the predecessor, using *). The vertex set {@code V*} is the set of vertices
  * of {@code G} with non-NIL predecessors, plus the source {@code s}:
  * </p>
- * 
+ *
  * <p>
  * <i>V* = { v of V : v.p != NIL } U {s}</i>
  * </p>
- * 
+ *
  * <p>
  * The directed edge set {@code E*} is the set of edges included by the
  * {@code p} values for vertices in {@code V*}:
@@ -70,7 +70,7 @@ import data_structures.graphs.Graph;
  * rooted at s is a directed subgraph G' = (V', E'), where V' is a subset of V
  * and E' is a subset of E, such that:
  * </p>
- * 
+ *
  * <ol>
  * <li>{@code V'} is the set of vertices reachable from {@code s} in
  * {@code G}</li>
@@ -111,9 +111,9 @@ public class SSSP {
   /**
    * Verifies that the supplied {@link Graph} is valid, being directed and
    * weighted.
-   * 
+   *
    * @param graph the graph to check
-   * 
+   *
    * @throws IllegalArgumentException if the specified {@code Graph} is not
    *                                  weighted and directed
    */
@@ -121,20 +121,20 @@ public class SSSP {
     if (!graph.directed && !graph.weighted)
       throw new IllegalArgumentException("The algorithm can only run on a directed weighted graph.");
   }
-  
+
   /**
-   * Initialize-Single-Source(G, s) (-)(V)-time 
-   * 1   for each vertex v of G.V 
-   * 2       v.d = Infinity 
-   * 3       v.p = NIL 
-   * 4   s.d = 0 
+   * Initialize-Single-Source(G, s) (-)(V)-time
+   * 1   for each vertex v of G.V
+   * 2       v.d = Infinity
+   * 3       v.p = NIL
+   * 4   s.d = 0
    */
 
   /**
    * Initializes the source vertex for the SSSP algorithm by creating the array of
    * the inner class {@code Node} for each vertex in the graph. It will set the
    * source with a distance of {@code 0} to be the root.
-   * 
+   *
    * @param graph        the weighted directed graph to run the SSSP algorithm on
    * @param sourceVertex the root vertex of all the paths
    * @return the {@code Node[]} containing the initialized vertices
@@ -143,7 +143,7 @@ public class SSSP {
     int[] V = graph.getVertices();
     Node[] VTS = new Node[V.length];
 
-    for (int i = 0, len = V.length; i < len; i++) {
+    for (int i = 0; i < V.length; i++) {
       VTS[i] = new Node(V[i]);
 
       if (V[i] == sourceVertex)
@@ -154,10 +154,39 @@ public class SSSP {
   }
 
   /**
-   * Relax(u, v, w) 
+   * Initializes the source vertex for the SSSP algorithm by creating the array of
+   * the inner class {@code Node} for each vertex in the graph. It will set the
+   * source with a distance of {@code 0} to be the root.
+   *
+   * <p>
+   * Retrievs the array of all vertices in the graph, whether they exist in the
+   * graph or not to be able to quickly access them in the {@code Node[]} array
+   * with their vertex number as the index.
+   * </p>
+   *
+   * @param graph
+   * @param sourceVertex
+   * @return
+   */
+  protected static final Node[] initSourceAll(Graph graph, int sourceVertex) {
+    int u, V = graph.rows;
+    Node[] VTS = new Node[V];
+
+    for (u = 0; u < V; u++) {
+      VTS[u] = new Node(u);
+
+      if (u == sourceVertex)
+        VTS[u].distance = 0;
+    }
+
+    return VTS;
+  }
+
+  /**
+   * Relax(u, v, w)
    * 1   if (v.d > u.d + w(u, v))
    * 2       v.d = u.d + W(u, v);
-   * 3       v.p = u;   
+   * 3       v.p = u;
    */
 
   /**
@@ -166,7 +195,7 @@ public class SSSP {
    * through u and if so, updating {@code v.d} and {@code v.p}. A relaxation step
    * may decrease the value of the shortest path estimate {@code v.d} and update
    * {@code v}'s predecessor attribute {@code v.p}.
-   * 
+   *
    * @param VTS the {@code Node[]} containing the attributes for the vertices
    * @param u   the x vertex of an edge to relax
    * @param v   the y vertex of an edge to relax

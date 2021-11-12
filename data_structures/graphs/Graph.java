@@ -171,6 +171,15 @@ public final class Graph {
   }
 
   /**
+   * Returns the matrix adjacency representation.
+   *
+   * @return the adjacency matrix
+   */
+  public int[][] getAdjacencyMatrix() {
+    return G;
+  }
+
+  /**
    * Returns the number of vertices in the graph.
    *
    * @return the number of vertices

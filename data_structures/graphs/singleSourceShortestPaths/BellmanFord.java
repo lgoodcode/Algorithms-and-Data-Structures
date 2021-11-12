@@ -57,7 +57,7 @@ public final class BellmanFord extends SSSP {
   }
 
   private static Node[] _run(Graph G, int s) {
-    Node[] VTS = initSource(G, s);
+    Node[] VTS = initSourceAll(G, s);
     int[] V = G.getVertices();
     Graph.Edge[] edges;
     int i, j, k, u, v, w, len;
@@ -93,7 +93,7 @@ public final class BellmanFord extends SSSP {
   }
 
   /**
-   * Runs the BFS algorithm and returns the path string for the start and end
+   * Runs the algorithm and returns the path string for the start and end
    * vertices.
    *
    * @param graph       the graph to run the algorithm on
@@ -102,21 +102,21 @@ public final class BellmanFord extends SSSP {
    * @return the string path if one exists or a no path exists message string
    */
   public static String printPath(Graph graph, int startVertex, int endVertex) {
-    Node[] results = _run(graph, startVertex);
+    Node[] results = run(graph, startVertex);
     return Graph.printPath(results, startVertex, endVertex);
   }
 
   /**
-   * Runs the BFS algorithm and returns the array of path vertices for the start
-   * and end vertices.
+   * Runs the algorithm and returns the array of path vertices for the start and
+   * end vertices.
    *
    * @param graph       the graph to run the algorithm on
    * @param startVertex the starting vertex of the path
    * @param endVertex   the end vertex of the path
-   * @return the string path if one exists or a no path exists message string
+   * @return the array of vertices for the path
    */
   public static int[] arrayPath(Graph graph, int startVertex, int endVertex) {
-    Node[] results = _run(graph, startVertex);
+    Node[] results = run(graph, startVertex);
     return Graph.arrayPath(results, startVertex, endVertex);
   }
 }

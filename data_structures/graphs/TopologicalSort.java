@@ -15,11 +15,11 @@ import data_structures.linkedLists.LinkedList;
  * before tie, undershorts before pants before a belt. A directed edge
  * {@code (u, v)} means {@code u} precedes {@code v}.
  * </p>
- * 
+ *
  * <p>
  * Topological sort algorithm for a dag is simply:
  * </p>
- * 
+ *
  * <ol>
  * <li>call {@code DFS(G)} to compute finishing times {@code v.f} for each
  * vertex {@code v}</li>
@@ -93,18 +93,15 @@ public final class TopologicalSort {
   }
 
   private static LinkedList<Node> _run(Graph G, int s) {
-    int[] V = G.getVertices(), time = { 0 };
-    Node[] VTS = new Node[V.length];
+    int u, V = G.rows;
+    int[] time = { 0 };
+    Node[] VTS = new Node[V];
     LinkedList<Node> L = new LinkedList<>();
-    int i, u;
 
-    // Initialize DFS vertex nodes
-    for (i = 0; i < V.length; i++)
-      VTS[i] = new Node(V[i]);
+    for (u = 0; u < V; u++)
+      VTS[u] = new Node(u);
 
-    for (i = 0; i < V.length; i++) {
-      u = V[i];
-
+    for (u = 0; u < V; u++) {
       if (VTS[u].color == WHITE)
         visit(G, VTS, L, u, time);
     }
@@ -113,6 +110,10 @@ public final class TopologicalSort {
   }
 
   private static void visit(Graph G, Node[] VTS, LinkedList<Node> L, int u, int[] time) {
+    // If vertex doesn't exist in the graph, don't check for edges
+    if (!G.hasVertex(u))
+      return;
+
     VTS[u].distance = ++time[0];
     VTS[u].color = GRAY;
 

@@ -19,7 +19,7 @@ public class DFS_Test {
 
   @BeforeEach
   void setup() {
-    G = new Graph(9, true);
+    G = new Graph(12, true);
 
     G.addEdge(0, 1);
     G.addEdge(0, 2);
@@ -31,6 +31,7 @@ public class DFS_Test {
     G.addEdge(1, 4);
     G.addEdge(1, 5);
     G.addEdge(4, 8);
+    G.addEdge(10, 11);
   }
 
   @Test
@@ -75,7 +76,7 @@ public class DFS_Test {
   class DFS_Stack_implementation {
     @BeforeEach
     void setup() {
-      G = new Graph(9, true);
+      G = new Graph(12, true);
   
       G.addEdge(0, 1);
       G.addEdge(0, 2);
@@ -87,6 +88,7 @@ public class DFS_Test {
       G.addEdge(1, 4);
       G.addEdge(1, 5);
       G.addEdge(4, 8);
+      G.addEdge(10, 11);
     }
   
     @Test
