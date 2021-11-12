@@ -18,14 +18,13 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import data_structures.tries.Trie;
-import data_structures.tries.TrieNode;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 public class Trie_Test {
   Trie<Integer> trie;
   Trie<String> trie2;
-  TrieNode<Integer> node;
-  TrieNode<String> node2;
+  Trie.Node<Integer> node;
+  Trie.Node<String> node2;
 
   @Nested
   class When_New {
@@ -102,7 +101,7 @@ public class Trie_Test {
 
     @Test
     void entries_is_empty() {
-      Iterator<TrieNode<Integer>> entries = trie.entriesIterator();
+      Iterator<Trie.Node<Integer>> entries = trie.entriesIterator();
       assertFalse(entries.hasNext());
       assertThrows(NoSuchElementException.class, () -> entries.next());
       assertThrows(IllegalStateException.class, () -> entries.remove());
@@ -190,7 +189,7 @@ public class Trie_Test {
 
     @Test
     void entries() {
-      Iterator<TrieNode<Integer>> entries = trie.entriesIterator();
+      Iterator<Trie.Node<Integer>> entries = trie.entriesIterator();
       assertTrue(entries.hasNext());
       assertEquals(8, entries.next().getValue());
       assertEquals(7, entries.next().getValue());

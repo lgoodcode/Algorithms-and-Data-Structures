@@ -19,14 +19,13 @@ import java.util.NoSuchElementException;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import data_structures.tries.TrieHash;
-import data_structures.tries.TrieHashNode;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 public class TrieHash_Test {
   TrieHash<Integer> trie;
   TrieHash<String> trie2;
-  TrieHashNode<Integer> node;
-  TrieHashNode<String> node2;
+  TrieHash.HashNode<Integer> node;
+  TrieHash.HashNode<String> node2;
 
   @Nested
   class When_New {
@@ -103,7 +102,7 @@ public class TrieHash_Test {
 
     @Test
     void entries_is_empty() {
-      Iterator<TrieHashNode<Integer>> entries = trie.entriesIterator();
+      Iterator<TrieHash.HashNode<Integer>> entries = trie.entriesIterator();
       assertFalse(entries.hasNext());
       assertThrows(NoSuchElementException.class, () -> entries.next());
       assertThrows(IllegalStateException.class, () -> entries.remove());
@@ -167,8 +166,8 @@ public class TrieHash_Test {
       assertEquals("five", words.next());
       assertEquals("four", words.next());
       assertEquals("one", words.next());
-      assertEquals("three", words.next());
       assertEquals("two", words.next());
+      assertEquals("three", words.next());
       assertFalse(words.hasNext());
       assertThrows(NoSuchElementException.class, () -> words.next());
     }
@@ -183,15 +182,15 @@ public class TrieHash_Test {
       assertEquals(5, values.next());
       assertEquals(4, values.next());
       assertEquals(1, values.next());
-      assertEquals(3, values.next());
       assertEquals(2, values.next());
+      assertEquals(3, values.next());
       assertFalse(values.hasNext());
       assertThrows(NoSuchElementException.class, () -> values.next());
     }
 
     @Test
     void entries() {
-      Iterator<TrieHashNode<Integer>> entries = trie.entriesIterator();
+      Iterator<TrieHash.HashNode<Integer>> entries = trie.entriesIterator();
       assertTrue(entries.hasNext());
       assertEquals(8, entries.next().getValue());
       assertEquals(7, entries.next().getValue());
@@ -199,8 +198,8 @@ public class TrieHash_Test {
       assertEquals(5, entries.next().getValue());
       assertEquals(4, entries.next().getValue());
       assertEquals(1, entries.next().getValue());
-      assertEquals(3, entries.next().getValue());
       assertEquals(2, entries.next().getValue());
+      assertEquals(3, entries.next().getValue());
       assertFalse(entries.hasNext());
       assertThrows(NoSuchElementException.class, () -> entries.next());
     }
@@ -222,8 +221,8 @@ public class TrieHash_Test {
           + "\s\s\"five -> 5\",\n"
           + "\s\s\"four -> 4\",\n"
           + "\s\s\"one -> 1\",\n"
-          + "\s\s\"three -> 3\",\n"
           + "\s\s\"two -> 2\",\n"
+          + "\s\s\"three -> 3\",\n"
           + "}",
         trie.toString());
     }

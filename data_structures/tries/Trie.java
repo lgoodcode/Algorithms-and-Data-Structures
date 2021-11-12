@@ -1,17 +1,57 @@
 package data_structures.tries;
 
-public class Trie<V> extends AbstractTrie<V> {
+public class Trie<T> extends AbstractTrie<T> {
+  public static final class Node<T> extends AbstractTrie.Node<T> {
+    /**
+     * Initializes an empty {@code TrieNode} with the specified key. The key is used
+     * to determine what position the node is in and what words it could contain.
+     *
+     * @param key    the character key to set the {@code TrieNode}
+     * @param parent the parent {@code TrieNode} that this new child node will be
+     *               placed under for tracing up in the {@link Trie#getPrefix()}
+     *               method.
+     */
+    @SuppressWarnings("unchecked")
+    protected <TrieNode extends AbstractTrie.Node<T>> Node(char key, TrieNode parent) {
+      super(key, parent);
+      children = (Node<T>[]) new Node<?>[26];
+    }
+
+    /**
+     * Default constructor for the root {@code TrieNode}.
+     */
+    @SuppressWarnings("unchecked")
+    protected Node() {
+      super();
+      children = (Node<T>[]) new Node<?>[26];
+    }
+  }
+
   /**
    * The root node of the {@code Trie} that will hold no value.
    */
-  private TrieNode<V> root;
+  private Node<T> root;
 
   /**
    * Creates a new, empty, {@code Trie}, with the root initialized to a {@code TrieNode}
    * that has a slot for each letter of the alphabet {@code (26)}.
    */
   public Trie() {
-    root = new TrieNode<V>();
+    root = new Node<T>();
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @param <TrieNode> {@link Trie.Node}
+   * @throws NullPointerException {@inheritDoc}
+   * @throws IllegalArgumentException {@inheritDoc}
+   */
+  protected <TrieNode extends AbstractTrie.Node<T>> void checkNode(TrieNode node) {
+    if (node == null)
+      throw new NullPointerException("TrieNode cannot be null.");
+    if (node.getClass() != Node.class)
+      throw new IllegalArgumentException("Node must be an instance of Trie.Node");
   }
 
   /**
@@ -19,12 +59,12 @@ public class Trie<V> extends AbstractTrie<V> {
    *
    * @throws IllegalArgumentException {@inheritDoc}
    */
-  public synchronized void insert(String word, V value) {
+  public synchronized void insert(String word, T value) {
     checkWord(word);
     checkValue(value);
 
     String currentWord = parseWord(word);
-    TrieNode<V> child, newChild, node = root;
+    Node<T> child, newChild, node = root;
     char currChar;
 
     count++;
@@ -37,7 +77,7 @@ public class Trie<V> extends AbstractTrie<V> {
       if (child != null)
         node = child;
       else {
-        newChild = new TrieNode<V>(currChar, node);
+        newChild = new Node<T>(currChar, node);
         node.setChild(currChar, newChild);
         node = newChild;
       }
@@ -45,16 +85,16 @@ public class Trie<V> extends AbstractTrie<V> {
       currentWord = currentWord.substring(1);
     }
 
-    node.setValue(value);
+    node.value = value;
   }
 
   /**
    * {@inheritDoc}
    */
   @SuppressWarnings("unchecked")
-  public TrieNode<V> search(String word) {
+  public Node<T> search(String word) {
     String currentWord = parseWord(word);
-    TrieNode<V> node = root;
+    Node<T> node = root;
 
     if (currentWord.isBlank())
       return node;
@@ -78,17 +118,17 @@ public class Trie<V> extends AbstractTrie<V> {
   public synchronized void delete(String word) {
     checkWord(word);
 
-    TrieNode<V> parent, node = search(word);
-    TrieNode<V>[] children;
+    Node<T> parent, node = search(word);
+    Node<T>[] children;
     boolean hasWord = false;
 
     if (node == null)
       return;
 
     count--;
-    node.setValue(null);
+    node.value = null;
 
-    for (parent = node.parent; parent != null; node = parent, parent = node.parent) {
+    for (parent = (Node<T>) node.parent; parent != null; node = parent, parent = (Node<T>) node.parent) {
       if (!node.hasWord && !node.isWord()) {
         parent.removeChild(node.key);
         continue;
@@ -111,30 +151,6 @@ public class Trie<V> extends AbstractTrie<V> {
       } else
         parent.removeChild(node.key);
     }
-  }
-
-  /**
-   * {@inheritDoc}
-   *
-   * @throws NullPointerException {@inheritDoc}
-   */
-  @SuppressWarnings("unchecked")
-  public <Node extends AbstractTrieNode<V>> String getPrefix(Node node) {
-    checkNode(node);
-
-    if (node.isRoot())
-      return "";
-
-    TrieNode<V> currNode = (TrieNode<V>) node, parent = currNode.parent;
-    String prefix = "";
-
-    while (!currNode.isRoot()) {
-      prefix = currNode.key + prefix;
-      currNode = parent;
-      parent = currNode.parent;
-    }
-
-    return prefix;
   }
 
 }
