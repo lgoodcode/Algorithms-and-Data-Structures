@@ -10,10 +10,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.*;
 
 import data_structures.graphs.Graph;
-import data_structures.graphs.allPairsShortesPaths.FloydWarshall;
+import data_structures.graphs.allPairsShortesPaths.Minimax;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-public class FloydWarshall_Test {
+public class Minimax_Test {
   Graph G = new Graph(9, true, true);
   int[][] table;
 
@@ -21,64 +21,63 @@ public class FloydWarshall_Test {
   void setup() {
     G.addEdge(1, 2, 3);
     G.addEdge(1, 3, 8);
-    G.addEdge(1, 5, -4);
+    G.addEdge(1, 5, 14);
     G.addEdge(2, 4, 1);
     G.addEdge(2, 5, 7);
     G.addEdge(3, 2, 4);
     G.addEdge(4, 1, 2);
-    G.addEdge(4, 3, -5);
+    G.addEdge(4, 3, 15);
     G.addEdge(5, 4, 6);
-    G.addEdge(7, 8, 4);
   }
 
   @Test
-  void floydWarshall() {
-    assertNotNull(FloydWarshall.run(G));
+  void minimax() {
+    assertNotNull(Minimax.run(G));
   }
 
   @Test
   void throws_on_invalid_graph() {
-    assertThrows(IllegalArgumentException.class, () -> FloydWarshall.run(new Graph(1, false, false)));
+    assertThrows(IllegalArgumentException.class, () -> Minimax.run(new Graph(1, false, false)));
   }
 
   @Test
   void no_negative_weight_cycle() {
-    assertFalse(FloydWarshall.hasNegativeWeightCycle(G));
+    assertFalse(Minimax.hasNegativeWeightCycle(G));
   }
 
   @Test
   void prints_path() {
-    assertEquals("1 -> 5 -> 4 -> 3", FloydWarshall.printPath(G, 1, 3));
+    assertEquals("1 -> 2 -> 5", Minimax.printPath(G, 1, 5));
   }
 
   @Test
   void table_prints_path() {
-    table = FloydWarshall.table(G);
-    assertEquals("1 -> 5 -> 4 -> 3", FloydWarshall.printPath(table, 1, 3));
+    table = Minimax.table(G);
+    assertEquals("1 -> 2 -> 5", Minimax.printPath(table, 1, 5));
   }
 
   @Test
   void no_path() {
-    assertEquals("No path exists from 0 to 5", FloydWarshall.printPath(G, 0, 5));
+    assertEquals("No path exists from 0 to 5", Minimax.printPath(G, 0, 5));
   }
 
   @Test 
   void array_path() {
-    int[] path = { 1, 5, 4, 3 };
-    assertArrayEquals(path, FloydWarshall.arrayPath(G, 1, 3));
+    int[] path = { 1, 2, 5 };
+    assertArrayEquals(path, Minimax.arrayPath(G, 1, 5));
   }
 
   @Test 
   void table_array_path() {
-    int[] path = { 1, 5, 4, 3 };
-    table = FloydWarshall.table(G);
-    assertArrayEquals(path, FloydWarshall.arrayPath(table, 1, 3));
+    int[] path = { 1, 2, 5 };
+    table = Minimax.table(G);
+    assertArrayEquals(path, Minimax.arrayPath(table, 1, 5));
   }
 
   @Test
   void no_array_path() {
     int[] noPath = { -1 };
-    assertArrayEquals(noPath, FloydWarshall.arrayPath(G, 0, 5));
+    assertArrayEquals(noPath, Minimax.arrayPath(G, 0, 5));
   }
 
   @Test
@@ -95,7 +94,8 @@ public class FloydWarshall_Test {
     W.addEdge(4, 3, -5);
     W.addEdge(5, 4, -3);
 
-    assertTrue(FloydWarshall.hasNegativeWeightCycle(W));
+    assertTrue(Minimax.hasNegativeWeightCycle(W));
 
   }
+
 }

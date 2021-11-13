@@ -36,6 +36,20 @@ import data_structures.graphs.Graph;
  * may be present, but we assume that there are none.
  *
  * <p>
+ * Improved version only requires {@code (-)(n^2)} space instead of
+ * {@code (-)(n^3)} by instead of having a 3-dimensional matrix
+ * {@ccode D[k][i][j]}, it only uses a 2-dimensional matrix and overwrites the
+ * positions on each iteration of {@code k}.
+ * </p>
+ *
+ * <p>
+ * Added a method to check whether the supplied graph contains a negative weight
+ * cycle by simply running the algorithm on the graph and checking if the
+ * resulting table contains a negative value in any of the diagonal positions,
+ * which should contain {@code 0}.
+ * </p>
+ *
+ * <p>
  * The algorithm considers the intermediate verties of a shortest path, where an
  * intermediate vertex of a simple path {@code p = [v1, v2, ..., vn]} is any
  * vertex of {@code p} other than any vertex that is already included in the
@@ -91,7 +105,7 @@ public final class FloydWarshall extends ASPS {
    * weight. Will produce a table of the weights from vertex to vertex or
    * {@link Graph.NIL} which is {@code Infinity} to represent not possible path
    * since {@code null} cannot be used for primitive values.
-   * 
+   *
    * @param graph the graph matrix to run the algorithm on
    * @return the table of weights for vertex to vertex paths
    *
@@ -105,45 +119,50 @@ public final class FloydWarshall extends ASPS {
 
   private static int[][] _run(Graph G) {
     int n = G.rows;
-    int D[][][] = new int[n][n][n];
+    int D[][] = new int[n][n];
     int W[][] = G.getAdjacencyMatrix();
     int a, b, c, i, j, k;
 
     // Initialize D^(0)
     for (i = 0; i < n; i++) {
-      if (W[i] == null)
+      if (W[i] == null) {
         W[i] = new int[n];
+
+        for (j = 0; j < n; j++)
+          D[i][j] = i == j ? 0 : Graph.NIL;
+        continue;
+      }
 
       for (j = 0; j < n; j++) {
         if (i == j)
-          D[0][i][j] = 0;
+          D[i][j] = 0;
         else if (W[i][j] == Graph.NIL)
-          D[0][i][j] = Graph.NIL;
+          D[i][j] = Graph.NIL;
         else
-          D[0][i][j] = W[i][j];
+          D[i][j] = W[i][j];
       }
     }
 
     for (k = 1; k < n; k++) {
       for (i = 0; i < n; i++) {
         for (j = 0; j < n; j++) {
-          a = D[k-1][i][j];
-          b = D[k-1][i][k];
-          c = D[k-1][k][j];
+          a = D[i][j];
+          b = D[i][k];
+          c = D[k][j];
           // Check for Infinity value (NIL) to prevent addition overflow
-          D[k][i][j] = b == Graph.NIL || c == Graph.NIL ? a : Math.min(a, b + c);
+          D[i][j] = b == Graph.NIL || c == Graph.NIL ? a : Math.min(a, b + c);
         }
       }
     }
 
-    return D[n-1];
+    return D;
   }
 
   /**
    * Runs the Floyd Warshall algorithm on the specified graph to produce a
    * predecessor matrix that contains the vertices to form a path, if one exists.
    * The predecessor matrix is used to print the path.
-   * 
+   *
    * @param graph the graph matrix to run the algorithm on
    * @return the predecessor matrix of the graph
    *
@@ -157,28 +176,35 @@ public final class FloydWarshall extends ASPS {
 
   private static int[][] _table(Graph G) {
     int n = G.rows;
-    int D[][][] = new int[n][n][n];
-    int P[][][] = new int[n][n][n];
+    int D[][] = new int[n][n];
+    int P[][] = new int[n][n];
     final int W[][] = G.getAdjacencyMatrix();
     int a, b, c, i, j, k;
 
     // Initialize D^(0) and P^(0)
     for (i = 0; i < n; i++) {
-      if (W[i] == null)
+      if (W[i] == null) {
         W[i] = new int[n];
+
+        for (j = 0; j < n; j++) {
+          D[i][j] = i == j ? 0 : Graph.NIL;
+          P[i][j] = Graph.NIL;
+        }
+        continue;
+      }
 
       for (j = 0; j < n; j++) {
         if (i == j) {
-          D[0][i][j] = 0;
-          P[0][i][j] = Graph.NIL;
+          D[i][j] = 0;
+          P[i][j] = Graph.NIL;
         }
         else if (W[i][j] == Graph.NIL) {
-          D[0][i][j] = Graph.NIL;
-          P[0][i][j] = Graph.NIL;
+          D[i][j] = Graph.NIL;
+          P[i][j] = Graph.NIL;
         }
         else {
-          D[0][i][j] = W[i][j];
-          P[0][i][j] = i;
+          D[i][j] = W[i][j];
+          P[i][j] = i;
         }
       }
     }
@@ -186,24 +212,44 @@ public final class FloydWarshall extends ASPS {
     for (k = 1; k < n; k++) {
       for (i = 0; i < n; i++) {
         for (j = 0; j < n; j++) {
-          a = D[k-1][i][j];
-          b = D[k-1][i][k];
-          c = D[k-1][k][j];
+          a = D[i][j];
+          b = D[i][k];
+          c = D[k][j];
 
           // Check for Infinity values to prevent addition overflow
           if (b == Graph.NIL || c == Graph.NIL || a <= b + c) {
-            D[k][i][j] = a;
-            P[k][i][j] = P[k-1][i][j];
+            D[i][j] = a;
+            P[i][j] = P[i][j];
           }
           else {
-            D[k][i][j] = b + c;
-            P[k][i][j] = P[k-1][k][j];
+            D[i][j] = b + c;
+            P[i][j] = P[k][j];
           }
         }
       }
     }
 
-    return P[n-1];
+    return P;
+  }
+
+  /**
+   * Detects if the specified graph contains a negative weight cycle by checking
+   * if there is a negative value in the diagonal values of the table, which
+   * should contain {@code 0}.
+   *
+   * @param graph the directed weighted graph to check
+   * @return whether the graph contains a negative weight cycle or not
+   *
+   * @throws IllegalArgumentException if the specified {@code Graph} is not
+   *                                  weighted and directed
+   */
+  public static boolean hasNegativeWeightCycle(Graph graph) {
+    int[][] table = run(graph);
+
+    for (int i = 0; i < table.length; i++)
+      if (table[i][i] < 0)
+        return true;
+    return false;
   }
 
   /**
