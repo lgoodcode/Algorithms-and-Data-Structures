@@ -3,11 +3,11 @@ package data_structures.graphs.allPairsShortesPaths;
 import data_structures.graphs.Graph;
 
 /**
- * In graph problems involves finding a path between two nodes that minimizes
- * the maximum cost along the path. (Example problems include finding feasible
- * paths to take by car with a limited fuel tank and rest stations at every
- * node). You can also add in an update to a predecessor matrix in order to keep
- * track of the actual path found.
+ * The other way around from Minimax - here you have problems where you need to
+ * find the path the maximizes the minimum cost along a path. (Example problems
+ * include trying to maximize the load a cargo truck can take when roads along a
+ * path may have a weight limit, or trying to find a network routing path that
+ * meets a minimum bandwidth requirement for some application).
  *
  * <p>
  * Based off of the FloydWarshall algorithm.
@@ -17,13 +17,13 @@ import data_structures.graphs.Graph;
  * {@code d} is an distance matrix for {@code n} nodes e.g. {@code d[i][j]} is
  * the direct distance from {@code i} to {@code j}. the distance from a node to
  * itself e.g. {@code d[i][i]} should be initialized to {@code 0}. The resulting
- * table positions {@code d[i][j]} will contain the length of the minimax path
+ * table positions {@code d[i][j]} will contain the length of the maximin path
  * from {@code i} to {@code j}.
  * </p>
  */
-public final class Minimax extends ASPS {
+public final class Maximin extends ASPS {
   /**
-   * Runs the Floyd Warshall MiniMax algorithm on the graph that minimizes the
+   * Runs the Floyd Warshall Maximin algorithm on the graph that minimizes the
    * maximum cost along a path. Will return the matrix table of the cost of paths
    * from vertices {@code i} to {@code j} in position {@code D[i][j]}.
    *
@@ -75,7 +75,7 @@ public final class Minimax extends ASPS {
   }
 
   /**
-   * Runs the Floyd Warshall MiniMax algorithm on the graph that minimizes the
+   * Runs the Floyd Warshall Maximin algorithm on the graph that minimizes the
    * maximum cost along a path. Will return the matrix table of the paths to
    * result in the minimum maximum costs along a specified path.
    *
@@ -128,11 +128,11 @@ public final class Minimax extends ASPS {
     for (k = 1; k < n; k++) {
       for (i = 0; i < n; i++) {
         for (j = 0; j < n; j++) {
-          if (D[i][j] <= Math.max(D[i][k], D[k][j])) {
+          if (D[i][j] != Graph.NIL && D[i][j] >= Math.min(D[i][k], D[k][j])) {
             x = D[i][j];
             y = P[i][j];
           }
-          else if (D[i][k] >= D[k][j]) {
+          else if (D[i][k] <= D[k][j]) {
             x = D[i][k];
             y = P[i][k];
           }
@@ -199,7 +199,7 @@ public final class Minimax extends ASPS {
    * @param endVertex   the end vertex of the path
    * @return the array of vertices for a path, or a single {@code -1} element if
    *         no path exists
-   * 
+   *
    * @throws IllegalArgumentException if the specified {@code Graph} is not
    *                                  weighted and directed, or the start or end
    *                                  vertices are invalid
