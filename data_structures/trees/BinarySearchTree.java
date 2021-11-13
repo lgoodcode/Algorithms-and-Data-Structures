@@ -1,9 +1,8 @@
 package data_structures.trees;
 
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
 
-public class BinarySearchTree<K, V> extends AbstractTree<K, V> {
+public final class BinarySearchTree<K, V> extends AbstractTree<K, V> {
   /**
    * The root of the tree
    */
@@ -26,6 +25,16 @@ public class BinarySearchTree<K, V> extends AbstractTree<K, V> {
    */
   public BinarySearchTree() {
     super();
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @throws IllegalArgumentException {@inheritDoc}
+   */
+  protected <TreeNode extends Node<K, V>> void checkType(TreeNode node) {
+    if (node != null && !(node instanceof Node))
+      throw new IllegalArgumentException("TreeNode must be an instance of AbstractTree.Node");
   }
 
   /**
@@ -110,29 +119,25 @@ public class BinarySearchTree<K, V> extends AbstractTree<K, V> {
 
   /**
    * {@inheritDoc}
-   *
-   * @throws IllegalArgumentException {@inheritDoc}
    */
   @SuppressWarnings("unchecked")
-  public <TreeNode extends Node<K, V>> TreeNode search(TreeNode node, K key) {
-    checkKey(key);
-
+  protected <TreeNode extends Node<K, V>> TreeNode _search(TreeNode node, K key) {
     if (node == null || key == node.getKey())
       return node;
     if (isLessThan(key, node.getKey()))
-      return (TreeNode) search(node.left, key);
-    return (TreeNode) search(node.right, key);
+      return (TreeNode) _search(node.left, key);
+    return (TreeNode) _search(node.right, key);
   }
 
   /**
    * {@inheritDoc}
    */
   @SuppressWarnings("unchecked")
-  public <TreeNode extends Node<K, V>> TreeNode minimum(TreeNode node) {
+  protected <TreeNode extends Node<K, V>> TreeNode _minimum(TreeNode node) {
     if (node == null)
       return null;
     if (node.left != null)
-      return (TreeNode) minimum(node.left);
+      return (TreeNode) _minimum(node.left);
     return node;
   }
 
@@ -140,11 +145,11 @@ public class BinarySearchTree<K, V> extends AbstractTree<K, V> {
    * {@inheritDoc}
    */
   @SuppressWarnings("unchecked")
-  public <TreeNode extends Node<K, V>> TreeNode maximum(TreeNode node) {
+  protected <TreeNode extends Node<K, V>> TreeNode _maximum(TreeNode node) {
     if (node == null)
       return null;
     if (node.right != null)
-      return (TreeNode) maximum(node.right);
+      return (TreeNode) _maximum(node.right);
     return node;
   }
 
@@ -208,10 +213,12 @@ public class BinarySearchTree<K, V> extends AbstractTree<K, V> {
   /**
    * {@inheritDoc}
    *
-   * @throws NullPointerException {@inheritDoc}
+   * @throws NullPointerException     {@inheritDoc}
+   * @throws IllegalArgumentException {@inheritDoc}
    */
   public synchronized <TreeNode extends Node<K, V>> void deleteNode(TreeNode node) {
     checkNode(node);
+    checkType(node);
 
     /**
      * Case 1: z has no left child
@@ -243,7 +250,7 @@ public class BinarySearchTree<K, V> extends AbstractTree<K, V> {
        * successor must be the node in that subtree with the smallest key; hence the
        * call to minimum(z.right).
        */
-      Node<K, V> y = minimum(node.right);
+      Node<K, V> y = _minimum(node.right); // Use main method without checking node
 
       if (y.parent != node) {
         /**
@@ -290,14 +297,16 @@ public class BinarySearchTree<K, V> extends AbstractTree<K, V> {
   /**
    * {@inheritDoc}
    *
-   * @throws NullPointerException {@inheritDoc}
+   * @throws NullPointerException     {@inheritDoc}
+   * @throws IllegalArgumentException {@inheritDoc}
    */
   @SuppressWarnings("unchecked")
   public <TreeNode extends Node<K, V>> TreeNode successor(TreeNode node) {
     checkNode(node);
+    checkType(node);
 
     if (node.right != null)
-      return (TreeNode) minimum(node.right);
+      return (TreeNode) _minimum(node.right);
 
     TreeNode y = (TreeNode) node.parent;
 
@@ -329,14 +338,16 @@ public class BinarySearchTree<K, V> extends AbstractTree<K, V> {
   /**
    * {@inheritDoc}
    *
-   * @throws NullPointerException {@inheritDoc}
+   * @throws NullPointerException     {@inheritDoc}
+   * @throws IllegalArgumentException {@inheritDoc}
    */
   @SuppressWarnings("unchecked")
   public <TreeNode extends Node<K, V>> TreeNode predecessor(TreeNode node) {
     checkNode(node);
+    checkType(node);
 
     if (node.left != null)
-      return (TreeNode) maximum(node.left);
+      return (TreeNode) _maximum(node.left);
 
     TreeNode y = (TreeNode) node.parent;
 
@@ -346,42 +357,6 @@ public class BinarySearchTree<K, V> extends AbstractTree<K, V> {
     }
 
     return y;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @SuppressWarnings("unchecked")
-  public <TreeNode extends Node<K, V>> void inorderTreeWalk(TreeNode node, Consumer<TreeNode> callback) {
-    if (node != null) {
-      this.inorderTreeWalk((TreeNode) node.left, callback);
-      callback.accept(node);
-      this.inorderTreeWalk((TreeNode) node.right, callback);
-    }
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @SuppressWarnings("unchecked")
-  public <TreeNode extends Node<K, V>> void preorderTreeWalk(TreeNode node, Consumer<TreeNode> callback) {
-    if (node != null) {
-      callback.accept(node);
-      this.preorderTreeWalk((TreeNode) node.left, callback);
-      this.preorderTreeWalk((TreeNode) node.right, callback);
-    }
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @SuppressWarnings("unchecked")
-  public <TreeNode extends Node<K, V>> void postorderTreeWalk(TreeNode node, Consumer<TreeNode> callback) {
-    if (node != null) {
-      this.postorderTreeWalk((TreeNode) node.left, callback);
-      this.postorderTreeWalk((TreeNode) node.right, callback);
-      callback.accept(node);
-    }
   }
 
 }

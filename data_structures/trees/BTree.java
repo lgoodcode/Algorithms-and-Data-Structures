@@ -93,27 +93,27 @@ public final class BTree<K, V> {
     /**
      * The child {@code BTreeNodes}.
      */
-    protected BTreeNode<K, V>[] children;
+    private BTreeNode<K, V>[] children;
 
     /**
      * The number of keys currently stored under this node.
      */
-    protected int count;
+    private int count;
 
     /**
      * Whether this node is a leaf or internal node.
      */
-    protected boolean leaf;
+    private boolean leaf;
 
     /**
      * The actual keys
      */
-    protected K[] keys;
+    private K[] keys;
 
     /**
      * The values
      */
-    protected V[] values;
+    private V[] values;
 
     /**
      * Constructs an empty {@code BTreeNode} with the specified {@code t},
@@ -154,7 +154,7 @@ public final class BTree<K, V> {
       return count > 0 ? values[count - 1] : null;
     }
 
-    protected void shiftKeys(int start, int end) {
+    private void shiftKeys(int start, int end) {
       if (start < end) {
         for (int i = start, j = end; i < j; i++) {
           keys[i] = keys[i+1];
@@ -169,7 +169,7 @@ public final class BTree<K, V> {
       }
     }
 
-    protected void removeKeys(int i, int j) {
+    private void removeKeys(int i, int j) {
       if (i > j)
         throw new IllegalArgumentException("Start cannot be greater than end");
       for (; i < j; i++) {
@@ -178,11 +178,11 @@ public final class BTree<K, V> {
       }
     }
 
-    protected void removeKeys(int i) {
+    private void removeKeys(int i) {
       removeKeys(i, keys.length);
     }
 
-    protected void removeChildren(int i) {
+    private void removeChildren(int i) {
       if (i >= children.length)
         throw new IllegalArgumentException("Start cannot be >= children length.");
       for (; i<children.length; i++)
@@ -209,22 +209,22 @@ public final class BTree<K, V> {
    * keys. Therefore, an internal node can have up to {@code 2t} children and a
    * "full" node contains exactly {@code 2t - 1} keys.
    */
-  protected int t;
+  private int t;
 
   /**
    * The maximum children length {@code 2t}
    */
-  protected int C_LEN;
+  private int C_LEN;
 
   /**
    * The maximum keys length {@code 2t - 1}
    */
-  protected int K_LEN;
+  private int K_LEN;
 
   /**
    * Counter tracking the number of entries in the tree.
    */
-  protected int count;
+  private int count;
 
   /**
    * The number of times this BTree has been structurally modified. Structural
@@ -234,7 +234,7 @@ public final class BTree<K, V> {
    *
    * @see ConcurrentModificationException
    */
-  protected int modCount;
+  private int modCount;
 
   // Enumeration/iteration constants
   private int KEYS = 0;
@@ -303,7 +303,7 @@ public final class BTree<K, V> {
    *
    * @throws IllegalArgumentException if either key is {@code null} or blank
    */
-  protected final boolean isLessThan(K x, K y) {
+  private boolean isLessThan(K x, K y) {
     checkKey(x);
     checkKey(y);
     return compare.apply(x, y);
@@ -316,7 +316,7 @@ public final class BTree<K, V> {
    *
    * @throws IllegalArgumentException if the key is {@code null}, or blank
    */
-  protected final void checkKey(K key) {
+  private void checkKey(K key) {
     if (key == null || key.toString().isBlank())
       throw new IllegalArgumentException("Key cannot be null or blank.");
   }
@@ -328,7 +328,7 @@ public final class BTree<K, V> {
    *
    * @throws IllegalArgumentException if the value is {@code null} or blank
    */
-  protected final void checkValue(V value) {
+  private void checkValue(V value) {
     if (value == null || value.toString().isBlank())
       throw new IllegalArgumentException("Key cannot be null or blank.");
   }
@@ -342,7 +342,7 @@ public final class BTree<K, V> {
    *
    * @throws IllegalArgumentException if the key already exists in the tree
    */
-  protected final void checkDuplicate(K key) {
+  private void checkDuplicate(K key) {
     if (hasKey(key))
       throw new IllegalArgumentException("Key already exists in the tree.");
   }
@@ -354,7 +354,7 @@ public final class BTree<K, V> {
    *
    * @throws NullPointerException if the specified node is {@code null}
    */
-  protected final void checkNode(BTreeNode<K, V> node) {
+  private void checkNode(BTreeNode<K, V> node) {
     if (node == null)
       throw new NullPointerException("Node cannot be null.");
   }
@@ -364,7 +364,7 @@ public final class BTree<K, V> {
    *
    * @return the number of nodes
    */
-  public final int size() {
+  public int size() {
     return count;
   }
 
@@ -373,7 +373,7 @@ public final class BTree<K, V> {
    *
    * @return whether the tree is empty
    */
-  public final boolean isEmpty() {
+  public boolean isEmpty() {
     return count == 0;
   }
 
@@ -382,7 +382,7 @@ public final class BTree<K, V> {
    *
    * @return the tree root
    */
-  public final BTreeNode<K, V> getRoot() {
+  public BTreeNode<K, V> getRoot() {
     return root;
   }
 
@@ -1430,7 +1430,7 @@ public final class BTree<K, V> {
    * @param type the type of item to iterate (keys, values, or entries)
    * @return the {@code Iterable}
    */
-  protected <T> Iterable<T> getIterable(int type) {
+  private <T> Iterable<T> getIterable(int type) {
     if (isEmpty())
       return new EmptyEnumerator<>();
     return new Enumerator<>(type, true);
@@ -1443,7 +1443,7 @@ public final class BTree<K, V> {
    * @param type the type of item to iterate (keys, values, or entries)
    * @return the {@code Iterator}
    */
-  protected <T> Iterator<T> getIterator(int type) {
+  private <T> Iterator<T> getIterator(int type) {
     if (isEmpty())
       return new EmptyEnumerator<>();
     return new Enumerator<>(type, true);
@@ -1456,7 +1456,7 @@ public final class BTree<K, V> {
    * @param type the type of item to iterate (keys, values, or entries)
    * @return the {@code Enumeration}
    */
-  protected <T> Enumeration<T> getEnumeration(int type) {
+  private <T> Enumeration<T> getEnumeration(int type) {
     if (isEmpty())
       return new EmptyEnumerator<>();
     return new Enumerator<>(type, false);
@@ -1512,23 +1512,23 @@ public final class BTree<K, V> {
    *
    * @param <T> the type of the object that is being enumerated
    */
-  protected class Enumerator<T> implements Enumeration<T>, Iterator<T>, Iterable<T> {
-    protected Queue<BTreeNode<K, V>> nodes;
-    protected BTreeNode<K, V> lastNode;
-    protected K key, lastKey;
-    protected int type, index;
+  private class Enumerator<T> implements Enumeration<T>, Iterator<T>, Iterable<T> {
+    private Queue<BTreeNode<K, V>> nodes;
+    private BTreeNode<K, V> lastNode;
+    private K key, lastKey;
+    private int type, index;
 
     /**
      * Indicates whether this Enumerator is serving as an Iterator or an
      * Enumeration.
      */
-    protected boolean iterator;
+    private boolean iterator;
 
     /**
      * The expected value of modCount when instantiating the iterator. If this
      * expectation is violated, the iterator has detected concurrent modification.
      */
-    protected int expectedModCount = BTree.this.modCount;
+    private int expectedModCount = BTree.this.modCount;
 
     /**
      * Constructs the enumerator that will be used to enumerate the values in the
@@ -1538,7 +1538,7 @@ public final class BTree<K, V> {
      * @param iterator whether this will serve as an {@code Enumeration} or
      *                 {@code Iterator}
      */
-    protected Enumerator(int type, boolean iterator) {
+    private Enumerator(int type, boolean iterator) {
       this.iterator = iterator;
       this.type = type;
       nodes = new Queue<>(BTree.this.count);

@@ -31,20 +31,14 @@ import java.util.function.Consumer;
  * "balanced".
  * </p>
  */
-public class AVLTree<K, V> extends AbstractTree<K, V> {
-  public static class AVLNode<T, E> extends AbstractTree.Node<T, E> {
-    protected AVLNode<T, E> parent;
-    protected AVLNode<T, E> left;
-    protected AVLNode<T, E> right;
+public final class AVLTree<K, V> extends AbstractTree<K, V> {
+  public static final class AVLNode<T, E> extends AbstractTree.Node<T, E> {
+    private AVLNode<T, E> parent;
+    private AVLNode<T, E> left;
+    private AVLNode<T, E> right;
 
-    /**
-     * Determines the level of how deep the node resides compared to the root.
-     */
-    protected int height;
-
-    protected AVLNode(T key, E value) {
+    private AVLNode(T key, E value) {
       super(key, value);
-      height = 0;
     }
   }
 
@@ -84,17 +78,13 @@ public class AVLTree<K, V> extends AbstractTree<K, V> {
   }
 
   /**
-   * Internal method to verify the {@code TreeNode} used for methods are
-   * {@code AVLNodes} that require it.
+   * {@inheritDoc}
    *
-   * @param <AVLNode> {@link AVLNode}
-   * @param node   the node to verify
-   *
-   * @throws IllegalArgumentException if the supplied node is not an instance of
-   *                                  {@code AVLNode}
+   * @param <TreeNode> {@link AVLNode}
+   * @throws IllegalArgumentException {@inheritDoc}
    */
-  private <TreeNode extends Node<K, V>> void checkType(TreeNode node) {
-    if (node != null && node.getClass() != AVLNode.class)
+  protected <TreeNode extends Node<K, V>> void checkType(TreeNode node) {
+    if (node != null && !(node instanceof AVLNode))
       throw new IllegalArgumentException("TreeNode must be an instance of AVLTree.AVLNode");
   }
 
@@ -354,40 +344,31 @@ public class AVLTree<K, V> extends AbstractTree<K, V> {
    * {@inheritDoc}
    *
    * @param <TreeNode> {@link AVLNode}
-   * @throws IllegalArgumentException {@inheritDoc}, or if the supplied node is
-   *                                  not an {@code AVLNode}
    */
   @SuppressWarnings("unchecked")
-  public <TreeNode extends Node<K, V>> TreeNode search(TreeNode node, K key) {
-    checkType(node);
-    checkKey(key);
-
+  protected <TreeNode extends Node<K, V>> TreeNode _search(TreeNode node, K key) {
     AVLNode<K, V> _node = (AVLNode<K, V>) node;
 
     if (_node == null || key == _node.getKey())
       return (TreeNode) _node;
     if (isLessThan(key, _node.getKey()))
-      return (TreeNode) search(_node.left, key);
-    return (TreeNode) search(_node.right, key);
+      return (TreeNode) _search(_node.left, key);
+    return (TreeNode) _search(_node.right, key);
   }
 
   /**
    * {@inheritDoc}
    *
    * @param <TreeNode> {@link AVLNode}
-   * @throws IllegalArgumentException if the supplied node is not an
-   *                                  {@code AVLNode}
    */
   @SuppressWarnings("unchecked")
-  public <TreeNode extends Node<K, V>> TreeNode minimum(TreeNode node) {
-    checkType(node);
-
+  protected <TreeNode extends Node<K, V>> TreeNode _minimum(TreeNode node) {
     AVLNode<K, V> _node = (AVLNode<K, V>) node;
 
     if (_node == null)
       return null;
     if (_node.left != null)
-      return (TreeNode) minimum(_node.left);
+      return (TreeNode) _minimum(_node.left);
     return (TreeNode) _node;
   }
 
@@ -395,19 +376,15 @@ public class AVLTree<K, V> extends AbstractTree<K, V> {
    * {@inheritDoc}
    *
    * @param <TreeNode> {@link AVLNode}
-   * @throws IllegalArgumentException if the supplied node is not an
-   *                                  {@code AVLNode}
    */
   @SuppressWarnings("unchecked")
-  public <TreeNode extends Node<K, V>> TreeNode maximum(TreeNode node) {
-    checkType(node);
-
+  public <TreeNode extends Node<K, V>> TreeNode _maximum(TreeNode node) {
     AVLNode<K, V> _node = (AVLNode<K, V>) node;
 
     if (_node == null)
       return null;
     if (_node.right != null)
-      return (TreeNode) maximum(_node.right);
+      return (TreeNode) _maximum(_node.right);
     return (TreeNode) _node;
   }
 
@@ -454,14 +431,13 @@ public class AVLTree<K, V> extends AbstractTree<K, V> {
    * </p>
    *
    * @param <TreeNode> {@link AVLNode}
-   * @throws NullPointerException {@inheritDoc}, or if the supplied node is not an
-   *                              {@code AVLNode}
+   *
+   * @throws NullPointerException     {@inheritDoc}
+   * @throws IllegalArgumentException {@inheritDoc}
    */
   @SuppressWarnings("unchecked")
   public synchronized <TreeNode extends Node<K, V>> void deleteNode(TreeNode node) {
-    if (node == null)
-      throw new NullPointerException("TreeNode cannot be null.");
-
+    checkNode(node);
     checkType(node);
     count--;
 
@@ -472,7 +448,7 @@ public class AVLTree<K, V> extends AbstractTree<K, V> {
     else if (_node.right == null)
       transplant(_node, _node.left);
     else {
-      y = minimum(_node.right);
+      y = _minimum(_node.right); // Use main method
 
       if (y.parent != _node) {
         transplant(y, y.right);
@@ -491,20 +467,19 @@ public class AVLTree<K, V> extends AbstractTree<K, V> {
    * {@inheritDoc}
    *
    * @param <TreeNode> {@link AVLNode}
-   * @throws NullPointerException {@inheritDoc}, or if the supplied node is not an
-   *                              {@code AVLNode}
+   *
+   * @throws NullPointerException     {@inheritDoc}
+   * @throws IllegalArgumentException {@inheritDoc}
    */
   @SuppressWarnings("unchecked")
   public <TreeNode extends Node<K, V>> TreeNode successor(TreeNode node) {
-    if (node == null)
-      throw new NullPointerException("TreeNode cannot be null.");
-
+    checkNode(node);
     checkType(node);
 
     AVLNode<K, V> y, _node = (AVLNode<K, V>) node;
 
     if (_node.right != null)
-      return (TreeNode) minimum(_node.right);
+      return (TreeNode) _minimum(_node.right); // Use main method
 
     y = _node.parent;
 
@@ -520,20 +495,19 @@ public class AVLTree<K, V> extends AbstractTree<K, V> {
    * {@inheritDoc}
    *
    * @param <TreeNode> {@link AVLNode}
-   * @throws NullPointerException {@inheritDoc}, or if the supplied node is not an
-   *                              {@code AVLNode}
+   *
+   * @throws NullPointerException     {@inheritDoc}
+   * @throws IllegalArgumentException {@inheritDoc}
    */
   @SuppressWarnings("unchecked")
   public <TreeNode extends Node<K, V>> TreeNode predecessor(TreeNode node) {
-    if (node == null)
-      throw new NullPointerException("TreeNode cannot be null.");
-
+    checkNode(node);
     checkType(node);
 
     AVLNode<K, V> y, _node = (AVLNode<K, V>) node;
 
     if (_node.left != null)
-      return (TreeNode) maximum(_node.left);
+      return (TreeNode) _maximum(_node.left); // Use main method
 
     y = _node.parent;
 
@@ -549,59 +523,53 @@ public class AVLTree<K, V> extends AbstractTree<K, V> {
    * {@inheritDoc}
    *
    * @param <TreeNode> {@link AVLNode}
-   * @throws IllegalArgumentException if the supplied node is not an
-   *                                  {@code AVLNode}
    */
+  @Override
   @SuppressWarnings("unchecked")
-  public <TreeNode extends Node<K, V>> void inorderTreeWalk(TreeNode node, Consumer<TreeNode> callback) {
+  protected <TreeNode extends Node<K, V>> void _inorderTreeWalk(TreeNode node, Consumer<TreeNode> callback) {
     if (node == null)
       return;
 
-    checkType(node);
     AVLNode<K, V> _node = (AVLNode<K, V>) node;
 
-    this.inorderTreeWalk((TreeNode) _node.left, callback);
+    _inorderTreeWalk((TreeNode) _node.left, callback);
     callback.accept((TreeNode) _node);
-    this.inorderTreeWalk((TreeNode) _node.right, callback);
+    _inorderTreeWalk((TreeNode) _node.right, callback);
   }
 
   /**
    * {@inheritDoc}
    *
    * @param <TreeNode> {@link AVLNode}
-   * @throws IllegalArgumentException if the supplied node is not an
-   *                                  {@code AVLNode}
    */
+  @Override
   @SuppressWarnings("unchecked")
-  public <TreeNode extends Node<K, V>> void preorderTreeWalk(TreeNode node, Consumer<TreeNode> callback) {
+  protected <TreeNode extends Node<K, V>> void _preorderTreeWalk(TreeNode node, Consumer<TreeNode> callback) {
     if (node == null)
       return;
 
-    checkType(node);
     AVLNode<K, V> _node = (AVLNode<K, V>) node;
 
     callback.accept((TreeNode) _node);
-    this.preorderTreeWalk((TreeNode) _node.left, callback);
-    this.preorderTreeWalk((TreeNode) _node.right, callback);
+    _preorderTreeWalk((TreeNode) _node.left, callback);
+    _preorderTreeWalk((TreeNode) _node.right, callback);
   }
 
   /**
    * {@inheritDoc}
    *
    * @param <TreeNode> {@link AVLNode}
-   * @throws IllegalArgumentException if the supplied node is not an
-   *                                  {@code AVLNode}
    */
+  @Override
   @SuppressWarnings("unchecked")
-  public <TreeNode extends Node<K, V>> void postorderTreeWalk(TreeNode node, Consumer<TreeNode> callback) {
+  protected <TreeNode extends Node<K, V>> void _postorderTreeWalk(TreeNode node, Consumer<TreeNode> callback) {
     if (node == null)
       return;
 
-    checkType(node);
     AVLNode<K, V> _node = (AVLNode<K, V>) node;
 
-    this.postorderTreeWalk((TreeNode) _node.left, callback);
-    this.postorderTreeWalk((TreeNode) _node.right, callback);
+    _postorderTreeWalk((TreeNode) _node.left, callback);
+    _postorderTreeWalk((TreeNode) _node.right, callback);
     callback.accept((TreeNode) _node);
   }
 
