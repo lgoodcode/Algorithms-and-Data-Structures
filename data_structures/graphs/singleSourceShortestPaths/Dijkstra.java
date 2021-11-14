@@ -1,7 +1,6 @@
 package data_structures.graphs.singleSourceShortestPaths;
 
 import data_structures.graphs.Graph;
-
 import data_structures.heaps.FibonacciHeap;
 
 /**
@@ -93,21 +92,20 @@ public final class Dijkstra extends SSSP {
   }
 
   private static Node[] _run(Graph G, int s) {
-    Node[] VTS = initSource(G, s);
+    int[] V = G.getVertices();
+    Node[] VTS = initSourceAll(G, s);
     FibonacciHeap<Node> Q = new FibonacciHeap<>((x, y) -> x.distance < y.distance);
-    Graph.Edge[] edges;
     int i, u, v, w;
 
-    for (i = 0; i < VTS.length; i++)
-      Q.insert(VTS[i]);
+    for (i = 0; i < V.length; i++)
+      Q.insert(VTS[V[i]]);
 
     while (Q.size() > 1) {
       u = Q.extractMin().getVertex();
-      edges = G.getEdges(u);
 
-      for (i = 0; i < edges.length; i++) {
-        v = edges[i].getVertices()[1];
-        w = edges[i].getWeight();
+      for (Graph.Edge edge : G.getEdges(u)) {
+        v = edge.getVertices()[1];
+        w = edge.getWeight();
 
         relax(VTS, u, v, w);
       }

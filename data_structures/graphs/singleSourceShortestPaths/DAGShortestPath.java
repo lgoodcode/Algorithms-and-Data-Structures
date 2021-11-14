@@ -58,16 +58,14 @@ public final class DAGShortestPath extends SSSP {
     Node[] VTS = initSourceAll(G, s);
     LinkedList<TopologicalSort.Node> L = TopologicalSort.run(G, s);
     Iterable<TopologicalSort.Node> N = L.values();
-    Graph.Edge[] edges;
-    int i, u, v, w;
+    int u, v, w;
 
     for (TopologicalSort.Node node : N) {
       u = node.getVertex();
-      edges = G.getEdges(u);
-
-      for (i = 0; i < edges.length; i++) {
-        v = edges[i].getVertices()[1];
-        w = edges[i].getWeight();
+      
+      for (Graph.Edge edge : G.getEdges(u)) {
+        v = edge.getVertices()[1];
+        w = edge.getWeight();
 
         relax(VTS, u, v, w);
       }

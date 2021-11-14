@@ -69,30 +69,23 @@ public final class DFS_Stack {
   }
 
   private static Node[] _run(Graph G, int s) {
-    int V = G.rows;
-    Node[] VTS = new Node[V];
-    Stack<Integer> S = new Stack<>(V);
+    int[] V = G.getVertices();
+    Node[] VTS = new Node[V.length];
+    Stack<Integer> S = new Stack<>(V.length);
     int i, u, v, time = 0;
-    Graph.Edge[] edges;
 
-    for (i = 0; i < V; i++)
-      VTS[i] = new Node(i);
+    for (i = 0; i < V.length; i++)
+      VTS[i] = new Node(V[i]);
 
     S.push(s);
 
     while (!S.isEmpty()) {
       u = S.pop();
-
-      // If the vertex doesn't exist in graph, don't check edges
-      if (!G.hasVertex(u))
-        continue;
-
       VTS[u].distance = ++time;
       VTS[u].color = GRAY;
-      edges = G.getEdges(u);
 
-      for (i = 0; i < edges.length; i++) {
-        v = edges[i].getVertices()[1];
+      for (Graph.Edge edge : G.getEdges(u)) {
+        v = edge.getVertices()[1];
 
         if (VTS[v].color == WHITE) {
           VTS[v].predecessor = u;

@@ -123,9 +123,9 @@ public final class DFS {
    * </p>
    *
    * <p>
-   * Uses the {@code Graph.getAllVertices()} to access the {@code Node} directly
-   * with the vertex as the index. With this, the {@code visit()} method has to
-   * check if the vertex exists in the graph before attempting to get its edges.
+   * Initializes {@code VTS} to the length of the the rows so that when the vertex
+   * from the edge is used to access the index, it won't throw an error and is
+   * quickly accessed.
    * </p>
    *
    * @param graph       the graph matrix
@@ -141,14 +141,13 @@ public final class DFS {
   }
 
   private static Node[] _run(Graph G, int s) {
-    int u, V = G.rows;
-    int[] time = { 0 };
-    Node[] VTS = new Node[V];
+    Node[] VTS = new Node[G.rows];
+    int[]  time = { 0 };
 
-    for (u = 0; u < V; u++)
-      VTS[u] = new Node(u);
+    for (int i = 0; i < G.rows; i++)
+      VTS[i] = new Node(i);
 
-    for (u = 0; u < V; u++) {
+    for (int u : G.getVertices()) {
       if (VTS[u].color == WHITE)
         visit(G, VTS, u, time);
     }
@@ -157,18 +156,13 @@ public final class DFS {
   }
 
   private static void visit(Graph G, Node[] VTS, int u, int[] time) {
-    // If vertex doesn't exist in the graph, don't check for edges
-    if (!G.hasVertex(u))
-      return;
+    int v;
 
     VTS[u].distance = ++time[0];
     VTS[u].color = GRAY;
 
-    Graph.Edge[] edges = G.getEdges(u);
-    int i, v;
-
-    for (i = 0; i < edges.length; i++) {
-      v = edges[i].getVertices()[1];
+    for (Graph.Edge edge : G.getEdges(u)) {
+      v = edge.getVertices()[1];
 
       if (VTS[v].color == WHITE) {
         VTS[v].predecessor = u;

@@ -253,13 +253,29 @@ public final class FloydWarshall extends ASPS {
   }
 
   /**
+   * Detects if the specified matrix table results from the algorithm contains a
+   * negative weight cycle by checking if there is a negative value in the
+   * diagonal values of the table, which should contain {@code 0}.
+   *
+   * @param table the matrix table results from the algorithm
+   * @return whether the table contains a negative weight cycle or not
+   */
+  public static boolean hasNegativeWeightCycle(int[][] table) {
+    for (int i = 0; i < table.length; i++)
+      if (table[i][i] < 0)
+        return true;
+    return false;
+  }
+
+  /**
    * Runs the algorithm and returns the path string for the start and end
    * vertices.
    *
    * @param graph       the graph to run the algorithm on
    * @param startVertex the starting vertex of the path
    * @param endVertex   the end vertex of the path
-   * @return the string path if one exists or a no path exists message string
+   * @return if the graph contains a negative weight cycle, or the string path if
+   *         one exists or no path exists message string
    *
    * @throws IllegalArgumentException if the specified {@code Graph} is not
    *                                  weighted and directed, or the start or end
@@ -268,7 +284,11 @@ public final class FloydWarshall extends ASPS {
   public static String printPath(Graph graph, int startVertex, int endVertex) {
     graph.checkVertex(startVertex);
     graph.checkVertex(endVertex);
+
     int[][] table = table(graph);
+
+    if (hasNegativeWeightCycle(table))
+      return "Graph contains a negative weight cycle.";
     return Graph.printPath(table, startVertex, endVertex);
   }
 
@@ -279,7 +299,9 @@ public final class FloydWarshall extends ASPS {
    * @param graph       the graph to run the algorithm on
    * @param startVertex the starting vertex of the path
    * @param endVertex   the end vertex of the path
-   * @return the string path if one exists or a no path exists message string
+   * @return the array of vertices for the path or an array containing just
+   *         {@code -1} if the graph contains a negative weight cycle or if no
+   *         path exists
    *
    * @throws IllegalArgumentException if the specified {@code Graph} is not
    *                                  weighted and directed, or the start or end
@@ -288,7 +310,12 @@ public final class FloydWarshall extends ASPS {
   public static int[] arrayPath(Graph graph, int startVertex, int endVertex) {
     graph.checkVertex(startVertex);
     graph.checkVertex(endVertex);
+
     int[][] table = table(graph);
+    int[] cycle = { -1 };
+
+    if (hasNegativeWeightCycle(table))
+      return cycle;
     return Graph.arrayPath(table, startVertex, endVertex);
   }
 

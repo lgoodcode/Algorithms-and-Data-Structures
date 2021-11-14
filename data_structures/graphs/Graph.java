@@ -126,6 +126,41 @@ public final class Graph {
   }
 
   /**
+   * Constructs a copy and extends the length of the specified graph.
+   *
+   * @param graph the graph to copy
+   * @param rows  the new graph length
+   *
+   * @throws NullPointerException     if the graph is {@code null}
+   * @throws IllegalArgumentException if the specified new length is less than the
+   *                                  original graph
+   */
+  public Graph(Graph graph, int rows) {
+    if (graph == null)
+      throw new NullPointerException("Graph cannot be null.");
+    if (rows < graph.rows)
+      throw new IllegalArgumentException("New graph length can't be less than the original.");
+
+    this.rows = rows;
+    directed = graph.directed;
+    weighted = graph.weighted;
+    vertices = graph.vertices;
+    edges = graph.edges;
+
+    int[] V = graph.getVertices();
+    G = new int[rows][];
+
+    for (int i = 0, u; i < V.length; i++) {
+      u = V[i];
+      G[u] = copyOf(graph.G[u], rows);
+
+      // Fill in the new vertices positions with NIL values
+      for (int j = graph.rows; j < rows; j++)
+        G[u][j] = Graph.NIL;
+    }
+  }
+
+  /**
    * Returns the transpose of the current graph, which is all the edges reversed.
    *
    * @return the transpose of the graph

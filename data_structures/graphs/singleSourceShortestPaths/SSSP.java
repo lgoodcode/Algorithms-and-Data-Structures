@@ -103,7 +103,7 @@ import data_structures.graphs.Graph;
  */
 public class SSSP {
   public static class Node extends Graph.Vertex {
-    protected Node(int vertex) {
+    private Node(int vertex) {
       super(vertex);
     }
   }

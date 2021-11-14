@@ -17,59 +17,63 @@ public class DFS_Test {
   DFS_Stack.Node[] nodes2;
   int[] path = { 0, 1, 4, 8 };
 
-  @BeforeEach
-  void setup() {
-    G = new Graph(12, true);
+  @Nested
+  class Recursive {
 
-    G.addEdge(0, 1);
-    G.addEdge(0, 2);
-    G.addEdge(0, 3);
-    G.addEdge(2, 3);
-    G.addEdge(2, 6);
-    G.addEdge(3, 6);
-    G.addEdge(3, 7);
-    G.addEdge(1, 4);
-    G.addEdge(1, 5);
-    G.addEdge(4, 8);
-    G.addEdge(10, 11);
-  }
+    @BeforeEach
+    void setup() {
+      G = new Graph(12, true);
 
-  @Test
-  void dfs() {
-    assertDoesNotThrow(() -> DFS.run(G, 0));
-  }
+      G.addEdge(0, 1);
+      G.addEdge(0, 2);
+      G.addEdge(0, 3);
+      G.addEdge(2, 3);
+      G.addEdge(2, 6);
+      G.addEdge(3, 6);
+      G.addEdge(3, 7);
+      G.addEdge(1, 4);
+      G.addEdge(1, 5);
+      G.addEdge(4, 8);
+      G.addEdge(10, 11);
+    }
 
-  @Test
-  void printPath() {
-    assertEquals("0 -> 1 -> 4 -> 8", DFS.printPath(G, 0, 8));
-  }
+    @Test
+    void dfs() {
+      assertDoesNotThrow(() -> DFS.run(G, 0));
+    }
 
-  @Test
-  void nodes_printPath() {
-    nodes = DFS.run(G, 0);
-    assertEquals("0 -> 1 -> 4 -> 8", DFS.printPath(nodes, 0, 8));
-  }
+    @Test
+    void printPath() {
+      assertEquals("0 -> 1 -> 4 -> 8", DFS.printPath(G, 0, 8));
+    }
 
-  @Test
-  void no_path() {
-    assertEquals("No path exists from 1 to 3", DFS.printPath(G, 1, 3));
-  }
+    @Test
+    void nodes_printPath() {
+      nodes = DFS.run(G, 0);
+      assertEquals("0 -> 1 -> 4 -> 8", DFS.printPath(nodes, 0, 8));
+    }
 
-  @Test
-  void arrayPath() {
-    assertArrayEquals(path, DFS.arrayPath(G, 0, 8));
-  }
+    @Test
+    void no_path() {
+      assertEquals("No path exists from 1 to 3", DFS.printPath(G, 1, 3));
+    }
 
-  @Test
-  void nodes_arrayPath() {
-    nodes = DFS.run(G, 0);
-    assertArrayEquals(path, DFS.arrayPath(nodes, 0, 8));
-  }
+    @Test
+    void arrayPath() {
+      assertArrayEquals(path, DFS.arrayPath(G, 0, 8));
+    }
 
-  @Test
-  void no_array_path() {
-    int[] noPath = { -1 };
-    assertArrayEquals(noPath, DFS.arrayPath(G, 1, 3));
+    @Test
+    void nodes_arrayPath() {
+      nodes = DFS.run(G, 0);
+      assertArrayEquals(path, DFS.arrayPath(nodes, 0, 8));
+    }
+
+    @Test
+    void no_array_path() {
+      int[] noPath = { -1 };
+      assertArrayEquals(noPath, DFS.arrayPath(G, 1, 3));
+    }
   }
 
   @Nested

@@ -103,6 +103,15 @@ public final class Stack<T> {
   }
 
   /**
+   * Determines whether the stack is currently full.
+   * 
+   * @return whether the stack is full
+   */
+  public boolean isFull() {
+    return top == stack.length - 1;
+  }
+
+  /**
    * Determines whether the stack contains any elements or not
    * 
    * @return whether the stack is empty or not

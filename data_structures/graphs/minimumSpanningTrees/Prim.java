@@ -69,45 +69,61 @@ import data_structures.heaps.FibonacciHeap;
  *
  */
 public final class Prim {
-  private static BiFunction<Node, Node, Boolean> compare = (x, y) -> x.key < y.key;
-
-  public static void run(Graph graph, int startVertex) {
-    if (!graph.weighted)
-      throw new IllegalArgumentException("Graph must be weighted.");
-    if (startVertex < 0)
-      throw new IllegalArgumentException("Start vertex cannot be negative.");
-    if (startVertex >= graph.rows)
-      throw new IllegalArgumentException("Start vertex cannot be greater than graph length.");
-    _run(graph, startVertex);
+  public static final class Node extends Graph.Vertex {
+    private Node(int vertex) {
+      super(vertex);
+    }
   }
 
-  public static Node[] _run(Graph G, int r) {
-    int[] V = G.getVertices();
-    int i, j, u, v, w, numVertices = V.length;
-    Node[] VTS = new Node[numVertices];
-    FibonacciHeap<Node> Q = new FibonacciHeap<>(compare);
-    Graph.Edge[] edges;
+  /**
+   * The comparison function used to determine which {@code Node} has a smaller
+   * distance, or key, as noted in the algorithm.
+   */
+  private static BiFunction<Node, Node, Boolean> compare = (x, y) -> x.distance < y.distance;
 
-    for (i = 0; i < numVertices; i++) {
+  /**
+   * Runs Prim's algorithm on the specified graph, which will find
+   *
+   * @param graph       the graph matrix to run the algorithm on
+   * @param startVertex the vertex to start building the tree from
+   * @return array of {@code Node} with the attributes that can be used to form
+   *         the MST
+   *
+   * @throws IllegalArgumentException if the specified {@code Graph} is not
+   *                                  weighted or if the start vertex is invalid
+   */
+  public static Node[] run(Graph graph, int startVertex) {
+    if (!graph.weighted)
+      throw new IllegalArgumentException("Graph must be weighted.");
+    graph.checkVertex(startVertex);
+    return _run(graph, startVertex);
+  }
+
+  private static Node[] _run(Graph G, int r) {
+    int[] V = G.getVertices();
+    Node[] VTS = new Node[V.length];
+    FibonacciHeap<Node> Q = new FibonacciHeap<>(compare);
+    int i, u, v, w;
+
+    for (i = 0; i < V.length; i++) {
       u = V[i];
       VTS[i] = new Node(u);
       Q.insert(VTS[i]);
 
       if (u == r)
-        VTS[i].key = 0;
+        VTS[i].distance = 0;
     }
 
     while (!Q.isEmpty()) {
-      u = Q.extractMin().vertex;
-      edges = G.getEdges(u);
+      u = Q.extractMin().getVertex();
+      
+      for (Graph.Edge edge : G.getEdges(u)) {
+        v = edge.getVertices()[1];
+        w = edge.getWeight();
 
-      for (j = 0; j < edges.length; j++) {
-        v = edges[j].getVertices()[1];
-        w = edges[j].getWeight();
-
-        if (w < VTS[v].key) {
-          VTS[v].parent = u;
-          VTS[v].key = w;
+        if (w < VTS[v].distance) {
+          VTS[v].predecessor = u;
+          VTS[v].distance = w;
         }
       }
     }
@@ -115,15 +131,4 @@ public final class Prim {
     return VTS;
   }
 
-  public static final class Node {
-    protected int vertex;
-    protected int key;
-    protected int parent;
-
-    protected Node(int vertex) {
-      this.vertex = vertex;
-      key = Integer.MAX_VALUE;
-      parent = -1;
-    }
-  }
 }

@@ -25,12 +25,28 @@ public class ShorterPathFaster extends SSSP {
   /**
    * Runs the SPF algorithm on the directed weighted graph with the given source
    * vertex. Throws if the supplied graph isn't weighted and directed.
+   * 
+   * <p>
+   * This is modified to make a check before enqueing the vertex of the edge that
+   * was relaxed that the queue isn't full and doesn't already exist in the queue.
+   * It doesn't add the vertex if it is already in the queue because it has to be
+   * checked if it can relax or not before adding into the queue to attempt to
+   * relax it again.
+   * </p>
+   * 
+   * <p>
+   * Another modification in the algorithm that includes a counter {@code n} that
+   * increments on each dequeue of a vertex. Once the counter reaches over the
+   * number of vertices squared, it is deemed reasonable to determine that there
+   * are negative weighted edges in the graph resulting in a negative weight
+   * cycle.
+   * </p>
    *
    * @param graph        the weighted directed graph to run the algorithm on
    * @param sourceVertex the single source vertex from which all paths originate
    *                     from
    * @return the {@code Node[]} results of the algorithm or {@code null} if there
-   *         is a cycle
+   *         is a negative weight cycle
    *
    * @throws IllegalArgumentException if the specified {@code Graph} is not
    *                                  weighted and directed or the source vertex
@@ -46,40 +62,42 @@ public class ShorterPathFaster extends SSSP {
     int[] V = G.getVertices();
     Queue<Integer> Q = new Queue<>(V.length);
     Node[] VTS = initSourceAll(G, s);
-    Graph.Edge[] edges;
-    int i, j, u, v, w;
+    int i, n = 0, u, v, w;
 
     Q.enqueue(s);
 
     while(!Q.isEmpty()) {
       u = Q.dequeue();
-      edges = G.getEdges(u);
 
-      for (i = 0; i < edges.length; i++) {
-        v = edges[i].getVertices()[1];
-        w = edges[i].getWeight();
+      for (Graph.Edge edge : G.getEdges(u)) {
+        v = edge.getVertices()[1];
+        w = edge.getWeight();
 
         // Relax and queue vertex v to check if we can relax it again
         if (VTS[v].distance > VTS[u].distance + w) {
           VTS[v].distance = VTS[u].distance + w;
           VTS[v].predecessor = u;
 
-          Q.enqueue(v);
+          // Checks for infinite loop
+          if (++n > V.length * V.length)
+            return null;
+          // Enqueue v if it doesn't already exist in the queue
+          if (!Q.has(v))
+            Q.enqueue(v);
         }
       }
     }
 
     for (i = 0; i < V.length; i++) {
       u = V[i];
-      edges = G.getEdges(u);
-
-      for (j = 0; j < edges.length; j++) {
-        v = edges[j].getVertices()[1];
-        w = edges[j].getWeight();
+      
+      for (Graph.Edge edge : G.getEdges(u)) {
+        v = edge.getVertices()[1];
+        w = edge.getWeight();
 
         // If either vertex is unreachable (distance = Infinity), continue
         // to check next vertex to prevent addition overflow
-        if (VTS[v].distance == Integer.MAX_VALUE || VTS[u].distance == Integer.MAX_VALUE)
+        if (VTS[v].distance == Graph.NIL || VTS[u].distance == Graph.NIL)
           continue;
         if (VTS[v].distance > VTS[u].distance + w)
           return null;
@@ -109,7 +127,7 @@ public class ShorterPathFaster extends SSSP {
     Node[] results = run(graph, startVertex);
     
     if (results == null)
-      return "Cycle detected.";
+      return "Graph contains a negative weight cycle.";
     return Graph.printPath(results, startVertex, endVertex);
   }
 

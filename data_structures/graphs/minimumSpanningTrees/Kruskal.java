@@ -83,11 +83,20 @@ public interface Kruskal {
    *
    * @param graph the graph to find the MST using the Kruskal algorithm
    * @return the array of {@link Graph.Edge} for the MST
+   *
+   * @throws IllegalArgumentException if the specified {@code Graph} is not
+   *                                  weighted or if the start vertex is invalid
    */
-  @SuppressWarnings("unchecked")
   public static Edge[] run(Graph graph) {
-    Edge[] E = graph.getEdges(), A = new Edge[E.length];
-    int[] vertices, V = graph.getVertices();
+    if (!graph.weighted)
+      throw new IllegalArgumentException("Graph must be weighted.");
+    return _run(graph);
+  }
+
+  @SuppressWarnings("unchecked")
+  private static Edge[] _run(Graph G) {
+    Edge[] E = G.getEdges(), A = new Edge[E.length];
+    int[] vertices, V = G.getVertices();
     DisjointSet<Integer>[] S = (DisjointSet<Integer>[]) new DisjointSet<?>[V.length];
     int i, j, u, v;
 

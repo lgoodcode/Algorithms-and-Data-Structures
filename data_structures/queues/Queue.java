@@ -93,6 +93,15 @@ public final class Queue<T> {
   }
 
   /**
+   * Checks if the queue is currently full.
+   * 
+   * @return whether the queue is full
+   */
+  public boolean isFull() {
+    return head == 0 && tail == queue.length - 1;
+  }
+
+  /**
    * Returns the next item to be dequeued
    * 
    * @return the next item to be dequeued or {@code null} if none
@@ -119,7 +128,15 @@ public final class Queue<T> {
    * properties of are both at the capacity and there is no item stored at that
    * position, then the {@code Queue} is empty and will reset the counters back to
    * {@code 0} to start again.
-   *
+   * 
+   * <p>
+   * Performs a check when the {@code tail} reaches the internal queue array
+   * length. If the {@code head} position is at {@code 0}, then the queue is full.
+   * Otherwise, there is still space in the queue and shifts all the elements back
+   * at the bottom so more elements can be queued without an exception being
+   * thrown falsely.
+   * </p>
+   * 
    * @param item the item to insert into the queue
    *
    * @throws IllegalArgumentException if the supplied item is {@code null} or
@@ -132,8 +149,19 @@ public final class Queue<T> {
       throw new IllegalArgumentException("Item cannot be null or blank.");
     if (head == tail && (head == queue.length || queue[head] == null))
       head = tail = 0;
-    else if (tail == queue.length)
-      throw new IllegalStateException("Queue capacity exceeded.");
+    else if (tail == queue.length) {
+      if (head == 0)
+        throw new IllegalStateException("Queue capacity exceeded.");
+
+      int i, j;
+      for (i = head, j = 0; i < tail; i++, j++) {
+        queue[j] = queue[i];
+        queue[i] = null;
+      }
+
+      head = 0;
+      tail = j;
+    }
 
     queue[tail++] = item;
   }

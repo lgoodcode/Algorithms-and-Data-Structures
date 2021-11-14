@@ -95,7 +95,7 @@ public final class BFS {
     /**
      * The status of the vertex, either undiscovered "WHITE" or discovered "GRAY".
      */
-    protected int color;
+    private int color;
 
     /**
      * Constructs an empty basic BFS node.
@@ -126,7 +126,6 @@ public final class BFS {
     int[] V = G.getVertices();
     Node[] VTS = new Node[V.length];
     Queue<Integer> Q = new Queue<>(V.length);
-    Graph.Edge[] edges;
     int i, u, v;
 
     // Initialize BFS vertex nodes
@@ -141,10 +140,9 @@ public final class BFS {
 
     while (!Q.isEmpty()) {
       u = Q.dequeue();
-      edges = G.getEdges(u);
-
-      for (i = 0; i < edges.length; i++) {
-        v = edges[i].getVertices()[1];
+      
+      for (Graph.Edge edge : G.getEdges(u)) {
+        v = edge.getVertices()[1];
 
         if (VTS[v].color == WHITE) {
           VTS[v].color = GRAY;
