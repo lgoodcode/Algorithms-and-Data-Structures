@@ -8,9 +8,9 @@ package algorithms.backtracking;
  * point where it made that decision and try any other possible move until there
  * is no possible move left, in which case the maze cannot be solved.
  */
-public interface Maze {
-  static int FORWARD = 0;
-  static int REVERSE = 1;
+public final class Maze {
+  private static int FORWARD = 0;
+  private static int REVERSE = 1;
 
   /**
    * Recursive function to move along a given path from the specified start

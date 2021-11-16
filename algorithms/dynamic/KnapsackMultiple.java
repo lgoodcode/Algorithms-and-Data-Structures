@@ -20,9 +20,9 @@ package algorithms.dynamic;
  * zeroes to be able to calculate the previous and current item.
  * </p>
  */
-public interface KnapsackMultiple {
-  static int TOTAL = 0;
-  static int ITEMS = 1;
+public final class KnapsackMultiple {
+  private static int TOTAL = 0;
+  // private static int ITEMS = 1;
 
   @SuppressWarnings("unchecked")
   private static <T> T run(int type, int capacity, int[] weights, int[] values) {

@@ -26,7 +26,7 @@ import static java.util.Arrays.copyOf;
  * zeroes to be able to calculate the previous and current item.
  * </p>
  */
-public interface Knapsack {
+public final class Knapsack {
   private static int[][] run(int capacity, int[] weights, int[] values) {
     if (weights.length != values.length)
       throw new IllegalArgumentException("Weights and Values array lengths don't match.");

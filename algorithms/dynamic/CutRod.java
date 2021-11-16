@@ -1,6 +1,6 @@
 package algorithms.dynamic;
 
-public interface CutRod {
+public final class CutRod {
   /**
    * Brute-force method. Checks every possible combination, resulting in an cost
    * time of {@code O(2^n)}.

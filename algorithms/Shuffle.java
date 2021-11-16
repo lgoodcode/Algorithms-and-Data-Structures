@@ -14,7 +14,7 @@ import static java.util.Arrays.copyOf;
  * deck of cards, the worse is the shuffle).
  * </p>
  */
-public interface Shuffle {
+public final class Shuffle {
   /**
    * Performs an in-place shuffle of the specified array up to the specified
    * index.

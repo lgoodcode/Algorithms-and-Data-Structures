@@ -6,7 +6,7 @@ import static java.util.Arrays.copyOf;;
  * Greedily calculates the minimum number of coins for change for a given
  * amount.
  */
-public interface CoinChangeG {
+public final class CoinChangeG {
   /**
    * Greedily calculates the the change with the given coin denomination to derive
    * the minimum number of coins possible. Starts by reducing the change amount

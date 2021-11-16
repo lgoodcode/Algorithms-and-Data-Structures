@@ -5,8 +5,8 @@ package algorithms.backtracking;
  * the sudoku is solved. The sudoku solves the matrix given in-place,
  * so if the boolean result is true, the given sudoku will now be solved.
  */
-public interface Sudoku {
-  static int UNASSIGNED = 0;
+public final class Sudoku {
+  private static int UNASSIGNED = 0;
 
   /**
    * Checks if the specified number is already used in the specified row
@@ -82,7 +82,7 @@ public interface Sudoku {
    * @param S the sudoku to solve
    * @return whether the sudoku was solved or not
    */
-  public static boolean _solve(int[][] S) {
+  private static boolean _solve(int[][] S) {
     int m = S.length;
     int n = S[0].length;
     int num, row = 0, col = 0;

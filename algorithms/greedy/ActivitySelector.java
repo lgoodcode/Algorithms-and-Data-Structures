@@ -6,7 +6,7 @@ import static java.util.Arrays.copyOf;
  * Greedy top-down recursive algorithm to calculate the most events for the time
  * allowed without overlapping events.
  */
-public interface ActivitySelector {
+public final class ActivitySelector {
   /**
    * Greedily calculates the the maximum number of events by comparing the start
    * time of the next event with the finish times of the previously chosen event.

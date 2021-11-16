@@ -8,7 +8,7 @@ package algorithms.dynamic;
  * row.
  * </p>
  */
-public interface LCS {
+public final class LCS {
   /**
    * Recursively computes the LCS of the two given strings.
    *

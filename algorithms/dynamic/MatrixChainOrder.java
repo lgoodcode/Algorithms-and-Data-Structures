@@ -7,9 +7,9 @@ package algorithms.dynamic;
  * Computes the smallest number of matrix multplications.
  * </p>
  */
-public interface MatrixChainOrder {
-  static int MATRICES = 0;
-  static int SOLUTION = 1;
+public final class MatrixChainOrder {
+  private static int MATRICES = 0;
+  private static int SOLUTION = 1;
 
   public static int[][] table(int type, int[] matrices) {
     int i, j, k, q, r, n = matrices.length;

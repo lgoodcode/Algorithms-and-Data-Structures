@@ -1,6 +1,6 @@
 package algorithms.dynamic;
 
-public interface Fibonacci {
+public final class Fibonacci {
   public static int calc(int n) {
     if (n == 0) return 0;
     if (n == 1) return 1;
