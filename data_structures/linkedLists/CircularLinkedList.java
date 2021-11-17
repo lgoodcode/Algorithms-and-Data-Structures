@@ -1,6 +1,9 @@
 package data_structures.linkedLists;
 
 public final class CircularLinkedList<T> extends LinkedList<T> {
+  @java.io.Serial
+  private static final long serialVersionUID = 199208284839394802L;
+  
   /**
    * Empty constructor besides the call to super() because there is no
    * initialization and extends the {@link LinkedList}.
@@ -140,7 +143,7 @@ public final class CircularLinkedList<T> extends LinkedList<T> {
 
     if (head == null)
       return -1;
-    else if (head.getItem() == item)
+    else if (head.item == item)
       return 0;
 
     Node<T> node = head;
@@ -149,9 +152,9 @@ public final class CircularLinkedList<T> extends LinkedList<T> {
     do {
       node = node.next;
       index++;
-    } while (node != head && node.getItem() != item);
+    } while (node != head && node.item != item);
 
-    return node.getItem() == item ? index : -1;
+    return node.item == item ? index : -1;
   }
 
   /**
@@ -165,7 +168,7 @@ public final class CircularLinkedList<T> extends LinkedList<T> {
 
     if (tail == null)
       return -1;
-    else if (tail.getItem() == item)
+    else if (tail.item == item)
       return size - 1;
 
     Node<T> node = tail;
@@ -174,9 +177,9 @@ public final class CircularLinkedList<T> extends LinkedList<T> {
     do {
       node = node.prev;
       index--;
-    } while (node.prev != tail && node.getItem() != item);
+    } while (node.prev != tail && node.item != item);
 
-    return node.getItem() == item ? index : -1;
+    return node.item == item ? index : -1;
   }
 
 }

@@ -3,16 +3,16 @@ package data_structures.tries;
 import data_structures.hashtables.DoubleHashing;
 
 public final class TrieHash<T> extends AbstractTrie<T> {
-  public static final class HashNode<T> extends Node<T> {
+  public static class HashNode<T> extends Node<T> {
     /**
      * The hashtable containing the child {@code TrieHashNodes}.
      */
-    protected DoubleHashing<Character, HashNode<T>> children;
+    DoubleHashing<Character, HashNode<T>> children;
 
     /**
      * The parent {@code TrieHashNode} used for tracing up to the root.
      */
-    protected HashNode<T> parent;
+    HashNode<T> parent;
 
     /**
      * Initializes an empty node with the specified key. The key is used for the
@@ -23,7 +23,7 @@ public final class TrieHash<T> extends AbstractTrie<T> {
      *               placed under for tracing up in the {@link Trie#getPrefix()}
      *               method.
      */
-    protected HashNode(char key, HashNode<T> parent) {
+    HashNode(char key, HashNode<T> parent) {
       super(key, parent);     
       children = new DoubleHashing<Character, HashNode<T>>();
     }
@@ -31,7 +31,7 @@ public final class TrieHash<T> extends AbstractTrie<T> {
     /**
      * Initializes the root node with no key or value.
      */
-    protected HashNode() {
+    HashNode() {
       super();
       children = new DoubleHashing<Character, HashNode<T>>();
     }

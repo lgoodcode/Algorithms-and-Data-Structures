@@ -32,12 +32,12 @@ import java.util.function.Consumer;
  * </p>
  */
 public final class AVLTree<K, V> extends AbstractTree<K, V> {
-  public static final class AVLNode<T, E> extends AbstractTree.Node<T, E> {
-    private AVLNode<T, E> parent;
-    private AVLNode<T, E> left;
-    private AVLNode<T, E> right;
+  public static class AVLNode<T, E> extends AbstractTree.Node<T, E> {
+    AVLNode<T, E> parent;
+    AVLNode<T, E> left;
+    AVLNode<T, E> right;
 
-    private AVLNode(T key, E value) {
+    AVLNode(T key, E value) {
       super(key, value);
     }
   }

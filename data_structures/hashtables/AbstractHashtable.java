@@ -1,12 +1,11 @@
 package data_structures.hashtables;
 
-import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.ConcurrentModificationException;
 
 import data_structures.Entry;
-import data_structures.EmptyEnumerator;
+import data_structures.EmptyIterator;
 
 public abstract class AbstractHashtable<K, V> {
   /**
@@ -165,8 +164,8 @@ public abstract class AbstractHashtable<K, V> {
    */
   protected <T> Iterable<T> getIterable(int type) {
     if (isEmpty())
-      return new EmptyEnumerator<>();
-    return new Enumerator<>(type, true);
+      return new EmptyIterator<>();
+    return new Itr<>(type);
   }
 
   /**
@@ -178,21 +177,8 @@ public abstract class AbstractHashtable<K, V> {
    */
   protected <T> Iterator<T> getIterator(int type) {
     if (isEmpty())
-      return new EmptyEnumerator<>();
-    return new Enumerator<>(type, true);
-  }
-
-  /**
-   * Returns an {@link Enumeration} of the specified type.
-   *
-   * @param <T>  Generic type to allow any type to be enumerated over
-   * @param type the type of item to iterate (keys, values, or entries)
-   * @return the {@code Enumeration}
-   */
-  protected <T> Enumeration<T> getEnumeration(int type) {
-    if (isEmpty())
-      return new EmptyEnumerator<>();
-    return new Enumerator<>(type, false);
+      return new EmptyIterator<>();
+    return new Itr<>(type);
   }
 
   /**
@@ -238,18 +224,6 @@ public abstract class AbstractHashtable<K, V> {
     return getIterator(ENTRIES);
   }
 
-  public final Enumeration<K> keysEnumeration() {
-    return getEnumeration(KEYS);
-  }
-
-  public final Enumeration<V> valuesEnumeration() {
-    return getEnumeration(VALUES);
-  }
-
-  public final Enumeration<Entry<K, V>> entriesEnumeration() {
-    return getEnumeration(ENTRIES);
-  }
-
   /**
    * A hashtable enumerator class. This class implements the Enumeration,
    * Iterator, and Iterable interfaces, but individual instances can be created
@@ -259,26 +233,26 @@ public abstract class AbstractHashtable<K, V> {
    *
    * @param <T> the type of the object in the table that is being enumerated
    */
-  protected abstract class AbstractEnumerator<T> implements Enumeration<T>, Iterator<T>, Iterable<T> {
-    protected Entry<?, ?>[] entries;
-    protected Entry<?, ?> entry, last;
-    protected int type, size, index = 0;
+  protected abstract class AbstractIterator<T> implements Iterator<T>, Iterable<T> {
+    Entry<?, ?>[] entries;
+    Entry<?, ?> entry, last;
+    int type, size, index = 0;
 
     /**
      * Indicates whether this Enumerator is serving as an Iterator or an
      * Enumeration.
      */
-    protected boolean iterator;
+    boolean iterator;
 
     /**
      * The expected value of modCount when instantiating the iterator. If this
      * expectation is violated, the iterator has detected concurrent modification.
      */
-    protected int expectedModCount = AbstractHashtable.this.modCount;
+    int expectedModCount = AbstractHashtable.this.modCount;
 
     // Iterable method
     public final Iterator<T> iterator() {
-      return iterator ? this : this.asIterator();
+      return this;
     }
 
     /**
@@ -403,10 +377,9 @@ public abstract class AbstractHashtable<K, V> {
    * Default Enumerator used for hashtables. Sets the entries as the the hashtable
    * and the size so it can be enmerated.
    */
-  private class Enumerator<T> extends AbstractEnumerator<T> {
-    Enumerator(int type, boolean iterator) {
+  private class Itr<T> extends AbstractIterator<T> {
+    Itr(int type) {
       this.type = type;
-      this.iterator = iterator;
       entries = AbstractHashtable.this.table;
       this.size = entries.length;
     }

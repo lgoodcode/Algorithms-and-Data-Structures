@@ -1,10 +1,9 @@
 package data_structures.hashtables;
 
 import java.util.Iterator;
-import java.util.Enumeration;
 
 import data_structures.Entry;
-import data_structures.EmptyEnumerator;
+import data_structures.EmptyIterator;
 
 public abstract class AbstractStaticHashtable<K, V> extends AbstractHashtable<K, V> {
   /**
@@ -104,28 +103,20 @@ public abstract class AbstractStaticHashtable<K, V> extends AbstractHashtable<K,
   @Override
   protected <T> Iterable<T> getIterable(int type) {
     if (isEmpty())
-      return new EmptyEnumerator<>();
-    return new Enumerator<>(type, true);
+      return new EmptyIterator<>();
+    return new Itr<>(type);
   }
 
   @Override
   protected <T> Iterator<T> getIterator(int type) {
     if (isEmpty())
-      return new EmptyEnumerator<>();
-    return new Enumerator<>(type, true);
+      return new EmptyIterator<>();
+    return new Itr<>(type);
   }
 
-  @Override
-  protected <T> Enumeration<T> getEnumeration(int type) {
-    if (isEmpty())
-      return new EmptyEnumerator<>();
-    return new Enumerator<>(type, false);
-  }
-
-  private class Enumerator<T> extends AbstractEnumerator<T> {
-    Enumerator(int type, boolean iterator) {
+  private class Itr<T> extends AbstractIterator<T> {
+    Itr(int type) {
       this.type = type;
-      this.iterator = iterator;
       entries = AbstractStaticHashtable.this.table;
       this.size = entries.length;
     }

@@ -1,22 +1,21 @@
 package data_structures.trees;
 
-import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.NoSuchElementException;
 import java.util.ConcurrentModificationException;
 
-import data_structures.EmptyEnumerator;
+import data_structures.EmptyIterator;
 import data_structures.queues.Queue;
 
 public abstract class AbstractTree<K, V> {
   public static class Node<T, E> {
-    protected Node<T, E> parent;
-    protected Node<T, E> left;
-    protected Node<T, E> right;
-    private T key;
-    private E value;
+    Node<T, E> parent;
+    Node<T, E> left;
+    Node<T, E> right;
+    T key;
+    E value;
 
     /**
      * Constructor that initializes a tree node with the specified key and value.
@@ -26,7 +25,7 @@ public abstract class AbstractTree<K, V> {
      *
      * @throws IllegalArgumentException if the key or value is {@code null} or blank
      */
-    protected Node(T key, E value) {
+    Node(T key, E value) {
       if (key == null || key.toString().isBlank())
         throw new IllegalArgumentException("Key cannot be null or empty.");
       if (value == null || value.toString().isBlank())
@@ -39,7 +38,7 @@ public abstract class AbstractTree<K, V> {
     /**
      * Default constructor used for {@code RedBlackTree} sentinel.
      */
-    protected Node() {}
+    Node() {}
 
     public final T getKey() {
       return key;
@@ -668,8 +667,8 @@ public abstract class AbstractTree<K, V> {
    */
   private final <T> Iterable<T> getIterable(int type) {
     if (isEmpty())
-      return new EmptyEnumerator<>();
-    return new Enumerator<>(type, true);
+      return new EmptyIterator<>();
+    return new Itr<>(type);
   }
 
   /**
@@ -681,21 +680,8 @@ public abstract class AbstractTree<K, V> {
    */
   private final <T> Iterator<T> getIterator(int type) {
     if (isEmpty())
-      return new EmptyEnumerator<>();
-    return new Enumerator<>(type, true);
-  }
-
-  /**
-   * Returns an {@link Enumeration} of the specified type.
-   *
-   * @param <T>  Generic type to allow any type to be enumerated over
-   * @param type the type of item to iterate (keys, values, or entries)
-   * @return the {@code Enumeration}
-   */
-  private final <T> Enumeration<T> getEnumeration(int type) {
-    if (isEmpty())
-      return new EmptyEnumerator<>();
-    return new Enumerator<>(type, false);
+      return new EmptyIterator<>();
+    return new Itr<>(type);
   }
 
   public final Iterable<K> keys() {
@@ -722,55 +708,37 @@ public abstract class AbstractTree<K, V> {
     return getIterator(ENTRIES);
   }
 
-  public final Enumeration<K> keysEnumeration() {
-    return getEnumeration(KEYS);
-  }
-
-  public final Enumeration<V> valuesEnumeration() {
-    return getEnumeration(VALUES);
-  }
-
-  public final <E extends Node<K, V>> Enumeration<E> entriesEnumeration() {
-    return getEnumeration(ENTRIES);
-  }
-
   /**
-   * A tree enumerator class. This class implements the Enumeration,
-   * Iterator, and Iterable interfaces, but individual instances can be created
-   * with the Iterator methods disabled. This is necessary to avoid
-   * unintentionally increasing the capabilities granted a user by passing an
-   * Enumeration.
+   * A tree iterator class. This class implements the interfaces. It keeps a
+   * {@link Queue} of the nodes in the tree after performing an inorder tree walk
+   * to insert all the nodes.
    *
+   * <p>
+   * Will throw a {@link ConcurrentModificationException} if the tree was modified
+   * outside of the iterator.
+   * </p>
+   * 
    * @param <T> the type of the object that is being enumerated
    */
-  private class Enumerator<T> implements Enumeration<T>, Iterator<T>, Iterable<T> {
-    private Queue<Node<K, V>> entries;
-    private Node<K, V> last;
-    private int type, size;
-
-    /**
-     * Indicates whether this Enumerator is serving as an Iterator or an
-     * Enumeration.
-     */
-    private boolean iterator;
+  private class Itr<T> implements Iterator<T>, Iterable<T> {
+    Queue<Node<K, V>> entries;
+    Node<K, V> last;
+    int type, size;
 
     /**
      * The expected value of modCount when instantiating the iterator. If this
      * expectation is violated, the iterator has detected concurrent modification.
      */
-    private int expectedModCount = AbstractTree.this.modCount;
+    int expectedModCount = modCount;
 
     /**
      * Constructs the enumerator that will be used to enumerate the values in the
      * tree.
      *
-     * @param type     the type of object to enumerate
-     * @param iterator whether this will serve as an {@code Enumeration} or
-     *                 {@code Iterator}
+     * @param type the type of object to enumerate
      */
-    private Enumerator(int type, boolean iterator) {
+    Itr(int type) {
       this.size = AbstractTree.this.count;
-      this.iterator = iterator;
       this.type = type;
       entries = new Queue<>(size);
 
@@ -779,7 +747,7 @@ public abstract class AbstractTree<K, V> {
 
     // Iterable method
     public Iterator<T> iterator() {
-      return iterator ? this : this.asIterator();
+      return this;
     }
 
     /**
@@ -841,10 +809,6 @@ public abstract class AbstractTree<K, V> {
      * The behavior of an iterator is unspecified if this method is called
      * after a call to the {@link #forEachRemaining forEachRemaining} method.
      *
-     * @throws UnsupportedOperationException if the {@code remove} operation is
-     *         not supported by this iterator, e.g., if the object is an
-     *         {@code Enumeration}.
-     *
      * @throws IllegalStateException if the {@code next} method has not yet been
      *         called, or the {@code remove} method has already been called after
      *         the last call to the {@code next} method.
@@ -854,8 +818,6 @@ public abstract class AbstractTree<K, V> {
      */
     @Override
     public void remove() {
-      if (!iterator)
-        throw new UnsupportedOperationException();
       if (last == null)
         throw new IllegalStateException("Tree Enumerator. No last item.");
       if (modCount != expectedModCount)

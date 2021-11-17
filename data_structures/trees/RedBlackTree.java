@@ -42,15 +42,15 @@ import java.util.function.Consumer;
  */
 public final class RedBlackTree<K, V> extends AbstractTree<K, V> {
   public static class RBNode<T, E> extends Node<T, E> {
-    private RBNode<T, E> parent;
-    private RBNode<T, E> left;
-    private RBNode<T, E> right;
+    RBNode<T, E> parent;
+    RBNode<T, E> left;
+    RBNode<T, E> right;
 
     /**
      * Used to determine the type of {@code RedBlackTreeNode}. The two types are
      * {@code Black (0)} and {@code Red (1)}.
      */
-    private int color = 0;
+    int color = 0;
 
     /**
      * Since the {@code RedBlackTree} may need to check the parent of a parent of a
@@ -65,7 +65,7 @@ public final class RedBlackTree<K, V> extends AbstractTree<K, V> {
      * usage.
      * </p>
      */
-    private static final RBNode<?, ?> NIL = new RedBlackTree.RBNode<>();
+    static final RBNode<?, ?> NIL = new RedBlackTree.RBNode<>();
 
     /**
      * Creates a tree node with the specified key and value. It initializes the
@@ -78,7 +78,7 @@ public final class RedBlackTree<K, V> extends AbstractTree<K, V> {
      *
      * @throws IllegalArgumentException if the key or value is {@code null} or blank
      */
-    private RBNode(T key, E value) {
+    RBNode(T key, E value) {
       super(key, value);
       parent = left = right = new RBNode<>();
     }
@@ -89,7 +89,7 @@ public final class RedBlackTree<K, V> extends AbstractTree<K, V> {
      * {@code RedBlackTreeNode} to prevent errors from occuring and for the tree to
      * perform its operations.
      */
-    private RBNode() {
+    RBNode() {
       parent = left = right = this;
     }
 

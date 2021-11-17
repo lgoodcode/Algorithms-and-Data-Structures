@@ -8,6 +8,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -21,8 +22,6 @@ import data_structures.linkedLists.CircularLinkedList;
 public class CircularLinkedList_Test {
   CircularLinkedList<String> list;
   CircularLinkedList<String> list2;
-  CircularLinkedList<String>.Node<String> node;
-  CircularLinkedList<String>.Node<String> node2;
 
   @Nested
   class When_New {
@@ -79,7 +78,7 @@ public class CircularLinkedList_Test {
 
     @Test
     void empty_list_string() {
-      assertEquals("{}", list.toString());
+      assertEquals("[]", list.toString());
     }
 
     @ParameterizedTest
@@ -91,7 +90,7 @@ public class CircularLinkedList_Test {
 
     @Test
     void values_is_empty() {
-      Iterator<String> values = list.valuesIterator();
+      Iterator<String> values = list.iterator();
       assertFalse(values.hasNext());
       assertThrows(NoSuchElementException.class, () -> values.next());
       assertThrows(IllegalStateException.class, () -> values.remove());
@@ -143,6 +142,13 @@ public class CircularLinkedList_Test {
     void pollLast() {
       assertEquals("one", list.pollLast());
       assertEquals("two", list.peekLast());
+    }
+
+    @Test
+    void clear() {
+      list.clear();
+      assertEquals(0, list.size());
+      assertTrue(list.isEmpty());
     }
 
     @Test
@@ -301,8 +307,18 @@ public class CircularLinkedList_Test {
     }
 
     @Test
+    void removeRange() {
+      list.removeRange(1, 4);
+
+      assertAll(
+        () -> assertEquals("five", list.get(0)),
+        () -> assertEquals("one", list.get(1))
+      );
+    }
+    
+    @Test
     void values() {
-      Iterator<String> values = list.valuesIterator();
+      Iterator<String> values = list.iterator();
       assertTrue(values.hasNext());
       assertEquals("five", values.next());
       assertEquals("four", values.next());
@@ -314,16 +330,14 @@ public class CircularLinkedList_Test {
     }
 
     @Test
+    void toArray() {
+      Object[] arr = { "five", "four", "three", "two", "one" };
+      assertArrayEquals(arr, list.toArray());
+    }
+
+    @Test
     void to_string() {
-      assertEquals("{"
-          + "\n\"0 -> five\","
-          + "\n\"1 -> four\","
-          + "\n\"2 -> three\","
-          + "\n\"3 -> two\","
-          + "\n\"4 -> one\","
-          + "\n}",
-        list.toString()
-      );
+      assertEquals("[five, four, three, two, one]", list.toString());
     }
   }
 }

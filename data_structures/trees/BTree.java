@@ -7,7 +7,7 @@ import java.util.function.BiFunction;
 import java.util.NoSuchElementException;
 import java.util.ConcurrentModificationException;
 
-import data_structures.EmptyEnumerator;
+import data_structures.EmptyIterator;
 import data_structures.queues.Queue;
 
 /**
@@ -1432,8 +1432,8 @@ public final class BTree<K, V> {
    */
   private <T> Iterable<T> getIterable(int type) {
     if (isEmpty())
-      return new EmptyEnumerator<>();
-    return new Enumerator<>(type, true);
+      return new EmptyIterator<>();
+    return new Itr<>(type, true);
   }
 
   /**
@@ -1445,21 +1445,8 @@ public final class BTree<K, V> {
    */
   private <T> Iterator<T> getIterator(int type) {
     if (isEmpty())
-      return new EmptyEnumerator<>();
-    return new Enumerator<>(type, true);
-  }
-
-  /**
-   * Returns an {@link Enumeration} of the specified type.
-   *
-   * @param <T>  Generic type to allow any type to be enumerated over
-   * @param type the type of item to iterate (keys, values, or entries)
-   * @return the {@code Enumeration}
-   */
-  private <T> Enumeration<T> getEnumeration(int type) {
-    if (isEmpty())
-      return new EmptyEnumerator<>();
-    return new Enumerator<>(type, false);
+      return new EmptyIterator<>();
+    return new Itr<>(type, true);
   }
 
   public Iterable<K> keys() {
@@ -1486,18 +1473,6 @@ public final class BTree<K, V> {
     return getIterator(ENTRIES);
   }
 
-  public Enumeration<K> keysEnumeration() {
-    return getEnumeration(KEYS);
-  }
-
-  public Enumeration<V> valuesEnumeration() {
-    return getEnumeration(VALUES);
-  }
-
-  public Enumeration<BTreeNode<K, V>> entriesEnumeration() {
-    return getEnumeration(ENTRIES);
-  }
-
   /**
    * A tree enumerator class. This class implements the Enumeration, Iterator, and
    * Iterable interfaces, but individual instances can be created with the
@@ -1505,14 +1480,14 @@ public final class BTree<K, V> {
    * increasing the capabilities granted a user by passing an Enumeration.
    *
    * <p>
-   * This differs from the {@link AbstractTree.Enumerator} because of the fact
+   * This differs from the {@link AbstractTree.Itr} because of the fact
    * that the {@code B-Tree} doesn't do 2-way splits like the others, which h s an
    * n-way split based on the specified minimum degree {@code t}.
    * </p>
    *
    * @param <T> the type of the object that is being enumerated
    */
-  private class Enumerator<T> implements Enumeration<T>, Iterator<T>, Iterable<T> {
+  private class Itr<T> implements Enumeration<T>, Iterator<T>, Iterable<T> {
     private Queue<BTreeNode<K, V>> nodes;
     private BTreeNode<K, V> lastNode;
     private K key, lastKey;
@@ -1538,7 +1513,7 @@ public final class BTree<K, V> {
      * @param iterator whether this will serve as an {@code Enumeration} or
      *                 {@code Iterator}
      */
-    private Enumerator(int type, boolean iterator) {
+    private Itr(int type, boolean iterator) {
       this.iterator = iterator;
       this.type = type;
       nodes = new Queue<>(BTree.this.count);

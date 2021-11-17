@@ -1,10 +1,9 @@
 package data_structures.hashtables;
 
-import java.util.Enumeration;
 import java.util.Iterator;
 
 import data_structures.Entry;
-import data_structures.EmptyEnumerator;
+import data_structures.EmptyIterator;
 import data_structures.linkedLists.LinkedList;
 
 /**
@@ -171,7 +170,7 @@ public final class ChainingHashtable<K, V> extends AbstractHashtable<K, V> {
       return -1;
 
     LinkedList<Entry<K, V>> list = ((LinkedList<Entry<K, V>>) table[hash]);
-    Iterable<Entry<K, V>> entries = list.values();
+    Iterable<Entry<K, V>> entries = list.iterable();
 
     for (Entry<K, V> e : entries)
       if (e.getKey() == key)
@@ -209,7 +208,7 @@ public final class ChainingHashtable<K, V> extends AbstractHashtable<K, V> {
       return null;
 
     LinkedList<Entry<K, V>> list = ((LinkedList<Entry<K, V>>) table[idx]);
-    Iterable<Entry<K, V>> entries = list.values();
+    Iterable<Entry<K, V>> entries = list.iterable();
 
     for (Entry<K, V> e : entries)
       if (e.getKey() == key)
@@ -236,7 +235,7 @@ public final class ChainingHashtable<K, V> extends AbstractHashtable<K, V> {
       return false;
 
     LinkedList<Entry<K, V>> list = ((LinkedList<Entry<K, V>>) table[idx]);
-    Iterable<Entry<K, V>> entries = list.values();
+    Iterable<Entry<K, V>> entries = list.iterable();
 
     for (Entry<K, V> e : entries) {
       if (e.getKey() == key) {
@@ -255,35 +254,27 @@ public final class ChainingHashtable<K, V> extends AbstractHashtable<K, V> {
   @Override
   protected <T> Iterable<T> getIterable(int type) {
     if (isEmpty())
-      return new EmptyEnumerator<>();
-    return new Enumerator<>(type, true);
+      return new EmptyIterator<>();
+    return new Itr<>(type);
   }
 
   @Override
   protected <T> Iterator<T> getIterator(int type) {
     if (isEmpty())
-      return new EmptyEnumerator<>();
-    return new Enumerator<>(type, true);
-  }
-
-  @Override
-  protected <T> Enumeration<T> getEnumeration(int type) {
-    if (isEmpty())
-      return new EmptyEnumerator<>();
-    return new Enumerator<>(type, false);
+      return new EmptyIterator<>();
+    return new Itr<>(type);
   }
 
   @SuppressWarnings("unchecked")
-  private class Enumerator<T> extends AbstractEnumerator<T> {
-    Enumerator(int type, boolean iterator) {
+  private class Itr<T> extends AbstractIterator<T> {
+    Itr(int type) {
       entries = new Entry<?, ?>[n];
       this.type = type;
-      this.iterator = iterator;
       size = 0;
 
       for (LinkedList<Entry<K, V>> list : (LinkedList<Entry<K, V>>[]) ChainingHashtable.this.table) {
         if (list != null)
-          list.values().forEach((entry) -> entries[size++] = entry);
+          list.iterable().forEach((entry) -> entries[size++] = entry);
       }
     }
   }

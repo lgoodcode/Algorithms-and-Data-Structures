@@ -1,13 +1,12 @@
 package data_structures.tries;
 
 import java.util.Iterator;
-import java.util.Enumeration;
 import java.util.function.Consumer;
 import java.util.function.BiConsumer;
 import java.util.NoSuchElementException;
 import java.util.ConcurrentModificationException;
 
-import data_structures.EmptyEnumerator;
+import data_structures.EmptyIterator;
 import data_structures.queues.Queue;
 
 public abstract class AbstractTrie<T> {
@@ -16,32 +15,32 @@ public abstract class AbstractTrie<T> {
      * Whether the current node is a word or contains a child that is or contains
      * word(s).
      */
-    protected boolean hasWord;
+    boolean hasWord;
 
     /**
      * The key of the node.
      */
-    protected char key;
+    char key;
 
     /**
      * The value of the node.
      */
-    protected T value;
+    T value;
 
     /**
      * The root key
      */
-    protected final char ROOT = '\s';
+    final char ROOT = '\s';
 
     /**
      * The array of the child {@code TrieNodes}.
      */
-    protected Node<T>[] children;
+    Node<T>[] children;
 
     /**
      * The parent {@code TrieNode} used for tracing up to the root.
      */
-    protected Node<T> parent;
+    Node<T> parent;
 
     /**
      * Initializes an empty {@code TrieNode} with the specified key. The key is used
@@ -58,7 +57,7 @@ public abstract class AbstractTrie<T> {
     /**
      * Default constructor for the root {@code TrieNode}.
      */
-    protected Node() {
+    Node() {
       key = ROOT;
       hasWord = false;
     }
@@ -642,8 +641,8 @@ public abstract class AbstractTrie<T> {
    */
   protected final <E> Iterable<E> getIterable(int type) {
     if (isEmpty())
-      return new EmptyEnumerator<>();
-    return new Enumerator<>(type, true);
+      return new EmptyIterator<>();
+    return new Itr<>(type, true);
   }
 
   /**
@@ -655,20 +654,8 @@ public abstract class AbstractTrie<T> {
    */
   protected final <E> Iterator<E> getIterator(int type) {
     if (isEmpty())
-      return new EmptyEnumerator<>();
-    return new Enumerator<>(type, true);
-  }
-  /**
-   * Returns an {@link Enumeration} of the specified type.
-   *
-   * @param <E>  Generic type to allow any type to be enumerated over
-   * @param type the type of item to iterate (keys, values, or entries)
-   * @return the {@code Enumeration}
-   */
-  protected final <E> Enumeration<E> getEnumeration(int type) {
-    if (isEmpty())
-      return new EmptyEnumerator<>();
-    return new Enumerator<>(type, false);
+      return new EmptyIterator<>();
+    return new Itr<>(type, true);
   }
 
   public final Iterable<String> words() {
@@ -695,43 +682,34 @@ public abstract class AbstractTrie<T> {
     return getIterator(ENTRIES);
   }
 
-  public final Enumeration<String> wordsEnumeration() {
-    return getEnumeration(WORDS);
-  }
-
-  public final Enumeration<T> valuesEnumeration() {
-    return getEnumeration(VALUES);
-  }
-
-  public final <TrieNode extends Node<T>> Enumeration<TrieNode> entriesEnumeration() {
-    return getEnumeration(ENTRIES);
-  }
-
   /**
-   * A trie enumerator class. This class implements the Enumeration,
-   * Iterator, and Iterable interfaces, but individual instances can be created
-   * with the Iterator methods disabled. This is necessary to avoid
-   * unintentionally increasing the capabilities granted a user by passing an
-   * Enumeration.
+   * A tree iterator class. This class implements the interfaces. It keeps a
+   * {@link Queue} of the nodes in the tree after performing an inorder tree walk
+   * to insert all the nodes.
    *
+   * <p>
+   * Will throw a {@link ConcurrentModificationException} if the tree was modified
+   * outside of the iterator.
+   * </p>
+   * 
    * @param <E> the type of the object that is being enumerated
    */
-  protected final class Enumerator<E> implements Enumeration<E>, Iterator<E>, Iterable<E> {
-    protected Queue<Node<T>> entries;
-    protected Node<T> last;
-    protected int type, size, index = 0;
+  private class Itr<E> implements Iterator<E>, Iterable<E> {
+    Queue<Node<T>> entries;
+    Node<T> last;
+    int type, size;
 
     /**
      * Indicates whether this Enumerator is serving as an Iterator or an
      * Enumeration.
      */
-    protected boolean iterator;
+    boolean iterator;
 
     /**
      * The expected value of modCount when instantiating the iterator. If this
      * expectation is violated, the iterator has detected concurrent modification.
      */
-    protected int expectedModCount = AbstractTrie.this.modCount;
+    int expectedModCount = AbstractTrie.this.modCount;
 
     /**
      * Constructs the enumerator that will be used to enumerate the values in the
@@ -741,7 +719,7 @@ public abstract class AbstractTrie<T> {
      * @param iterator whether this will serve as an {@code Enumeration} or
      *                 {@code Iterator}
      */
-    protected Enumerator(int type, boolean iterator) {
+    Itr(int type, boolean iterator) {
       this.size = AbstractTrie.this.count;
       this.iterator = iterator;
       this.type = type;
@@ -755,7 +733,7 @@ public abstract class AbstractTrie<T> {
 
     // Iterable method
     public Iterator<E> iterator() {
-      return iterator ? this : this.asIterator();
+      return this;
     }
 
     /**

@@ -3,6 +3,9 @@ package data_structures.linkedLists;
 import java.util.function.BiFunction;
 
 public class SortedLinkedList<T> extends LinkedList<T> {
+  @java.io.Serial
+  private static final long serialVersionUID = 199208284839394803L;
+
   /**
    * The function used to compare two keys and returns a boolean value indicating
    * whether the first argument is less than the second argument.
@@ -39,7 +42,7 @@ public class SortedLinkedList<T> extends LinkedList<T> {
   private boolean isLessThan(Node<T> x, Node<T> y) {
     checkNode(x);
     checkNode(y);
-    return compareFn.apply(x.getItem(), y.getItem());
+    return compareFn.apply(x.item, y.item);
   }
 
   /**

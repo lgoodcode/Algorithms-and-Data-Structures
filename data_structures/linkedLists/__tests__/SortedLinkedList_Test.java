@@ -8,6 +8,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -21,8 +22,6 @@ import data_structures.linkedLists.SortedLinkedList;
 public class SortedLinkedList_Test {
   SortedLinkedList<String> list;
   SortedLinkedList<String> list2;
-  SortedLinkedList<String>.Node<String> node;
-  SortedLinkedList<String>.Node<String> node2;
 
   @Nested
   class When_New {
@@ -79,7 +78,7 @@ public class SortedLinkedList_Test {
 
     @Test
     void empty_list_string() {
-      assertEquals("{}", list.toString());
+      assertEquals("[]", list.toString());
     }
 
     @ParameterizedTest
@@ -91,7 +90,7 @@ public class SortedLinkedList_Test {
 
     @Test
     void values_is_empty() {
-      Iterator<String> values = list.valuesIterator();
+      Iterator<String> values = list.iterator();
       assertFalse(values.hasNext());
       assertThrows(NoSuchElementException.class, () -> values.next());
       assertThrows(IllegalStateException.class, () -> values.remove());
@@ -143,6 +142,13 @@ public class SortedLinkedList_Test {
     void pollLast() {
       assertEquals("e", list.pollLast());
       assertEquals("d", list.peekLast());
+    }
+
+    @Test
+    void clear() {
+      list.clear();
+      assertEquals(0, list.size());
+      assertTrue(list.isEmpty());
     }
 
     @Test
@@ -222,8 +228,18 @@ public class SortedLinkedList_Test {
     }
 
     @Test
+    void removeRange() {
+      list.removeRange(1, 4);
+
+      assertAll(
+        () -> assertEquals("a", list.get(0)),
+        () -> assertEquals("e", list.get(1))
+      );
+    }
+
+    @Test
     void values() {
-      Iterator<String> values = list.valuesIterator();
+      Iterator<String> values = list.iterator();
       assertTrue(values.hasNext());
       assertEquals("a", values.next());
       assertEquals("b", values.next());
@@ -235,16 +251,14 @@ public class SortedLinkedList_Test {
     }
 
     @Test
+    void toArray() {
+      Object[] arr = { "a", "b", "c", "d", "e" };
+      assertArrayEquals(arr, list.toArray());
+    }
+
+    @Test
     void to_string() {
-      assertEquals("{"
-          + "\n\"0 -> a\","
-          + "\n\"1 -> b\","
-          + "\n\"2 -> c\","
-          + "\n\"3 -> d\","
-          + "\n\"4 -> e\","
-          + "\n}",
-        list.toString()
-      );
+      assertEquals("[a, b, c, d, e]", list.toString());
     }
   }
 }

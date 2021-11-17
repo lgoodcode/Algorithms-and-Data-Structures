@@ -2,14 +2,12 @@ package data_structures;
 
 import java.util.Objects;
 import java.util.Iterator;
-import java.util.Enumeration;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 
 /**
- * This class creates an empty Enumerator that has no elements and implements
- * the {@code Iterable}, {@code Iterator}, {@code Enumeration} interfaces so
- * that it can be used for all types.
+ * This class creates an empty Iterator that has no elements and implements the
+ * {@code Iterable}, {@code Iterator}, interfaces.
  *
  * <ul>
  * <li>{@link Iterator#hasNext} always returns {@code false}.</li>
@@ -23,22 +21,10 @@ import java.util.function.Consumer;
  *
  * @param <T> the class of the objects in the iterable
  */
-public final class EmptyEnumerator<T> implements Enumeration<T>, Iterator<T>, Iterable<T> {
+public final class EmptyIterator<T> implements Iterator<T>, Iterable<T> {
   // TODO: need to disable the warning here for unused variable
   // static final EmptyIterable<?> EMPTY_ITERABLE = new EmptyIterable<>();
 
-  public EmptyEnumerator() {}
-
-  // Enumeration methods
-  public boolean hasMoreElements() {
-    return false;
-  }
-
-  public T nextElement() {
-    throw new NoSuchElementException();
-  }
-
-  // Iterator methods
   public boolean hasNext() {
     return false;
   }
@@ -51,7 +37,6 @@ public final class EmptyEnumerator<T> implements Enumeration<T>, Iterator<T>, It
     throw new IllegalStateException();
   }
 
-  // Iterable method
   public Iterator<T> iterator() {
     return this;
   }

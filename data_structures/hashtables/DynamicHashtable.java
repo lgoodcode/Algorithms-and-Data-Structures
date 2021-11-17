@@ -1,10 +1,9 @@
 package data_structures.hashtables;
 
-import java.util.Enumeration;
 import java.util.Iterator;
 
 import data_structures.Entry;
-import data_structures.EmptyEnumerator;
+import data_structures.EmptyIterator;
 import static data_structures.hashtables.HashtableFunctions.*;
 
 /**
@@ -419,29 +418,21 @@ public final class DynamicHashtable<K, V> extends AbstractDynamicHashtable<K, V>
   @Override
   protected <T> Iterable<T> getIterable(int type) {
     if (isEmpty())
-      return new EmptyEnumerator<>();
-    return new Enumerator<>(type, true);
+      return new EmptyIterator<>();
+    return new Itr<>(type);
   }
 
   @Override
   protected <T> Iterator<T> getIterator(int type) {
     if (isEmpty())
-      return new EmptyEnumerator<>();
-    return new Enumerator<>(type, true);
+      return new EmptyIterator<>();
+    return new Itr<>(type);
   }
 
-  @Override
-  protected <T> Enumeration<T> getEnumeration(int type) {
-    if (isEmpty())
-      return new EmptyEnumerator<>();
-    return new Enumerator<>(type, false);
-  }
-
-  private class Enumerator<T> extends AbstractEnumerator<T> {
-    Enumerator(int type, boolean iterator) {
+  private class Itr<T> extends AbstractIterator<T> {
+    Itr(int type) {
       entries = new Entry<?, ?>[m * m];
       this.type = type;
-      this.iterator = iterator;
       size = 0;
 
       // Copy all entries from each subtable into the single array of entries

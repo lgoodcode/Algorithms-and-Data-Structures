@@ -1,6 +1,9 @@
 package data_structures.linkedLists;
 
-public class LinkedList<T> extends AbstractLinkedList<T> {
+public class LinkedList<T> extends AbstractLinkedList<T> implements java.io.Serializable {
+  @java.io.Serial
+  private static final long serialVersionUID = 199208284839394801L;
+
   /**
    * Empty contructor
    */
@@ -151,7 +154,7 @@ public class LinkedList<T> extends AbstractLinkedList<T> {
     Node<T> node = head;
     int index = 0;
 
-    while (node != null && node.getItem() != item) {
+    while (node != null && node.item != item) {
       node = node.next;
       index++;
     }
@@ -170,7 +173,7 @@ public class LinkedList<T> extends AbstractLinkedList<T> {
     Node<T> node = tail;
     int index = size - 1;
 
-    while (node != null && node.getItem() != item) {
+    while (node != null && node.item != item) {
       node = node.prev;
       index--;
     }
@@ -183,35 +186,9 @@ public class LinkedList<T> extends AbstractLinkedList<T> {
    *
    * @throws IndexOutOfBoundsException {@inheritDoc}
    */
-  public Node<T> search(int index) {
-    checkIndex(index);
-
-    Node<T> node = null;
-
-    if (index < (size >> 1)) {
-      node = head;
-
-      for (int i=0; i<index; i++)
-        node = node.next;
-      return node;
-    }
-    else {
-      node = tail;
-
-      for (int i=size-1; i>index; i--)
-        node = node.prev;
-      return node;
-    }
-  }
-
-  /**
-   * {@inheritDoc}
-   *
-   * @throws IndexOutOfBoundsException {@inheritDoc}
-   */
   public T get(int index) {
     Node<T> node = search(index);
-    return node != null ? node.getItem() : null;
+    return node != null ? node.item : null;
   }
 
   /**
@@ -222,23 +199,59 @@ public class LinkedList<T> extends AbstractLinkedList<T> {
   public synchronized void remove(int index) {
     Node<T> node = search(index);
 
-    if (node != null) {
-      unlink(node);
-      size--;
-      modCount++;
-    }
+    if (node != null)
+      remove(node);
   }
 
   /**
-   * {@inheritDoc}
+   * Saves the state of this {@code LinkedList} instance to a stream (that is,
+   * serializes it).
+   * 
+   * @param stream the {@link java.io.ObjectOutputStream} to write to
+   * 
+   * @throws java.io.IOException if serialization fails
    *
-   * @throws NullPointerException {@inheritDoc}
+   * @serialData The size of the list (the number of elements it contains) is
+   *             emitted (int), followed by all of its elements (each an Object)
+   *             in the proper order.
    */
-  public synchronized void remove(Node<T> node) {
-    checkNode(node);
-    unlink(node);
-    size--;
-    modCount++;
+  @java.io.Serial
+  private void writeObject(java.io.ObjectOutputStream stream) throws java.io.IOException {
+    // Write out any hidden serialization magic
+    stream.defaultWriteObject();
+
+    // Write out size
+    stream.writeInt(size);
+
+    if (isEmpty())
+      return;
+
+    Node<T> node = head;
+
+    // Write out all elements in the proper order.
+    do {
+      stream.writeObject(node.item);
+      node = node.next;
+    } while (node != null && node != head);
+  }
+
+  /**
+   * Reconstitutes this {@code LinkedList} instance from a stream (that is,
+   * deserializes it).
+   */
+  @SuppressWarnings("unchecked")
+  @java.io.Serial
+  private void readObject(java.io.ObjectInputStream stream) 
+throws java.io.IOException, ClassNotFoundException {
+    // Read in any hidden serialization magic
+    stream.defaultReadObject();
+
+    // Read in size
+    int size = stream.readInt();
+
+    // Read in all elements in the proper order.
+    for (int i = 0; i < size; i++)
+      insertLast((T) stream.readObject());
   }
 
 }

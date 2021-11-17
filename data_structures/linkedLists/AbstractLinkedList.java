@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.ConcurrentModificationException;
 
-import data_structures.EmptyEnumerator;
+import data_structures.EmptyIterator;
 
 /**
  * Creates a DoublyLinkedList implementation because, the simple forward only
@@ -17,43 +17,45 @@ import data_structures.EmptyEnumerator;
  * to the head or tail, making the search perform {@code O(n / 2)}.
  */
 public abstract class AbstractLinkedList<T> {
-  public class Node<E> {
-    protected Node<E> next;
-    protected Node<E> prev;
-    private E item;
-  
-    public Node(E item) {
+  protected class Node<E> {
+    Node<E> next;
+    Node<E> prev;
+    E item;
+
+    Node(E item) {
       if (item == null || item.toString().isBlank())
         throw new IllegalArgumentException("Item cannot be null or empty.");
       this.item = item;
     }
-  
+
     public E getItem() {
       return item;
     }
-  
-    public String toString() {
-      return item.toString();
-    }
   }
 
-  protected Node<T> head = null;
-  protected Node<T> tail = null;
+  protected transient Node<T> head = null;
+  protected transient Node<T> tail = null;
 
   /**
    * The counter to track the number of entries total in the linkedlist.
    */
-  protected int size = 0;
+  protected transient int size = 0;
 
   /**
    * The number of times this LinkedList has been structurally modified Structural
    * modifications are those that change the number of entries in the list or
    * otherwise modify its internal structure (e.g., insert, delete).  This field
    * is used to make iterators on Collection-views of the LinkedList fail-fast.
-   * 
+   *
    * @see ConcurrentModificationException
    */
-  protected int modCount = 0;
+  protected transient int modCount = 0;
+
+  /**
+   * Sole constructor. (For invocation by subclass constructors, typically
+   * implicit.)
+   */
+  protected AbstractLinkedList() {}
 
   /**
    * Checks whether the specified index is within the range of [0, size-1]. This
@@ -129,6 +131,21 @@ public abstract class AbstractLinkedList<T> {
   }
 
   /**
+   * Removes all elements in the linkedlist.
+   */
+  public synchronized final void clear() {
+    if (isEmpty())
+      return;
+
+    Iterator<T> itr = iterator();
+
+    while (itr.hasNext()) {
+      itr.next();
+      itr.remove();
+    }
+  }
+
+  /**
    * Returns the head of the list or {@code} null if the list is empty.
    *
    * @return the head of the list or {@code null} if none
@@ -145,7 +162,6 @@ public abstract class AbstractLinkedList<T> {
   public final Node<T> getTail() {
     return tail;
   }
-
   /**
    * Returns the item at the front of the list or {@code null} if the list is
    * empty.
@@ -153,7 +169,7 @@ public abstract class AbstractLinkedList<T> {
    * @return the item of the front of the lists or {@code null} if none
    */
   public final T peek() {
-    return head != null ? head.getItem() : null;
+    return head != null ? head.item : null;
   }
 
   /**
@@ -163,7 +179,7 @@ public abstract class AbstractLinkedList<T> {
    * @return the item of the tail of the lists or {@code null} if none
    */
   public final T peekLast() {
-    return tail != null ? tail.getItem() : null;
+    return tail != null ? tail.item : null;
   }
 
   /**
@@ -172,10 +188,10 @@ public abstract class AbstractLinkedList<T> {
    *
    * @return the item of the front of the lists or {@code null} if none
    */
-  public final T poll() {
+  public synchronized final T poll() {
     if (head == null)
       return null;
-    T item = head.getItem();
+    T item = head.item;
     unlink(head);
     return item;
   }
@@ -186,10 +202,10 @@ public abstract class AbstractLinkedList<T> {
    *
    * @return the item of the end of the lists or {@code null} if none
    */
-  public final T pollLast() {
+  public synchronized final T pollLast() {
     if (tail == null)
       return null;
-    T item = tail.getItem();
+    T item = tail.item;
     unlink(tail);
     return item;
   }
@@ -245,6 +261,9 @@ public abstract class AbstractLinkedList<T> {
       node.next.prev = node.prev;
       node.prev.next = node.next;
     }
+
+    node.next = null;
+    node.prev = null;
   }
 
   /**
@@ -302,7 +321,29 @@ public abstract class AbstractLinkedList<T> {
    *
    * @throws IndexOutOfBoundsException if the specified index is invalid
    */
-  public abstract Node<T> search(int index);
+  public final Node<T> search(int index) {
+    checkIndex(index);
+    return _search(index);
+  }
+
+  private Node<T> _search(int index) {
+    Node<T> node = null;
+
+    if (index < (size >> 1)) {
+      node = head;
+
+      for (int i=0; i<index; i++)
+        node = node.next;
+      return node;
+    }
+    else {
+      node = tail;
+
+      for (int i=size-1; i>index; i--)
+        node = node.prev;
+      return node;
+    }
+  }
 
   /**
    * Retrieves the item of the node with the specified index or {@code null} if
@@ -326,32 +367,97 @@ public abstract class AbstractLinkedList<T> {
   public abstract void remove(int index);
 
   /**
-   * Removes the specified {@code Node} from the list by adjusting
-   * the pointers of the surrounding nodes of the specified node.
+   * Remove a node by unlinking it and then decrementing the size counter.
    *
-   * @param index the node to remove
+   * @param node the node to remove
    *
    * @throws NullPointerException if the specified node is {@code null}
    */
-  public abstract void remove(Node<T> node);
+  public synchronized final void remove(Node<T> node) {
+    checkNode(node);
+    unlink(node);
+    size--;
+    modCount++;
+  }
 
   /**
-   * Displays the contents of the list in order in a JSON format. Overrides due to
-   * the node implemented being different.
+   * Removes nodes in the specified indices range.
    *
-   * @return the string format of the object
+   * @param fromIndex the node at the specified index to start
+   * @param toIndex   the node at the specified index to end
+   *
+   * @throws IndexOutOfBoundsException if the index is not within the range of
+   *                                   {@code [0, size-1]}
+   * @throws IllegalArgumentException  if the specified start index is greater
+   *                                   than the specified end index
+   */
+  public synchronized final void removeRange(int fromIndex, int toIndex) {
+    checkIndex(fromIndex);
+    checkPosition(toIndex);
+
+    if (fromIndex > toIndex)
+      throw new IllegalArgumentException("Start index cannot be greater than end index.");
+
+    if (fromIndex == toIndex) {
+      remove(fromIndex);
+      return;
+    }
+
+    Node<T> temp, node = _search(fromIndex); // use main method to skip redundant check
+    int i = fromIndex, j = toIndex;
+
+    while (i < j) {
+      temp = node.next;
+      remove(node);
+      node = temp;
+      i++;
+    }
+
+  }
+
+  /**
+   * Returns an array containing all of the elements in this list
+   * in proper sequence (from first to last element).
+   *
+   * <p>The returned array will be "safe" in that no references to it are
+   * maintained by this list.  (In other words, this method must allocate
+   * a new array).  The caller is thus free to modify the returned array.
+   *
+   * <p>This method acts as bridge between array-based and collection-based
+   * APIs.
+   *
+   * @return an array containing all of the elements in this list
+   *         in proper sequence
+   */
+  public final Object[] toArray() {
+    Object[] arr = new Object[size];
+    Node<T> node = head;
+    int i = 0;
+
+    while (node != null && i != size) {
+      arr[i++] = node.item;
+      node = node.next;
+    }
+
+    return arr;
+  }
+
+  /**
+   * Displays the contents of the list in order in an array format.
+   *
+   * @return the string format of the linkedlist
    */
   public final String toString() {
     if (head == null)
-      return "{}";
+      return "[]";
 
-    StringBuilder sb = new StringBuilder("{\n");
-    Iterable<T> values = (Iterable<T>) values();
-    int i = 0;
+    StringBuilder sb = new StringBuilder("[");
 
-    for (T val : values)
-      sb.append("\"" + i++ + " -> " + val.toString() + "\",\n");
-    return sb.toString() + "}";
+    for (T item : iterable())
+      sb.append(item.toString()+ ", ");
+
+    sb.delete(sb.length() - 2, sb.length());
+    return sb.toString() + "]";
   }
 
   /**
@@ -362,10 +468,10 @@ public abstract class AbstractLinkedList<T> {
    */
   protected final Iterable<T> getIterable() {
     if (isEmpty())
-      return new EmptyEnumerator<>();
-    return new Enumerator<>(true);
+      return new EmptyIterator<>();
+    return new Itr();
   }
-  
+
   /**
    * Returns an {@link Iterator} of the specified type.
    *
@@ -374,93 +480,70 @@ public abstract class AbstractLinkedList<T> {
    */
   protected final Iterator<T> getIterator() {
     if (isEmpty())
-      return new EmptyEnumerator<>();
-    return new Enumerator<>(true);
+      return new EmptyIterator<>();
+    return new Itr();
   }
 
   /**
-   * Returns an {@link Enumeration} of the specified type.
+   * Returns an {@link Iterable} of the elements in the linkedlist.
    *
-   * @param type the type of item to iterate (keys, values, or entries)
-   * @return the {@code Enumeration}
+   * @return linkedlist iterable
    */
-  protected final Enumeration<T> getEnumeration() {
-    if (isEmpty())
-      return new EmptyEnumerator<>();
-    return new Enumerator<>(false);
-  }
-
-  /**
-   * Returns an iterable of the values in this linkedlist. Use the {@code Iterator}
-   * methods on the returned object to fetch the values sequentially. If the
-   * linkedlist is structurally modified while enumerating over the values then the
-   * results of enumerating are undefined.
-   *
-   * @return an iterable of the values in the linkedlist
-   */
-  public final Iterable<T> values() {
+  public final Iterable<T> iterable() {
     return getIterable();
   }
 
-  public final Iterator<T> valuesIterator() {
+  /**
+   * Returns an {@link Iterator} of the elements in the linkedlist.
+   *
+   * @return linkedlist iterator
+   */
+  public final Iterator<T> iterator() {
     return getIterator();
   }
 
-  public final Enumeration<T> valuesEnumeration() {
-    return getEnumeration();
-  }
-
   /**
-   * A linkedlist enumerator class. This class implements the Enumeration,
-   * Iterator, and Iterable interfaces, but individual instances can be created
-   * with the Iterator methods disabled. This is necessary to avoid
-   * unintentionally increasing the capabilities granted a user by passing an
-   * Enumeration.
+   * A linkedlist iterator class. This class implements the interfaces. It simply
+   * keeps a reference to a single {@link Node} to retain the current position and
+   * not have to sequentially have to find the next node from the start or end
+   * again.
    *
-   * @param <T> the type of the object that is being enumerated
+   * <p>
+   * Doesn't need to be generic or static because it will be accessing the
+   * linkedlist directly, not creating a list of entries
+   * </p>
+   *
+   * <p>
+   * Will throw a {@link ConcurrentModificationException} if the linkedlist was
+   * modified outside of the iterator.
+   * </p>
    */
-  protected final class Enumerator<E> implements Enumeration<E>, Iterator<E>, Iterable<E> {
-    protected Node<E>[] list;
-    protected Node<E> entry, last;
-    protected int size, index = 0;
+  private class Itr implements Enumeration<T>, Iterator<T>, Iterable<T> {
+    /**
+     * The current {@link Node} of the iterator.
+     */
+    Node<T> entry = head;
 
     /**
-     * Indicates whether this Enumerator is serving as an Iterator or an
-     * Enumeration.
+     * The last returned {@code LinkedListNode} so it can be quickly passed to the
+     * {@code unlink} method to remove in {@code O(1)} from the {@code LinkedList}.
      */
-    protected boolean iterator;
+    Node<T> last;
+
+    /**
+     * Tracks the current node index position.
+     */
+    int cursor = 0;
 
     /**
      * The expected value of modCount when instantiating the iterator. If this
      * expectation is violated, the iterator has detected concurrent modification.
      */
-    protected int expectedModCount = AbstractLinkedList.this.modCount;
-
-    /**
-     * Constructs the enumerator that will be used to enumerate the values in the
-     * list.
-     *
-     * @param iterator whether this will serve as an {@code Enumeration} or
-     *                 {@code Iterator}
-     */
-    @SuppressWarnings("unchecked")
-    protected Enumerator(boolean iterator) {
-      this.size = AbstractLinkedList.this.size;
-      this.iterator = iterator;
-      list = (Node<E>[]) new AbstractLinkedList<?>.Node<?>[size];
-      int i = 0;
-
-      Node<E> node = (Node<E>) getHead();
-
-      do {
-        list[i++] = node;
-        node = node.next;
-      } while (node != null && node != head);
-    }
+    int expectedModCount = modCount;
 
     // Iterable method
-    public Iterator<E> iterator() {
-      return iterator ? this : this.asIterator();
+    public Iterator<T> iterator() {
+      return this;
     }
 
     /**
@@ -469,9 +552,7 @@ public abstract class AbstractLinkedList<T> {
      * @return if this object has one or more items to provide or not
      */
     public boolean hasMoreElements() {
-      if (index >= size)
-        return false;
-      return list[index] != null;
+      return entry != null && cursor != size;
     }
 
     /**
@@ -481,11 +562,14 @@ public abstract class AbstractLinkedList<T> {
      *
      * @throws NoSuchElementException if no more elements exist
      */
-    public E nextElement() {
-      if (index >= size)
-        throw new NoSuchElementException("LinkedList Enumerator");
-      last = list[index];
-      return (E) list[index++].getItem();
+    public T nextElement() {
+      if (!hasMoreElements())
+        throw new NoSuchElementException("LinkedList Iterator");
+      cursor++;
+      T item = entry.item;
+      last = entry;
+      entry = entry.next;
+      return item;
     }
 
     /**
@@ -502,8 +586,8 @@ public abstract class AbstractLinkedList<T> {
      * @throws ConcurrentModificationException if the list was modified during
      *                                         computation.
      */
-    public E next() {
-      if (AbstractLinkedList.this.modCount != expectedModCount)
+    public T next() {
+      if (modCount != expectedModCount)
         throw new ConcurrentModificationException();
       return nextElement();
     }
@@ -523,10 +607,6 @@ public abstract class AbstractLinkedList<T> {
      * The behavior of an iterator is unspecified if this method is called
      * after a call to the {@link #forEachRemaining forEachRemaining} method.
      *
-     * @throws UnsupportedOperationException if the {@code remove} operation is
-     *         not supported by this iterator, e.g., if the object is an
-     *         {@code Enumeration}.
-     *
      * @throws IllegalStateException if the {@code next} method has not yet been
      *         called, or the {@code remove} method has already been called after
      *         the last call to the {@code next} method.
@@ -535,21 +615,19 @@ public abstract class AbstractLinkedList<T> {
      *         during computation.
      */
     @Override
-    @SuppressWarnings("unchecked")
     public void remove() {
-      if (!iterator)
-        throw new UnsupportedOperationException();
       if (last == null)
-        throw new IllegalStateException("LinkedList Enumerator. No last item.");
+        throw new IllegalStateException("LinkedList Iterator. No last item.");
       if (modCount != expectedModCount)
         throw new ConcurrentModificationException();
 
       // Synchronized block to lock the linkedlist object while removing entry
       synchronized (AbstractLinkedList.this) {
-        // Pass the current index to remove the last item
+        // Remove the last returned node to from the linkedlist
         AbstractLinkedList.this.remove((Node<T>) last);
-        expectedModCount++;
+        expectedModCount = modCount;
         last = null;
+        cursor--;
       }
     }
   }
