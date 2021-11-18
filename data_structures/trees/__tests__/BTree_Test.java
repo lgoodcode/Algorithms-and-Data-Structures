@@ -137,6 +137,13 @@ public class BTree_Test {
     }
 
     @Test
+    void clear() {
+      tree.clear();
+      assertEquals(0, tree.size());
+      assertTrue(tree.isEmpty());
+    }
+
+    @Test
     void hasKey() {
       assertTrue(tree.hasKey(1));
       assertTrue(tree.hasKey(2));

@@ -32,20 +32,10 @@ import java.util.function.Consumer;
  * </p>
  */
 public final class AVLTree<K, V> extends AbstractTree<K, V> {
-  public static class AVLNode<T, E> extends AbstractTree.Node<T, E> {
-    AVLNode<T, E> parent;
-    AVLNode<T, E> left;
-    AVLNode<T, E> right;
-
-    AVLNode(T key, E value) {
-      super(key, value);
-    }
-  }
-
   /**
    * The root of the tree
    */
-  private AVLNode<K, V> root;
+  private Node<K, V> root;
 
   /**
    * Constant used for {@link #retracing()} in {@link #insert()} with a key.
@@ -80,22 +70,31 @@ public final class AVLTree<K, V> extends AbstractTree<K, V> {
   /**
    * {@inheritDoc}
    *
-   * @param <TreeNode> {@link AVLNode}
+   * @param <TreeNode> {@link Node}
    * @throws IllegalArgumentException {@inheritDoc}
    */
   protected <TreeNode extends Node<K, V>> void checkType(TreeNode node) {
-    if (node != null && !(node instanceof AVLNode))
-      throw new IllegalArgumentException("TreeNode must be an instance of AVLTree.AVLNode");
+    if (node != null && !(node instanceof Node))
+      throw new IllegalArgumentException("TreeNode must be an instance of AbstractTree.Node");
   }
 
   /**
    * {@inheritDoc}
    *
-   * @param <TreeNode> {@link AVLNode}
+   * @param <TreeNode> {@link Node}
    */
   @SuppressWarnings("unchecked")
-  public final AVLNode<K, V> getRoot() {
+  public final Node<K, V> getRoot() {
     return  root;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public final void clear() {
+    root = null;
+    size = 0;
+    modCount++;
   }
 
   /**
@@ -105,7 +104,7 @@ public final class AVLTree<K, V> extends AbstractTree<K, V> {
    * @param node the node whose balance factor we want to get
    * @return the balance factor of the node
    */
-  private int balanceFactor(AVLNode<K, V> node) {
+  private int balanceFactor(Node<K, V> node) {
     return height(node.left) - height(node.right);
   }
 
@@ -115,14 +114,14 @@ public final class AVLTree<K, V> extends AbstractTree<K, V> {
    * @param node the node whose height we want
    * @return the height of the node
    */
-  private int height(AVLNode<K, V> node) {
+  private int height(Node<K, V> node) {
     if (node == null)
       return -1;
     return Math.max(height(node.left), height(node.right)) + 1;
   }
 
-  private AVLNode<K, V> rotateLeft(AVLNode<K, V> x, AVLNode<K, V> z) {
-    AVLNode<K, V> y = z.left;
+  private Node<K, V> rotateLeft(Node<K, V> x, Node<K, V> z) {
+    Node<K, V> y = z.left;
 
     x.right = y;
 
@@ -135,8 +134,8 @@ public final class AVLTree<K, V> extends AbstractTree<K, V> {
     return z;
   }
 
-  private AVLNode<K, V> rotateRight(AVLNode<K, V> x, AVLNode<K, V> z) {
-    AVLNode<K, V> y = z.right;
+  private Node<K, V> rotateRight(Node<K, V> x, Node<K, V> z) {
+    Node<K, V> y = z.right;
 
     x.left = y;
 
@@ -149,8 +148,8 @@ public final class AVLTree<K, V> extends AbstractTree<K, V> {
     return z;
   }
 
-  private AVLNode<K, V> rotateLeftRight(AVLNode<K, V> x, AVLNode<K, V> z) {
-    AVLNode<K, V> y = z.right;
+  private Node<K, V> rotateLeftRight(Node<K, V> x, Node<K, V> z) {
+    Node<K, V> y = z.right;
 
     z.right = y.left;
 
@@ -170,8 +169,8 @@ public final class AVLTree<K, V> extends AbstractTree<K, V> {
     return y;
   }
 
-  private AVLNode<K, V> rotateRightLeft(AVLNode<K, V> x, AVLNode<K, V> z) {
-    AVLNode<K, V> y = z.left;
+  private Node<K, V> rotateRightLeft(Node<K, V> x, Node<K, V> z) {
+    Node<K, V> y = z.left;
 
     z.left = y.right;
 
@@ -220,8 +219,8 @@ public final class AVLTree<K, V> extends AbstractTree<K, V> {
    * @param key the key of the newly inserted node
    * @param z   the newly inserted node
    */
-  private void retracing(int type, AVLNode<K, V> node, K key) {
-    AVLNode<K, V> g, n, x = node.parent;
+  private void retracing(int type, Node<K, V> node, K key) {
+    Node<K, V> g, n, x = node.parent;
 
     for (int b; x != null; node = x, x = node.parent) {
       b = balanceFactor(x);
@@ -314,11 +313,11 @@ public final class AVLTree<K, V> extends AbstractTree<K, V> {
     checkValue(value);
     checkDuplicate(key);
 
-    count++;
+    size++;
 
-    AVLNode<K, V> z = new AVLNode<>(key, value);
-    AVLNode<K, V> y = null;
-    AVLNode<K, V> q = root;
+    Node<K, V> z = new Node<>(key, value);
+    Node<K, V> y = null;
+    Node<K, V> q = root;
 
     while (q != null) {
       y = q;
@@ -343,11 +342,11 @@ public final class AVLTree<K, V> extends AbstractTree<K, V> {
   /**
    * {@inheritDoc}
    *
-   * @param <TreeNode> {@link AVLNode}
+   * @param <TreeNode> {@link Node}
    */
   @SuppressWarnings("unchecked")
   protected <TreeNode extends Node<K, V>> TreeNode _search(TreeNode node, K key) {
-    AVLNode<K, V> _node = (AVLNode<K, V>) node;
+    Node<K, V> _node = (Node<K, V>) node;
 
     if (_node == null || key == _node.getKey())
       return (TreeNode) _node;
@@ -359,11 +358,11 @@ public final class AVLTree<K, V> extends AbstractTree<K, V> {
   /**
    * {@inheritDoc}
    *
-   * @param <TreeNode> {@link AVLNode}
+   * @param <TreeNode> {@link Node}
    */
   @SuppressWarnings("unchecked")
   protected <TreeNode extends Node<K, V>> TreeNode _minimum(TreeNode node) {
-    AVLNode<K, V> _node = (AVLNode<K, V>) node;
+    Node<K, V> _node = (Node<K, V>) node;
 
     if (_node == null)
       return null;
@@ -375,11 +374,11 @@ public final class AVLTree<K, V> extends AbstractTree<K, V> {
   /**
    * {@inheritDoc}
    *
-   * @param <TreeNode> {@link AVLNode}
+   * @param <TreeNode> {@link Node}
    */
   @SuppressWarnings("unchecked")
   public <TreeNode extends Node<K, V>> TreeNode _maximum(TreeNode node) {
-    AVLNode<K, V> _node = (AVLNode<K, V>) node;
+    Node<K, V> _node = (Node<K, V>) node;
 
     if (_node == null)
       return null;
@@ -391,12 +390,11 @@ public final class AVLTree<K, V> extends AbstractTree<K, V> {
   /**
    * {@inheritDoc}
    *
-   * @param <TreeNode> {@link AVLNode}
+   * @param <TreeNode> {@link Node}
    */
-  @SuppressWarnings("unchecked")
   protected <TreeNode extends Node<K, V>> void transplant(TreeNode x, TreeNode y) {
-    AVLNode<K, V> _x = (AVLNode<K, V>) x;
-    AVLNode<K, V> _y = (AVLNode<K, V>) y;
+    Node<K, V> _x = (Node<K, V>) x;
+    Node<K, V> _y = (Node<K, V>) y;
 
     if (_x.parent == null)
       root = _y;
@@ -430,18 +428,17 @@ public final class AVLTree<K, V> extends AbstractTree<K, V> {
    * higher level.
    * </p>
    *
-   * @param <TreeNode> {@link AVLNode}
+   * @param <TreeNode> {@link Node}
    *
    * @throws NullPointerException     {@inheritDoc}
    * @throws IllegalArgumentException {@inheritDoc}
    */
-  @SuppressWarnings("unchecked")
   public synchronized <TreeNode extends Node<K, V>> void deleteNode(TreeNode node) {
     checkNode(node);
     checkType(node);
-    count--;
+    size--;
 
-    AVLNode<K, V> y, _node = (AVLNode<K, V>) node;
+    Node<K, V> y, _node = (Node<K, V>) node;
 
     if (_node.left == null)
       transplant(_node, _node.right);
@@ -466,7 +463,7 @@ public final class AVLTree<K, V> extends AbstractTree<K, V> {
   /**
    * {@inheritDoc}
    *
-   * @param <TreeNode> {@link AVLNode}
+   * @param <TreeNode> {@link Node}
    *
    * @throws NullPointerException     {@inheritDoc}
    * @throws IllegalArgumentException {@inheritDoc}
@@ -476,7 +473,7 @@ public final class AVLTree<K, V> extends AbstractTree<K, V> {
     checkNode(node);
     checkType(node);
 
-    AVLNode<K, V> y, _node = (AVLNode<K, V>) node;
+    Node<K, V> y, _node = (Node<K, V>) node;
 
     if (_node.right != null)
       return (TreeNode) _minimum(_node.right); // Use main method
@@ -494,7 +491,7 @@ public final class AVLTree<K, V> extends AbstractTree<K, V> {
   /**
    * {@inheritDoc}
    *
-   * @param <TreeNode> {@link AVLNode}
+   * @param <TreeNode> {@link Node}
    *
    * @throws NullPointerException     {@inheritDoc}
    * @throws IllegalArgumentException {@inheritDoc}
@@ -504,7 +501,7 @@ public final class AVLTree<K, V> extends AbstractTree<K, V> {
     checkNode(node);
     checkType(node);
 
-    AVLNode<K, V> y, _node = (AVLNode<K, V>) node;
+    Node<K, V> y, _node = (Node<K, V>) node;
 
     if (_node.left != null)
       return (TreeNode) _maximum(_node.left); // Use main method
@@ -522,7 +519,7 @@ public final class AVLTree<K, V> extends AbstractTree<K, V> {
   /**
    * {@inheritDoc}
    *
-   * @param <TreeNode> {@link AVLNode}
+   * @param <TreeNode> {@link Node}
    */
   @Override
   @SuppressWarnings("unchecked")
@@ -530,7 +527,7 @@ public final class AVLTree<K, V> extends AbstractTree<K, V> {
     if (node == null)
       return;
 
-    AVLNode<K, V> _node = (AVLNode<K, V>) node;
+    Node<K, V> _node = (Node<K, V>) node;
 
     _inorderTreeWalk((TreeNode) _node.left, callback);
     callback.accept((TreeNode) _node);
@@ -540,7 +537,7 @@ public final class AVLTree<K, V> extends AbstractTree<K, V> {
   /**
    * {@inheritDoc}
    *
-   * @param <TreeNode> {@link AVLNode}
+   * @param <TreeNode> {@link Node}
    */
   @Override
   @SuppressWarnings("unchecked")
@@ -548,7 +545,7 @@ public final class AVLTree<K, V> extends AbstractTree<K, V> {
     if (node == null)
       return;
 
-    AVLNode<K, V> _node = (AVLNode<K, V>) node;
+    Node<K, V> _node = (Node<K, V>) node;
 
     callback.accept((TreeNode) _node);
     _preorderTreeWalk((TreeNode) _node.left, callback);
@@ -558,7 +555,7 @@ public final class AVLTree<K, V> extends AbstractTree<K, V> {
   /**
    * {@inheritDoc}
    *
-   * @param <TreeNode> {@link AVLNode}
+   * @param <TreeNode> {@link Node}
    */
   @Override
   @SuppressWarnings("unchecked")
@@ -566,7 +563,7 @@ public final class AVLTree<K, V> extends AbstractTree<K, V> {
     if (node == null)
       return;
 
-    AVLNode<K, V> _node = (AVLNode<K, V>) node;
+    Node<K, V> _node = (Node<K, V>) node;
 
     _postorderTreeWalk((TreeNode) _node.left, callback);
     _postorderTreeWalk((TreeNode) _node.right, callback);

@@ -22,8 +22,8 @@ import data_structures.trees.AVLTree;
 public class AVLTree_Test {
   AVLTree<Integer, String> tree;
   AVLTree<String, String> tree2;
-  AVLTree.AVLNode<Integer, String> node;
-  AVLTree.AVLNode<String, String> node2;
+  AVLTree.Node<Integer, String> node;
+  AVLTree.Node<String, String> node2;
 
   @Test
   void is_instantiated() {
@@ -109,7 +109,7 @@ public class AVLTree_Test {
 
     @Test
     void entries_is_empty() {
-      Iterator<AVLTree.AVLNode<Integer, String>> entries = tree.entriesIterator();
+      Iterator<AVLTree.Node<Integer, String>> entries = tree.entriesIterator();
       assertFalse(entries.hasNext());
       assertThrows(NoSuchElementException.class, () -> entries.next());
       assertThrows(IllegalStateException.class, () -> entries.remove());
@@ -140,6 +140,13 @@ public class AVLTree_Test {
         () -> assertEquals("four", tree.get(4)),
         () -> assertEquals("five", tree.get(5))
       );
+    }
+
+    @Test
+    void clear() {
+      tree.clear();
+      assertEquals(0, tree.size());
+      assertTrue(tree.isEmpty());
     }
 
     @Test
@@ -221,7 +228,7 @@ public class AVLTree_Test {
 
     @Test
     void entries() {
-      Iterator<AVLTree.AVLNode<Integer, String>> entries = tree.entriesIterator();
+      Iterator<AVLTree.Node<Integer, String>> entries = tree.entriesIterator();
       assertTrue(entries.hasNext());
       assertEquals("one", entries.next().getValue());
       assertEquals("two", entries.next().getValue());

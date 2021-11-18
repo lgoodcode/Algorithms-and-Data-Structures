@@ -2,7 +2,7 @@ package data_structures.linkedLists;
 
 import java.util.function.BiFunction;
 
-public class SortedLinkedList<T> extends LinkedList<T> {
+public class SortedLinkedList<T extends Comparable<T>> extends LinkedList<T> {
   @java.io.Serial
   private static final long serialVersionUID = 199208284839394803L;
 
@@ -10,15 +10,15 @@ public class SortedLinkedList<T> extends LinkedList<T> {
    * The function used to compare two keys and returns a boolean value indicating
    * whether the first argument is less than the second argument.
    */
-  private BiFunction<T, T, Boolean> compareFn;
+  private BiFunction<T, T, Boolean> compare;
 
   /**
    * Empty constructor besides the call to super() because there is no
    * initialization and extends the {@link LinkedList}.
    */
-  public SortedLinkedList(BiFunction<T, T, Boolean> compareFn) {
+  public SortedLinkedList(BiFunction<T, T, Boolean> compare) {
     super();
-    this.compareFn = compareFn;
+    this.compare = compare;
   }
 
   /**
@@ -42,7 +42,7 @@ public class SortedLinkedList<T> extends LinkedList<T> {
   private boolean isLessThan(Node<T> x, Node<T> y) {
     checkNode(x);
     checkNode(y);
-    return compareFn.apply(x.item, y.item);
+    return compare.apply(x.item, y.item);
   }
 
   /**

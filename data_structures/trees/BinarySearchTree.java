@@ -46,6 +46,15 @@ public final class BinarySearchTree<K, V> extends AbstractTree<K, V> {
   }
 
   /**
+   * {@inheritDoc}
+   */
+  public final void clear() {
+    root = null;
+    size = 0;
+    modCount++;
+  }
+
+  /**
    * Insert O(h)
    *
    * Begins at the root and traces a simple path downward looking for a
@@ -100,7 +109,7 @@ public final class BinarySearchTree<K, V> extends AbstractTree<K, V> {
     else
       y.right = z;
 
-    count++;
+    size++;
   }
 
   /**
@@ -274,7 +283,7 @@ public final class BinarySearchTree<K, V> extends AbstractTree<K, V> {
       y.left.parent = y;
     }
 
-    count--;
+    size--;
   }
 
   /**

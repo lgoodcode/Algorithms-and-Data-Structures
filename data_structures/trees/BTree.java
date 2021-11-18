@@ -89,31 +89,31 @@ import data_structures.queues.Queue;
  * </p>
  */
 public final class BTree<K, V> {
-  public static final class BTreeNode<K, V> {
+  public static class BTreeNode<K, V> {
     /**
      * The child {@code BTreeNodes}.
      */
-    private BTreeNode<K, V>[] children;
+    BTreeNode<K, V>[] children;
 
     /**
      * The number of keys currently stored under this node.
      */
-    private int count;
+    int count;
 
     /**
      * Whether this node is a leaf or internal node.
      */
-    private boolean leaf;
+    boolean leaf;
 
     /**
      * The actual keys
      */
-    private K[] keys;
+    K[] keys;
 
     /**
      * The values
      */
-    private V[] values;
+    V[] values;
 
     /**
      * Constructs an empty {@code BTreeNode} with the specified {@code t},
@@ -126,7 +126,7 @@ public final class BTree<K, V> {
      *                                  {@code 2}
      */
     @SuppressWarnings("unchecked")
-    public BTreeNode(int t) {
+    BTreeNode(int t) {
       if (t < 1)
         throw new IllegalArgumentException("Minimum degree must be >= 2");
 
@@ -224,7 +224,7 @@ public final class BTree<K, V> {
   /**
    * Counter tracking the number of entries in the tree.
    */
-  private int count;
+  private int size;
 
   /**
    * The number of times this BTree has been structurally modified. Structural
@@ -365,7 +365,7 @@ public final class BTree<K, V> {
    * @return the number of nodes
    */
   public int size() {
-    return count;
+    return size;
   }
 
   /**
@@ -374,7 +374,7 @@ public final class BTree<K, V> {
    * @return whether the tree is empty
    */
   public boolean isEmpty() {
-    return count == 0;
+    return size == 0;
   }
 
   /**
@@ -384,6 +384,12 @@ public final class BTree<K, V> {
    */
   public BTreeNode<K, V> getRoot() {
     return root;
+  }
+
+  public void clear() {
+    root = new BTreeNode<K, V>(t);
+    size = 0;
+    modCount++;
   }
 
   /**
@@ -547,7 +553,7 @@ public final class BTree<K, V> {
     else
       insertNonfull(r, key, value);
 
-    count++;
+    size++;
     modCount++;
   }
 
@@ -1103,7 +1109,7 @@ public final class BTree<K, V> {
           node.count--;
           node.shiftKeys(i, node.count);
           node.removeKeys(node.count);
-          count--;
+          size--;
           modCount++;
           return;
         }
@@ -1516,7 +1522,7 @@ public final class BTree<K, V> {
     private Itr(int type, boolean iterator) {
       this.iterator = iterator;
       this.type = type;
-      nodes = new Queue<>(BTree.this.count);
+      nodes = new Queue<>(BTree.this.size);
 
       walk((BTreeNode<K, V> node) -> nodes.enqueue(node));
     }

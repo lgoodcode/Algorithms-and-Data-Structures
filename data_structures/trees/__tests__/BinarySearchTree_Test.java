@@ -143,6 +143,13 @@ public class BinarySearchTree_Test {
     }
 
     @Test
+    void clear() {
+      tree.clear();
+      assertEquals(0, tree.size());
+      assertTrue(tree.isEmpty());
+    }
+
+    @Test
     void search() {
       node = tree.search(4);
       assertEquals(4, node.getKey());

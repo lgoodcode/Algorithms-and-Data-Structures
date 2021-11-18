@@ -143,6 +143,13 @@ public class RedBlackTree_Test {
     }
 
     @Test
+    void clear() {
+      tree.clear();
+      assertEquals(0, tree.size());
+      assertTrue(tree.isEmpty());
+    }
+
+    @Test
     void search() {
       node = tree.search(4);
 

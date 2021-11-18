@@ -167,6 +167,15 @@ public final class RedBlackTree<K, V> extends AbstractTree<K, V> {
     return root;
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  public final void clear() {
+    root = null;
+    size = 0;
+    modCount++;
+  }
+
   private void leftRotate(RBNode<K, V> x) {
     RBNode<K, V> y = x.right;
 
@@ -238,7 +247,7 @@ public final class RedBlackTree<K, V> extends AbstractTree<K, V> {
     checkValue(value);
     checkDuplicate(key);
 
-    count++;
+    size++;
 
     RBNode<K, V> x = root;
     RBNode<K, V> y = NIL;
@@ -496,7 +505,7 @@ public final class RedBlackTree<K, V> extends AbstractTree<K, V> {
   public synchronized <TreeNode extends Node<K, V>> void deleteNode(TreeNode node) {
     checkNode(node);
     checkType(node);
-    count--;
+    size--;
 
     RBNode<K, V> x, y = (RBNode<K, V>) node, _node = y;
     int y_color = y.color;

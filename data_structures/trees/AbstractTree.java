@@ -62,7 +62,7 @@ public abstract class AbstractTree<K, V> {
   /**
    * Counter tracking the number of entries in the tree.
    */
-  protected int count;
+  protected int size;
 
   /**
    * The number of times this LinkedList has been structurally modified Structural
@@ -87,7 +87,7 @@ public abstract class AbstractTree<K, V> {
    */
   protected AbstractTree(BiFunction<K, K, Boolean> compare) {
     this.compare = compare;
-    count = 0;
+    size = 0;
   }
 
   /**
@@ -192,7 +192,7 @@ public abstract class AbstractTree<K, V> {
    * @return the number of nodes
    */
   public final int size() {
-    return count;
+    return size;
   }
 
   /**
@@ -201,8 +201,14 @@ public abstract class AbstractTree<K, V> {
    * @return whether the tree is empty
    */
   public final boolean isEmpty() {
-    return count == 0;
+    return size == 0;
   }
+
+  /**
+   * Removes all the entries in the tree by removing the root reference, which has
+   * all the tree nodes under it.
+   */
+  public abstract void clear();
 
   /**
    * Retrieves the root {@code TreeNode}.
@@ -738,7 +744,7 @@ public abstract class AbstractTree<K, V> {
      * @param type the type of object to enumerate
      */
     Itr(int type) {
-      this.size = AbstractTree.this.count;
+      this.size = AbstractTree.this.size;
       this.type = type;
       entries = new Queue<>(size);
 
