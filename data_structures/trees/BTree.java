@@ -1356,8 +1356,12 @@ public final class BTree<K, V> {
    */
   public void walk(BTreeNode<K, V> node, Consumer<BTreeNode<K, V>> callback) {
     if (node != null) {
-      for (int i=0; i < node.children.length; i++)
-        walk(node.children[i], callback);
+      if (!node.leaf) {
+        for (int i=0; i < node.children.length; i++) {
+          if (node.children[i] != null)
+            walk(node.children[i], callback);
+        }
+      }
       callback.accept(node);
     }
   }
@@ -1627,7 +1631,7 @@ public final class BTree<K, V> {
      */
     @Override
     public void remove() {
-      if (lastNode == null || lastKey == null)
+      if (lastKey == null)
         throw new IllegalStateException("Tree Iterator. No last item.");
       if (modCount != expectedModCount)
         throw new ConcurrentModificationException();
@@ -1636,8 +1640,10 @@ public final class BTree<K, V> {
       synchronized (BTree.this) {
         BTree.this.delete(lastNode, lastKey);
         expectedModCount = modCount;
-        lastNode = null;
         lastKey = null;
+
+        // Key removed from node, decrement index to continue to next element
+        index--;
       }
     }
   }

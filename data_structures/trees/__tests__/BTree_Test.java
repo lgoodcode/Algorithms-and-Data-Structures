@@ -267,9 +267,9 @@ public class BTree_Test {
       assertDoesNotThrow(() -> keys.remove());
       assertFalse(tree.hasKey(3));
       assertThrows(IllegalStateException.class, () -> keys.remove());
-      assertEquals(2, keys.next());
       assertEquals(4, keys.next());
       assertEquals(5, keys.next());
+      assertEquals(2, keys.next());
       assertFalse(keys.hasNext());
       assertThrows(NoSuchElementException.class, () -> keys.next());
       assertEquals(4, tree.size());
