@@ -33,7 +33,9 @@ import static java.util.Arrays.fill;
    * <i>l ij^(m) = for 1 <= k <= n min {l ik^(m-1) + w kj}</i>
    */
 
-
+/**
+ * TODO: test the results with matrices from book
+ */
 public final class MatrixMultiplication {
   private static void checkIndex(int[] matrices, int index) {
     if (index < 0)

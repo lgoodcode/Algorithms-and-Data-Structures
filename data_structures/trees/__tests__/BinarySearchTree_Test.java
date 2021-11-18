@@ -6,6 +6,7 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -202,6 +203,7 @@ public class BinarySearchTree_Test {
     void keys() {
       Iterator<Integer> keys = tree.keysIterator();
       assertTrue(keys.hasNext());
+      assertThrows(IllegalStateException.class, () -> keys.remove());
       assertEquals(1, keys.next());
       assertEquals(2, keys.next());
       assertEquals(3, keys.next());
@@ -215,6 +217,7 @@ public class BinarySearchTree_Test {
     void values() {
       Iterator<String> values = tree.valuesIterator();
       assertTrue(values.hasNext());
+      assertThrows(IllegalStateException.class, () -> values.remove());
       assertEquals("one", values.next());
       assertEquals("two", values.next());
       assertEquals("three", values.next());
@@ -228,6 +231,7 @@ public class BinarySearchTree_Test {
     void entries() {
       Iterator<BinarySearchTree.Node<Integer, String>> entries = tree.entriesIterator();
       assertTrue(entries.hasNext());
+      assertThrows(IllegalStateException.class, () -> entries.remove());
       assertEquals("one", entries.next().getValue());
       assertEquals("two", entries.next().getValue());
       assertEquals("three", entries.next().getValue());
@@ -238,11 +242,21 @@ public class BinarySearchTree_Test {
     }
 
     @Test
-    void enumeration_remove() {
+    void iterator_remove() {
       Iterator<Integer> keys = tree.keysIterator();
-      keys.next();
-      keys.remove();
-      assertFalse(tree.hasKey(1));
+      assertTrue(keys.hasNext());
+      assertThrows(IllegalStateException.class, () -> keys.remove());
+      assertEquals(1, keys.next());
+      assertEquals(2, keys.next());
+      assertDoesNotThrow(() -> keys.remove());
+      assertFalse(tree.hasKey(2));
+      assertThrows(IllegalStateException.class, () -> keys.remove());
+      assertEquals(3, keys.next());
+      assertEquals(4, keys.next());
+      assertEquals(5, keys.next());
+      assertFalse(keys.hasNext());
+      assertThrows(NoSuchElementException.class, () -> keys.next());
+      assertEquals(4, tree.size());
     }
 
     @Test

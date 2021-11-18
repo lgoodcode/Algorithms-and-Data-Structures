@@ -22,8 +22,7 @@ import java.util.function.Consumer;
  * @param <T> the class of the objects in the iterable
  */
 public final class EmptyIterator<T> implements Iterator<T>, Iterable<T> {
-  // TODO: need to disable the warning here for unused variable
-  // static final EmptyIterable<?> EMPTY_ITERABLE = new EmptyIterable<>();
+  static final EmptyIterator<?> EMPTY_ITERATOR = new EmptyIterator<>();
 
   public boolean hasNext() {
     return false;

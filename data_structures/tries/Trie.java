@@ -1,6 +1,6 @@
 package data_structures.tries;
 
-public class Trie<T> extends AbstractTrie<T> {
+public final class Trie<T> extends AbstractTrie<T> {
   public static final class Node<T> extends AbstractTrie.Node<T> {
     /**
      * Initializes an empty {@code TrieNode} with the specified key. The key is used
@@ -67,7 +67,7 @@ public class Trie<T> extends AbstractTrie<T> {
     Node<T> child, newChild, node = root;
     char currChar;
 
-    count++;
+    size++;
 
     while (currentWord.length() > 0) {
       currChar = currentWord.charAt(0);
@@ -125,7 +125,7 @@ public class Trie<T> extends AbstractTrie<T> {
     if (node == null)
       return;
 
-    count--;
+    size--;
     node.value = null;
 
     for (parent = (Node<T>) node.parent; parent != null; node = parent, parent = (Node<T>) node.parent) {

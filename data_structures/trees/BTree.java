@@ -1,7 +1,6 @@
 package data_structures.trees;
 
 import java.util.Iterator;
-import java.util.Enumeration;
 import java.util.function.Consumer;
 import java.util.function.BiFunction;
 import java.util.NoSuchElementException;
@@ -1439,7 +1438,7 @@ public final class BTree<K, V> {
   private <T> Iterable<T> getIterable(int type) {
     if (isEmpty())
       return new EmptyIterator<>();
-    return new Itr<>(type, true);
+    return new Itr<>(type);
   }
 
   /**
@@ -1452,7 +1451,7 @@ public final class BTree<K, V> {
   private <T> Iterator<T> getIterator(int type) {
     if (isEmpty())
       return new EmptyIterator<>();
-    return new Itr<>(type, true);
+    return new Itr<>(type);
   }
 
   public Iterable<K> keys() {
@@ -1480,7 +1479,7 @@ public final class BTree<K, V> {
   }
 
   /**
-   * A tree enumerator class. This class implements the Enumeration, Iterator, and
+   * A tree Iterator class. This class implements the Enumeration, Iterator, and
    * Iterable interfaces, but individual instances can be created with the
    * Iterator methods disabled. This is necessary to avoid unintentionally
    * increasing the capabilities granted a user by passing an Enumeration.
@@ -1493,34 +1492,25 @@ public final class BTree<K, V> {
    *
    * @param <T> the type of the object that is being enumerated
    */
-  private class Itr<T> implements Enumeration<T>, Iterator<T>, Iterable<T> {
-    private Queue<BTreeNode<K, V>> nodes;
-    private BTreeNode<K, V> lastNode;
-    private K key, lastKey;
-    private int type, index;
-
-    /**
-     * Indicates whether this Enumerator is serving as an Iterator or an
-     * Enumeration.
-     */
-    private boolean iterator;
+  private class Itr<T> implements Iterator<T>, Iterable<T> {
+    Queue<BTreeNode<K, V>> nodes;
+    BTreeNode<K, V> lastNode;
+    K key, lastKey;
+    int type, index;
 
     /**
      * The expected value of modCount when instantiating the iterator. If this
      * expectation is violated, the iterator has detected concurrent modification.
      */
-    private int expectedModCount = BTree.this.modCount;
+    int expectedModCount = BTree.this.modCount;
 
     /**
-     * Constructs the enumerator that will be used to enumerate the values in the
+     * Constructs the Iterator that will be used to enumerate the values in the
      * tree.
      *
-     * @param type     the type of object to enumerate
-     * @param iterator whether this will serve as an {@code Enumeration} or
-     *                 {@code Iterator}
+     * @param type the type of object to enumerate
      */
-    private Itr(int type, boolean iterator) {
-      this.iterator = iterator;
+    private Itr(int type) {
       this.type = type;
       nodes = new Queue<>(BTree.this.size);
 
@@ -1529,7 +1519,7 @@ public final class BTree<K, V> {
 
     // Iterable method
     public Iterator<T> iterator() {
-      return iterator ? this : this.asIterator();
+      return this;
     }
 
     /**
@@ -1537,7 +1527,7 @@ public final class BTree<K, V> {
      *
      * @return if this object has one or more items to provide or not
      */
-    public boolean hasMoreElements() {
+    public boolean hasNext() {
       if (type == ENTRIES)
         return !nodes.isEmpty();
 
@@ -1567,13 +1557,18 @@ public final class BTree<K, V> {
 
     /**
      * Returns the next element if it has one to provide.
+     * 
+     * TODO: need to fix next item once a removal occurs
      *
      * @return the next element
-     *
-     * @throws NoSuchElementException if no more elements exist
+     * @throws ConcurrentModificationException if the list was modified during
+     *                                         computation.
+     * @throws NoSuchElementException          if no more elements exist
      */
     @SuppressWarnings("unchecked")
-    public T nextElement() {
+    public T next() {
+      if (BTree.this.modCount != expectedModCount)
+        throw new ConcurrentModificationException();
       if (type == ENTRIES && !nodes.isEmpty())
         return (T) (lastNode = nodes.dequeue());
 
@@ -1605,27 +1600,7 @@ public final class BTree<K, V> {
         return type == KEYS ? (T) k : (T) l.values[i];
       }
 
-      throw new NoSuchElementException("BTree Enumerator");
-    }
-
-    /**
-     * The Iterator method; the same as Enumeration.
-     */
-    public boolean hasNext() {
-      return hasMoreElements();
-    }
-
-    /**
-     * Iterator method. Returns the next element in the iteration.
-     *
-     * @return the next element in the iteration
-     * @throws ConcurrentModificationException if the list was modified during
-     *                                         computation.
-     */
-    public T next() {
-      if (BTree.this.modCount != expectedModCount)
-        throw new ConcurrentModificationException();
-      return nextElement();
+      throw new NoSuchElementException("BTree Iterator");
     }
 
     /**
@@ -1643,10 +1618,6 @@ public final class BTree<K, V> {
      * The behavior of an iterator is unspecified if this method is called
      * after a call to the {@link #forEachRemaining forEachRemaining} method.
      *
-     * @throws UnsupportedOperationException if the {@code remove} operation is
-     *         not supported by this iterator, e.g., if the object is an
-     *         {@code Enumeration}.
-     *
      * @throws IllegalStateException if the {@code next} method has not yet been
      *         called, or the {@code remove} method has already been called after
      *         the last call to the {@code next} method.
@@ -1656,17 +1627,15 @@ public final class BTree<K, V> {
      */
     @Override
     public void remove() {
-      if (!iterator)
-        throw new UnsupportedOperationException();
       if (lastNode == null || lastKey == null)
-        throw new IllegalStateException("Tree Enumerator. No last item.");
+        throw new IllegalStateException("Tree Iterator. No last item.");
       if (modCount != expectedModCount)
         throw new ConcurrentModificationException();
 
       // Synchronized block to lock the tree object while removing entry
       synchronized (BTree.this) {
         BTree.this.delete(lastNode, lastKey);
-        expectedModCount++;
+        expectedModCount = modCount;
         lastNode = null;
         lastKey = null;
       }

@@ -1,6 +1,5 @@
 package data_structures.linkedLists;
 
-import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.ConcurrentModificationException;
@@ -452,54 +451,40 @@ public abstract class AbstractLinkedList<T> {
       return "[]";
 
     StringBuilder sb = new StringBuilder("[");
+    Node<T> node = head;
+    int i = 0, len = size - 1;
 
-    for (T item : iterable())
-      sb.append(item.toString()+ ", ");
+    while (node != null && i != len) {
+      sb.append(node.item.toString() + ", ");
+      node = node.next;
+      i++;
+    }
 
-    sb.delete(sb.length() - 2, sb.length());
-    return sb.toString() + "]";
+    sb.append(node.item.toString() + "]");
+
+    return sb.toString();
   }
 
   /**
-   * Returns an {@link Iterable} of the specified type.
+   * Returns an {@link Iterable} of the elements in the linkedlist
    *
-   * @param type the type of item to iterate (keys, values, or entries)
    * @return the {@code Iterable}
    */
-  protected final Iterable<T> getIterable() {
+  public final Iterable<T> iterable() {
     if (isEmpty())
       return new EmptyIterator<>();
     return new Itr();
   }
 
   /**
-   * Returns an {@link Iterator} of the specified type.
+   * Returns an {@link Iterator} of the elements in the linkedlist
    *
-   * @param type the type of item to iterate (keys, values, or entries)
    * @return the {@code Iterator}
    */
-  protected final Iterator<T> getIterator() {
+  public final Iterator<T> iterator() {
     if (isEmpty())
       return new EmptyIterator<>();
     return new Itr();
-  }
-
-  /**
-   * Returns an {@link Iterable} of the elements in the linkedlist.
-   *
-   * @return linkedlist iterable
-   */
-  public final Iterable<T> iterable() {
-    return getIterable();
-  }
-
-  /**
-   * Returns an {@link Iterator} of the elements in the linkedlist.
-   *
-   * @return linkedlist iterator
-   */
-  public final Iterator<T> iterator() {
-    return getIterator();
   }
 
   /**
@@ -518,7 +503,7 @@ public abstract class AbstractLinkedList<T> {
    * modified outside of the iterator.
    * </p>
    */
-  private class Itr implements Enumeration<T>, Iterator<T>, Iterable<T> {
+  private class Itr implements Iterator<T>, Iterable<T> {
     /**
      * The current {@link Node} of the iterator.
      */
@@ -541,17 +526,11 @@ public abstract class AbstractLinkedList<T> {
      */
     int expectedModCount = modCount;
 
-    // Iterable method
     public Iterator<T> iterator() {
       return this;
     }
 
-    /**
-     * Checks whether there are more elments to return.
-     *
-     * @return if this object has one or more items to provide or not
-     */
-    public boolean hasMoreElements() {
+    public boolean hasNext() {
       return entry != null && cursor != size;
     }
 
@@ -559,37 +538,20 @@ public abstract class AbstractLinkedList<T> {
      * Returns the next element if it has one to provide.
      *
      * @return the next element
-     *
-     * @throws NoSuchElementException if no more elements exist
+     * @throws ConcurrentModificationException if the list was modified during
+     *                                         computation.
+     * @throws NoSuchElementException          if no more elements exist
      */
-    public T nextElement() {
-      if (!hasMoreElements())
+    public T next() {
+      if (modCount != expectedModCount)
+        throw new ConcurrentModificationException();
+      if (!hasNext())
         throw new NoSuchElementException("LinkedList Iterator");
       cursor++;
       T item = entry.item;
       last = entry;
       entry = entry.next;
       return item;
-    }
-
-    /**
-     * The Iterator method; the same as Enumeration.
-     */
-    public boolean hasNext() {
-      return hasMoreElements();
-    }
-
-    /**
-     * Iterator method. Returns the next element in the iteration.
-     *
-     * @return the next element in the iteration
-     * @throws ConcurrentModificationException if the list was modified during
-     *                                         computation.
-     */
-    public T next() {
-      if (modCount != expectedModCount)
-        throw new ConcurrentModificationException();
-      return nextElement();
     }
 
     /**

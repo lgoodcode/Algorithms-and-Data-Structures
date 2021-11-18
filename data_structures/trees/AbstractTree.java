@@ -65,10 +65,10 @@ public abstract class AbstractTree<K, V> {
   protected int size;
 
   /**
-   * The number of times this LinkedList has been structurally modified Structural
+   * The number of times this Tree has been structurally modified Structural
    * modifications are those that change the number of entries in the list or
-   * otherwise modify its internal structure (e.g., insert, delete).  This field
-   * is used to make iterators on Collection-views of the LinkedList fail-fast.
+   * otherwise modify its internal structure (e.g., insert, delete). This field is
+   * used to make iterators on Collection-views of the Tree fail-fast.
    *
    * @see ConcurrentModificationException
    */
@@ -751,53 +751,30 @@ public abstract class AbstractTree<K, V> {
       inorderTreeWalk((Node<K, V> node) -> entries.enqueue(node));
     }
 
-    // Iterable method
     public Iterator<T> iterator() {
       return this;
     }
 
-    /**
-     * Checks whether there are more elments to return.
-     *
-     * @return if this object has one or more items to provide or not
-     */
-    public boolean hasMoreElements() {
+    public boolean hasNext() {
       return !entries.isEmpty();
     }
 
     /**
-     * Returns the next element if it has one to provide.
-     *
-     * @return the next element
-     *
-     * @throws NoSuchElementException if no more elements exist
-     */
-    @SuppressWarnings("unchecked")
-    public T nextElement() {
-      if (!hasNext())
-        throw new NoSuchElementException("Tree enumerator. No items in queue.");
-      last = entries.dequeue();
-      return type == KEYS ? (T) last.getKey() : (type == VALUES ? (T) last.getValue() : (T) last);
-    }
-
-    /**
-     * The Iterator method; the same as Enumeration.
-     */
-    public boolean hasNext() {
-      return hasMoreElements();
-    }
-
-    /**
-     * Iterator method. Returns the next element in the iteration.
+     * Returns the next element in the iteration.
      *
      * @return the next element in the iteration
      * @throws ConcurrentModificationException if the list was modified during
      *                                         computation.
+     * @throws NoSuchElementException          if no more elements exist
      */
+    @SuppressWarnings("unchecked")
     public T next() {
       if (AbstractTree.this.modCount != expectedModCount)
         throw new ConcurrentModificationException();
-      return nextElement();
+      if (!hasNext())
+        throw new NoSuchElementException("Tree enumerator. No items in queue.");
+      last = entries.dequeue();
+      return type == KEYS ? (T) last.getKey() : (type == VALUES ? (T) last.getValue() : (T) last);
     }
 
     /**
@@ -833,7 +810,7 @@ public abstract class AbstractTree<K, V> {
       synchronized (AbstractTree.this) {
         // Pass the current index to remove the last item
         AbstractTree.this.deleteNode(last);
-        expectedModCount++;
+        expectedModCount = modCount;
         last = null;
       }
     }

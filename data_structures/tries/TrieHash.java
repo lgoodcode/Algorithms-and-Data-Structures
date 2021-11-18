@@ -129,7 +129,7 @@ public final class TrieHash<T> extends AbstractTrie<T> {
     HashNode<T> child, newChild, node = root;
     char currChar;
 
-    count++;
+    size++;
 
     while (currentWord.length() > 0) {
       currChar = currentWord.charAt(0);
@@ -186,7 +186,7 @@ public final class TrieHash<T> extends AbstractTrie<T> {
     if (node == null)
       return;
 
-    count--;
+    size--;
     node.value = null;
 
     for (parent = node.parent; parent != null; node = parent, parent = node.parent) {

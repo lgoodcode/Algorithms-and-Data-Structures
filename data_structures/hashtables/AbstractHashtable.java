@@ -225,7 +225,7 @@ public abstract class AbstractHashtable<K, V> {
   }
 
   /**
-   * A hashtable enumerator class. This class implements the Enumeration,
+   * A hashtable Iterator class. This class implements the Enumeration,
    * Iterator, and Iterable interfaces, but individual instances can be created
    * with the Iterator methods disabled. This is necessary to avoid
    * unintentionally increasing the capabilities granted a user by passing an
@@ -239,12 +239,6 @@ public abstract class AbstractHashtable<K, V> {
     int type, size, index = 0;
 
     /**
-     * Indicates whether this Enumerator is serving as an Iterator or an
-     * Enumeration.
-     */
-    boolean iterator;
-
-    /**
      * The expected value of modCount when instantiating the iterator. If this
      * expectation is violated, the iterator has detected concurrent modification.
      */
@@ -255,12 +249,7 @@ public abstract class AbstractHashtable<K, V> {
       return this;
     }
 
-    /**
-     * Checks whether there are more elments to return.
-     *
-     * @return if this object has one or more items to provide or not
-     */
-    public final boolean hasMoreElements() {
+    public final boolean hasNext() {
       Entry<?, ?>[] t = entries;
       Entry<?, ?> e = entry;
       int i = index, len = size;
@@ -279,11 +268,15 @@ public abstract class AbstractHashtable<K, V> {
      * Returns the next element if it has one to provide.
      *
      * @return the next element
-     *
-     * @throws NoSuchElementException if no more elements exist
+     * @throws ConcurrentModificationException if the hashtable was modified during
+     *                                         computation
+     * @throws NoSuchElementException          if no more elements exist
      */
     @SuppressWarnings("unchecked")
-    public final T nextElement() {
+    public final T next() {
+      if (AbstractHashtable.this.modCount != expectedModCount)
+        throw new ConcurrentModificationException();
+
       Entry<?, ?>[] t = entries;
       Entry<?, ?> e = entry;
       int i = index, len = entries.length;
@@ -302,27 +295,7 @@ public abstract class AbstractHashtable<K, V> {
         return type == KEYS ? (T) e.getKey() : (type == VALUES ? (T) e.getValue() : (T) e);
       }
 
-      throw new NoSuchElementException("Hashtable Enumerator");
-    }
-
-    /**
-     * The Iterator method; the same as Enumeration.
-     */
-    public final boolean hasNext() {
-      return hasMoreElements();
-    }
-
-    /**
-     * Iterator method. Returns the next element in the iteration.
-     *
-     * @return the next element in the iteration
-     * @throws ConcurrentModificationException if the fullRehash function modified
-     *         this map during computation.
-     */
-    public final T next() {
-      if (AbstractHashtable.this.modCount != expectedModCount)
-        throw new ConcurrentModificationException();
-      return nextElement();
+      throw new NoSuchElementException("Hashtable Iterator");
     }
 
     /**
@@ -340,10 +313,6 @@ public abstract class AbstractHashtable<K, V> {
      * The behavior of an iterator is unspecified if this method is called
      * after a call to the {@link #forEachRemaining forEachRemaining} method.
      *
-     * @throws UnsupportedOperationException if the {@code remove} operation is
-     *         not supported by this iterator, e.g., if the object is an
-     *         {@code Enumeration}.
-     *
      * @throws IllegalStateException if the {@code next} method has not yet been
      *         called, or the {@code remove} method has already been called after
      *         the last call to the {@code next} method.
@@ -354,28 +323,23 @@ public abstract class AbstractHashtable<K, V> {
     @Override
     @SuppressWarnings("unchecked")
     public final void remove() {
-      if (!iterator)
-        throw new UnsupportedOperationException();
       if (last == null)
-        throw new IllegalStateException("Hashtable Enumerator");
+        throw new IllegalStateException("Hashtable Iterator");
       if (modCount != expectedModCount)
         throw new ConcurrentModificationException();
 
       // Synchronized block to lock the hashtable object while removing entry
       synchronized (AbstractHashtable.this) {
-        if (AbstractHashtable.this.delete((K) last.getKey())) {
-          expectedModCount++;
-          last = null;
-          return;
-        }
-        throw new ConcurrentModificationException();
+        AbstractHashtable.this.delete((K) last.getKey());
+        expectedModCount++;
+        last = null;
       }
     }
   }
 
   /**
-   * Default Enumerator used for hashtables. Sets the entries as the the hashtable
-   * and the size so it can be enmerated.
+   * Default Iterator used for hashtables. Sets the entries as the the hashtable
+   * and the size so it can be iterated.
    */
   private class Itr<T> extends AbstractIterator<T> {
     Itr(int type) {

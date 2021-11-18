@@ -7,6 +7,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -205,11 +206,24 @@ public class TrieHash_Test {
     }
 
     @Test
-    void enumeration_remove() {
-      Iterator<String> words = trie.wordsIterator();
-      words.next();
-      words.remove();
-      assertFalse(trie.hasWord("boar"));
+    void iterator_remove() {
+      Iterator<Integer> values = trie.valuesIterator();
+      assertTrue(values.hasNext());
+      assertThrows(IllegalStateException.class, () -> values.remove());
+      assertEquals(8, values.next());
+      assertEquals(7, values.next());
+      assertDoesNotThrow(() -> values.remove());
+      assertFalse(trie.hasWord("boars"));
+      assertThrows(IllegalStateException.class, () -> values.remove());
+      assertEquals(6, values.next());
+      assertEquals(5, values.next());
+      assertEquals(4, values.next());
+      assertEquals(1, values.next());
+      assertEquals(2, values.next());
+      assertEquals(3, values.next());
+      assertFalse(values.hasNext());
+      assertThrows(NoSuchElementException.class, () -> values.next());
+      assertEquals(7, trie.size());
     }
 
     @Test

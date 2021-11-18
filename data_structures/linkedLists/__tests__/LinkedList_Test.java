@@ -9,6 +9,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -94,7 +95,7 @@ public class LinkedList_Test {
     }
 
     @Test
-    void values_is_empty() {
+    void iterator_is_empty() {
       Iterator<String> values = list.iterator();
       assertFalse(values.hasNext());
       assertThrows(NoSuchElementException.class, () -> values.next());
@@ -322,9 +323,10 @@ public class LinkedList_Test {
     }
 
     @Test
-    void values() {
+    void iterator() {
       Iterator<String> values = list.iterator();
       assertTrue(values.hasNext());
+      assertThrows(IllegalStateException.class, () -> values.remove());
       assertEquals("five", values.next());
       assertEquals("four", values.next());
       assertEquals("three", values.next());
@@ -332,6 +334,22 @@ public class LinkedList_Test {
       assertEquals("one", values.next());
       assertFalse(values.hasNext());
       assertThrows(NoSuchElementException.class, () -> values.next());
+    }
+
+    @Test
+    void iterator_remove() {
+      Iterator<String> values = list.iterator();
+      assertTrue(values.hasNext());
+      assertEquals("five", values.next());
+      assertEquals("four", values.next());
+      assertDoesNotThrow(() -> values.remove());
+      assertFalse(list.contains("four"));
+      assertThrows(IllegalStateException.class, () -> values.remove());
+      assertEquals("three", values.next());
+      assertEquals("two", values.next());
+      assertEquals("one", values.next());
+      assertThrows(NoSuchElementException.class, () -> values.next());
+      assertEquals(4, list.size());
     }
 
     @Test

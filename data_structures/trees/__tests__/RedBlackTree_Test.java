@@ -6,6 +6,7 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -240,11 +241,21 @@ public class RedBlackTree_Test {
     }
 
     @Test
-    void enumeration_remove() {
+    void iterator_remove() {
       Iterator<Integer> keys = tree.keysIterator();
-      keys.next();
-      keys.remove();
-      assertFalse(tree.hasKey(1));
+      assertTrue(keys.hasNext());
+      assertThrows(IllegalStateException.class, () -> keys.remove());
+      assertEquals(1, keys.next());
+      assertEquals(2, keys.next());
+      assertDoesNotThrow(() -> keys.remove());
+      assertFalse(tree.hasKey(2));
+      assertThrows(IllegalStateException.class, () -> keys.remove());
+      assertEquals(3, keys.next());
+      assertEquals(4, keys.next());
+      assertEquals(5, keys.next());
+      assertFalse(keys.hasNext());
+      assertThrows(NoSuchElementException.class, () -> keys.next());
+      assertEquals(4, tree.size());
     }
 
     @Test

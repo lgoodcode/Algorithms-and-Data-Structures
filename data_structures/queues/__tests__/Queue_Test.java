@@ -6,6 +6,7 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -13,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import data_structures.queues.Queue;
@@ -79,6 +81,11 @@ public class Queue_Test {
     }
 
     @Test
+    void peekLast_is_null() {
+      assertNull(queue.peekLast());
+    }
+
+    @Test
     void enqueue() {
       queue.enqueue(1);
       assertEquals(1, queue.dequeue());
@@ -86,7 +93,7 @@ public class Queue_Test {
 
     @Test
     void empty_queue_string() {
-      assertEquals("{}", queue.toString());
+      assertEquals("[]", queue.toString());
     }
 
     @Test
@@ -126,8 +133,25 @@ public class Queue_Test {
     }
 
     @Test
+    void isFull() {
+      assertTrue(queue.isFull());
+    }
+
+    @Test
+    void clear() {
+      queue.clear();
+      assertTrue(queue.isEmpty());
+      assertEquals(0, queue.size());
+    }
+
+    @Test
     void peek() {
       assertEquals(1, queue.peek());
+    }
+
+    @Test
+    void peekLast() {
+      assertEquals(5, queue.peekLast());
     }
 
     @Test
@@ -179,16 +203,45 @@ public class Queue_Test {
     }
 
     @Test
+    void iterator() {
+      Iterator<Integer> values = queue.iterator();
+      assertTrue(values.hasNext());
+      assertThrows(IllegalStateException.class, () -> values.remove());
+      assertEquals(1, values.next());
+      assertEquals(2, values.next());
+      assertEquals(3, values.next());
+      assertEquals(4, values.next());
+      assertEquals(5, values.next());
+      assertFalse(values.hasNext());
+      assertThrows(NoSuchElementException.class, () -> values.next());
+    }
+
+    @Test
+    void iterator_remove() {
+      Iterator<Integer> values = queue.iterator();
+      assertTrue(values.hasNext());
+      assertEquals(1, values.next());
+      assertEquals(2, values.next());
+      assertDoesNotThrow(() -> values.remove());
+      assertFalse(queue.has(2));
+      assertThrows(IllegalStateException.class, () -> values.remove());
+      assertEquals(3, values.next());
+      assertEquals(4, values.next());
+      assertEquals(5, values.next());
+      assertThrows(NoSuchElementException.class, () -> values.next());
+      assertEquals(4, queue.size());
+    }
+
+
+    @Test
+    void toArray() {
+      Object[] arr = { 1, 2, 3, 4, 5 };
+      assertArrayEquals(arr, queue.toArray());
+    }
+
+    @Test
     void to_string() {
-      assertEquals("{"
-          + "\n\"1\""  
-          + "\n\"2\""  
-          + "\n\"3\""  
-          + "\n\"4\""  
-          + "\n\"5\""
-          + "\n}", 
-        queue.toString()
-      );
+      assertEquals("[1, 2, 3, 4, 5]", queue.toString());
     }
   
   }

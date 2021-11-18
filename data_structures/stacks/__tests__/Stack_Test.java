@@ -6,12 +6,14 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import data_structures.stacks.Stack;
@@ -20,6 +22,7 @@ import data_structures.stacks.Stack;
 public class Stack_Test {
   Stack<Integer> stack;
   Stack<String> stack2;
+  int size = 5;
   
   @Test
   void is_instantiated() {
@@ -56,7 +59,6 @@ public class Stack_Test {
 
   @Nested 
   class When_New {
-    int size = 5;
 
     @BeforeEach
     void create_stack() {
@@ -79,6 +81,11 @@ public class Stack_Test {
     }
 
     @Test
+    void is_not_full() {
+      assertFalse(stack.isFull());
+    }
+
+    @Test
     void push() {
       stack.push(1);
       assertEquals(1, stack.pop());
@@ -86,7 +93,7 @@ public class Stack_Test {
 
     @Test
     void empty_stack_string() {
-      assertEquals("{}", stack.toString());
+      assertEquals("[]", stack.toString());
     }
 
     @Test
@@ -103,11 +110,18 @@ public class Stack_Test {
       assertThrows(IllegalArgumentException.class, () -> stack2.push(key));
     }
 
+    @Test
+    void iterator_is_empty() {
+      Iterator<Integer> values = stack.iterator();
+      assertFalse(values.hasNext());
+      assertThrows(NoSuchElementException.class, () -> values.next());
+      assertThrows(IllegalStateException.class, () -> values.remove());
+    }   
+
   }
 
   @Nested
   class Multiple_pushes {
-    int size = 5;
 
     @BeforeEach
     void create_and_push() {
@@ -123,6 +137,18 @@ public class Stack_Test {
     @Test
     void not_empty() {
       assertFalse(stack.isEmpty());
+    }
+
+    @Test
+    void isFull() {
+      assertTrue(stack.isFull());
+    }
+
+    @Test
+    void clear() {
+      stack.clear();
+      assertEquals(0, stack.size());
+      assertTrue(stack.isEmpty());
     }
 
     @Test
@@ -174,16 +200,44 @@ public class Stack_Test {
     }
 
     @Test
+    void iterator() {
+      Iterator<Integer> values = stack.iterator();
+      assertTrue(values.hasNext());
+      assertThrows(IllegalStateException.class, () -> values.remove());
+      assertEquals(5, values.next());
+      assertEquals(4, values.next());
+      assertEquals(3, values.next());
+      assertEquals(2, values.next());
+      assertEquals(1, values.next());
+      assertFalse(values.hasNext());
+      assertThrows(NoSuchElementException.class, () -> values.next());
+    }
+
+    @Test
+    void iterator_remove() {
+      Iterator<Integer> values = stack.iterator();
+      assertTrue(values.hasNext());
+      assertEquals(5, values.next());
+      assertEquals(4, values.next());
+      assertDoesNotThrow(() -> values.remove());
+      assertFalse(stack.has(4));
+      assertThrows(IllegalStateException.class, () -> values.remove());
+      assertEquals(3, values.next());
+      assertEquals(2, values.next());
+      assertEquals(1, values.next());
+      assertThrows(NoSuchElementException.class, () -> values.next());
+      assertEquals(4, stack.size());
+    }
+
+    @Test
+    void toArray() {
+      Object[] arr = { 5, 4, 3, 2, 1 };
+      assertArrayEquals(arr, stack.toArray());
+    }
+
+    @Test
     void to_string() {
-      assertEquals("{"
-          + "\n\"5\""
-          + "\n\"4\""  
-          + "\n\"3\""  
-          + "\n\"2\""  
-          + "\n\"1\""  
-          + "\n}", 
-        stack.toString()
-      );
+      assertEquals("[5, 4, 3, 2, 1]", stack.toString());
     }
   
   }

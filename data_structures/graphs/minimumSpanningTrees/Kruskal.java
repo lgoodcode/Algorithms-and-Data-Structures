@@ -62,6 +62,8 @@ public interface Kruskal {
 
   /**
    * Runs the Kruskal algorithm on the given graph.
+   * 
+   * TODO: verify the results from the book, as well as Prim's
    *
    * <p>
    * {@code A} is the set that will hold the edges of the MST. {@code S} is the

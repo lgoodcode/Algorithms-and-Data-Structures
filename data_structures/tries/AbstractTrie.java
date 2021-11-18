@@ -100,7 +100,7 @@ public abstract class AbstractTrie<T> {
 
     /**
      * Returns the key of the node
-     * 
+     *
      * @return the character key of the node
      */
     public final char getKey() {
@@ -109,7 +109,7 @@ public abstract class AbstractTrie<T> {
 
     /**
      * Returns the value of the node or {@code null} if none (not a word).
-     * 
+     *
      * @return the value of the node or {@code null} if none
      */
     public final T getValue() {
@@ -167,7 +167,7 @@ public abstract class AbstractTrie<T> {
   /**
    * Counter tracking the number of entries in the {@code Trie}.
    */
-  protected int count;
+  protected int size;
 
   /**
    * The number of times this Trie has been structurally modified Structural
@@ -213,10 +213,10 @@ public abstract class AbstractTrie<T> {
   /**
    * Checks the specified {@code TrieNode} that it isn't {@code null} and is of
    * the class that it belongs to.
-   * 
-   * @param <TrieNode> {@link Node} or a subclass of 
+   *
+   * @param <TrieNode> {@link Node} or a subclass of
    * @param node the node to verify
-   * 
+   *
    * @throws NullPointerException if the node is {@code null}
    * @throws IllegalArgumentException if the node is not of the proper class
    */
@@ -243,7 +243,7 @@ public abstract class AbstractTrie<T> {
    * @return the number of nodes
    */
   public final int size() {
-    return count;
+    return size;
   }
 
   /**
@@ -252,7 +252,7 @@ public abstract class AbstractTrie<T> {
    * @return whether the {@code Trie} is empty
    */
   public final boolean isEmpty() {
-    return count == 0;
+    return size == 0;
   }
 
   /**
@@ -270,7 +270,7 @@ public abstract class AbstractTrie<T> {
    * {@link #_toString()} bridge method.
    * </p>
    *
-   * @param <TrieNode> {@link Node} or a subclass of 
+   * @param <TrieNode> {@link Node} or a subclass of
    * @return the root {@code TrieNode} of the {@code Trie}
    */
   public final <TrieNode extends Node<T>> TrieNode getRoot() {
@@ -319,7 +319,7 @@ public abstract class AbstractTrie<T> {
    * the {@code root}.
    * </p>
    *
-   * @param <TrieNode> {@link Node} or a subclass of 
+   * @param <TrieNode> {@link Node} or a subclass of
    * @param word   the node to look for
    * @return the {@code TrieNode} if exists or {@code null} if not
    */
@@ -330,7 +330,7 @@ public abstract class AbstractTrie<T> {
    * the specified {@code word}. Returns {@code true} only if the resulting node
    * in the search is not {@code null} or the {@code root}.
    *
-   * @param <TrieNode> {@link Node} or a subclass of 
+   * @param <TrieNode> {@link Node} or a subclass of
    * @param word   the word to search for
    * @return whether a node in the {@code Trie} contains the specified word
    */
@@ -642,7 +642,7 @@ public abstract class AbstractTrie<T> {
   protected final <E> Iterable<E> getIterable(int type) {
     if (isEmpty())
       return new EmptyIterator<>();
-    return new Itr<>(type, true);
+    return new Itr<>(type);
   }
 
   /**
@@ -655,7 +655,7 @@ public abstract class AbstractTrie<T> {
   protected final <E> Iterator<E> getIterator(int type) {
     if (isEmpty())
       return new EmptyIterator<>();
-    return new Itr<>(type, true);
+    return new Itr<>(type);
   }
 
   public final Iterable<String> words() {
@@ -691,19 +691,13 @@ public abstract class AbstractTrie<T> {
    * Will throw a {@link ConcurrentModificationException} if the tree was modified
    * outside of the iterator.
    * </p>
-   * 
+   *
    * @param <E> the type of the object that is being enumerated
    */
   private class Itr<E> implements Iterator<E>, Iterable<E> {
     Queue<Node<T>> entries;
     Node<T> last;
     int type, size;
-
-    /**
-     * Indicates whether this Enumerator is serving as an Iterator or an
-     * Enumeration.
-     */
-    boolean iterator;
 
     /**
      * The expected value of modCount when instantiating the iterator. If this
@@ -719,9 +713,8 @@ public abstract class AbstractTrie<T> {
      * @param iterator whether this will serve as an {@code Enumeration} or
      *                 {@code Iterator}
      */
-    Itr(int type, boolean iterator) {
-      this.size = AbstractTrie.this.count;
-      this.iterator = iterator;
+    Itr(int type) {
+      this.size = AbstractTrie.this.size;
       this.type = type;
       entries = new Queue<>(size);
 
@@ -731,17 +724,11 @@ public abstract class AbstractTrie<T> {
       });
     }
 
-    // Iterable method
     public Iterator<E> iterator() {
       return this;
     }
 
-    /**
-     * Checks whether there are more elments to return.
-     *
-     * @return if this object has one or more items to provide or not
-     */
-    public boolean hasMoreElements() {
+    public boolean hasNext() {
       return !entries.isEmpty();
     }
 
@@ -749,36 +736,19 @@ public abstract class AbstractTrie<T> {
      * Returns the next element if it has one to provide.
      *
      * @return the next element
-     *
-     * @throws NoSuchElementException if no more elements exist
+     * @throws ConcurrentModificationException if the list was modified during
+     *                                         computation.
+     * @throws NoSuchElementException          if no more elements exist
      */
     @SuppressWarnings("unchecked")
-    public E nextElement() {
+    public E next() {
+      if (AbstractTrie.this.modCount != expectedModCount)
+        throw new ConcurrentModificationException();
       if (!hasNext())
         throw new NoSuchElementException("Queue enumerator. No items in queue.");
       last = entries.dequeue();
       return type == WORDS ? (E) AbstractTrie.this.getPrefix(last)
         : (type == VALUES ? (E) last.value : (E) last);
-    }
-
-    /**
-     * The Iterator method; the same as Enumeration.
-     */
-    public boolean hasNext() {
-      return hasMoreElements();
-    }
-
-    /**
-     * Iterator method. Returns the next element in the iteration.
-     *
-     * @return the next element in the iteration
-     * @throws ConcurrentModificationException if the list was modified during
-     *                                         computation.
-     */
-    public E next() {
-      if (AbstractTrie.this.modCount != expectedModCount)
-        throw new ConcurrentModificationException();
-      return nextElement();
     }
 
     /**
@@ -796,10 +766,6 @@ public abstract class AbstractTrie<T> {
      * The behavior of an iterator is unspecified if this method is called
      * after a call to the {@link #forEachRemaining forEachRemaining} method.
      *
-     * @throws UnsupportedOperationException if the {@code remove} operation is
-     *         not supported by this iterator, e.g., if the object is an
-     *         {@code Enumeration}.
-     *
      * @throws IllegalStateException if the {@code next} method has not yet been
      *         called, or the {@code remove} method has already been called after
      *         the last call to the {@code next} method.
@@ -809,8 +775,6 @@ public abstract class AbstractTrie<T> {
      */
     @Override
     public void remove() {
-      if (!iterator)
-        throw new UnsupportedOperationException();
       if (last == null)
         throw new IllegalStateException("trie Enumerator. No last item.");
       if (modCount != expectedModCount)
@@ -820,7 +784,7 @@ public abstract class AbstractTrie<T> {
       synchronized (AbstractTrie.this) {
         // Pass the current index to remove the last item
         AbstractTrie.this.delete(AbstractTrie.this.getPrefix(last));
-        expectedModCount++;
+        expectedModCount = modCount;
         last = null;
       }
     }

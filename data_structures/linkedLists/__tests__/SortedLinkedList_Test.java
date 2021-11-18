@@ -9,6 +9,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -77,6 +78,11 @@ public class SortedLinkedList_Test {
     }
 
     @Test
+    void empty_array() {
+      assertArrayEquals(new Object[0], list.toArray());
+    }
+
+    @Test
     void empty_list_string() {
       assertEquals("[]", list.toString());
     }
@@ -89,7 +95,7 @@ public class SortedLinkedList_Test {
     }
 
     @Test
-    void values_is_empty() {
+    void iterator_is_empty() {
       Iterator<String> values = list.iterator();
       assertFalse(values.hasNext());
       assertThrows(NoSuchElementException.class, () -> values.next());
@@ -238,9 +244,10 @@ public class SortedLinkedList_Test {
     }
 
     @Test
-    void values() {
+    void iterator() {
       Iterator<String> values = list.iterator();
       assertTrue(values.hasNext());
+      assertThrows(IllegalStateException.class, () -> values.remove());
       assertEquals("a", values.next());
       assertEquals("b", values.next());
       assertEquals("c", values.next());
@@ -248,6 +255,22 @@ public class SortedLinkedList_Test {
       assertEquals("e", values.next());
       assertFalse(values.hasNext());
       assertThrows(NoSuchElementException.class, () -> values.next());
+    }
+
+    @Test
+    void iterator_remove() {
+      Iterator<String> values = list.iterator();
+      assertTrue(values.hasNext());
+      assertEquals("a", values.next());
+      assertEquals("b", values.next());
+      assertDoesNotThrow(() -> values.remove());
+      assertFalse(list.contains("b"));
+      assertThrows(IllegalStateException.class, () -> values.remove());
+      assertEquals("c", values.next());
+      assertEquals("d", values.next());
+      assertEquals("e", values.next());
+      assertThrows(NoSuchElementException.class, () -> values.next());
+      assertEquals(4, list.size());
     }
 
     @Test
