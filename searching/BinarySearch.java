@@ -5,13 +5,17 @@ import java.util.function.BiFunction;
 /**
  * Requires the array to be sorted. O(log2 n)
  */
-public interface BinarySearch {
+public final class BinarySearch {
+  BinarySearch() {
+    throw new NoClassDefFoundError("Cannot instantiate this class.");
+  }
+
   public static <T> int search(T[] arr, T value, int low, int high, BiFunction<T, T, Boolean> compare) {
     if (arr.length == 0 || arr.length == 1 && arr[0] != value)
       return -1;
 
     if (low <= high) {
-      int mid = (int) Math.floor((low + high) / 2);
+      int mid = Math.floorDiv(low + high, 2);
       T element = arr[mid];
 
       if (element == value)

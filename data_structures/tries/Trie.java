@@ -148,7 +148,8 @@ public final class Trie<T> extends AbstractTrie<T> {
       else if (!hasWord && node.isWord()) {
         node.hasWord = false;
         break;
-      } else
+      } 
+      else
         parent.removeChild(node.key);
     }
   }

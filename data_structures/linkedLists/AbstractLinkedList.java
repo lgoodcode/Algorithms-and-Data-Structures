@@ -15,7 +15,7 @@ import data_structures.EmptyIterator;
  * either the start or end of the list depending on whether the index is closer
  * to the head or tail, making the search perform {@code O(n / 2)}.
  */
-public abstract class AbstractLinkedList<T> {
+public abstract class AbstractLinkedList<T> implements LinkedList_Int<T> {
   protected class Node<E> {
     Node<E> next;
     Node<E> prev;
@@ -130,18 +130,26 @@ public abstract class AbstractLinkedList<T> {
   }
 
   /**
-   * Removes all elements in the linkedlist.
+   * Removes all elements in the linkedlist. Ensures the references are removed so
+   * it can be garbage collected.
    */
   public synchronized final void clear() {
     if (isEmpty())
       return;
 
-    Iterator<T> itr = iterator();
+    Node<T> temp, node = head;
 
-    while (itr.hasNext()) {
-      itr.next();
-      itr.remove();
-    }
+    do {
+      temp = node.next;
+      node.item = null;
+      node.next = null;
+      node.prev = null;
+      node = temp;
+    } while (node != null && node != head);
+
+    head = tail = null;
+    size = 0;
+    modCount++;
   }
 
   /**
@@ -161,6 +169,7 @@ public abstract class AbstractLinkedList<T> {
   public final Node<T> getTail() {
     return tail;
   }
+
   /**
    * Returns the item at the front of the list or {@code null} if the list is
    * empty.
@@ -260,9 +269,6 @@ public abstract class AbstractLinkedList<T> {
       node.next.prev = node.prev;
       node.prev.next = node.next;
     }
-
-    node.next = null;
-    node.prev = null;
   }
 
   /**
@@ -402,13 +408,12 @@ public abstract class AbstractLinkedList<T> {
       return;
     }
 
-    Node<T> temp, node = _search(fromIndex); // use main method to skip redundant check
+    Node<T> node = _search(fromIndex); // use main method to skip redundant check
     int i = fromIndex, j = toIndex;
 
     while (i < j) {
-      temp = node.next;
       remove(node);
-      node = temp;
+      node = node.next;
       i++;
     }
 

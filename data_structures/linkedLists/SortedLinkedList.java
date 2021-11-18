@@ -29,6 +29,10 @@ public class SortedLinkedList<T extends Comparable<T>> extends LinkedList<T> {
     this((T x, T y) -> x.hashCode() < y.hashCode());
   }
 
+  private boolean isLessThan(T x, T y) {
+    return compare.apply(x, y);
+  }
+
   /**
    * The internal compare method used to determine if the key of a
    * {@code LinkedListNode} is smaller than the other node key.
@@ -42,7 +46,7 @@ public class SortedLinkedList<T extends Comparable<T>> extends LinkedList<T> {
   private boolean isLessThan(Node<T> x, Node<T> y) {
     checkNode(x);
     checkNode(y);
-    return compare.apply(x.item, y.item);
+    return isLessThan(x.item, y.item);
   }
 
   /**
@@ -101,6 +105,60 @@ public class SortedLinkedList<T extends Comparable<T>> extends LinkedList<T> {
 
     size++;
     modCount++;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * <p>
+   * This implementation uses a BinarySearch by retaining the current node being
+   * checked and it's index.
+   * </p>
+   */
+  @Override
+  public int indexOf(T item) {
+    checkItem(item);
+
+    Node<T> node = null;
+    boolean started = false;
+    int i = 0, mid, low = 0, high = size - 1;
+
+    while (low <= high) {
+      mid = Math.floorDiv(low + high, 2);
+
+      if (!started) {
+        if (mid < high >> 1) {
+          i = 0;
+          node = head;
+        }
+        else {
+          i = high;
+          node = tail;
+        }
+      }
+      
+      if (mid > i) {
+        for (; i < mid; i++)
+          node = node.next;
+      }
+      else {
+        for (; i > mid; i--)
+          node = node.prev;
+      }
+
+      if (node.item == item)
+        return mid;
+      else if (isLessThan(node.item, item)) {
+        low = mid + 1;
+      }
+      else {
+        high = mid - 1;
+      }
+
+      started = true;
+    }
+
+    return -1;
   }
 
 }
