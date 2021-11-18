@@ -161,11 +161,11 @@ public class QuadraticProbing_Test {
 
     @Test
     void hasKey() {
-      assertTrue(table.hasKey(1));
-      assertTrue(table.hasKey(2));
-      assertTrue(table.hasKey(3));
-      assertTrue(table.hasKey(4));
-      assertTrue(table.hasKey(5));
+      assertTrue(table.containsKey(1));
+      assertTrue(table.containsKey(2));
+      assertTrue(table.containsKey(3));
+      assertTrue(table.containsKey(4));
+      assertTrue(table.containsKey(5));
     }
 
     @Test
@@ -178,8 +178,8 @@ public class QuadraticProbing_Test {
     }
 
     @Test
-    void delete() {
-      table.delete(2);
+    void remove() {
+      table.remove(2);
       assertNull(table.get(2));
     }
 
@@ -254,26 +254,26 @@ public class QuadraticProbing_Test {
       table.insert(19, "nineteen");
       table.insert(20, "twenty");
 
-      assertTrue(table.hasKey(1));
-      assertTrue(table.hasKey(2));
-      assertTrue(table.hasKey(3));
-      assertTrue(table.hasKey(4));
-      assertTrue(table.hasKey(5));
-      assertTrue(table.hasKey(6));
-      assertTrue(table.hasKey(7));
-      assertTrue(table.hasKey(8));
-      assertTrue(table.hasKey(9));
-      assertTrue(table.hasKey(10));
-      assertTrue(table.hasKey(110));
-      assertTrue(table.hasKey(120));
-      assertTrue(table.hasKey(13));
-      assertTrue(table.hasKey(14));
-      assertTrue(table.hasKey(15));
-      assertTrue(table.hasKey(16));
-      assertTrue(table.hasKey(17));
-      assertTrue(table.hasKey(18));
-      assertTrue(table.hasKey(19));
-      assertTrue(table.hasKey(20));
+      assertTrue(table.containsKey(1));
+      assertTrue(table.containsKey(2));
+      assertTrue(table.containsKey(3));
+      assertTrue(table.containsKey(4));
+      assertTrue(table.containsKey(5));
+      assertTrue(table.containsKey(6));
+      assertTrue(table.containsKey(7));
+      assertTrue(table.containsKey(8));
+      assertTrue(table.containsKey(9));
+      assertTrue(table.containsKey(10));
+      assertTrue(table.containsKey(110));
+      assertTrue(table.containsKey(120));
+      assertTrue(table.containsKey(13));
+      assertTrue(table.containsKey(14));
+      assertTrue(table.containsKey(15));
+      assertTrue(table.containsKey(16));
+      assertTrue(table.containsKey(17));
+      assertTrue(table.containsKey(18));
+      assertTrue(table.containsKey(19));
+      assertTrue(table.containsKey(20));
     }
 
   }

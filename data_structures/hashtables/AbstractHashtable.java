@@ -85,7 +85,7 @@ public abstract class AbstractHashtable<K, V> {
    * @throws IllegalArgumentException if the key already exists in the hashtable
    */
   protected final void checkDuplicate(K key) {
-    if (hasKey(key))
+    if (containsKey(key))
       throw new IllegalArgumentException("Key already exists in the hashtable.");
   }
 
@@ -112,7 +112,7 @@ public abstract class AbstractHashtable<K, V> {
    *
    * @throws IllegalArgumentException if the key or value is {@code null} or blank
    */
-  public abstract boolean hasKey(K key);
+  public abstract boolean containsKey(K key);
 
   /**
    * Returns the value for the entry with the specified key or {@code null} if not
@@ -134,7 +134,7 @@ public abstract class AbstractHashtable<K, V> {
    *
    * @throws IllegalArgumentException if the key or value is {@code null} or blank
    */
-  public abstract boolean delete(K key);
+  public abstract boolean remove(K key);
 
   /**
    * Iterates through the entries of the hashtable and prints it out in a string
@@ -242,9 +242,8 @@ public abstract class AbstractHashtable<K, V> {
      * The expected value of modCount when instantiating the iterator. If this
      * expectation is violated, the iterator has detected concurrent modification.
      */
-    int expectedModCount = AbstractHashtable.this.modCount;
+    int expectedModCount = modCount;
 
-    // Iterable method
     public final Iterator<T> iterator() {
       return this;
     }
@@ -330,7 +329,7 @@ public abstract class AbstractHashtable<K, V> {
 
       // Synchronized block to lock the hashtable object while removing entry
       synchronized (AbstractHashtable.this) {
-        AbstractHashtable.this.delete((K) last.getKey());
+        AbstractHashtable.this.remove((K) last.getKey());
         expectedModCount++;
         last = null;
       }

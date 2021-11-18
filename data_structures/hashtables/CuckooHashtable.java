@@ -244,14 +244,12 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
    * @param key   the hashtable key
    * @param value the value
    *
-   * @throws IllegalArgumentException if the key or value is {@code null}, blank,
-   *                                  or already exists in the hashtable
+   * @throws IllegalArgumentException if the key or value is {@code null} or blank
    */
   @SuppressWarnings("unchecked")
   public synchronized void insert(K key, V value) {
     checkKey(key);
     checkValue(value);
-    checkDuplicate(key);
 
     n++;
 
@@ -366,7 +364,7 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
    *
    * @throws IllegalArgumentException if the key is {@code null} or blank
    */
-  public boolean hasKey(K key) {
+  public boolean containsKey(K key) {
     return find(key) != null;
   }
 
@@ -380,7 +378,7 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
    * @throws IllegalArgumentException if the value is {@code null} or blank
    */
   @SuppressWarnings("unchecked")
-  public boolean hasValue(V value) {
+  public boolean containsValue(V value) {
     checkValue(value);
 
     for (CuckooHashSubtable<K, V> Tj : (CuckooHashSubtable<K, V>[]) tables) {
@@ -407,6 +405,65 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
   }
 
   /**
+   * Retrieves the value of the entry for the given key if it exists or returns
+   * the specified default value if not.
+   *
+   * @param key   the key of the entry whose value we want to retrieve
+   * @param value the default value to return if key doesn't have a value
+   * @return the value of the specified key entry if it exists or the specified
+   *         default value
+   *
+   * @throws IllegalArgumentException if the key is {@code null} or blank
+   */
+  public V getOrDefault(K key, V value) {
+    Entry<K, V> entry = find(key);
+    return entry != null ? entry.getValue() : value;
+  }
+
+  /**
+   * Updates a key/value pair only if the key exists in one of the subtables.
+   * 
+   * @param key      the key whose value is to be updated
+   * @param newValue the new value to update the key
+   * 
+   * @throws IllegalArgumentException if the key or new value is {@code null} or
+   *                                  blank
+   */
+  @SuppressWarnings("unchecked")
+  public void replace(K key, V newValue) {
+    checkKey(key);
+    checkValue(newValue);
+
+    CuckooHashSubtable<K, V> Tj;
+    Entry<K, V> newEntry = new Entry<K, V>(key, newValue);
+
+    for (int i = 0; i < T; i++) {
+      Tj = (CuckooHashSubtable<K, V>) tables[i];
+
+      if (Tj.isOccupied(key)) {
+        Tj.insert(newEntry);
+        modCount++;
+        return;
+      }
+    }
+  }
+
+  /**
+   * Inserts a key/value pair in the table only if the key doesn't exist in the
+   * hashtable.
+   * 
+   * @param key   the key
+   * @param value the value
+   * 
+   * @throws IllegalArgumentException if the key or new value is {@code null} or
+   *                                  blank
+   */
+  public void putIfAbsent(K key, V value) {
+    if (find(key) == null)
+      insert(key, value);
+  }
+
+  /**
    * Deletes the entry for the specified key if it exists and returns a boolean if
    * the operation was successful or not. If successful, it will increment the modCount
    * and decrement the size counter.
@@ -417,7 +474,7 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
    * @throws IllegalArgumentException if the key is {@code null} or blank
    */
   @SuppressWarnings("unchecked")
-  public synchronized boolean delete(K key) {
+  public synchronized boolean remove(K key) {
     checkKey(key);
 
     for (CuckooHashSubtable<K, V> Tj : (CuckooHashSubtable<K, V>[]) tables) {
@@ -438,12 +495,12 @@ public final class CuckooHashtable<K, V> extends AbstractHashtable<K, V> {
    *
    * @throws NullPointerException if the entry is {@code null}
    * @see Entry
-   * @see #delete(K key)
+   * @see #remove(K key)
    */
   public synchronized boolean delete(Entry<K, V> entry) {
     if (entry == null)
       throw new NullPointerException();
-    return delete(entry.getKey());
+    return remove(entry.getKey());
   }
 
   /**

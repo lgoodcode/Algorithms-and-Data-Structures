@@ -76,7 +76,7 @@ public abstract class AbstractStaticHashtable<K, V> extends AbstractHashtable<K,
    *
    * @throws IllegalArgumentException if the key or value is {@code null} or blank
    */
-  public abstract boolean hasKey(K key);
+  public abstract boolean containsKey(K key);
 
   /**
    * Returns the value for the entry with the specified key or {@code null} if not
@@ -98,7 +98,7 @@ public abstract class AbstractStaticHashtable<K, V> extends AbstractHashtable<K,
    *
    * @throws IllegalArgumentException if the key or value is {@code null} or blank
    */
-  public abstract boolean delete(K key);
+  public abstract boolean remove(K key);
 
   @Override
   protected <T> Iterable<T> getIterable(int type) {

@@ -66,7 +66,7 @@ public final class TrieHash<T> extends AbstractTrie<T> {
      * @param c the character key of the node to remove
      */
     protected void removeChild(char c) {
-      children.delete(c);
+      children.remove(c);
     }
 
     /**

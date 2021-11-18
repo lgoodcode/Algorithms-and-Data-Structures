@@ -215,7 +215,7 @@ public final class DynamicHashtable<K, V> extends AbstractDynamicHashtable<K, V>
    *
    * @throws IllegalArgumentException {@inheritDoc}
    */
-  public synchronized boolean hasKey(K key) {
+  public synchronized boolean containsKey(K key) {
     return search(key) != -1;
   }
 
@@ -235,7 +235,7 @@ public final class DynamicHashtable<K, V> extends AbstractDynamicHashtable<K, V>
    * @throws IllegalArgumentException {@inheritDoc}
    */
   @SuppressWarnings("unchecked")
-  public synchronized boolean delete(K key) {
+  public synchronized boolean remove(K key) {
     int idx = search(key);
 
     if (idx != -1 && ((DynamicSubtable<K, V>) tables[idx]).delete(key)) {

@@ -187,7 +187,7 @@ public final class ChainingHashtable<K, V> extends AbstractHashtable<K, V> {
    *
    * @throws IllegalArgumentException if the key or value is {@code null} or blank
    */
-  public boolean hasKey(K key) {
+  public boolean containsKey(K key) {
     return search(key) != -1;
   }
 
@@ -228,7 +228,7 @@ public final class ChainingHashtable<K, V> extends AbstractHashtable<K, V> {
    * @throws IllegalArgumentException if the key or value is {@code null} or blank
    */
   @SuppressWarnings("unchecked")
-  public synchronized boolean delete(K key) {
+  public synchronized boolean remove(K key) {
     int idx = search(key);
 
     if (idx == -1)
