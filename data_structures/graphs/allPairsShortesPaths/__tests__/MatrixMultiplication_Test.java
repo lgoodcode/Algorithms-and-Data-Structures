@@ -30,6 +30,11 @@ public class MatrixMultiplication_Test {
   }
 
   @Test
+  void no_instantiation() {
+    assertThrows(NoClassDefFoundError.class, () -> new MatrixMultiplication());
+  }
+
+  @Test
   void MatrixMultiplication() {
     assertEquals(1750, MatrixMultiplication.matrixChainOrder(matrices));
   }

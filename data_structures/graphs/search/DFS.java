@@ -86,7 +86,7 @@ public final class DFS {
   /**
    * Vertex node of the Depth-first Search. Used to hold the attributes of DFS.
    */
-  public static final class Node extends Graph.Vertex {
+  public static class Node extends Graph.Vertex {
     /**
      * The status of the vertex, either undiscovered "WHITE" or discovered "GRAY".
      */
@@ -105,6 +105,11 @@ public final class DFS {
       color = WHITE;
       finish = Integer.MIN_VALUE;
     }
+  }
+
+  // Prevent this class from being instantiated
+  public DFS() { 
+    throw new NoClassDefFoundError("Cannot instantiate this class.");
   }
 
   /**

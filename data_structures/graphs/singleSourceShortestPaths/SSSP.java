@@ -108,6 +108,11 @@ public class SSSP {
     }
   }
 
+  // Prevent this class from being instantiated
+  public SSSP() { 
+    throw new NoClassDefFoundError("Cannot instantiate this class.");
+  }
+
   /**
    * Verifies that the supplied {@link Graph} is valid, being directed and
    * weighted.

@@ -32,6 +32,11 @@ public class FloydWarshall_Test {
   }
 
   @Test
+  void no_instantiation() {
+    assertThrows(NoClassDefFoundError.class, () -> new FloydWarshall());
+  }
+
+  @Test
   void floydWarshall() {
     assertNotNull(FloydWarshall.run(G));
   }

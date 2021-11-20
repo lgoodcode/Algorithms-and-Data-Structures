@@ -72,6 +72,11 @@ public final class TopologicalSort {
     }
   }
 
+  // Prevent this class from being instantiated
+  public TopologicalSort() { 
+    throw new NoClassDefFoundError("Cannot instantiate this class.");
+  }
+
   /**
    * Runs the Depth-first Search algorithm on the supplied graph matrix and start
    * vertex to serve as the root of the DFS tree and inserts all the vertices, in

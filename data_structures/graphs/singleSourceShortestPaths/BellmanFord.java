@@ -35,6 +35,11 @@ import data_structures.graphs.Graph;
  * takes {@code O(E)} time.
  */
 public final class BellmanFord extends SSSP {
+  // Prevent this class from being instantiated
+  public BellmanFord() { 
+    super();
+  }
+
   /**
    * Runs the BellmanFord SSSP algorithm on the specified graph for the source
    * vertex of all the paths If a negative-weight cycle is detected, it will

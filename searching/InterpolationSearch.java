@@ -5,7 +5,11 @@ import java.util.function.BiFunction;
 /**
  * Requires the array to be sorted. O(log2 n)
  */
-public interface InterpolationSearch {
+public final class InterpolationSearch {
+  InterpolationSearch() {
+    throw new NoClassDefFoundError("Cannot instantiate this class.");
+  }
+
   public static <T> int search(T[] arr, T value, int low, int high, BiFunction<T, T, Boolean> compare, 
 BiFunction<T, T, Integer> subtract) {
     if (arr.length == 0 || arr.length == 1 && arr[0] != value)

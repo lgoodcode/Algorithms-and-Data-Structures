@@ -30,6 +30,11 @@ public class TransitiveClosure_Test {
   }
 
   @Test
+  void no_instantiation() {
+    assertThrows(NoClassDefFoundError.class, () -> new TransitiveClosure());
+  }
+
+  @Test
   void TransitiveClosure() {
     assertNotNull(TransitiveClosure.run(G));
   }

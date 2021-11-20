@@ -32,6 +32,11 @@ public class ShorterPathFaster_Test {
   }
 
   @Test
+  void no_instantiation() {
+    assertThrows(NoClassDefFoundError.class, () -> new ShorterPathFaster());
+  }
+
+  @Test
   void shorterPathFaster() {
     assertNotNull(ShorterPathFaster.run(G, 0));
   }

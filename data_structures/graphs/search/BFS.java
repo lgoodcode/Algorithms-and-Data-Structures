@@ -91,7 +91,7 @@ public final class BFS {
   /**
    * Vertex node of the Breadth-first Search. Used to hold the attributes of BFS.
    */
-  public static final class Node extends Graph.Vertex {
+  public static class Node extends Graph.Vertex {
     /**
      * The status of the vertex, either undiscovered "WHITE" or discovered "GRAY".
      */
@@ -104,6 +104,11 @@ public final class BFS {
       super(vertex);
       color = WHITE;
     }
+  }
+
+  // Prevent this class from being instantiated
+  public BFS() { 
+    throw new NoClassDefFoundError("Cannot instantiate this class.");
   }
 
   /**

@@ -1,5 +1,7 @@
 package data_structures.graphs.minimumSpanningTrees.__tests__;
 
+import static org.junit.Assert.assertThrows;
+
 import org.junit.jupiter.api.*;
 
 import data_structures.graphs.Graph;
@@ -27,5 +29,10 @@ public class Kruskal_Test {
     G.addEdge(5, 6, 2);
 
     Kruskal.run(G);
+  }
+
+  @Test
+  void no_instantiation() {
+    assertThrows(NoClassDefFoundError.class, () -> new Kruskal());
   }
 }

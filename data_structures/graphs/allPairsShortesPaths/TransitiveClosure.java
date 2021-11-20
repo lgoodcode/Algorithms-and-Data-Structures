@@ -69,6 +69,11 @@ import data_structures.graphs.Graph;
  * </p>
  */
 public final class TransitiveClosure extends ASPS {
+  // Prevent this class from being instantiated
+  public TransitiveClosure() {
+    super();
+  }
+
   /**
    * Runs the Transitive-Closure algorithm on the specified graph. Simply sets any
    * valid path from vertices {@code i} to {@code j} with a weight of {@code 1} or

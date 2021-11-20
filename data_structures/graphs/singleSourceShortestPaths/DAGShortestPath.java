@@ -35,6 +35,11 @@ import data_structures.graphs.TopologicalSort;
  * relaxes each edge exactly once.
  */
 public final class DAGShortestPath extends SSSP {
+  // Prevent this class from being instantiated
+  public DAGShortestPath() { 
+    super();
+  }
+
   /**
    * Topologically sorts all the vertices of the DAG (Directed Acylic Graph) and
    * then relaxes them in sorted order to derive the shortest paths for the

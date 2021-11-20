@@ -8,6 +8,25 @@ import data_structures.graphs.Graph;
  * TODO: test the results with matrices from book
  */
 public final class MatrixMultiplication {
+  // Prevent this class from being instantiated
+  public MatrixMultiplication() { 
+    throw new NoClassDefFoundError("Cannot instantiate this class.");
+  }
+
+  /**
+   * Verifies that the supplied {@link Graph} is valid, being directed and
+   * weighted.
+   *
+   * @param graph the graph to check
+   *
+   * @throws IllegalArgumentException if the specified {@code Graph} is not
+   *                                  weighted and directed
+   */
+  private static final void checkGraph(Graph graph) {
+    if (!graph.directed && !graph.weighted)
+      throw new IllegalArgumentException("The algorithm can only run on a directed weighted graph.");
+  }
+
   private static void checkIndex(int[] matrices, int index) {
     if (index < 0)
       throw new IllegalArgumentException("Index cannot be less than 0.");
@@ -300,10 +319,12 @@ public final class MatrixMultiplication {
   }
 
   public static int[][] allPathsWeights(Graph graph) {
+    checkGraph(graph);
     return allPaths(graph.getAdjacencyMatrix());
   }
 
   public static int[][] allPathsPredMatrix(Graph graph) {
+    checkGraph(graph);
     return allPathsPredMatrix(graph.getAdjacencyMatrix());
   }
 
@@ -351,6 +372,7 @@ public final class MatrixMultiplication {
    *                                  vertices are invalid
    */
   public static String printPath(Graph graph, int startVertex, int endVertex) {
+    checkGraph(graph);
     graph.checkVertex(startVertex);
     graph.checkVertex(endVertex);
 
@@ -374,6 +396,7 @@ public final class MatrixMultiplication {
    *                                  vertices are invalid
    */
   public static int[] arrayPath(Graph graph, int startVertex, int endVertex) {
+    checkGraph(graph);
     graph.checkVertex(startVertex);
     graph.checkVertex(endVertex);
 

@@ -33,6 +33,11 @@ public class Dijkstra_Test {
   }
 
   @Test
+  void no_instantiation() {
+    assertThrows(NoClassDefFoundError.class, () -> new Dijkstra());
+  }
+
+  @Test
   void dijkstra() {
     assertNotNull(Dijkstra.run(G, 0));
   }

@@ -52,6 +52,11 @@ import data_structures.graphs.Graph;
  * </p>
  */
 public class ASPS {
+  // Prevent this class from being instantiated
+  public ASPS() {
+    throw new NoClassDefFoundError("Cannot instantiate this class.");
+  }
+
   /**
    * Verifies that the supplied {@link Graph} is valid, being directed and
    * weighted.

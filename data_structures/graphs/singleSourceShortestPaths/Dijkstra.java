@@ -71,6 +71,11 @@ import data_structures.heaps.FibonacciHeap;
  * </p>
  */
 public final class Dijkstra extends SSSP {
+  // Prevent this class from being instantiated
+  public Dijkstra() { 
+    super();
+  }
+
   /**
    * Runs the Dijkstra SSSP algorithm on the specified graph for the source vertex
    * of all the paths. Details on the specifics of this implementation is noted in

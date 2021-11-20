@@ -31,6 +31,11 @@ public class Maximin_Test {
   }
 
   @Test
+  void no_instantiation() {
+    assertThrows(NoClassDefFoundError.class, () -> new Maximin());
+  }
+
+  @Test
   void maximin() {
     assertNotNull(Maximin.run(G));
   }

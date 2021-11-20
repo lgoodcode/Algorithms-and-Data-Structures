@@ -1,5 +1,6 @@
 package data_structures.graphs.search.__tests__;
 
+import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,6 +36,11 @@ public class DFS_Test {
       G.addEdge(1, 5);
       G.addEdge(4, 8);
       G.addEdge(10, 11);
+    }
+
+    @Test
+    void no_instantiation() {
+      assertThrows(NoClassDefFoundError.class, () -> new DFS());
     }
 
     @Test
@@ -93,6 +99,11 @@ public class DFS_Test {
       G.addEdge(1, 5);
       G.addEdge(4, 8);
       G.addEdge(10, 11);
+    }
+
+    @Test
+    void no_instantiation() {
+      assertThrows(NoClassDefFoundError.class, () -> new DFS_Stack());
     }
   
     @Test

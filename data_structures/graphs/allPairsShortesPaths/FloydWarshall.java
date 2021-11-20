@@ -99,6 +99,11 @@ import data_structures.graphs.Graph;
  * </p>
  */
 public final class FloydWarshall extends ASPS {
+  // Prevent this class from being instantiated
+  public FloydWarshall() { 
+    super(); 
+  }
+
   /**
    * Runs the Floyd Warshall algorithm on the specified graph, which will find all
    * the shortest paths possible for all vertices to all vertices with the least

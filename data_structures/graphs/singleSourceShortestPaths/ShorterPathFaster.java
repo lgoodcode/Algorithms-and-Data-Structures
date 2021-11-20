@@ -22,6 +22,11 @@ import data_structures.queues.Queue;
  * </p>
  */
 public class ShorterPathFaster extends SSSP {
+  // Prevent this class from being instantiated
+  public ShorterPathFaster() { 
+    super();
+  }
+
   /**
    * Runs the SPF algorithm on the directed weighted graph with the given source
    * vertex. Throws if the supplied graph isn't weighted and directed.

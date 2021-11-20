@@ -31,6 +31,11 @@ public class Minimax_Test {
   }
 
   @Test
+  void no_instantiation() {
+    assertThrows(NoClassDefFoundError.class, () -> new Minimax());
+  }
+
+  @Test
   void minimax() {
     assertNotNull(Minimax.run(G));
   }

@@ -81,6 +81,11 @@ public final class Prim {
    */
   private static BiFunction<Node, Node, Boolean> compare = (x, y) -> x.distance < y.distance;
 
+  // Prevent this class from being instantiated
+  public Prim() { 
+    throw new NoClassDefFoundError("Cannot instantiate this class.");
+  }
+
   /**
    * Runs Prim's algorithm on the specified graph, which will find
    *

@@ -33,6 +33,11 @@ public class Johnsons_Test {
   }
 
   @Test
+  void no_instantiation() {
+    assertThrows(NoClassDefFoundError.class, () -> new Johnsons());
+  }
+
+  @Test
   void johnsons() {
     assertNotNull(Johnsons.run(G));
   }

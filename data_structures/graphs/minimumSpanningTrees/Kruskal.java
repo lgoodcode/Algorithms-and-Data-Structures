@@ -57,8 +57,13 @@ import static data_structures.sets.DisjointSet.union;
  * total time of {@code O((V + E) ~ (V))}, where ~(the fish looking symbol) is a
  * very slowly growing function..
  */
-public interface Kruskal {
-  static BiFunction<Edge, Edge, Boolean> compare = (Edge x, Edge y) -> x.getWeight() < y.getWeight();
+public final class Kruskal {
+  private static BiFunction<Edge, Edge, Boolean> compare = (Edge x, Edge y) -> x.getWeight() < y.getWeight();
+
+  // Prevent this class from being instantiated
+  public Kruskal() {
+    throw new NoClassDefFoundError("Cannot instantiate this class.");
+  }
 
   /**
    * Runs the Kruskal algorithm on the given graph.

@@ -32,6 +32,11 @@ public class DAGShortestPath_Test {
   }
 
   @Test
+  void no_instantiation() {
+    assertThrows(NoClassDefFoundError.class, () -> new DAGShortestPath());
+  }
+
+  @Test
   void dagSP() {
     assertNotNull(DAGShortestPath.run(G, 0));
   }

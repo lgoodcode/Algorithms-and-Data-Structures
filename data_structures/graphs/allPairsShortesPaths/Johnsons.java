@@ -110,6 +110,11 @@ public final class Johnsons extends ASPS {
     }
   }
 
+  // Prevent this class from being instantiated
+  public Johnsons() { 
+    super(); 
+  }
+
   /**
    * Runs the Johnson's algorithm on the directed, weighted graph to find the
    * shortest paths for all vertices. If a negative weight cycle exists in the

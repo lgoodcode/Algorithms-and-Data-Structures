@@ -1,5 +1,6 @@
 package data_structures.graphs.__tests__;
 
+import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import org.junit.jupiter.api.*;
@@ -23,6 +24,11 @@ public class TopologicalSort_Test {
     G.addEdge(2, 4, 2);
     G.addEdge(4, 3, 6);
     G.addEdge(4, 0, 7);
+  }
+
+  @Test
+  void no_instantiation() {
+    assertThrows(NoClassDefFoundError.class, () -> new TopologicalSort());
   }
 
   @Test

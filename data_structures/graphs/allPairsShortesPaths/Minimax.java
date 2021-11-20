@@ -22,6 +22,11 @@ import data_structures.graphs.Graph;
  * </p>
  */
 public final class Minimax extends ASPS {
+  // Prevent this class from being instantiated
+  public Minimax() {
+    super();
+  }
+
   /**
    * Runs the Floyd Warshall MiniMax algorithm on the graph that minimizes the
    * maximum cost along a path. Will return the matrix table of the cost of paths

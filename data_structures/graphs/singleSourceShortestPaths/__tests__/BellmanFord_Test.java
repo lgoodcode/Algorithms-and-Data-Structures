@@ -32,6 +32,11 @@ public class BellmanFord_Test {
   }
 
   @Test
+  void no_instantiation() {
+    assertThrows(NoClassDefFoundError.class, () -> new BellmanFord());
+  }
+
+  @Test
   void bellmanford() {
     assertNotNull(BellmanFord.run(G, 0));
   }
