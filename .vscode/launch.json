@@ -2,6 +2,27 @@
   "configurations": [
     {
       "type": "java",
+      "name": "Launch RationalNumber",
+      "request": "launch",
+      "mainClass": "RationalNumber",
+      "projectName": "Java_ca58194c"
+    },
+    {
+      "type": "java",
+      "name": "Launch Ch07",
+      "request": "launch",
+      "mainClass": "Ch07",
+      "projectName": "Java_ca58194c"
+    },
+    {
+      "type": "java",
+      "name": "Launch test",
+      "request": "launch",
+      "mainClass": "test",
+      "projectName": "Java_ca58194c"
+    },
+    {
+      "type": "java",
       "name": "Launch BlackJack",
       "request": "launch",
       "mainClass": "blackjack.BlackJack",

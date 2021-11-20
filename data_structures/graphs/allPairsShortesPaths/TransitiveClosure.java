@@ -111,6 +111,7 @@ public final class TransitiveClosure extends ASPS {
         continue;
       }
 
+      // Initialize t ij = 1 if i == j or ij is a member, 0 otherwise
       for (j = 0; j < n; j++)
         T[i][j] = i == j || W[i][j] != Graph.NIL ? 1 : 0;
     }

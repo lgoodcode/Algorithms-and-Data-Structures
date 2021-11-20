@@ -1,6 +1,6 @@
 package data_structures.linkedLists;
 
-public interface LinkedList_Int<T> {
+public interface ILinkedList<T> {
   /**
    * Determines whether the list is empty or not
    *

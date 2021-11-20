@@ -15,7 +15,7 @@ import data_structures.EmptyIterator;
  * either the start or end of the list depending on whether the index is closer
  * to the head or tail, making the search perform {@code O(n / 2)}.
  */
-public abstract class AbstractLinkedList<T> implements LinkedList_Int<T> {
+public abstract class AbstractLinkedList<T> {
   protected class Node<E> {
     Node<E> next;
     Node<E> prev;
