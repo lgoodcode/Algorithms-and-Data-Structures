@@ -6,11 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.*;
 
 import data_structures.graphs.Graph;
-import data_structures.graphs.maxBipartiteMatching.BipartiteDFS;
+import data_structures.graphs.maxBipartiteMatching.HopcroftKarp;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-public class BipartiteDFS_Test {
-  Graph G = new Graph(10);
+public class HopcroftKarp_Test {
+  Graph G = new Graph(10, true, true);
 
   @BeforeEach
   void setup() {
@@ -26,17 +26,17 @@ public class BipartiteDFS_Test {
 
   @Test
   void throws_when_instantiated() {
-    assertThrows(NoClassDefFoundError.class, () -> new BipartiteDFS());
+    assertThrows(NoClassDefFoundError.class, () -> new HopcroftKarp());
   }
 
   @Test
   void total() {
-    assertEquals(3, BipartiteDFS.totalMatches(G));
+    assertEquals(3, HopcroftKarp.total(G));
   }
 
   @Test
   void matches() {
-    int[] matches = BipartiteDFS.matches(G);
+    int[] matches = HopcroftKarp.matches(G);
     int numMatches = 0;
 
     for (int x : matches)
@@ -47,19 +47,22 @@ public class BipartiteDFS_Test {
   }
 
   @Test
-  void range_total() {
-    assertEquals(3, BipartiteDFS.totalMatchesRange(G, 5, 9));
+  void printMatches() {
+    assertEquals("{\n"
+      + "\s\s1 -> 6\n"
+      + "\s\s2 -> 8\n"
+      + "\s\s3 -> 7\n"
+      + "}", HopcroftKarp.printMatches(G));
   }
 
   @Test
-  void range_matches() {
-    int[] matches = BipartiteDFS.matchesRange(G, 5, 9);
-    int numMatches = 0;
+  void printMatches_from_results() {
+    int[] matches = HopcroftKarp.matches(G);
 
-    for (int x : matches)
-      if (x != Graph.NIL)
-        numMatches++;
-
-    assertEquals(3, numMatches);
+    assertEquals("{\n"
+      + "\s\s1 -> 6\n"
+      + "\s\s2 -> 8\n"
+      + "\s\s3 -> 7\n"
+      + "}", HopcroftKarp.printMatches(matches));
   }
 }
