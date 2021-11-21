@@ -123,7 +123,7 @@ public final class FloydWarshall extends ASPS {
   }
 
   private static int[][] _run(Graph G) {
-    int n = G.rows;
+    int n = G.getRows();
     int D[][] = new int[n][n];
     int W[][] = G.getAdjacencyMatrix();
     int a, b, c, i, j, k;
@@ -180,7 +180,7 @@ public final class FloydWarshall extends ASPS {
   }
 
   private static int[][] _table(Graph G) {
-    int n = G.rows;
+    int n = G.getRows();
     int D[][] = new int[n][n];
     int P[][] = new int[n][n];
     final int W[][] = G.getAdjacencyMatrix();

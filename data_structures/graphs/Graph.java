@@ -16,18 +16,18 @@ public final class Graph {
    * Whether the graph is directed or not. If not, an edge goes both ways from the
    * respective vertices.
    */
-  public final boolean directed;
+  private final boolean directed;
 
   /**
    * Whether the graph edges are weighted or not. If so, the edges will contain
    * the weight value.
    */
-  public final boolean weighted;
+  private final boolean weighted;
 
   /**
    * The length and width of the graph.
    */
-  public final int rows;
+  private final int rows;
 
   /**
    * The graph matrix.
@@ -100,7 +100,7 @@ public final class Graph {
   }
 
   /**
-   * Constructs a copy of the specified graph.
+   * Constructs a copy of the specified {@link Graph}.
    *
    * @param graph the graph to copy
    *
@@ -116,17 +116,14 @@ public final class Graph {
     vertices = graph.vertices;
     edges = graph.edges;
 
-    int[] V = graph.getVertices();
     G = new int[rows][];
 
-    for (int i = 0, u; i < V.length; i++) {
-      u = V[i];
+    for (int u : graph.getVertices())
       G[u] = copyOf(graph.G[u], rows);
-    }
   }
 
   /**
-   * Constructs a copy and extends the length of the specified graph.
+   * Constructs a copy and extends the length of the specified {@link Graph}.
    *
    * @param graph the graph to copy
    * @param rows  the new graph length
@@ -147,13 +144,10 @@ public final class Graph {
     vertices = graph.vertices;
     edges = graph.edges;
 
-    int[] V = graph.getVertices();
     G = new int[rows][];
 
-    for (int i = 0, u; i < V.length; i++) {
-      u = V[i];
+    for (int u : graph.getVertices()) {
       G[u] = copyOf(graph.G[u], rows);
-
       // Fill in the new vertices positions with NIL values
       for (int j = graph.rows; j < rows; j++)
         G[u][j] = Graph.NIL;
@@ -166,21 +160,16 @@ public final class Graph {
    * @return the transpose of the graph
    */
   public Graph transpose() {
-    int i, j, u, v;
     Graph G = new Graph(rows, directed, weighted);
-    int[] V = getVertices();
-    Graph.Edge[] edges;
+    int v;
 
-    for (i = 0; i < V.length; i++) {
-      u = V[i];
-      edges = getEdges(u);
-
-      for (j = 0; j < edges.length; j++) {
-        v = edges[j].getVertices()[1];
+    for (int u : getVertices()) {
+      for (Edge edge : getEdges(u)) {
+        v = edge.getVertices()[1];
 
         if (!G.hasEdge(u, v)) {
           if (weighted)
-            G.addEdge(v, u, edges[j].getWeight());
+            G.addEdge(v, u, edge.getWeight());
           else
             G.addEdge(v, u);
         }
@@ -223,6 +212,33 @@ public final class Graph {
   }
 
   /**
+   * Returns the number of rows in the graph matrix.
+   *
+   * @return the number of rows in the graph
+   */
+  public int getRows() {
+    return rows;
+  }
+
+  /**
+   * Returns whether this graph is directed or not.
+   *
+   * @return if the graph is directed
+   */
+  public boolean isDirected() {
+    return directed;
+  }
+
+  /**
+   * Returns whether this graph is weighted or not.
+   *
+   * @return if the graph is weighted
+   */
+  public boolean isWeighted() {
+    return weighted;
+  }
+
+  /**
    * Returns the matrix adjacency representation.
    *
    * @return the adjacency matrix
@@ -251,7 +267,7 @@ public final class Graph {
 
   /**
    * Returns an array with a length of the number of vertices and each element is
-   * the index of each vertex.
+   * the vertex.
    *
    * @return the array of vertices indices
    */
@@ -278,17 +294,15 @@ public final class Graph {
       return new Edge[0];
 
     int numEdges = directed ? edges : edges * 2;
-    int i, j, k = 0, len;
+    int j, k = 0, len = rows;
     Edge[] E = new Edge[numEdges];
 
     // Iterate through each vertex
-    for (i = 0, len = rows; i < len; i++) {
-      if (G[i] != null) {
-        // Iterate through each edge of the vertex
-        for (j = 0; j < len; j++) {
-          if (G[i][j] != NIL)
-            E[k++] = weighted ? new Edge(i, j, G[i][j]) : new Edge(i, j);
-        }
+    for (int i : getVertices()) {
+      // Iterate through each edge of the vertex
+      for (j = 0; j < len; j++) {
+        if (G[i][j] != NIL)
+          E[k++] = weighted ? new Edge(i, j, G[i][j]) : new Edge(i, j);
       }
     }
 
@@ -304,59 +318,19 @@ public final class Graph {
    * @throws IllegalArgumentException if the vertex doesn't exist in the graph
    */
   public Edge[] getEdges(int vertex) {
-    checkVertex(vertex);
-
-    if (G[vertex] == null)
-      throw new IllegalArgumentException("Vertex does not exist in graph.");
+    if (!hasVertex(vertex))
+      throw new IllegalArgumentException("Vertex " + vertex + " does not exist in graph.");
 
     Edge[] E = new Edge[vertices];
-    int i = 0, u = vertex, v, len;
+    int i = 0, u = vertex, v, len = rows;
 
-    for (v = 0, len = rows; v < len; v++) {
+    // Iterate through each possible adjacent vertex v
+    for (v = 0; v < len; v++) {
       if (G[u][v] != NIL)
         E[i++] = weighted ? new Edge(u, v, G[u][v]) : new Edge(u, v);
     }
 
     return copyOf(E, i);
-  }
-
-  /**
-   * Returns an {@link Graph.Edge} and the weight if the graph is weighted.
-   *
-   * @param u the x vertex of the edge
-   * @param v the y vertex of the edge
-   * @return the {@code Edge}
-   *
-   * @throws NoSuchElementException if the edge does not exist in the graph
-   */
-  public Edge getEdge(int u, int v) {
-    checkVertex(u);
-    checkVertex(v);
-
-    if (G[u] == null || G[u][v] == NIL)
-      throw new NoSuchElementException("Edge does not exist.");
-    if (weighted)
-      return new Edge(u, v, G[u][v]);
-    return new Edge(u, v);
-  }
-
-  /**
-   * Retrieves the weight for an edge.
-   *
-   * @param u the x vertex index
-   * @param v the y vertex index
-   * @return the edge weight
-   *
-   * @throws IllegalCallerException   if the graph is not weighted
-   * @throws IllegalArgumentException if either vertex is negative or greater than
-   *                                  the graph length
-   */
-  public int getEdgeWeight(int u, int v) {
-    if (!weighted)
-      throw new IllegalCallerException("This graph is not weighted.");
-    checkVertex(u);
-    checkVertex(v);
-    return G[u] != null && G[u][v] != NIL ? G[u][v] : NIL;
   }
 
   /**
@@ -376,8 +350,8 @@ public final class Graph {
   /**
    * Determines whether a given edge exists in the graph in or not.
    *
-   * @param u the x vertex index of the edge
-   * @param v the y vertex index of the edge
+   * @param u the u vertex index of the edge
+   * @param v the v vertex index of the edge
    * @return whether the edge exists or not
    *
    * @throws IllegalArgumentException if either vertex is negative or greater than
@@ -390,10 +364,46 @@ public final class Graph {
   }
 
   /**
+   * Returns an {@link Graph.Edge} and the weight if the graph is weighted.
+   *
+   * @param u the u vertex of the edge
+   * @param v the v vertex of the edge
+   * @return the {@code Edge}
+   *
+   * @throws NoSuchElementException if the edge does not exist in the graph
+   */
+  public Edge getEdge(int u, int v) {
+    if (!hasEdge(u, v))
+      throw new NoSuchElementException("Edge (" + u + ", " + v + ") does not exist.");
+    if (weighted)
+      return new Edge(u, v, G[u][v]);
+    return new Edge(u, v);
+  }
+
+  /**
+   * Retrieves the weight for an edge.
+   *
+   * @param u the u vertex index
+   * @param v the v vertex index
+   * @return the edge weight
+   *
+   * @throws IllegalCallerException   if the graph is not weighted
+   * @throws IllegalArgumentException if either vertex is negative or greater than
+   *                                  the graph length
+   * @throws NoSuchElementException   if the edge doesn't exist in the graph
+   */
+  public int getEdgeWeight(int u, int v) {
+    if (!weighted)
+      throw new IllegalCallerException("This graph is not weighted.");
+    if (!hasEdge(u, v))
+      throw new NoSuchElementException("Edge (" + u + ", " + v + ") does not exist.");
+    return G[u][v];
+  }
+
+  /**
    * Adds a specified vertex index to the graph.
    *
    * @param v the vertex index to add
-   * @return whether the vertex is in the graph or not
    *
    * @throws IllegalArgumentException if the vertex is negative or greater than
    *                                  the graph length
@@ -412,20 +422,24 @@ public final class Graph {
 
   /**
    * Adds an edge to the graph with the given x and y vertices as well as the edge
-   * weight, if applicable.
+   * weight, if applicable. Will add the reverse edge if the graph is not
+   * directed, so the edge points in both directions.
    *
-   * @param u the x vertex index
-   * @param v the y vertex index
+   * @param u the u vertex index
+   * @param v the v vertex index
    * @param w the edge weight
    *
    * @throws IllegalArgumentException if either vertex is negative or greater than
-   *                                  the graph length
+   *                                  the graph length or if the edge already
+   *                                  exists in the graph
    */
   private void _addEdge(int u, int v, int w) {
     if (!hasVertex(u))
       addVertex(u);
     if (!hasVertex(v))
       addVertex(v);
+    if (hasEdge(u, v))
+      throw new IllegalArgumentException("Edge already exists in the graph.");
 
     if (weighted)
       G[u][v] = w;
@@ -443,69 +457,52 @@ public final class Graph {
   }
 
   /**
-   * Adds an edge to the graph.
+   * Adds an edge to the graph with no weight.
    *
-   * @param u the x vertex index
-   * @param v the y vertex index
+   * @param u the u vertex index
+   * @param v the v vertex index
    *
    * @throws IllegalArgumentException if either vertex is negative or greater than
-   *                                  the graph length, or the edge already exists
-   *                                  in the graph
+   *                                  the graph length, or if the edge already
+   *                                  exists in the graph
    */
   public void addEdge(int u, int v) {
-    checkVertex(u);
-    checkVertex(v);
-
-    if (G[u] != null && G[u][v] != NIL)
-      throw new IllegalArgumentException("Edge already exists in graph.");
-
     _addEdge(u, v, 1);
   }
 
   /**
    * Adds an edge to the graph with the specified weight.
    *
-   * @param u the x vertex index
-   * @param v the y vertex index
+   * @param u the u vertex index
+   * @param v the v vertex index
    * @param w the weight
    *
    * @throws IllegalCallerException   if the graph is not weighted
    * @throws IllegalArgumentException if either vertex is negative or greater than
-   *                                  the graph length, or the edge already exists
-   *                                  in the graph, or the weight is negative
+   *                                  the graph length, or if the edge already
+   *                                  exists in the graph
    */
   public void addEdge(int u, int v, int w) {
     if (!weighted)
       throw new IllegalCallerException("This graph is not weighted.");
-    if (G[u] != null && G[u][v] != NIL)
-      throw new IllegalArgumentException("Edge already exists in graph.");
-
-    checkVertex(u);
-    checkVertex(v);
-
     _addEdge(u, v, w);
   }
 
   /**
-   * Update an existing edge weight. If edge doesn't exist, will set it.
+   * Update an existing edge weight. If edge doesn't exist, will create it.
    *
-   * @param u the x vertex index
-   * @param v the y vertex index
+   * @param u the u vertex index
+   * @param v the v vertex index
    * @param w the weight
    *
    * @throws IllegalCallerException   if the graph is not weighted
    * @throws IllegalArgumentException if either vertex is negative or greater than
-   *                                  the graph length, or the edge already exists
-   *                                  in the graph, or the weight is negative
+   *                                  the graph length
    */
   public void setEdge(int u, int v, int w) {
     if (!weighted)
       throw new IllegalCallerException("This graph is not weighted.");
-
-    checkVertex(u);
-    checkVertex(v);
-
-    if (G[u] == null || G[u][v] == NIL)
+    if (!hasEdge(u, v))
       _addEdge(u, v, w);
     else {
       G[u][v] = w;
@@ -518,46 +515,44 @@ public final class Graph {
   /**
    * Removes a vertex from the graph along with it's edges.
    *
-   * @param v the vertex index to remove
+   * @param u the vertex index to remove
    *
    * @throws IllegalArgumentException if the vertex is negative or greater than
    *                                  the graph length
    * @throws NoSuchElementException   if the vertex doesn't exist in the graph
    */
-  public void removeVertex(int v) {
-    checkVertex(v);
-
-    if (!hasVertex(v))
-      throw new NoSuchElementException("Vertex does not exist: " + v);
+  public void removeVertex(int u) {
+    if (!hasVertex(u))
+      throw new NoSuchElementException("Vertex does not exist: " + u);
 
     for (int i = 0, len = rows; i < len; i++) {
-      if (G[v][i] != NIL) {
+      if (G[u][i] != NIL) {
+        G[u][i] = NIL;
+
         if (!directed)
-          G[i][v] = NIL;
+          G[i][u] = NIL;
+
         edges--;
       }
     }
 
-    G[v] = null;
+    G[u] = null;
     vertices--;
   }
 
   /**
    * Removes an edge from the graph.
    *
-   * @param u the edge x vertex
-   * @param v the edge y vertex
+   * @param u the edge u vertex
+   * @param v the edge v vertex
    *
    * @throws IllegalArgumentException if either vertex is negative or greater than
    *                                  the graph length
    * @throws NoSuchElementException   if the edge doesn't exist in the graph
    */
   public void removeEdge(int u, int v) {
-    checkVertex(u);
-    checkVertex(v);
-
-    if (G[u] == null || G[u][v] == NIL)
-      throw new NoSuchElementException("Edge does not exist: ("+u+", "+v+")");
+    if (!hasEdge(u, v))
+      throw new NoSuchElementException("Edge ("+u+", "+v+") does not exist.");
 
     G[u][v] = NIL;
 
@@ -568,22 +563,42 @@ public final class Graph {
   }
 
   /**
+   * Used to hold attributes of an algorithm for each vertex. Is meant to be
+   * extended for algorithm-specific implementations.
+   */
+  public static class Vertex {
+    private int vertex;
+    public int distance;
+    public int predecessor;
+
+    protected Vertex(int vertex) {
+      this.vertex = vertex;
+      distance = Integer.MAX_VALUE;
+      predecessor = -1;
+    }
+
+    public int getVertex() {
+      return vertex;
+    }
+  }
+
+  /**
    * The static class to easily retrieve the edges from the graph and to be able
    * to access the vertices as well as the weight of the edge, if applicable.
    */
   public static final class Edge {
-    protected boolean weighted;
-    protected int u;
-    protected int v;
-    protected int w;
+    private boolean weighted;
+    private int u;
+    private int v;
+    private int w;
 
-    protected Edge(int u, int v) {
+    private Edge(int u, int v) {
       weighted = false;
       this.u = u;
       this.v = v;
     }
 
-    protected Edge(int u, int v, int w) {
+    private Edge(int u, int v, int w) {
       weighted = true;
       this.u = u;
       this.v = v;
@@ -613,26 +628,6 @@ public final class Graph {
       if (!weighted)
         throw new IllegalCallerException("This edge is not part of a weighted graph.");
       return w;
-    }
-  }
-
-  /**
-   * Used to hold attributes of an algorithm for each vertex. Is meant to be
-   * extended for algorithm-specific implementations.
-   */
-  public static class Vertex {
-    private int vertex;
-    public int distance;
-    public int predecessor;
-
-    protected Vertex(int vertex) {
-      this.vertex = vertex;
-      distance = Integer.MAX_VALUE;
-      predecessor = -1;
-    }
-
-    public int getVertex() {
-      return vertex;
     }
   }
 

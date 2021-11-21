@@ -225,6 +225,9 @@ public class Graph_Test {
       assertDoesNotThrow(() -> g.removeVertex(2));
       assertEquals(3, g.getNumVertices());
       assertEquals(1, g.getNumEdges());
+      assertFalse(g.hasVertex(2));
+      assertFalse(g.hasEdge(2, 3));
+      assertFalse(g.hasEdge(0, 2));
     }
 
     @Test
@@ -234,6 +237,7 @@ public class Graph_Test {
       assertDoesNotThrow(() -> g.removeEdge(1, 3));
       assertEquals(4, g.getNumVertices());
       assertEquals(2, g.getNumEdges());
+      assertFalse(g.hasEdge(1, 3));
     }
   }
 
@@ -252,6 +256,24 @@ public class Graph_Test {
     assertTrue(graph.hasEdge(1, 3));
     assertTrue(graph.hasEdge(2, 3));
     assertTrue(graph.hasEdge(0, 2));
+  }
+
+  @Test
+  void clone_graph_and_extend() {
+    g = new Graph(rows);
+    
+    g.addEdge(1, 3);
+    g.addEdge(2, 3);
+    g.addEdge(0, 2);
+
+    Graph graph = new Graph(g, 5);
+
+    assertEquals(4, graph.getNumVertices());
+    assertEquals(3, graph.getNumEdges());
+    assertTrue(graph.hasEdge(1, 3));
+    assertTrue(graph.hasEdge(2, 3));
+    assertTrue(graph.hasEdge(0, 2));
+    assertEquals(5, graph.getRows());
   }
 
   @Test

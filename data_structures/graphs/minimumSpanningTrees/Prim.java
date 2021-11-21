@@ -98,7 +98,7 @@ public final class Prim {
    *                                  weighted or if the start vertex is invalid
    */
   public static Node[] run(Graph graph, int startVertex) {
-    if (!graph.weighted)
+    if (!graph.isWeighted())
       throw new IllegalArgumentException("Graph must be weighted.");
     graph.checkVertex(startVertex);
     return _run(graph, startVertex);

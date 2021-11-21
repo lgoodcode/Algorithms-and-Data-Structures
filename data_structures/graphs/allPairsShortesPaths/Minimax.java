@@ -44,7 +44,7 @@ public final class Minimax extends ASPS {
   }
 
   private static int[][] _run(Graph G) {
-    int n = G.rows;
+    int n = G.getRows();
     int D[][] = new int[n][n];
     int W[][] = G.getAdjacencyMatrix();
     int i, j, k;
@@ -96,7 +96,7 @@ public final class Minimax extends ASPS {
   }
 
   private static int[][] _table(Graph G) {
-    int n = G.rows;
+    int n = G.getRows();
     int D[][] = new int[n][n];
     int P[][] = new int[n][n];
     int W[][] = G.getAdjacencyMatrix();

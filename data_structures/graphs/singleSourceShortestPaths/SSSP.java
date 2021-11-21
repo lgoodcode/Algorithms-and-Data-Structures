@@ -123,7 +123,7 @@ public class SSSP {
    *                                  weighted and directed
    */
   protected static final void checkGraph(Graph graph) {
-    if (!graph.directed && !graph.weighted)
+    if (!graph.isDirected() && !graph.isWeighted())
       throw new IllegalArgumentException("The algorithm can only run on a directed weighted graph.");
   }
 
@@ -174,7 +174,7 @@ public class SSSP {
    * @return
    */
   protected static final Node[] initSourceAll(Graph graph, int sourceVertex) {
-    int u, V = graph.rows;
+    int u, V = graph.getRows();
     Node[] VTS = new Node[V];
 
     for (u = 0; u < V; u++) {

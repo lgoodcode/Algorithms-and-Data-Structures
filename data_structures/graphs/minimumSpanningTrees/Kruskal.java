@@ -95,7 +95,7 @@ public final class Kruskal {
    *                                  weighted or if the start vertex is invalid
    */
   public static Edge[] run(Graph graph) {
-    if (!graph.weighted)
+    if (!graph.isWeighted())
       throw new IllegalArgumentException("Graph must be weighted.");
     return _run(graph);
   }

@@ -146,10 +146,10 @@ public final class DFS {
   }
 
   private static Node[] _run(Graph G, int s) {
-    Node[] VTS = new Node[G.rows];
+    Node[] VTS = new Node[G.getRows()];
     int[]  time = { 0 };
 
-    for (int i = 0; i < G.rows; i++)
+    for (int i = 0, len = G.getRows(); i < len; i++)
       VTS[i] = new Node(i);
 
     for (int u : G.getVertices()) {

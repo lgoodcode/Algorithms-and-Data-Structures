@@ -29,7 +29,7 @@ public final class BipartiteDFS {
 
   @SuppressWarnings("unchecked")
   private static <T> T _run(boolean type, Graph G) {
-    int n = G.rows;
+    int n = G.getRows();
     Node[] VTS = new Node[n];
     int[] M = new int[n];
     Integer maxMatches = 0;
@@ -139,8 +139,8 @@ public final class BipartiteDFS {
   public static int totalMatchesRange(Graph graph, int left, int right) {
     if (left > right)
       throw new IllegalArgumentException("The left vertices cannot be less than the right vertices.");
-    Graph.checkVertex(graph.rows, left);
-    Graph.checkVertex(graph.rows, right);
+    Graph.checkVertex(graph.getRows(), left);
+    Graph.checkVertex(graph.getRows(), right);
     return _runRange(TOTAL, graph, left, right);
   }
 
@@ -158,8 +158,8 @@ public final class BipartiteDFS {
   public static int[] matchesRange(Graph graph, int left, int right) {
     if (left > right)
       throw new IllegalArgumentException("The left vertices cannot be less than the right vertices.");
-    Graph.checkVertex(graph.rows, left);
-    Graph.checkVertex(graph.rows, right);
+    Graph.checkVertex(graph.getRows(), left);
+    Graph.checkVertex(graph.getRows(), right);
     return _runRange(MATCHES, graph, left, right);
   }
 }

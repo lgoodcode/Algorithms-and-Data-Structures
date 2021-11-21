@@ -91,14 +91,14 @@ public final class TopologicalSort {
    *                                  is invalid
    */
   public static LinkedList<Node> run(Graph graph, int startVertex) {
-    if (!graph.directed && !graph.weighted)
+    if (!graph.isDirected() && !graph.isWeighted())
       throw new IllegalArgumentException("The algorithm can only run on a directed weighted graph.");
     graph.checkVertex(startVertex);
     return _run(graph, startVertex);
   }
 
   private static LinkedList<Node> _run(Graph G, int s) {
-    int u, V = G.rows;
+    int u, V = G.getRows();
     int[] time = { 0 };
     Node[] VTS = new Node[V];
     LinkedList<Node> L = new LinkedList<>();

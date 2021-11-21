@@ -141,12 +141,14 @@ public final class Johnsons extends ASPS {
   }
 
   private static int[][] _run(Graph G) {
+    int n = G.getRows();
     // compute G' where G'.V = G.V U {s}, where s is a new vertex
-    Graph T = new Graph(G, G.rows + 1);
-    int[] vertices, h = new int[G.rows], V = G.getVertices();
+    Graph T = new Graph(G, n + 1);
+    int[] vertices, h = new int[n], V = G.getVertices();
     int[][] D;
     SSSP.Node[] VTS;
-    int s = G.rows, i, j, u, v;
+    // Set s, the new vertex, to the number of rows in the graph
+    int s = n, i, j, u, v;
 
     // Add the new edge from the new vertex to all vertices with 0 weight
     for (i = 0; i < V.length; i++)
@@ -157,7 +159,7 @@ public final class Johnsons extends ASPS {
       return null;
 
     // Set h(v) to the value of S(s, v) computed by the Bellman-Ford algorithm
-    for (i = 0; i < G.rows; i++)
+    for (i = 0; i < n; i++)
       h[i] = VTS[i].distance;
 
     for (Graph.Edge edge : G.getEdges()) {
@@ -169,9 +171,9 @@ public final class Johnsons extends ASPS {
       G.setEdge(u, v, edge.getWeight() + h[u] - h[v]);
     }
 
-    D = new int[G.rows][G.rows];
+    D = new int[n][n];
 
-    for (i = 0; i < G.rows; i++)
+    for (i = 0; i < n; i++)
       fill(D[i], Graph.NIL);
 
     // Run Dijkstra(G, w', u) to compute S'(u, v) for all u and v of G.V
@@ -208,12 +210,13 @@ public final class Johnsons extends ASPS {
   }
 
   private static SSSP.Node[][] _table(Graph G) {
-    Graph T = new Graph(G, G.rows + 1);
-    int[] vertices, h = new int[G.rows], V = G.getVertices();
+    int n = G.getRows();
+    Graph T = new Graph(G, n + 1);
+    int[] vertices, h = new int[n], V = G.getVertices();
     int[][] D;
     SSSP.Node[] VTS;
-    SSSP.Node[][] P = new SSSP.Node[G.rows][];
-    int s = G.rows, i, j, u, v;
+    SSSP.Node[][] P = new SSSP.Node[n][];
+    int s = n, i, j, u, v;
 
     for (i = 0; i < V.length; i++)
       T.addEdge(s, V[i], 0);
@@ -221,7 +224,7 @@ public final class Johnsons extends ASPS {
     if ((VTS = ShorterPathFaster.run(T, s)) == null)
       return null;
 
-    for (i = 0; i < G.rows; i++)
+    for (i = 0; i < n; i++)
       h[i] = VTS[i].distance;
 
     for (Graph.Edge edge : G.getEdges()) {
@@ -232,9 +235,9 @@ public final class Johnsons extends ASPS {
       G.setEdge(u, v, edge.getWeight() + h[u] - h[v]);
     }
 
-    D = new int[G.rows][G.rows];
+    D = new int[n][n];
 
-    for (i = 0; i < G.rows; i++)
+    for (i = 0; i < n; i++)
       fill(D[i], Graph.NIL);
 
     for (i = 0; i < V.length; i++) {
@@ -273,9 +276,10 @@ public final class Johnsons extends ASPS {
   }
 
   private static boolean _hasNegativeWeightCycle(Graph G) {
-    Graph T = new Graph(G, G.rows + 1);
+    int n = G.getRows();
+    Graph T = new Graph(G, n + 1);
     int[] V = G.getVertices();
-    int s = G.rows, i;
+    int s = n, i;
 
     for (i = 0; i < V.length; i++)
       T.addEdge(s, V[i], 0);

@@ -67,7 +67,7 @@ public class ASPS {
    *                                  weighted and directed
    */
   protected static final void checkGraph(Graph graph) {
-    if (!graph.directed && !graph.weighted)
+    if (!graph.isDirected() && !graph.isWeighted())
       throw new IllegalArgumentException("The algorithm can only run on a directed weighted graph.");
   }
 

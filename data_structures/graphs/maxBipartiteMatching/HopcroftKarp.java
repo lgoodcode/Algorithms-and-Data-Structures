@@ -115,7 +115,7 @@ public final class HopcroftKarp {
 
   @SuppressWarnings("unchecked")
   private static <T> T _run(boolean type, Graph G) {
-    int n = G.rows;
+    int n = G.getRows();
     // Set the dummy vertex to the next possible vertex that doesn't exist
     NIL = n;
     Node[] VTS = new Node[n+1];
@@ -147,7 +147,7 @@ public final class HopcroftKarp {
    * @return whether there is an augmenting path available
    */
   private static boolean HP_BFS(Graph G, Node[] VTS) {
-    Queue<Integer> Q = new Queue<>(G.rows);
+    Queue<Integer> Q = new Queue<>(G.getRows());
     int[] vertices = G.getVertices();
     int u, v;
 
@@ -246,7 +246,7 @@ public final class HopcroftKarp {
    * @throws IllegalArgumentException if the specified graph is not directed
    */
   public static int total(Graph graph) {
-    if (!graph.directed)
+    if (!graph.isDirected())
       throw new IllegalArgumentException("The graph must be directed.");
     return _run(TOTAL, graph);
   }
@@ -263,10 +263,10 @@ public final class HopcroftKarp {
    * @throws IllegalArgumentException if the specified graph is not directed
    */
   public static int[] matches(Graph graph) {
-    if (!graph.directed)
+    if (!graph.isDirected())
       throw new IllegalArgumentException("The graph must be directed.");
     
-    int n = graph.rows, NIL = n;
+    int n = graph.getRows(), NIL = n;
     Node[] VTS = _run(MATCHES, graph);
     int[] matches = new int[n];
 

@@ -100,7 +100,7 @@ public final class TransitiveClosure extends ASPS {
   }
 
   private static int[][] _run(Graph G) {
-    int n = G.rows;
+    int n = G.getRows();
     int T[][] = new int[n][n];
     int W[][] = G.getAdjacencyMatrix();
     int i, j, k, last = n - 1;
