@@ -1,10 +1,149 @@
-package data_structures.graphs;
+package data_structures.graphs.flowNetworks;
 
 import static java.util.Arrays.copyOf;
 
 import java.util.NoSuchElementException;
 
-public class FlowNetwork {
+/**
+ * <b>Flow Network:</b>
+ *
+ * <ul>
+ * <li>{@code G = (V, E)} is a directed graph in which each edge {@code (u, v)}
+ * of {@code E} has a nonnegative <i>Capacity</i> {@code c(u, v) >= 0}.</li>
+ *
+ * <li>Requires that if {@code E} contains an edge {@code (u, v)}, then there is
+ * no edge {@code (v, u)} in the reverse direction.</li>
+ *
+ * <li>Two vertices: <i>Source</i> {@code s} and <i>Sink</i> {@code t}</li>
+ *
+ * <li>We assume for convenience that each vertex {@code v} of {@code V} lies on
+ * some path from the source to the sink. That is, the flow network contains a
+ * path {@code s ~ v ~ t}.</li>
+ *
+ * <li>The graph is connected, and since each vertex other than {@code s} has at
+ * least one entering edge: {@code |E| >= |V| - 1}.</li>
+ * </ul>
+ *
+ * <b>Flow:</b>
+ *
+ * <ul>
+ * <li>A flow in {@code G} is a real-valued function {@code f : V x V -> R} that
+ * satisfies the following two properties:
+ * <ul>
+ * <li><b>Capacity constraint</b>: For all {@code u}, {@code v} of {@code V}, we
+ * require {@code 0 <= f(u, v) <= c(u, v)}.</li>
+ *
+ * <li><b>Flow conservation:</b> For all {@code u} of {@code V - [s, t]}, we
+ * require:
+ * <ul>
+ * <li><i>Summation of all v of V - f(v, u) = Summation of all v of V - f(u,
+ * v).</i></li>
+ *
+ * <li>When {@code (u, v)} isn't a member of {@code E}, there can be no flow
+ * from {@code u} to {@code v}, and {@code f(u, v) = 0}</li>
+ * </ul>
+ * </li>
+ * </ul>
+ * </ul>
+ *
+ * <p>
+ * <b>Antiparallel Edges:</b> If edge (v1, v2) and (v2, v1)
+ * </p>
+ *
+ * <b>Networks with multiple sources and sinks:</b>
+ *
+ * <p>
+ * The problem can be converted to an ordinary flow network with only a single
+ * source with a single sink. Adding a <i>Supersource</i> {@code s} and a
+ * directed edge {@code (s, si)} with capacity {@code c(s, si) = Infinity} for
+ * each multiple source. We also add a <i>Supersink</i> {@code t} and add a
+ * directed edge {@code (ti, t)} with capacity {@code c(ti, t) = Infinity} for
+ * each multiple sink.
+ * </p>
+ *
+ * <hr/>
+ *
+ * <h3>Residual Networks</h3>
+ *
+ * <p>
+ * An edge of the flow network can admit an amount of additional flow equal to
+ * the edge's capacity minus the flow on that edge. If that value is positive,
+ * we place that edge into the residual network, {@code Gf} with a
+ * </p>
+ *
+ * <h4><i>Residual Capacity</i> of {@code cf(u, v) = c(u, v) - f(u, v)}</h4>
+ *
+ * <p>
+ * The only edges of {@code G} that are in {@code Gf} are those that can admit
+ * more flow; those edges {@code (u, v)} whose flow equals their capacity have
+ * {@code cf(u, v) = 0}, and they are not in {@code Gf}.
+ * </p>
+ *
+ * <p>
+ * The residual network {@code Gf} may also contain edges that are not in the
+ * flow network {@code G}. As an algorithm manipulates the flow with the goal of
+ * increasing the total flow, it might need to decrease the flow on a particular
+ * edge. In order to represent a possible decrease of a positive flow
+ * {@code f(u, v)} on an edge {@code G}, we place an edge {@code (v, u)} into
+ * {@code Gf} with residual capacity {@code cf(u, v) = f(u, v)} - an edge that
+ * can admit flow in the opposite direction to {@code (u, v)}, at most canceling
+ * out the flow on {@code (u, v)}.
+ *
+ * <p>
+ * Sending flow back along an edge is equivalent to decreasing the flow on the
+ * edge, which is a necessary operation in many algorithms.
+ * </p>
+ *
+ * { c(u, v) - f(u, v) if (u, v) is a member of E Residual Capacity cf(u, v) = {
+ * f(u, v) if (v, u) is a member of E { 0 otherwise
+ *
+ * <p>
+ * <b>Residual Capacity</b>: the maximum amount we can increase the flow on each
+ * edge in augmenting path {@code p} which is the minimum edge capacity value
+ * along the path {@code s} to {@code t} of path {@code p}.
+ * </p>
+ *
+ * <p>
+ * Given a flow network {@code G = (V, E)} and a flow {@code f}, the <i>Residual
+ * Network</i> of {@code G} induced by {@code f} is {@code Gf = (V, Ef)}.
+ * </p>
+ *
+ * <i>Ef = {(u, v) member of V x V : cf(u, v) > 0}</i>
+ *
+ * <p>
+ * The edges in {@code Ef} are either edges in E or their reversals such that
+ * {@code |Ef| <= 2|E|}
+ * </p>
+ *
+ * <p>
+ * A flow in a residual network provides a roadmap for adding flow to the
+ * original flow network. If {@code f} is a flow in {@code G} and {@code f'} is
+ * a flow in the corresponding residual network {@code Gf}, we define
+ * {@code f|f'}, the <i>Augmentation</i> of flow {@code f} by {@code f'}, to be
+ * a function from {@code V x V to R} defined by:
+ *
+ * (f|f')(u, v) = { f(u, v) + f'(u, v) - f'(v, u) if (u, v) is a member of E { 0
+ * otherwise
+ *
+ * <p>
+ * We increase the flow on {@code (u, v)} by {@code f'(u, v)} but decrease it by
+ * {@code f'(v, u)} because pushing flow on the reverse edge in the residual
+ * network signifies decreasing the flow in the original network. Pushing flow
+ * on the reverse edge in the residual network is known as <i>Cancellation</i>.
+ * </p>
+ *
+ * <h4>Augmenting Paths:</h4>
+ *
+ * <p>
+ * Given a flow network {@code G} and a flow {@code f}, an <i>Augmenting
+ * Path</i> {@code p} is a simple path from {@code s} to {@code t} in the
+ * residual network {@code Gf}. We may increase the flow on an edge
+ * {@code (u, v)} of an augmenting path by up to {@code cf(u, v)} without
+ * violating the capacity constraint on whichever {@code (u, v)} and
+ * {@code (v, u)} is in the original flow network {@code G}.
+ * </p>
+ */
+public final class FlowNetwork {
   /**
    * The length and width of the flow network.
    */
@@ -62,6 +201,15 @@ public class FlowNetwork {
       this.f = 0;
     }
 
+    private Edge(int u, int v, int capacity) {
+      checkCapacity(capacity);
+
+      this.u = u;
+      this.v = v;
+      this.c = capacity;
+      this.f = 0;
+    }
+
     private Edge(int u, int v, int capacity, int flow) {
       checkCapacity(capacity);
       checkFlow(flow);
@@ -103,9 +251,9 @@ public class FlowNetwork {
 
     /**
      * Sets the capacity of the edge.
-     * 
+     *
      * @param capacity the new edge capacity
-     * 
+     *
      * @throws IllegalArgumentException if the capacity is less than {@code 0}
      */
     public void setCapacity(int capacity) {
@@ -114,15 +262,42 @@ public class FlowNetwork {
     }
 
     /**
-     * Sets the flow of the edge/
-     * 
+     * Sets the flow of the edge.
+     *
      * @param flow the new edge flow
-     * 
+     *
      * @throws IllegalArgumentException if the flow is less than {@code 0}
      */
     public void setFlow(int flow) {
       checkFlow(flow);
       this.f = flow;
+    }
+
+    /**
+     * Adds the flow to the current flow of the edge.
+     *
+     * @param flow the flow to add
+     *
+     * @throws IllegalArgumentException if the flow is less than {@code 0}
+     */
+    public void addFlow(int flow) {
+      checkFlow(flow);
+      this.f += flow;
+    }
+
+    /**
+     * Subtracts the flow to the current flow of the edge. Used for flow
+     * preservation when manipulating the flow in a direction. By having flow added
+     * to the opposite direction, it keeps a balance of the total flow in the
+     * network.
+     *
+     * @param flow the flow to subtract
+     *
+     * @throws IllegalArgumentException if the flow is less than {@code 0}
+     */
+    public void subtractFlow(int flow) {
+      checkFlow(flow);
+      this.f -= flow;
     }
   }
 
@@ -244,9 +419,9 @@ public class FlowNetwork {
   /**
    * Checks the specified capacity that it satisfies the <i>capacity
    * constraint</i> property of flow networks, where {@code 0 <= f(u, v) <= c(u, v)}.
-   * 
+   *
    * @param capacity the capacity to check
-   * 
+   *
    * @throws IllegalArgumentException if the capacity is less than {@code 0}
    */
   public static void checkCapacity(int capacity){
@@ -257,9 +432,9 @@ public class FlowNetwork {
   /**
    * Checks the specified flow that it satisifes the flow network properties where
    * {@code 0 <= f(u, v) <= c(u, v)}.
-   * 
+   *
    * @param flow the flow to check
-   * 
+   *
    * @throws IllegalArgumentException if the capacity is less than {@code 0}
    */
   public static void checkFlow(int flow) {
@@ -269,7 +444,7 @@ public class FlowNetwork {
 
   /**
    * Returns the number of rows in the flow network matrix.
-   * 
+   *
    * @return the number of rows in the flow network
    */
   public int getRows() {
@@ -432,9 +607,55 @@ public class FlowNetwork {
   }
 
   /**
+   * The default constructor for an edge in the flow network. Adds an edge to the
+   * flow network with the given x and y vertices and the edge capacity. If the
+   * specified vertices don't exist in the flow network, they will be added.
+   *
+   * <p>
+   * The edge has an initial flow of {@code 0} so that the residual capacity in a
+   * residual network can be determined.
+   * </p>
+   *
+   * <p>
+   * A reverse of the edge will be added to the flow network with a capacity and
+   * flow of {@code 0} to allow reverse flow to be added when manipulating the
+   * flow for the residual network.
+   * </p>
+   *
+   * @param u        the u vertex index
+   * @param v        the v vertex index
+   * @param capacity the edge capacity
+   *
+   * @throws IllegalArgumentException if either vertex is negative or greater than
+   *                                  the flow network length, or the edge already
+   *                                  exists in the flow network, or the capacity
+   *                                  is less than {@code 0}
+   */
+  public void addEdge(int u, int v, int capacity) {
+    if (!hasVertex(u))
+      addVertex(u);
+    if (!hasVertex(v))
+      addVertex(v);
+    if (hasEdge(u, v))
+      throw new IllegalArgumentException("Edge already exists in flow network.");
+
+    checkCapacity(capacity);
+
+    G[u][v] = new Edge(u, v, capacity);
+    G[v][u] = new Edge(u, v);
+    edges++;
+  }
+
+  /**
    * Adds an edge to the flow network with the given x and y vertices as well as
    * the edge capacity and flow. If the specified vertices don't exist in the flow
    * network, they will be added.
+   *
+   * <p>
+   * A reverse of the edge will be added to the flow network with a capacity and
+   * flow of {@code 0} to allow reverse flow to be added when manipulating the
+   * flow for the residual network.
+   * </p>
    *
    * @param u        the u vertex index
    * @param v        the v vertex index
@@ -458,6 +679,7 @@ public class FlowNetwork {
     checkFlow(flow);
 
     G[u][v] = new Edge(u, v, capacity, flow);
+    G[v][u] = new Edge(u, v);
     edges++;
   }
 
@@ -521,11 +743,11 @@ public class FlowNetwork {
   /**
    * Update an existing edge capacity. If the edge doesn't exist, it will throw an
    * exception.
-   * 
+   *
    * @param u        the u vertex index
    * @param v        the v vertex index
    * @param capacity the new edge capacity
-   * 
+   *
    * @throws IllegalArgumentException if either vertex is negative or greater than
    *                                  the flow network length, or capacity is less
    *                                  than {@code 0}
@@ -543,11 +765,11 @@ public class FlowNetwork {
   /**
    * Update an existing edge flow. If the edge doesn't exist, it will throw an
    * exception.
-   * 
+   *
    * @param u    the u vertex index
    * @param v    the v vertex index
    * @param flow the new edge flow
-   * 
+   *
    * @throws IllegalArgumentException if either vertex is negative or greater than
    *                                  the flow network length, or flow is less
    *                                  than {@code 0}
@@ -588,7 +810,7 @@ public class FlowNetwork {
   }
 
   /**
-   * Removes an edge from the flow network.
+   * Removes an edge from the flow network. The reversed edge is also removed.
    *
    * @param u the edge u vertex
    * @param v the edge v vertex
@@ -602,6 +824,7 @@ public class FlowNetwork {
     if (!hasEdge(u, v))
       throw new NoSuchElementException("Edge (" + u + ", " + v + ") does not exist.");
     G[u][v] = null;
+    G[v][u] = null;
     edges--;
   }
 

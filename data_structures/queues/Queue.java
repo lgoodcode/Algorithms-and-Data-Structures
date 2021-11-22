@@ -14,7 +14,7 @@ import data_structures.EmptyIterator;
  */
 public final class Queue<T> implements java.io.Serializable {
   @java.io.Serial
-  private static final long serialVersionUID = 199208284839394805L;
+  private static final long serialVersionUID = 199208284839394820L;
 
   /**
    * Holds the elements in the queue.

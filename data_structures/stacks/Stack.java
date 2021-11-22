@@ -11,7 +11,7 @@ import data_structures.EmptyIterator;
  */
 public final class Stack<T> implements java.io.Serializable {
   @java.io.Serial
-  private static final long serialVersionUID = 199208284839394804L;
+  private static final long serialVersionUID = 199208284839394810L;
 
   /**
    * Array to hold the elements of the stack.

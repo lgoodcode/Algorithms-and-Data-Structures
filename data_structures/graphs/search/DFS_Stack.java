@@ -16,21 +16,21 @@ public final class DFS_Stack {
   /**
    * Color constant used to flag a vertex as "undiscovered"
    */
-  private static final int WHITE = 0;
+  private static final boolean WHITE = false;
 
   /**
    * Color constant used to flag a vertex as "discovered"
    */
-  private static final int GRAY = 1;
+  private static final boolean GRAY = true;
 
   /**
    * Vertex node of the Depth-first Search. Used to hold the attributes of DFS.
    */
-  public static class Node extends Graph.Vertex {
+  public static final class Node extends Graph.Vertex {
     /**
      * The status of the vertex, either undiscovered "WHITE" or discovered "GRAY".
      */
-    protected int color;
+    protected boolean color;
 
     /**
      * The number of vertices visited before this node was compeleted.
@@ -44,6 +44,10 @@ public final class DFS_Stack {
       super(vertex);
       color = WHITE;
       finish = Integer.MIN_VALUE;
+    }
+
+    public boolean visited() {
+      return color == GRAY;
     }
   }
 
@@ -92,7 +96,7 @@ public final class DFS_Stack {
       for (Graph.Edge edge : G.getEdges(u)) {
         v = edge.getVertices()[1];
 
-        if (VTS[v].color == WHITE) {
+        if (!VTS[v].visited()) {
           VTS[v].predecessor = u;
           S.push(v);
         }

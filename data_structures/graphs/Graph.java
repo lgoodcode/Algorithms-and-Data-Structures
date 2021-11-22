@@ -180,6 +180,75 @@ public final class Graph {
   }
 
   /**
+   * Used to hold attributes of an algorithm for each vertex. Is meant to be
+   * extended for algorithm-specific implementations.
+   */
+  public static class Vertex {
+    private int vertex;
+    public int distance;
+    public int predecessor;
+
+    protected Vertex(int vertex) {
+      this.vertex = vertex;
+      distance = Integer.MAX_VALUE;
+      predecessor = -1;
+    }
+
+    public int getVertex() {
+      return vertex;
+    }
+  }
+
+  /**
+   * The static class to easily retrieve the edges from the graph and to be able
+   * to access the vertices as well as the weight of the edge, if applicable.
+   */
+  public static final class Edge {
+    private boolean weighted;
+    private int u;
+    private int v;
+    private int w;
+
+    private Edge(int u, int v) {
+      weighted = false;
+      this.u = u;
+      this.v = v;
+    }
+
+    private Edge(int u, int v, int w) {
+      weighted = true;
+      this.u = u;
+      this.v = v;
+      this.w = w;
+    }
+
+    /**
+     * Returns a two element {@code int} array containing the {@code u} and
+     * {@code v} vertices.
+     *
+     * @return the edge vertices array
+     */
+    public int[] getVertices() {
+      int[] V = { u, v };
+      return V;
+    }
+
+    /**
+     * Retrieves the weight of the edge, if the graph is weighted. Otherwise, it
+     * will throw an exception.
+     *
+     * @return the edge weight
+     *
+     * @throws IllegalCallerException if the edge is not weighted
+     */
+    public int getWeight() {
+      if (!weighted)
+        throw new IllegalCallerException("This edge is not part of a weighted graph.");
+      return w;
+    }
+  }
+
+  /**
    * Checks that the specified vertex index is valid.
    *
    * @param vertex the vertex index
@@ -560,75 +629,6 @@ public final class Graph {
       G[v][u] = NIL;
 
     edges--;
-  }
-
-  /**
-   * Used to hold attributes of an algorithm for each vertex. Is meant to be
-   * extended for algorithm-specific implementations.
-   */
-  public static class Vertex {
-    private int vertex;
-    public int distance;
-    public int predecessor;
-
-    protected Vertex(int vertex) {
-      this.vertex = vertex;
-      distance = Integer.MAX_VALUE;
-      predecessor = -1;
-    }
-
-    public int getVertex() {
-      return vertex;
-    }
-  }
-
-  /**
-   * The static class to easily retrieve the edges from the graph and to be able
-   * to access the vertices as well as the weight of the edge, if applicable.
-   */
-  public static final class Edge {
-    private boolean weighted;
-    private int u;
-    private int v;
-    private int w;
-
-    private Edge(int u, int v) {
-      weighted = false;
-      this.u = u;
-      this.v = v;
-    }
-
-    private Edge(int u, int v, int w) {
-      weighted = true;
-      this.u = u;
-      this.v = v;
-      this.w = w;
-    }
-
-    /**
-     * Returns a two element {@code int} array containing the {@code u} and
-     * {@code v} vertices.
-     *
-     * @return the edge vertices array
-     */
-    public int[] getVertices() {
-      int[] V = { u, v };
-      return V;
-    }
-
-    /**
-     * Retrieves the weight of the edge, if the graph is weighted. Otherwise, it
-     * will throw an exception.
-     *
-     * @return the edge weight
-     *
-     * @throws IllegalCallerException if the edge is not weighted
-     */
-    public int getWeight() {
-      if (!weighted)
-        throw new IllegalCallerException("This edge is not part of a weighted graph.");
-      return w;
-    }
   }
 
   /**
