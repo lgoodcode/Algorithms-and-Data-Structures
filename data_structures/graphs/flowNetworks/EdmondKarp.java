@@ -15,22 +15,12 @@ import data_structures.queues.Queue;
  */
 
 /**
- * <h3>Edmond-Karp Algorithm {@code O(E |f*|)}</h3>
+ * <h3>Edmond-Karp Algorithm {@code O(VE^2)}</h3>
  *
  * <p>
- * Same as the Edmond-Karp algorithm except, it uses the Breadth-first search
+ * Uses the Ford-Fulkerson method except, it uses the Breadth-first search
  * algorithm to find the augmenting path {@code p} which has a running time of
- * {@code O(V + E) rather than Depth-first search, which is {@code (-)(V + E)}.
- * </p>
- *
- * <p>
- * {@code f*} denotes a maximum flow in the transformed network, then a
- * straightforward implementation of Edmond-Karp executes the while loop at most
- * {@code |f*|} times ({@code |f*|} denotes the maximum flow of a residual
- * network), since the flow value increases by at least one unit in each
- * iteration. The time to find a path in a residual network would be {@code O(V
- * + E') = O(E)}. So, each while loop taking {@code O(E)}, executed {@code |f*|}
- * times, results in a total running time of {@code O(E |f*|}).
+ * {@code O(V + E)} rather than Depth-first search, which is {@code (-)(V + E)}.
  * </p>
  */
 public final class EdmondKarp extends MaxFlowAlgorithm {
@@ -40,19 +30,23 @@ public final class EdmondKarp extends MaxFlowAlgorithm {
   }
 
   /**
-   * Runs the Edmond-Karp algorithm to find the maximum flow in the specified
-   * flow network from the specified source to the sink.
+   * Runs the Edmond-Karp algorithm to find the maximum flow in the specified flow
+   * network from the specified source to the sink.
    *
    * @param network the flow network
    * @param source  the starting vertex
    * @param sink    the destination vertex
-   * @return the maximum flow from the source to the sink
+   * @return the maximum flow from the source to the sink or {@code 0} if the
+   *         source is the sink
    *
    * @throws IllegalArgumentException if the source or sink vertices are invalid
    */
   public static int maxFlow(FlowNetwork network, int source, int sink) {
     network.checkVertex(source);
     network.checkVertex(sink);
+
+    if (source == sink)
+      return 0;
     return run(network, source, sink);
   }
 
@@ -67,10 +61,9 @@ public final class EdmondKarp extends MaxFlowAlgorithm {
 
     // While there is a path p from source to sink in residual network Gf that can
     // be augmented
-    while (EK_BFS(network, VTS, s, t)) {
+    while (EK_BFS(network, VTS, s, t))
       // Find the minimum residual capacity of all edges from s to t along path p
       maxFlow += residualCapacity(G, VTS, Integer.MAX_VALUE, t);
-    }
     return maxFlow;
   }
 
@@ -111,7 +104,7 @@ public final class EdmondKarp extends MaxFlowAlgorithm {
         // Find edges with a positive residual capacity: the maximum amount of flow
         // that can be added to each edge in the augmenting path
         // (0 < f < c for all (u, v) in path p)
-        if (edge.getCapacity() - edge.getFlow() > 0 && !VTS[v].visited()) {
+        if (edge.getFlow() < edge.getCapacity() && !VTS[v].visited()) {
           VTS[v].visited = true;
           VTS[v].predecessor = u;
           Q.enqueue(v);

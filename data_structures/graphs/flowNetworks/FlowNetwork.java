@@ -781,7 +781,7 @@ public final class FlowNetwork {
 
     if (!hasEdge(u, v))
       throw new NoSuchElementException("Edge (" + u + ", " + v + ") does not exist.");
-    G[u][v].c = flow;
+    G[u][v].f = flow;
   }
 
   /**

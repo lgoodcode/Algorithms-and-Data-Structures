@@ -12,12 +12,19 @@ public class MaxFlowAlgorithm {
   /**
    * BFS/DFS node
    */
-  protected static class Node extends FlowNetwork.Vertex {
+  protected static class Node {
+    private int vertex;
     protected boolean visited;
+    protected int predecessor;
 
     protected Node(int vertex) {
-      super(vertex);
+      this.vertex = vertex;
       visited = false;
+      predecessor = -1;
+    }
+
+    public int getVertex() {
+      return vertex;
     }
 
     public boolean visited() {
@@ -49,7 +56,8 @@ public class MaxFlowAlgorithm {
    * @param VTS  the vertex nodes
    * @param flow the current maximum flow that can be augmented
    * @param v    the current vertex along the
-   * @return the residual capacity
+   * @return the residual capacity for the augmenting path {@code p} or {@code 0}
+   *         if there is no possible augmenting path
    */
   protected static int residualCapacity(FlowNetwork.Edge[][] G, Node[] VTS, int flow, int v) {
     if (VTS[v].predecessor == NIL)
@@ -66,7 +74,7 @@ public class MaxFlowAlgorithm {
       G[v][u].subtractFlow(cfP);
       return cfP;
     }
-    
+
     return 0;
   }
 }
