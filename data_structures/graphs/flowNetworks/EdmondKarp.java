@@ -1,7 +1,9 @@
 package data_structures.graphs.flowNetworks;
 
+import data_structures.queues.Queue;
+
 /**
- * Ford-Fulkerson(G, s, t)
+ * Edmond-Karp(G, s, t)
  * 1   for each edge (u, v) of G.E
  * 2       (u, v).f = 0
  * 3   while there exists a path from s to t in the residual network Gf augment flow f along p
@@ -13,30 +15,32 @@ package data_structures.graphs.flowNetworks;
  */
 
 /**
- * <h3>Ford-Fulkerson Algorithm {@code O(E |f*|)}</h3>
+ * <h3>Edmond-Karp Algorithm {@code O(E |f*|)}</h3>
  *
  * <p>
- * Finding the path using DFS.
+ * Same as the Edmond-Karp algorithm except, it uses the Breadth-first search
+ * algorithm to find the augmenting path {@code p} which has a running time of
+ * {@code O(V + E) rather than Depth-first search, which is {@code (-)(V + E)}.
  * </p>
  *
  * <p>
  * {@code f*} denotes a maximum flow in the transformed network, then a
- * straightforward implementation of Ford-Fulkerson executes the while loop at
- * most {@code |f*|} times ({@code |f*|} denotes the maximum flow of a residual
+ * straightforward implementation of Edmond-Karp executes the while loop at most
+ * {@code |f*|} times ({@code |f*|} denotes the maximum flow of a residual
  * network), since the flow value increases by at least one unit in each
- * iteration. The time to find a path in a residual network would be
- * {@code O(V + E') = O(E)}. So, each while loop taking {@code O(E)}, executed
- * {@code |f*|} times, results in a total running time of {@code O(E |f*|}).
+ * iteration. The time to find a path in a residual network would be {@code O(V
+ * + E') = O(E)}. So, each while loop taking {@code O(E)}, executed {@code |f*|}
+ * times, results in a total running time of {@code O(E |f*|}).
  * </p>
  */
-public final class FordFulkerson extends MaxFlowAlgorithm{
+public final class EdmondKarp extends MaxFlowAlgorithm {
   // Prevent this class from being instantiated
-  public FordFulkerson() {
+  public EdmondKarp() {
     super();
   }
 
   /**
-   * Runs the Ford-Fulkerson algorithm to find the maximum flow in the specified
+   * Runs the Edmond-Karp algorithm to find the maximum flow in the specified
    * flow network from the specified source to the sink.
    *
    * @param network the flow network
@@ -63,7 +67,7 @@ public final class FordFulkerson extends MaxFlowAlgorithm{
 
     // While there is a path p from source to sink in residual network Gf that can
     // be augmented
-    while (FF_DFS(network, VTS, s, t)) {
+    while (EK_BFS(network, VTS, s, t)) {
       // Find the minimum residual capacity of all edges from s to t along path p
       maxFlow += residualCapacity(G, VTS, Integer.MAX_VALUE, t);
     }
@@ -71,54 +75,52 @@ public final class FordFulkerson extends MaxFlowAlgorithm{
   }
 
   /**
-   * Modfied DFS to just check if there is a path from source {@code s} to sink
+   * Modfied BFS to just check if there is a path from source {@code s} to sink
    * {@code t} that has a positive residual capacity to be able to augment a path.
    *
    * @param G   the flow network
    * @param VTS the nodes
    * @param s   the source
    * @param t   the sink
-   * @return whether there exists a path from source to sink that can be augmented
+   * @returns whether a path exists from the source to the sink that can be
+   *          augmented
    */
-  private static boolean FF_DFS(FlowNetwork G, Node[] VTS, int s, int t) {
-    int[] V = G.getVertices();
-
-    // Reset color status and predecessor vertex
-    for (int u : V) {
-      VTS[u].visited = false;
-      VTS[u].predecessor = NIL;
-    }
-
-    for (int u : V) {
-      if (!VTS[u].visited())
-        FF_DFS_visit(G, VTS, u);
-    }
-
-    // Find if there was a path from the source to the sink
-    while (s != t && t != NIL)
-      t = VTS[t].predecessor;
-    return s == t;
-  }
-
-  private static void FF_DFS_visit(FlowNetwork G, Node[] VTS, int u) {
-    VTS[u].visited = true;
+  private static boolean EK_BFS(FlowNetwork G, Node[] VTS, int s, int t) {
+    Queue<Integer> Q = new Queue<>(G.getRows());
     int[] vertices;
-    int v;
+    int u, v;
 
-    for (FlowNetwork.Edge edge : G.getEdges(u)) {
-      // Get the vertices to ensure we are setting v to the adjacent vertex
-      // because of the reversed edges, which could set v == u
-      vertices = edge.getVertices();
-      v = vertices[1] == u ? vertices[0] : vertices[1];
+    // Reset nodes to unvisited
+    for (Node node : VTS) {
+      node.visited = false;
+      node.predecessor = NIL;
+    }
 
-      // Find edges with a positive residual capacity: the maximum amount of flow
-      // that can be added to each edge in the augmenting path
-      // (0 < f < c for all (u, v) in path p)
-      if (edge.getCapacity() - edge.getFlow() > 0 && !VTS[v].visited()) {
-        VTS[v].predecessor = u;
-        FF_DFS_visit(G, VTS, v);
+    VTS[s].visited = true;
+    Q.enqueue(s);
+
+    while (!Q.isEmpty()) {
+      u = Q.dequeue();
+
+      for (FlowNetwork.Edge edge : G.getEdges(u)) {
+        // Get the vertices to ensure we are setting v to the adjacent vertex
+        // because of the reversed edges, which could set v == u
+        vertices = edge.getVertices();
+        v = vertices[1] == u ? vertices[0] : vertices[1];
+
+        // Find edges with a positive residual capacity: the maximum amount of flow
+        // that can be added to each edge in the augmenting path
+        // (0 < f < c for all (u, v) in path p)
+        if (edge.getCapacity() - edge.getFlow() > 0 && !VTS[v].visited()) {
+          VTS[v].visited = true;
+          VTS[v].predecessor = u;
+          Q.enqueue(v);
+        }
       }
     }
+
+    // Find if there was a path from the source to the sink (reached sink from source)
+    return VTS[t].visited();
   }
 
   /**
@@ -141,7 +143,7 @@ public final class FordFulkerson extends MaxFlowAlgorithm{
       VTS[u] = new Node(u);
 
     // Augment flow while there is a path from source to sink in residual network Gf
-    while (FF_DFS(network, VTS, s, t)) {
+    while (EK_BFS(network, VTS, s, t)) {
       // Find the minimum residual capacity of all edges from s to t along path p
       cfP = Integer.MAX_VALUE;
 

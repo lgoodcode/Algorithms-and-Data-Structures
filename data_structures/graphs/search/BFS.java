@@ -26,11 +26,15 @@ import data_structures.queues.Queue;
  */
 
 /**
+ * <h3> Breadth-first Search {@code O(V + E)}</h3>
+ * 
+ * <p>
  * Breadth-first search is one of the simplest algorithms for searching a graph
  * and is the archetype for many important graph algorithms. Prim's
  * minimum-spanning-tree algorithm and Dijkstra's single-source shortest-paths
  * algorithm use ideas similar to those in breadth-first search.
- *
+ * </p>
+ * 
  * <p>
  * Given a graph {@code G = (V, E)} and a distinguished source vertex {@code s},
  * BFS searches systematically to explore the edges of G to "discover" every

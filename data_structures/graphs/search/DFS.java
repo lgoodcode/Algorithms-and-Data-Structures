@@ -27,9 +27,13 @@ import data_structures.graphs.Graph;
  */
 
 /**
- * Depth-first Search searches "deeper" in the graph whenever possible. DFS
+ * <h3>Depth-first Search {@code (-)(V + E)}</h3>
+ * 
+ * <p>
+ * Depth-first search searches "deeper" in the graph whenever possible. DFS
  * explores edges out of the most recently discovered vertex {@code v} that
  * still has unexplored edges leaving it.
+ * </p>
  *
  * <p>
  * Once all of the edges of {@code v} have been explored, the search
