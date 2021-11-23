@@ -91,27 +91,6 @@ public final class FibonacciHeap<T> {
     return min;
   }
 
-  // TODO: implement a better log2 function
-  /**
-   * Calculates the base 2 of logarithm of the number of items in the heap,
-   * {@code n}. It determines the smallest integer value that is greater than
-   * {@code n}.
-   * 
-   * @param n the number of items in the heap
-   * @return the smallest base 2 logarithm to encompass the items
-   */
-  private int log2(int n) {
-    if (n == 1) return 0;
-    if (n == 2) return 1;
-
-    for (int i=0; i<n; i++) {
-      if (Math.pow(2, i) > n)
-        return i;
-    }
-
-    return 0;
-  }
-
   /**
    * Fib-Insert(H, x)  O(1)
    * 1   x.degree = 0
@@ -323,7 +302,7 @@ public final class FibonacciHeap<T> {
     Node<?>[] arr = new Node<?>[count];
     Node<T> y, x, temp;
     // Maximum degree D(n) of any node in an n-node Fibonacci heap is O(lg n)
-    int i, d, num = 0, D = log2(count);
+    int i, d, num = 0, D = count >> 1;
 
     // Initialize the aux array with null values
     for (i = 0; i <= D; i++)
