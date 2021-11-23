@@ -47,13 +47,36 @@ public final class EdmondKarp extends MaxFlowAlgorithm {
 
     if (source == sink)
       return 0;
-    return run(network, source, sink);
+    return run(new FlowNetwork(network), source, sink).getFlow();
   }
 
-  private static int run(FlowNetwork network, int s, int t) {
+  /**
+   * Runs the Edmond-Karp algorithm to find the paths for the maximum flow in
+   * the specified flow network from the specified source to the sink.
+   *
+   * @param network the flow network
+   * @param source  the starting vertex
+   * @param sink    the destination vertex
+   * @return the paths for the maximum flow from source to sink or an array of
+   *         {@code 0} length if no paths exist for a maximum flow
+   *
+   * @throws IllegalArgumentException if the source or sink vertices are invalid
+   */
+  public static Object[] maxFlowPaths(FlowNetwork network, int source, int sink) {
+    network.checkVertex(source);
+    network.checkVertex(sink);
+
+    if (source == sink)
+      return new Object[0];
+    return run(new FlowNetwork(network), source, sink).getPaths();
+  }
+
+  private static FlowPaths run(FlowNetwork network, int s, int t) {
     FlowNetwork.Edge[][] G = network.getAdjacencyMatrix();
     Node[] VTS = new Node[network.getRows()];
-    int maxFlow = 0;
+    FlowPaths P = new FlowPaths();
+    StringBuilder sb = new StringBuilder();
+    int flow = 0;
 
     // Initialize nodes
     for (int i = 0; i < G.length; i++)
@@ -61,10 +84,18 @@ public final class EdmondKarp extends MaxFlowAlgorithm {
 
     // While there is a path p from source to sink in residual network Gf that can
     // be augmented
-    while (EK_BFS(network, VTS, s, t))
+    while (EK_BFS(network, VTS, s, t)) {
       // Find the minimum residual capacity of all edges from s to t along path p
-      maxFlow += residualCapacity(G, VTS, Integer.MAX_VALUE, t);
-    return maxFlow;
+      flow = printResidualCapacity(G, VTS, sb, Integer.MAX_VALUE, t);
+
+      P.addFlow(flow);
+      // Prepends the path with the residual capacity for that path
+      P.addPath(flow + ": " + sb.toString() + t);
+
+      sb = new StringBuilder();
+    }
+
+    return P;
   }
 
   /**

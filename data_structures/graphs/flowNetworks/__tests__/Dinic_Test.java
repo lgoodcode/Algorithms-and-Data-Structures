@@ -1,6 +1,7 @@
 package data_structures.graphs.flowNetworks.__tests__;
 
 import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.*;
@@ -11,6 +12,11 @@ import data_structures.graphs.flowNetworks.Dinic;
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 public class Dinic_Test {
   FlowNetwork G = new FlowNetwork(10);
+  String[] paths = {
+    "7: 0 -> 2 -> 4 -> 3 -> 5",
+    "4: 0 -> 2 -> 4 -> 5",
+    "12: 0 -> 1 -> 3 -> 5"
+  };
 
   @BeforeEach
   void setup() {
@@ -33,5 +39,19 @@ public class Dinic_Test {
   @Test
   void dinic() {
     assertEquals(23, Dinic.maxFlow(G, 0, 5));
+  }
+
+  @Test
+  void paths() {
+    assertArrayEquals(paths, Dinic.maxFlowPaths(G, 0, 5));
+    Object[] p = Dinic.maxFlowPaths(G, 0, 5);
+    assertEquals(paths[0], p[0]);
+    assertEquals(paths[1], p[1]);
+    assertEquals(paths[2], p[2]);
+  }
+
+  @Test
+  void no_paths() {
+    assertEquals(0, Dinic.maxFlowPaths(G, 0, 0).length);
   }
 }

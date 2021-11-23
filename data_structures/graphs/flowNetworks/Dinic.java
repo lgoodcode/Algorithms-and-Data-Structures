@@ -84,20 +84,51 @@ public final class Dinic extends MaxFlowAlgorithm {
 
     if (source == sink)
       return 0;
-    return run(network, source, sink);
+    return run(new FlowNetwork(network), source, sink).getFlow();
   }
 
-  private static int run(FlowNetwork G, int s, int t) {
+  /**
+   * Runs the Dinic algorithm to find the paths for the maximum flow in the
+   * specified flow network from the specified source to the sink.
+   *
+   * @param network the flow network
+   * @param source  the starting vertex
+   * @param sink    the destination vertex
+   * @return the paths for the maximum flow from source to sink or an array of
+   *         {@code 0} length if no paths exist for a maximum flow
+   *
+   * @throws IllegalArgumentException if the source or sink vertices are invalid
+   */
+  public static Object[] maxFlowPaths(FlowNetwork network, int source, int sink) {
+    network.checkVertex(source);
+    network.checkVertex(sink);
+
+    if (source == sink)
+      return new Object[0];
+    return run(new FlowNetwork(network), source, sink).getPaths();
+  }
+
+  private static FlowPaths run(FlowNetwork G, int s, int t) {
     Node[] levels = new Node[G.getRows()];
-    int maxFlow = 0;
+    FlowPaths P = new FlowPaths();
+    StringBuilder sb = new StringBuilder();
+    int flow = 0;
 
     // Initialize nodes
     for (int i = 0, n = G.getRows(); i < n; i++)
       levels[i] = new Node(i);
 
-    while (D_BFS(G, levels, s, t))
-      maxFlow += sendFlow(G, levels, Integer.MAX_VALUE, s, t);
-    return maxFlow;
+    while (D_BFS(G, levels, s, t)) {
+      flow = sendFlow(G, levels, sb, Integer.MAX_VALUE, s, t);
+
+      P.addFlow(flow);
+      // Prepends the path with the residual capacity for that path
+      P.addPath(flow + ": " + sb.reverse().toString() + t);
+
+      sb = new StringBuilder();
+    }
+
+    return P;
   }
 
   /**
@@ -105,16 +136,22 @@ public final class Dinic extends MaxFlowAlgorithm {
    * the levels. It finds the residual capacity only for edges along a path where
    * the vertex {@code v} of the edge {@code (u, v)} is one level higher, similar
    * to how a slope where the flow runs down and doesn't skip.
+   * 
+   * <p>
+   * Modified to include the ability to build the string path, using a
+   * {@code StringBuilder} while calculating the maximum flow.
+   * </p>
    *
    * @param G    the flow network
    * @param L    the nodes containg the level for the vertex
+   * @param sb   the {@code StringBuilder} to hold the vertices for the path
    * @param flow the current maximum flow
    * @param u    the vertex to find an edge for the path
    * @param t    the sink to determine once an augmenting path is found or not
    * @return the residual capacity that can be pushed or {@code 0} if there is no
    *         augmenting path available
    */
-  private static int sendFlow(FlowNetwork G, Node[] L, int flow, int u, int t) {
+  private static int sendFlow(FlowNetwork G, Node[] L, StringBuilder sb, int flow, int u, int t) {
     // Base case: once the sink is reached, return the calculated residual capacity
     // cf(p) = min {cf(u, v) : (u, v) is in p} where cf(u, v) = c(u, v) - f(u, v)
     if (u == t)
@@ -132,12 +169,16 @@ public final class Dinic extends MaxFlowAlgorithm {
 
       if (L[v].level == L[u].level + 1 && f < c) {
         currentFlow = Math.min(flow, c - f);
-        cfP = sendFlow(G, L, currentFlow, v, t);
+        cfP = sendFlow(G, L, sb, currentFlow, v, t);
 
         if (cfP > 0) {
           edge.addFlow(cfP);
           // Need to lookup the reverse edge to subtract the flow
           G.getEdge(v, u).subtractFlow(cfP);
+
+          // Add vertex to the path (has to be reversed so we add it in reverse)
+          sb.append(" >- " + u);
+
           return cfP;
         }
       }

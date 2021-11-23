@@ -320,7 +320,7 @@ public final class FlowNetwork {
   }
 
   /**
-   * Constructs a shallow copy of the specified {@link FlowNetwork}.
+   * Constructs a deep copy of the specified {@link FlowNetwork}.
    *
    * @param network the flow network to copy
    *
@@ -334,37 +334,57 @@ public final class FlowNetwork {
     vertices = network.vertices;
     edges = network.edges;
 
+    Edge[][] N = network.getAdjacencyMatrix();
     G = new Edge[rows][];
+    int i, j;
 
-    for (int u : network.getVertices())
-      G[u] = copyOf(network.G[u], rows);
+    for (i = 0; i < rows; i++) {
+      if (N[i] != null) {
+        G[i] = new Edge[rows];
+
+        for (j = 0; j < rows; j++) {
+          if (N[i][j] != null) 
+            G[i][j] = new Edge(i, j, N[i][j].c, N[i][j].f);
+        }
+      }
+    }
   }
 
   /**
-   * Constructs a copy and extends the length of the specified
+   * Constructs a deep copy and extends the length of the specified
    * {@link FlowNetwork}.
    *
    * @param network the flow network to copy
-   * @param rows    the new flow network length
+   * @param newRows    the new flow network length
    *
    * @throws NullPointerException     if the flow network is {@code null}
    * @throws IllegalArgumentException if the specified new length is less than the
    *                                  original flow network
    */
-  public FlowNetwork(FlowNetwork network, int rows) {
+  public FlowNetwork(FlowNetwork network, int newRows) {
     if (network == null)
       throw new NullPointerException("FlowNetwork cannot be null.");
-    if (rows < network.rows)
+    if (newRows < network.rows)
       throw new IllegalArgumentException("New network length can't be less than the original.");
 
-    this.rows = rows;
+    this.rows = newRows;
     vertices = network.vertices;
     edges = network.edges;
 
-    G = new Edge[rows][];
+    Edge[][] N = network.getAdjacencyMatrix();
+    G = new Edge[newRows][];
+    int i, j, currRows = network.rows;
 
-    for (int u : network.getVertices())
-      G[u] = copyOf(network.G[u], rows);
+    for (i = 0; i < currRows; i++) {
+      if (N[i] != null) {
+        G[i] = new Edge[newRows];
+
+        for (j = 0; j < currRows; j++) {
+          if (N[i][j] != null) 
+            G[i][j] = new Edge(i, j, N[i][j].c, N[i][j].f);
+        }
+      }
+    }
   }
 
   /**
@@ -452,7 +472,7 @@ public final class FlowNetwork {
   }
 
   /**
-   * Returns the matrix adjacency representation.
+   * Returns a copy of the matrix adjacency representation.
    *
    * @return the adjacency matrix
    */
