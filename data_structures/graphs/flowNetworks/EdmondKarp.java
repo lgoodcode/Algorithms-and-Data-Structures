@@ -1,5 +1,6 @@
 package data_structures.graphs.flowNetworks;
 
+import data_structures.linkedLists.LinkedList;
 import data_structures.queues.Queue;
 
 /**
@@ -47,12 +48,13 @@ public final class EdmondKarp extends MaxFlowAlgorithm {
 
     if (source == sink)
       return 0;
-    return run(new FlowNetwork(network), source, sink).getFlow();
+    return computeMaxFlow(new FlowNetwork(network), source, sink);
   }
 
   /**
-   * Runs the Edmond-Karp algorithm to find the paths for the maximum flow in
-   * the specified flow network from the specified source to the sink.
+   * Runs the Edmond-Karp algorithm to find the paths for the maximum flow in the
+   * specified flow network from the specified source to the sink. Returns an
+   * array of strings for each path and their respective.
    *
    * @param network the flow network
    * @param source  the starting vertex
@@ -62,21 +64,42 @@ public final class EdmondKarp extends MaxFlowAlgorithm {
    *
    * @throws IllegalArgumentException if the source or sink vertices are invalid
    */
-  public static Object[] maxFlowPaths(FlowNetwork network, int source, int sink) {
+  public static String[] maxFlowPaths(FlowNetwork network, int source, int sink) {
     network.checkVertex(source);
     network.checkVertex(sink);
 
     if (source == sink)
-      return new Object[0];
-    return run(new FlowNetwork(network), source, sink).getPaths();
+      return new String[0];
+    return computeMaxFlowPaths(new FlowNetwork(network), source, sink);
   }
 
-  private static FlowPaths run(FlowNetwork network, int s, int t) {
+  /**
+   * Runs the Edmond-Karp algorithm to find the paths for the maximum flow in the
+   * specified flow network from the specified source to the sink. Returns an
+   * array of the paths and their flow as the first index followed by the vertices
+   * of the path.
+   *
+   * @param network the flow network
+   * @param source  the starting vertex
+   * @param sink    the destination vertex
+   * @return the arrays of paths for the maximum flow from source to sink or an
+   *         array of {@code 0} length if no paths exist for a maximum flow
+   *
+   * @throws IllegalArgumentException if the source or sink vertices are invalid
+   */
+  public static Integer[][] maxFlowArray(FlowNetwork network, int source, int sink) {
+    network.checkVertex(source);
+    network.checkVertex(sink);
+
+    if (source == sink)
+      return new Integer[0][];
+    return computeMaxFlowArray(new FlowNetwork(network), source, sink);
+  }
+
+  private static int computeMaxFlow(FlowNetwork network, int s, int t) {
     FlowNetwork.Edge[][] G = network.getAdjacencyMatrix();
     Node[] VTS = new Node[network.getRows()];
-    FlowPaths P = new FlowPaths();
-    StringBuilder sb = new StringBuilder();
-    int flow = 0;
+    int maxFlow = 0;
 
     // Initialize nodes
     for (int i = 0; i < G.length; i++)
@@ -84,18 +107,10 @@ public final class EdmondKarp extends MaxFlowAlgorithm {
 
     // While there is a path p from source to sink in residual network Gf that can
     // be augmented
-    while (EK_BFS(network, VTS, s, t)) {
+    while (EK_BFS(network, VTS, s, t))
       // Find the minimum residual capacity of all edges from s to t along path p
-      flow = printResidualCapacity(G, VTS, sb, Integer.MAX_VALUE, t);
-
-      P.addFlow(flow);
-      // Prepends the path with the residual capacity for that path
-      P.addPath(flow + ": " + sb.toString() + t);
-
-      sb = new StringBuilder();
-    }
-
-    return P;
+      maxFlow += residualCapacity(G, VTS, Integer.MAX_VALUE, t);
+    return maxFlow;
   }
 
   /**
@@ -111,7 +126,6 @@ public final class EdmondKarp extends MaxFlowAlgorithm {
    */
   private static boolean EK_BFS(FlowNetwork G, Node[] VTS, int s, int t) {
     Queue<Integer> Q = new Queue<>(G.getRows());
-    int[] vertices;
     int u, v;
 
     // Reset nodes to unvisited
@@ -127,10 +141,7 @@ public final class EdmondKarp extends MaxFlowAlgorithm {
       u = Q.dequeue();
 
       for (FlowNetwork.Edge edge : G.getEdges(u)) {
-        // Get the vertices to ensure we are setting v to the adjacent vertex
-        // because of the reversed edges, which could set v == u
-        vertices = edge.getVertices();
-        v = vertices[1] == u ? vertices[0] : vertices[1];
+        v = edge.getVertices()[1];
 
         // Find edges with a positive residual capacity: the maximum amount of flow
         // that can be added to each edge in the augmenting path
@@ -145,6 +156,51 @@ public final class EdmondKarp extends MaxFlowAlgorithm {
 
     // Find if there was a path from the source to the sink (reached sink from source)
     return VTS[t].visited();
+  }
+
+  private static String[] computeMaxFlowPaths(FlowNetwork network, int s, int t) {
+    FlowNetwork.Edge[][] G = network.getAdjacencyMatrix();
+    Node[] VTS = new Node[network.getRows()];
+    FlowPaths P = new FlowPaths(true);
+    StringBuilder sb = new StringBuilder();
+    int flow = 0;
+
+    for (int i = 0; i < G.length; i++)
+      VTS[i] = new Node(i);
+
+    while (EK_BFS(network, VTS, s, t)) {
+      // Find the minimum residual capacity of all edges from s to t along path p
+      flow = printResidualCapacity(G, VTS, sb, Integer.MAX_VALUE, t);
+      // Add the string path with the flow
+      P.addPath(flow + ": " + sb.toString() + t);
+      // Reset the stringbuilder for the next path
+      sb = new StringBuilder();
+    }
+
+    return P.getStringPaths();
+  }
+
+  private static Integer[][] computeMaxFlowArray(FlowNetwork network, int s, int t) {
+    FlowNetwork.Edge[][] G = network.getAdjacencyMatrix();
+    Node[] VTS = new Node[network.getRows()];
+    FlowPaths P = new FlowPaths(false);
+    LinkedList<Integer> L = new LinkedList<>();
+    int flow = 0;
+
+    for (int i = 0; i < G.length; i++)
+      VTS[i] = new Node(i);
+
+    while (EK_BFS(network, VTS, s, t)) {
+      flow = arrayResidualCapacity(G, VTS, L, Integer.MAX_VALUE, t);
+      // Add the sink to the end of the path of vertices
+      L.insertLast(t);
+      // Add the flow for this path
+      P.addPath(L, flow);
+      // Reset the linkedlist for the next path
+      L = new LinkedList<>();
+    }
+
+    return P.getArrayPaths();
   }
 
   /**

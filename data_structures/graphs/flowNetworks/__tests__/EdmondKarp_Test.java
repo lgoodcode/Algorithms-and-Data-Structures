@@ -12,10 +12,15 @@ import data_structures.graphs.flowNetworks.EdmondKarp;
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 public class EdmondKarp_Test {
   FlowNetwork G = new FlowNetwork(10);
-  String[] paths = {
-    "7: 0 -> 2 -> 4 -> 3 -> 5",
+  String[] stringPaths = {
+    "12: 0 -> 1 -> 3 -> 5",
     "4: 0 -> 2 -> 4 -> 5",
-    "12: 0 -> 1 -> 3 -> 5"
+    "7: 0 -> 2 -> 4 -> 3 -> 5"
+  };
+  Integer[][] arrayPaths = {
+    { 12, 0, 1, 3, 5 },
+    { 4, 0, 2, 4, 5 },
+    { 7, 0, 2, 4, 3, 5 }
   };
 
   @BeforeEach
@@ -42,16 +47,30 @@ public class EdmondKarp_Test {
   }
 
   @Test
-  void paths() {
-    assertArrayEquals(paths, EdmondKarp.maxFlowPaths(G, 0, 5));
-    Object[] p = EdmondKarp.maxFlowPaths(G, 0, 5);
-    assertEquals(paths[0], p[0]);
-    assertEquals(paths[1], p[1]);
-    assertEquals(paths[2], p[2]);
+  void string_paths() {
+    assertArrayEquals(stringPaths, EdmondKarp.maxFlowPaths(G, 0, 5));
+    String[] p = EdmondKarp.maxFlowPaths(G, 0, 5);
+    assertEquals(stringPaths[0], p[0]);
+    assertEquals(stringPaths[1], p[1]);
+    assertEquals(stringPaths[2], p[2]);
   }
 
   @Test
-  void no_paths() {
+  void no_string_path() {
     assertEquals(0, EdmondKarp.maxFlowPaths(G, 0, 0).length);
+  }
+
+  @Test
+  void array_paths() {
+    assertArrayEquals(arrayPaths, EdmondKarp.maxFlowArray(G, 0, 5));
+    Integer[][] arr = EdmondKarp.maxFlowArray(G, 0, 5);
+    assertArrayEquals(arrayPaths[0], arr[0]);
+    assertArrayEquals(arrayPaths[1], arr[1]);
+    assertArrayEquals(arrayPaths[2], arr[2]);
+  }
+
+  @Test
+  void no_array_path() {
+    assertArrayEquals(new Integer[0][], EdmondKarp.maxFlowArray(G, 0, 0));
   }
 }

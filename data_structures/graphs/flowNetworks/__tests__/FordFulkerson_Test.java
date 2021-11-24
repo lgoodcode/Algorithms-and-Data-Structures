@@ -12,11 +12,17 @@ import data_structures.graphs.flowNetworks.FordFulkerson;
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 public class FordFulkerson_Test {
   FlowNetwork G = new FlowNetwork(10);
-  String[] paths = {
-    "7: 0 -> 2 -> 4 -> 3 -> 5",
-    "4: 0 -> 2 -> 3 -> 5",
+  String[] stringPaths = {
+    "4: 0 -> 1 -> 3 -> 2 -> 4 -> 5",
     "8: 0 -> 1 -> 3 -> 5",
-    "4: 0 -> 1 -> 3 -> 2 -> 4 -> 5"
+    "4: 0 -> 2 -> 3 -> 5",
+    "7: 0 -> 2 -> 4 -> 3 -> 5"
+  };
+  Integer[][] arrayPaths = {
+    { 4, 0, 1, 3, 2, 4, 5 },
+    { 8, 0, 1, 3, 5 },
+    { 4, 0, 2, 3, 5 },
+    { 7, 0, 2, 4, 3, 5 }
   };
 
   @BeforeEach
@@ -48,17 +54,32 @@ public class FordFulkerson_Test {
   }
 
   @Test
-  void paths() {
-    assertArrayEquals(paths, FordFulkerson.maxFlowPaths(G, 0, 5));
+  void string_paths() {
+    assertArrayEquals(stringPaths, FordFulkerson.maxFlowPaths(G, 0, 5));
     Object[] p = FordFulkerson.maxFlowPaths(G, 0, 5);
-    assertEquals(paths[0], p[0]);
-    assertEquals(paths[1], p[1]);
-    assertEquals(paths[2], p[2]);
-    assertEquals(paths[3], p[3]);
+    assertEquals(stringPaths[0], p[0]);
+    assertEquals(stringPaths[1], p[1]);
+    assertEquals(stringPaths[2], p[2]);
+    assertEquals(stringPaths[3], p[3]);
   }
 
   @Test
-  void no_paths() {
+  void no_string_path() {
     assertEquals(0, FordFulkerson.maxFlowPaths(G, 0, 0).length);
+  }
+
+  @Test
+  void array_paths() {
+    assertArrayEquals(arrayPaths, FordFulkerson.maxFlowArray(G, 0, 5));
+    Integer[][] arr = FordFulkerson.maxFlowArray(G, 0, 5);
+    assertArrayEquals(arrayPaths[0], arr[0]);
+    assertArrayEquals(arrayPaths[1], arr[1]);
+    assertArrayEquals(arrayPaths[2], arr[2]);
+    assertArrayEquals(arrayPaths[3], arr[3]);
+  }
+
+  @Test
+  void no_array_path() {
+    assertArrayEquals(new Integer[0][], FordFulkerson.maxFlowArray(G, 0, 0));
   }
 }
