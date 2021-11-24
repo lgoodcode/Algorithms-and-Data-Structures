@@ -715,9 +715,9 @@ public abstract class AbstractTree<K, V> {
   }
 
   /**
-   * A tree iterator class. This class implements the interfaces. It keeps a
-   * {@link Queue} of the nodes in the tree after performing an inorder tree walk
-   * to insert all the nodes.
+   * A tree iterator class. This class implements the {@link Iterator} and
+   * {@link Iterable} interfaces. It keeps a {@link Queue} of the nodes in the
+   * tree after performing an inorder tree walk to insert all the nodes.
    *
    * <p>
    * Will throw a {@link ConcurrentModificationException} if the tree was modified

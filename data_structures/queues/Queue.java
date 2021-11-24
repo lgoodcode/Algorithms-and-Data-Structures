@@ -234,18 +234,21 @@ public final class Queue<T> implements java.io.Serializable {
   }
 
   /**
-   * Returns an array containing all of the elements in this queue
-   * in proper sequence (from first to last element).
+   * Returns an array containing all of the elements in this queue in proper
+   * sequence (from first to last element).
    *
-   * <p>The returned array will be "safe" in that no references to it are
-   * maintained by this queue.  (In other words, this method must allocate
-   * a new array).  The caller is thus free to modify the returned array.
+   * <p>
+   * The returned array will be "safe" in that no references to it are maintained
+   * by this queue. (In other words, this method must allocate a new array). The
+   * caller is thus free to modify the returned array.
+   * </p>
    *
-   * <p>This method acts as bridge between array-based and collection-based
-   * APIs.
+   * <p>
+   * This method acts as bridge between array-based and collection-based APIs.
+   * </p>
    *
-   * @return an array containing all of the elements in this queue
-   *         in proper sequence
+   * @return an array containing all of the elements in this queue in proper
+   *         sequence
    */
   public Object[] toArray() {
     Object[] arr = new Object[size()];
@@ -304,8 +307,7 @@ public final class Queue<T> implements java.io.Serializable {
    */
   @SuppressWarnings("unchecked")
   @java.io.Serial
-  private void readObject(java.io.ObjectInputStream stream)
-throws java.io.IOException, ClassNotFoundException {
+  private void readObject(java.io.ObjectInputStream stream) throws java.io.IOException, ClassNotFoundException {
     // Read in any hidden serialization magic
     stream.defaultReadObject();
 

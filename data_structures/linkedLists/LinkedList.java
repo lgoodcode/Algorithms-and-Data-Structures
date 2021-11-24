@@ -241,8 +241,7 @@ public class LinkedList<T> extends AbstractLinkedList<T> implements java.io.Seri
    */
   @SuppressWarnings("unchecked")
   @java.io.Serial
-  private void readObject(java.io.ObjectInputStream stream) 
-throws java.io.IOException, ClassNotFoundException {
+  private void readObject(java.io.ObjectInputStream stream) throws java.io.IOException, ClassNotFoundException {
     // Read in any hidden serialization magic
     stream.defaultReadObject();
 

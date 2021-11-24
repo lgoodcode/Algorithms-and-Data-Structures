@@ -420,18 +420,21 @@ public abstract class AbstractLinkedList<T> {
   }
 
   /**
-   * Returns an array containing all of the elements in this list
-   * in proper sequence (from first to last element).
+   * Returns an array containing all of the elements in this list in proper
+   * sequence (from first to last element).
    *
-   * <p>The returned array will be "safe" in that no references to it are
-   * maintained by this list.  (In other words, this method must allocate
-   * a new array).  The caller is thus free to modify the returned array.
+   * <p>
+   * The returned array will be "safe" in that no references to it are maintained
+   * by this list. (In other words, this method must allocate a new array). The
+   * caller is thus free to modify the returned array.
+   * </p>
    *
-   * <p>This method acts as bridge between array-based and collection-based
-   * APIs.
+   * <p>
+   * This method acts as bridge between array-based and collection-based APIs.
+   * </p>
    *
-   * @return an array containing all of the elements in this list
-   *         in proper sequence
+   * @return an array containing all of the elements in this list in proper
+   *         sequence
    */
   public final Object[] toArray() {
     Object[] arr = new Object[size];
@@ -493,10 +496,10 @@ public abstract class AbstractLinkedList<T> {
   }
 
   /**
-   * A linkedlist iterator class. This class implements the interfaces. It simply
-   * keeps a reference to a single {@link Node} to retain the current position and
-   * not have to sequentially have to find the next node from the start or end
-   * again.
+   * A linkedlist iterator class. This class implements the {@link Iterator} and
+   * {@link Iterable} interfaces. It simply keeps a reference to a single
+   * {@link Node} to retain the current position and not have to sequentially have
+   * to find the next node from the start or end again.
    *
    * <p>
    * Doesn't need to be generic or static because it will be accessing the
