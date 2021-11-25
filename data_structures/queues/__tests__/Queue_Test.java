@@ -76,6 +76,13 @@ public class Queue_Test {
     }
 
     @Test
+    void removeAt_throws() {
+      assertThrows(IndexOutOfBoundsException.class, ()-> queue.removeAt(-1));
+      assertThrows(IndexOutOfBoundsException.class, ()-> queue.removeAt(11));
+      assertThrows(NoSuchElementException.class, ()-> queue.removeAt(0));
+    }
+
+    @Test
     void peek_is_null() {
       assertNull(queue.peek());
     }
@@ -142,6 +149,12 @@ public class Queue_Test {
       queue.clear();
       assertTrue(queue.isEmpty());
       assertEquals(0, queue.size());
+    }
+
+    @Test
+    void removeAt() {
+      queue.removeAt(2);
+      assertFalse(queue.has(3));
     }
 
     @Test

@@ -595,7 +595,7 @@ public abstract class AbstractLinkedList<T> {
       synchronized (AbstractLinkedList.this) {
         // Remove the last returned node to from the linkedlist
         AbstractLinkedList.this.remove((Node<T>) last);
-        expectedModCount = modCount;
+        expectedModCount++;
         last = null;
         cursor--;
       }

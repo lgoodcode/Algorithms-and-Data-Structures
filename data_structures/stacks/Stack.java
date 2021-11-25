@@ -221,6 +221,31 @@ public final class Stack<T> implements java.io.Serializable {
   }
 
   /**
+   * Removes the element at the specified index of the stack.
+   * 
+   * @param index the position of the element to remove
+   * 
+   * @throws IndexOutOfBoundsException if the index is less than {@code 0} equal
+   *                                   to or greater than the stack size
+   * @throws NoSuchElementException    if there is no element to remove at the
+   *                                   specified index
+   */
+  public synchronized void removeAt(int index) {
+    if (index < 0)
+      throw new IndexOutOfBoundsException("Index cannot be less than 0.");
+    if (index >= stack.length)
+      throw new IndexOutOfBoundsException("Index cannot be greater than stack size.");
+    if (stack[index] == null)
+      throw new NoSuchElementException("No element at this index to remove.");
+
+    for (int i = index, len = --top; i < len; i++)
+      stack[i] = stack[i+1];
+    stack[top] = null;
+
+    modCount++;
+  }
+
+  /**
    * Returns an array containing all of the elements in this stack in proper
    * sequence (from first to last element).
    *
@@ -412,12 +437,8 @@ public final class Stack<T> implements java.io.Serializable {
 
       // Synchronized block to lock the stack object while removing entry
       synchronized (Stack.this) {
-        // Shift all items down one
-        for (int i = cursor + 1, len = top - 1; i < len; i++)
-          stack[i] = stack[i+1];
-        stack[--top] = null;
-        
-        expectedModCount = modCount;
+        Stack.this.removeAt(cursor + 1);
+        expectedModCount++;
         last = false;
       }
     }

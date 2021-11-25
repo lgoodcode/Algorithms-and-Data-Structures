@@ -92,6 +92,13 @@ public class Stack_Test {
     }
 
     @Test
+    void removeAt_throws() {
+      assertThrows(IndexOutOfBoundsException.class, ()-> stack.removeAt(-1));
+      assertThrows(IndexOutOfBoundsException.class, ()-> stack.removeAt(6));
+      assertThrows(NoSuchElementException.class, ()-> stack.removeAt(0));
+    }
+
+    @Test
     void empty_stack_string() {
       assertEquals("[]", stack.toString());
     }
@@ -149,6 +156,12 @@ public class Stack_Test {
       stack.clear();
       assertEquals(0, stack.size());
       assertTrue(stack.isEmpty());
+    }
+
+    @Test
+    void removeAt() {
+      stack.removeAt(2);
+      assertFalse(stack.has(3));
     }
 
     @Test

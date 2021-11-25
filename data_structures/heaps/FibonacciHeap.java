@@ -161,18 +161,18 @@ public final class FibonacciHeap<T> implements java.io.Serializable {
    * 11  H.n = H.n + 1
    */
 
-   /**
-    * Inserts a new key/value node into the heap by simply adding it to the root
-    * list. The key is used to identify the priority of the new node; a smaller key
-    * is extracted sooner than one that is larger.
-    *
-    * @param key   the key
-    * @param value the value
-    * @see LinkedLists.CircularLinkedList
-    *
-    * @throws IllegalArgumentException if the specified item is {@code null} or
-    *                                  blank
-    */
+  /**
+   * Inserts a new key/value node into the heap by simply adding it to the root
+   * list. The key is used to identify the priority of the new node; a smaller key
+   * is extracted sooner than one that is larger.
+   *
+   * @param key   the key
+   * @param value the value
+   * @see LinkedLists.CircularLinkedList
+   *
+   * @throws IllegalArgumentException if the specified item is {@code null} or
+   *                                  blank
+   */
   public synchronized void insert(T item) {
     if (item == null || item.toString().isBlank())
       throw new IllegalArgumentException("Item cannot be null or blank.");
@@ -423,12 +423,12 @@ public final class FibonacciHeap<T> implements java.io.Serializable {
    * 3   y.mark = False
    */
 
-   /**
-    * Makes y a child of x
-    *
-    * @param y node to become a child
-    * @param x node to become a parent
-    */
+  /**
+   * Makes y a child of x
+   *
+   * @param y node to become a child
+   * @param x node to become a parent
+   */
   private void heapLink(Node<T> y, Node<T> x) {
     // Remove y from root list
     y.left.right = y.right;
@@ -583,8 +583,8 @@ public final class FibonacciHeap<T> implements java.io.Serializable {
    */
 
   /**
-   * Cuts the {@code FibonacciNode} from its parent and continues up to every
-   * parent of the original node.
+   * Cuts the node from its parent and continues up to every parent of the
+   * original node.
    *
    * @param y node to cut from parent
    */
@@ -850,7 +850,6 @@ public final class FibonacciHeap<T> implements java.io.Serializable {
         min = last;
         extractMin();
 
-        expectedModCount = modCount;
         last = null;
       }
     }
