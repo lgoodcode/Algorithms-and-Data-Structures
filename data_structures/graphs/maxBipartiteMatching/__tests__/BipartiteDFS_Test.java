@@ -10,7 +10,7 @@ import data_structures.graphs.maxBipartiteMatching.BipartiteDFS;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 public class BipartiteDFS_Test {
-  Graph G = new Graph(10);
+  Graph G = new Graph(10, true, true);
 
   @BeforeEach
   void setup() {
@@ -47,19 +47,22 @@ public class BipartiteDFS_Test {
   }
 
   @Test
-  void range_total() {
-    assertEquals(3, BipartiteDFS.totalMatchesRange(G, 5, 9));
+  void printMatches() {
+    assertEquals("{\n"
+      + "\s\s1 -> 6\n"
+      + "\s\s2 -> 8\n"
+      + "\s\s3 -> 7\n"
+      + "}", BipartiteDFS.printMatches(G));
   }
 
   @Test
-  void range_matches() {
-    int[] matches = BipartiteDFS.matchesRange(G, 5, 9);
-    int numMatches = 0;
+  void printMatches_from_results() {
+    int[] matches = BipartiteDFS.matches(G);
 
-    for (int x : matches)
-      if (x != Graph.NIL)
-        numMatches++;
-
-    assertEquals(3, numMatches);
+    assertEquals("{\n"
+      + "\s\s1 -> 6\n"
+      + "\s\s2 -> 8\n"
+      + "\s\s3 -> 7\n"
+      + "}", BipartiteDFS.printMatches(matches));
   }
 }

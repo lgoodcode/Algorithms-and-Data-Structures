@@ -16,7 +16,7 @@ import data_structures.queues.Queue;
 
 /**
  * <h3>Hopcroft-Karp {@code O(sqrt(V) E)}</h3>
- * 
+ *
  * <p>
  * The Hopcroft-Karp algorithm finds a maximum matching in a bipartite graph on
  * {@code O(sqrt(V) E)}.
@@ -40,14 +40,14 @@ import data_structures.queues.Queue;
  * that contain one vertex to which each vertex of {@code U} and of {@code V} is
  * matched, or {@code NIL} for unmatched vertices.
  * </p>
- * 
+ *
  * <p>
  * Using the {@code null} (dummy) vertex connected to all unmatched vertices in
  * {@code U} and {@code V}, so that when we run the BFS from dummy to dummy, we
  * can get the paths of minimal length that connect currently unmatched vertices
  * in {@code U} to currently unmatched vertices in {@code V}.
  * </p>
- * 
+ *
  * <p>
  * As the graph is bipartite, these paths always alternate between vertices in
  * {@code U} and vertices in {@code V}, and we require in our BFS that when
@@ -90,13 +90,11 @@ import data_structures.queues.Queue;
  * to the lines: {@code dist[u] = Infinity; return false;}
  * </p>
  */
-public final class HopcroftKarp {
-  private static final boolean TOTAL = false;
-  private static final boolean MATCHES = true;
+public final class HopcroftKarp extends BipartiteMatchingAlgorithm {
   // Dummy vertex
   private static int NIL;
 
-  public static class Node {
+  private static class Node {
     private int pairU;
     private int pairV;
     private int distance;
@@ -107,16 +105,69 @@ public final class HopcroftKarp {
       distance = 0;
     }
   }
-  
+
   // Prevent this class from being instantiated
   public HopcroftKarp() {
-    throw new NoClassDefFoundError("Cannot instantiate this class.");
+    super();
+  }
+
+  /**
+   * Runs the Hopcroft-Karp algorithm on the specified directed graph where the
+   * edges are possible pairs and finds the maximum cardinality of possible pairs.
+   *
+   * @param graph the directed graph to run the algorithm on
+   * @return the maximum cardinality of matches
+   *
+   * @throws IllegalArgumentException if the specified graph is not directed
+   */
+  public static int total(Graph graph) {
+    if (!graph.isDirected())
+      throw new IllegalArgumentException("The graph must be directed.");
+    return run(TOTAL, graph);
+  }
+
+  /**
+   * Runs the Hopcroft-Karp algorithm on the specified directed graph where the
+   * edges are possible pairs and finds the maximum cardinality of possible pairs.
+   * Will return an array of the matches where the array indices represent the
+   * vertices and the value is the matched vertex.
+   *
+   * @param graph the directed grpah to run the algorithm on
+   * @return the array of matches
+   *
+   * @throws IllegalArgumentException if the specified graph is not directed
+   */
+  public static int[] matches(Graph graph) {
+    if (!graph.isDirected())
+      throw new IllegalArgumentException("The graph must be directed.");
+
+    int n = graph.getRows(), NIL = n;
+    Node[] VTS = run(MATCHES, graph);
+    int[] matches = new int[n];
+
+    for (int i = 0; i < n; i++)
+      matches[i] = VTS[i].pairU != NIL ? VTS[i].pairU : Graph.NIL;
+    return matches;
+  }
+
+  /**
+   * Runs the Hopcroft-Karp algorithm on the specified directed graph where the
+   * edges are possible pairs and finds the maximum cardinality of possible pairs.
+   * Will return a string representing the pairs.
+   *
+   * @param graph the directed graph to run the algorithm on
+   * @return the string of matches
+   *
+   * @throws IllegalArgumentException if the specified graph is not directed
+   */
+  public static String printMatches(Graph graph) {
+    return printMatches(matches(graph));
   }
 
   @SuppressWarnings("unchecked")
-  private static <T> T _run(boolean type, Graph G) {
+  private static <T> T run(boolean type, Graph G) {
     int n = G.getRows();
-    // Set the dummy vertex to the next possible vertex that doesn't exist
+    // Set the dummy vertex to the next possible vertex that doesn't exist in G
     NIL = n;
     Node[] VTS = new Node[n+1];
     Integer maxMatches = 0;
@@ -141,7 +192,7 @@ public final class HopcroftKarp {
   /**
    * Performs a Breadth-first search on the initial layer of vertices, only
    * traversed edges that haven't been matched.
-   * 
+   *
    * @param G   the graph
    * @param VTS the array of vertices with their pairs and distances
    * @return whether there is an augmenting path available
@@ -161,14 +212,14 @@ public final class HopcroftKarp {
         Q.enqueue(u);
       }
       // Otherwise, set distance as infinite so that the vertex is considered next time
-      else 
-        VTS[u].distance = Integer.MAX_VALUE; 
+      else
+        VTS[u].distance = Integer.MAX_VALUE;
     }
 
-    // Initialize distance to dummy vertex as infinite 
+    // Initialize distance to dummy vertex as infinite
     VTS[NIL].distance = Integer.MAX_VALUE;
 
-    while (!Q.isEmpty()) { 
+    while (!Q.isEmpty()) {
       u = Q.dequeue();
       // If this node is not NIL and can provide a shorter path to dummy vertex
       if (VTS[u].distance < VTS[NIL].distance) {
@@ -184,7 +235,7 @@ public final class HopcroftKarp {
         }
       }
     }
-    // If we can come back to NIL using an alternating path of distinct 
+    // If we can come back to NIL using an alternating path of distinct
     // vertices, then there is an augmenting path
     return VTS[NIL].distance != Integer.MAX_VALUE;
   }
@@ -193,7 +244,7 @@ public final class HopcroftKarp {
    * The Depth-first search part of the Hopcroft-Karp algorithm where once we find
    * a vertex that doesn't have a pair in the {@code U} set (pairU[u] == dummy
    * vertex).
-   * 
+   *
    * <p>
    * The operation first checks each adjacent vertex {@code v} of the edges of the
    * specified vertex {@code u}. It makes a check whether if {@code pairV[v]} has
@@ -204,7 +255,7 @@ public final class HopcroftKarp {
    * matched, or, if the checked vertex can be matched to a different vertex.
    * Otherwise, the vertex {@code u} cannot be matched or is already matched.
    * </p>
-   * 
+   *
    * @param G   the graph containing the edges for matches
    * @param VTS the array of all the vertices with their pairs and distances
    * @param u   the vertex being checked for a potential pair
@@ -219,7 +270,7 @@ public final class HopcroftKarp {
 
     int v;
     for (Graph.Edge edge : G.getEdges(u)) {
-      v = edge.getVertices()[1];  
+      v = edge.getVertices()[1];
 
       // If pairV[v] has a shorter distance than the current pair for u
       // and doesn't already have a pair that is shorter
@@ -227,85 +278,12 @@ public final class HopcroftKarp {
         VTS[v].pairV = u;
         VTS[u].pairU = v;
         return true;
-      } 
+      }
     }
 
     // A pair couldn't be made so we set the distance of u to infinity to
     // indicate there is no match
     VTS[u].distance = Integer.MAX_VALUE;
     return false;
-  }
-
-  /**
-   * Runs the Hopcroft-Karp algorithm on the specified directed graph where the
-   * edges are possible pairs and finds the maximum cardinality of possible pairs.
-   * 
-   * @param graph the directed graph to run the algorithm on
-   * @return the maximum cardinality of matches
-   * 
-   * @throws IllegalArgumentException if the specified graph is not directed
-   */
-  public static int total(Graph graph) {
-    if (!graph.isDirected())
-      throw new IllegalArgumentException("The graph must be directed.");
-    return _run(TOTAL, graph);
-  }
-
-  /**
-   * Runs the Hopcroft-Karp algorithm on the specified directed graph where the
-   * edges are possible pairs and finds the maximum cardinality of possible pairs.
-   * Will return an array of the matches where the array indices represent the
-   * vertices and the value is the matched vertex.
-   * 
-   * @param graph the directed grpah to run the algorithm on
-   * @return the array of matches
-   * 
-   * @throws IllegalArgumentException if the specified graph is not directed
-   */
-  public static int[] matches(Graph graph) {
-    if (!graph.isDirected())
-      throw new IllegalArgumentException("The graph must be directed.");
-    
-    int n = graph.getRows(), NIL = n;
-    Node[] VTS = _run(MATCHES, graph);
-    int[] matches = new int[n];
-
-    for (int i = 0; i < n; i++)
-      matches[i] = VTS[i].pairU != NIL ? VTS[i].pairU : Graph.NIL;
-    return matches;
-  }
-
-  /**
-   * Runs the Hopcroft-Karp algorithm on the specified directed graph where the
-   * edges are possible pairs and finds the maximum cardinality of possible pairs.
-   * Takes the results of the {@link #matches(Graph)} method and prints the
-   * matches.
-   * 
-   * @param matches the array of matches
-   * @return the string of matches
-   */
-  public static String printMatches(int[] matches) {
-    StringBuilder sb = new StringBuilder("{\n");
-
-    for (int i = 0, len = matches.length; i < len; i++) {
-      if (matches[i] != Graph.NIL)
-        sb.append("\s\s" + i + " -> " + matches[i] + "\n");
-    }
-
-    return sb.toString() + "}";
-  }
-
-  /**
-   * Runs the Hopcroft-Karp algorithm on the specified directed graph where the
-   * edges are possible pairs and finds the maximum cardinality of possible pairs.
-   * Will return a string representing the pairs.
-   * 
-   * @param graph the directed graph to run the algorithm on
-   * @return the string of matches
-   * 
-   * @throws IllegalArgumentException if the specified graph is not directed
-   */
-  public static String printMatches(Graph graph) {
-    return printMatches(matches(graph));
   }
 }
