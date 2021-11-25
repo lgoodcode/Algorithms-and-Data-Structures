@@ -1,46 +1,60 @@
 package data_structures.heaps;
 
+import java.util.Comparator;
+import java.util.ConcurrentModificationException;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.function.BiFunction;
 
-import data_structures.Entry;
+import data_structures.EmptyIterator;
 
 /**
- * Simple Binary Minimum Heap implementation. Uses the {@link Entry} class to
- * hold the MinHeap key identifier and the value.
+ * Simple Binary Minimum Heap implementation.
  */
-public class MinHeap<T> {
+public final class MinHeap<T> implements java.io.Serializable {
+  @java.io.Serial
+  private static final long serialVersionUID = 199208284839394831L;
+
   /**
    * The comparison function used to determine whether an element is less than
    * another to retain the minimum for the extractMin operation.
    */
-  private BiFunction<T, T, Boolean> compare;
+  private transient Comparator<? super T> compare;
 
   /**
    * The array to hold the elements in the heap.
    */
-  private Entry<Integer, T>[] heap;
+  private transient T[] heap;
 
   /**
    * The number of elements in the heap.
    */
-  private int size = 0;
+  private transient int size = 0;
+
+  /**
+   * The number of times this heap has been structurally modified Structural
+   * modifications are those that change the number of entries in the list or
+   * otherwise modify its internal structure (e.g., insert, delete). This field is
+   * used to make iterators on Collection-views of the heap fail-fast.
+   *
+   * @see ConcurrentModificationException
+   */
+  private transient int modCount = 0;
 
   /**
    * Constructs an empty MinHeap with the specified maximum capacity of elements
    * and the custom compare function to determine the minimum element.
-   * 
+   *
    * @param capacity the capacity of the heap
    * @param compare  the comparison function
-   * 
+   *
    * @throws IllegalArgumentException if the specified capacity is less than
    *                                  {@code 1}
    */
   @SuppressWarnings("unchecked")
-  public MinHeap(int capacity, BiFunction<T, T, Boolean> compare) {
+  public MinHeap(int capacity, Comparator<? super T> compare) {
     if (capacity < 1)
       throw new IllegalArgumentException("Illegal capacity, must be greater than 1.");
-    heap = (Entry<Integer, T>[]) new Entry<?, ?>[capacity];
+    heap = (T[]) new Object[capacity];
     this.compare = compare;
   }
 
@@ -48,22 +62,22 @@ public class MinHeap<T> {
    * Constructs an empty MinHeap with the specified maximum capacity of elements
    * and uses the default compare function which compares the elements
    * {@code hashCode()}.
-   * 
+   *
    * @param capacity the capacity of the heap
-   * 
+   *
    * @throws IllegalArgumentException if the specified capacity is less than
    *                                  {@code 1}
    */
   public MinHeap(int capacity) {
-    this(capacity, (T x, T y) -> x.hashCode() < y.hashCode());
+    this(capacity, (Comparator<T>) (T x, T y) -> x.hashCode() < y.hashCode() ? -1 : x.hashCode() > y.hashCode() ? 1 : 0);
   }
 
   /**
    * Constructs a MinHeap from the values in an array and sets the capacity to the
    * length of the array.
-   * 
+   *
    * @param array the array whose values to initalize the heap with
-   * 
+   *
    * @throws NullPointerException     if the array is {@code null}
    * @throws IllegalArgumentException if the array is empty
    */
@@ -74,7 +88,7 @@ public class MinHeap<T> {
     if (array.length == 0)
       throw new IllegalArgumentException("Initial array of values cannot be empty.");
 
-    heap = (Entry<Integer, T>[]) new Entry<?, ?>[array.length];
+    heap = (T[]) new Object[array.length];
 
     for (int i = 0; i < array.length; i++)
       insert(array[i]);
@@ -82,14 +96,14 @@ public class MinHeap<T> {
 
   /**
    * Constructs a copy of another {@code MinHeap}.
-   * 
+   *
    * @param heap the heap to make a copy of
-   * 
+   *
    * @throws NullPointerException if the {@code MinHeap} is {@code null}
    */
   public MinHeap(MinHeap<T> heap) {
     if (heap == null)
-      throw new NullPointerException("Heap cannot be null");
+      throw new NullPointerException("Heap cannot be null.");
 
     this.heap = heap.heap;
     compare = heap.compare;
@@ -97,44 +111,44 @@ public class MinHeap<T> {
   }
 
   /**
-   * The internal method that uses the compare function to determine which
-   * {@code Entry} is lesser.
-   * 
+   * The internal method that uses the compare function to determine which element
+   * is lesser.
+   *
    * @param x the first entry to compare
    * @param y the second entry to compare
    * @return whether the first entry is less than the other
    */
-  private boolean isLessThan(Entry<Integer, T> x, Entry<Integer, T> y) {
-    return compare.apply(x.getValue(), y.getValue());
+  private boolean isLessThan(T x, T y) {
+    return compare.compare(x, y) < 0;
   }
 
   /**
-   * Internal method to swap two heap elements positions.
-   * 
+   * Swap two heap elements positions.
+   *
    * @param a first item index
    * @param b second item index
    */
   private void swap(int a, int b) {
-    Entry<Integer, T> temp = heap[a];
+    T temp = heap[a];
     heap[a] = heap[b];
     heap[b] = temp;
   }
 
   private int left(int i) {
-    return 2 * i;
+    return i << 1; // 2 * i
   }
-    
+
   private int right(int i) {
-    return 2 * i + 1; 
+    return (i << 1) + 1; // 2 * i + 1;
   }
-    
+
   private int parent(int i) {
-    return (int) Math.floor(i / 2);
+    return i >>> 1; // floor(i / 2)
   }
 
   /**
    * Determines whether heap is empty or not
-   * 
+   *
    * @return whether the heap is empty
    */
   public boolean isEmpty() {
@@ -142,8 +156,17 @@ public class MinHeap<T> {
   }
 
   /**
+   * Determines whether the heap is at max capacity or not
+   *
+   * @return whether the heap is full
+   */
+  public boolean isFull() {
+    return size == heap.length;
+  }
+
+  /**
    * Returns the number of elements in the heap.
-   * 
+   *
    * @return the number of elements in the heap
    */
   public int size() {
@@ -152,7 +175,7 @@ public class MinHeap<T> {
 
   /**
    * The maximum number of elements in the heap.
-   * 
+   *
    * @return the maximum number of elements in the heap
    */
   public int capacity() {
@@ -160,21 +183,29 @@ public class MinHeap<T> {
   }
 
   /**
+   * Removes all the elements in the heap.
+   */
+  public void clear() {
+    for (int i = 0; i < size; i++)
+      heap[i] = null;
+    size = 0;
+    modCount++;
+  }
+
+  /**
    * Returns the minimum element in the heap without removing it.
-   * 
+   *
    * @return the minimum element or {@code null} if empty
    */
   public T peek() {
-    if (isEmpty())
-      return null;
-    return (T) heap[0].getValue();
+    return isEmpty() ? null : (T) heap[0];
   }
 
   /**
    * Inserts a new element into the heap.
-   * 
+   *
    * @param value the element to insert
-   * 
+   *
    * @throws IllegalArgumentException if the value is {@code null} or blank
    * @throws IllegalStateException    if the heap is full
    */
@@ -183,86 +214,292 @@ public class MinHeap<T> {
       throw new IllegalArgumentException("Value cannot be null or blank.");
     if (size == heap.length)
       throw new IllegalStateException("MinHeap is full.");
-    
-    heap[size] = new Entry<Integer, T>(Integer.MIN_VALUE, value);
-    increaseKey(size, size);
-    size++;
-  }
 
-  /**
-   * Increases the key of an {@code Entry} at the specified index.
-   * 
-   * @param i      the index of the element whose key is to be increased
-   * @param newKey the new key
-   * 
-   * @throws IllegalArgumentException if the new key is smaller than the current
-   *                                  key
-   */
-  public synchronized void increaseKey(int i, int newKey) {
-    if (heap[i].getKey() > newKey)
-      throw new IllegalArgumentException("New key is smaller than current key");
+    int k = size, parent = parent(k);
+    heap[k] = value;
 
-    int parent = parent(i);
-    heap[i] = new Entry<Integer, T>(newKey, heap[i].getValue());
-
-    while (i > 0 && isLessThan(heap[i], heap[parent])) {
-      swap(i, parent);
-      i = parent;
-      parent = parent(i);
+    while (k > 0 && isLessThan(heap[k], heap[parent])) {
+      swap(k, parent);
+      k = parent;
+      parent = parent(k);
     }
+
+    size++;
+    modCount++;
   }
-    
+
   /**
    * Retrieves and removes from the heap the current smallest element in the heap.
-   * 
+   *
    * @returns the smallest element in the heap
-   * 
+   *
    * @throws NoSuchElementException if the heap is empty
    */
   public synchronized T extractMin() {
     if (size < 1)
       throw new NoSuchElementException("MinHeap is empty.");
 
-    Entry<Integer, T> min = heap[0];
+    T min = heap[0];
     heap[0] = heap[--size];
     heap[size] = null;
 
-    minHeapify(0);
-
-    return min.getValue();
+    siftDown(0);
+    modCount++;
+    return min;
   }
 
   /**
    * Internal method to sift the elements around to retain a tree-like structure
    * where the smaller elements will be placed at a lower position within the
    * heap.
-   * 
+   *
    * @param i the index of the element to start the process from
    */
-  private void minHeapify(int i) {                             
+  private void siftDown(int i) {
     int l = left(i);
     int r = right(i);
     int smallest = i;
-    
+
     if (l < size && isLessThan(heap[l], heap[i]))
       smallest = l;
     if (r < size && isLessThan(heap[r], heap[smallest]))
       smallest = r;
     if (smallest != i) {
       swap(i, smallest);
-      minHeapify(smallest);
+      siftDown(smallest);
     }
   }
 
+  /**
+   * Removes the element at the specified position.
+   *
+   * @param index the position of the element to remove
+   *
+   * @throws IndexOutOfBoundsException if the specified index is less than
+   *                                   {@code 0} or greater than the heap capacity
+   */
+  public synchronized void removeAt(int index) {
+    if (index < 0)
+      throw new IndexOutOfBoundsException("Index cannot be less than 0.");
+    if (index >= size)
+      throw new IndexOutOfBoundsException("Index " + index + "exceeds heap length of " + capacity());
+
+    int s = --size;
+
+    // If removing the last item
+    if (s == index)
+      heap[index] = null;
+    // Otherwise, place last item at removed position and siftDown
+    else {
+      heap[index] = heap[s];
+      heap[s] = null;
+      siftDown(index);
+    }
+
+    modCount++;
+  }
+
+  /**
+   * Returns the heap string elements in an array format.
+   *
+   * @return the heap string in an array format
+   */
   public String toString() {
     if (isEmpty())
-      return "{}";
+      return "[]";
 
-    StringBuilder sb = new StringBuilder("{\n");
+    StringBuilder sb = new StringBuilder("[");
 
     for (int i=0; i<heap.length; i++)
-      sb.append("\"" + heap[i].getValue() + "\"\n");
+      sb.append(heap[i] + ", ");
+    return sb.delete(sb.length() - 2, sb.length()) + "]";
+  }
 
-    return sb.toString() + "}";
+  /**
+   * Returns an array containing all of the elements in this list in proper
+   * sequence (from first to last element).
+   *
+   * <p>
+   * The returned array will be "safe" in that no references to it are maintained
+   * by this list. (In other words, this method must allocate a new array). The
+   * caller is thus free to modify the returned array.
+   * </p>
+   *
+   * <p>
+   * This method acts as bridge between array-based and collection-based APIs.
+   * </p>
+   *
+   * @return an array containing all of the elements in this list in proper
+   *         sequence
+   */
+  public Object[] toArray() {
+    if (isEmpty())
+      return new Object[0];
+
+    Object[] arr = new Object[size];
+
+    for (int i = 0, len = size; i < len; i++)
+      arr[i] = heap[i];
+    return arr;
+  }
+
+  /**
+   * Saves the state of this {@code LinkedList} instance to a stream (that is,
+   * serializes it).
+   *
+   * @param stream the {@link java.io.ObjectOutputStream} to write to
+   *
+   * @throws java.io.IOException if serialization fails
+   *
+   * @serialData The size of the list (the number of elements it contains) is
+   *             emitted (int), followed by all of its elements (each an Object)
+   *             in the proper order.
+   */
+  @java.io.Serial
+  private void writeObject(java.io.ObjectOutputStream stream) throws java.io.IOException {
+    // Write out any hidden serialization magic
+    stream.defaultWriteObject();
+
+    // Write out size
+    stream.writeInt(size);
+
+    if (isEmpty())
+      return;
+
+    // Write out all elements
+    for (int i = 0, len = size; i < len; i++)
+      stream.writeObject(heap[i]);
+  }
+
+  /**
+   * Reconstitutes this {@code MinHeaep} instance from a stream (that is,
+   * deserializes it).
+   */
+  @java.io.Serial
+  @SuppressWarnings("unchecked")
+  private void readObject(java.io.ObjectInputStream stream) throws java.io.IOException, ClassNotFoundException {
+    // Read in any hidden serialization magic
+    stream.defaultReadObject();
+
+    // Read in size
+    int size = stream.readInt();
+
+    // Read in all elements
+    for (int i = 0; i < size; i++)
+      insert((T) stream.readObject());
+  }
+
+  /**
+   * Returns an {@link Iterable} of the elements in the MinHeap
+   *
+   * @return the {@code Iterable}
+   */
+  public Iterable<T> iterable() {
+    if (isEmpty())
+      return new EmptyIterator<>();
+    return new Itr();
+  }
+
+  /**
+   * Returns an {@link Iterator} of the elements in the MinHeap
+   *
+   * @return the {@code Iterator}
+   */
+  public Iterator<T> iterator() {
+    if (isEmpty())
+      return new EmptyIterator<>();
+    return new Itr();
+  }
+
+  /**
+   * A MinHeap iterator class. This class implements the {@link Iterator} and
+   * {@link Iterable} interfaces. It uses a {@link Queue} to walk the heap and
+   * hold all the elements because of the CircularLinkedList internal structure,
+   * it would be difficult to directly iterate through the nodes.
+   *
+   * <p>
+   * Will throw a {@link ConcurrentModificationException} if the MinHeap was
+   * modified outside of the iterator.
+   * </p>
+   */
+  private class Itr implements Iterator<T>, Iterable<T> {
+    /**
+     * The current position of the iterator in the heap.
+     */
+    int cursor = 0;
+
+    /**
+     * Whether the iterator has a returned element to remove.
+     */
+    boolean last = false;
+
+    /**
+     * The expected value of modCount when instantiating the iterator. If this
+     * expectation is violated, the iterator has detected concurrent modification.
+     */
+    int expectedModCount = modCount;
+
+    public Iterator<T> iterator() {
+      return this;
+    }
+
+    public boolean hasNext() {
+      return cursor < size && heap[cursor] != null;
+    }
+
+    /**
+     * Returns the next element, if it has one to provide.
+     *
+     * @return the next element
+     * @throws ConcurrentModificationException if the list was modified during
+     *                                         computation.
+     * @throws NoSuchElementException          if no more elements exist
+     */
+    public T next() {
+      if (modCount != expectedModCount)
+        throw new ConcurrentModificationException();
+      if (!hasNext())
+        throw new NoSuchElementException("MinHeap Iterator");
+      last = true;
+      return heap[cursor++];
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * Removes from the underlying collection the last element returned
+     * by this iterator (optional operation).  This method can be called
+     * only once per call to {@link #next}.
+     * <p>
+     * The behavior of an iterator is unspecified if the underlying collection
+     * is modified while the iteration is in progress in any way other than by
+     * calling this method, unless an overriding class has specified a
+     * concurrent modification policy.
+     * <p>
+     * The behavior of an iterator is unspecified if this method is called
+     * after a call to the {@link #forEachRemaining forEachRemaining} method.
+     *
+     * @throws IllegalStateException if the {@code next} method has not yet been
+     *         called, or the {@code remove} method has already been called after
+     *         the last call to the {@code next} method.
+     *
+     * @throws ConcurrentModificationException if a function modified this map
+     *         during computation.
+     */
+    @Override
+    public void remove() {
+      if (!last)
+        throw new IllegalStateException("MinHeap Iterator. No last item.");
+      if (modCount != expectedModCount)
+        throw new ConcurrentModificationException();
+
+      // Synchronized block to lock the minheap object while removing entry
+      synchronized (MinHeap.this) {
+        // Decrement cursor to get new position after removal
+        removeAt(--cursor);
+        last = false;
+        expectedModCount++;
+      }
+    }
   }
 }

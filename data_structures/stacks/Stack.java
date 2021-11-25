@@ -286,8 +286,8 @@ public final class Stack<T> implements java.io.Serializable {
    * Reconstitutes this {@code Stack} instance from a stream (that is,
    * deserializes it).
    */
-  @SuppressWarnings("unchecked")
   @java.io.Serial
+  @SuppressWarnings("unchecked")
   private void readObject(java.io.ObjectInputStream stream) throws java.io.IOException, ClassNotFoundException {
     // Read in any hidden serialization magic
     stream.defaultReadObject();

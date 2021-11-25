@@ -78,7 +78,7 @@ public final class FibonacciHeap<T> implements java.io.Serializable {
    *
    * @see ConcurrentModificationException
    */
-  protected transient int modCount = 0;
+  private transient int modCount = 0;
 
   /**
    * Constructs an empty, FibonacciHeap, with the specified compare function to
@@ -129,11 +129,20 @@ public final class FibonacciHeap<T> implements java.io.Serializable {
   }
 
   /**
+   * Removes all the entries in the FibHeap by removing the reference to the root.
+   */
+  public void clear() {
+    min = null;
+    size = 0;
+    modCount++;
+  }
+
+  /**
    * Returns the current minimum element in the heap without extracting it.
    *
    * @return the miniumum element in the heap or {@code null} if empty
    */
-  public T getMin() {
+  public T peek() {
     return isEmpty() ? null : min.item;
   }
 
@@ -187,8 +196,8 @@ public final class FibonacciHeap<T> implements java.io.Serializable {
         min = node;
     }
 
-    // Increment size counter
     size++;
+    modCount++;
   }
 
   /**
@@ -263,8 +272,8 @@ public final class FibonacciHeap<T> implements java.io.Serializable {
       consolidate();
     }
 
-    // Decrement size counter
     size--;
+    modCount++;
 
     return z.item;
   }
@@ -699,8 +708,8 @@ public final class FibonacciHeap<T> implements java.io.Serializable {
    * Reconstitutes this {@code FibonacciHeap} instance from a stream (that is,
    * deserializes it).
    */
-  @SuppressWarnings("unchecked")
   @java.io.Serial
+  @SuppressWarnings("unchecked")
   private void readObject(java.io.ObjectInputStream stream) throws java.io.IOException, ClassNotFoundException {
     // Read in any hidden serialization magic
     stream.defaultReadObject();

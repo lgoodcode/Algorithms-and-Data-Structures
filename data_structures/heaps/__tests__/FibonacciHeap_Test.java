@@ -74,8 +74,8 @@ public class FibonacciHeap_Test {
     }
 
     @Test
-    void minimum_is_null() {
-      assertNull(heap.getMin());
+    void peek_is_null() {
+      assertNull(heap.peek());
     }
 
     @Test
@@ -139,12 +139,12 @@ public class FibonacciHeap_Test {
 
     @Test
     void get_minimum() {
-      assertEquals(1, heap.getMin());
+      assertEquals(1, heap.peek());
     }
 
     // @Test
     // void decreaseKey_throws_on_invalid_key() {
-    //   assertThrows(IllegalArgumentException.class, () -> heap.decreaseKey(heap.getMin(), 3));
+    //   assertThrows(IllegalArgumentException.class, () -> heap.decreaseKey(heap.peek(), 3));
     // }
 
     @Test
@@ -156,6 +156,14 @@ public class FibonacciHeap_Test {
         () -> assertEquals(4, heap.extractMin()),
         () -> assertEquals(5, heap.extractMin())
       );
+    }
+
+    @Test
+    void clear() {
+      heap.clear();
+      assertNull(heap.peek());
+      assertEquals(0, heap.size());
+      assertTrue(heap.isEmpty());
     }
 
     @Test

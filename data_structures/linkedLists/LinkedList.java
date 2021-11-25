@@ -239,8 +239,8 @@ public class LinkedList<T> extends AbstractLinkedList<T> implements java.io.Seri
    * Reconstitutes this {@code LinkedList} instance from a stream (that is,
    * deserializes it).
    */
-  @SuppressWarnings("unchecked")
   @java.io.Serial
+  @SuppressWarnings("unchecked")
   private void readObject(java.io.ObjectInputStream stream) throws java.io.IOException, ClassNotFoundException {
     // Read in any hidden serialization magic
     stream.defaultReadObject();
