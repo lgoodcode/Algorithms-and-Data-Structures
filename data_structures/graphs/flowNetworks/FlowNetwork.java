@@ -525,7 +525,7 @@ public final class FlowNetwork {
       return new Edge[0];
 
     int j, k = 0, len = rows;
-    Edge[] E = new Edge[edges];
+    Edge[] E = new Edge[edges * 2];
 
     // Iterate through each vertex
     for (int i : getVertices()) {
