@@ -444,7 +444,7 @@ public final class FlowNetwork {
    *
    * @throws IllegalArgumentException if the capacity is less than {@code 0}
    */
-  public static void checkCapacity(int capacity){
+  private static void checkCapacity(int capacity){
     if (capacity < 0)
       throw new IllegalArgumentException("Capacity Constraint: capacity cannot be less than 0. ");
   }
@@ -457,7 +457,7 @@ public final class FlowNetwork {
    *
    * @throws IllegalArgumentException if the capacity is less than {@code 0}
    */
-  public static void checkFlow(int flow) {
+  private static void checkFlow(int flow) {
     if (flow < 0)
       throw new IllegalArgumentException("Flow cannot be less than 0.");
   }
@@ -515,6 +515,28 @@ public final class FlowNetwork {
   }
 
   /**
+   * Returns an array of the adjacent vertices of the specified vertex.
+   * 
+   * @param u the vertex whose adjacent vertices is needed
+   * @return the adjacent vertices
+   * 
+   * @throws IllegalArgumentException if the vertex doesn't exist in the flow
+   *                                  network
+   */
+  public int[] getAdjacentVertices(int u) {
+    if (!hasVertex(u))
+      throw new IllegalArgumentException("Vertex " + u + " does not exist in flow network.");
+
+    int[] V = new int[rows];
+    int i, j, len;
+
+    for (i = 0, j = 0, len = rows; i < len; i++)
+      if (G[u][i] != null)
+        V[j++] = i;
+    return copyOf(V, j);
+  }
+
+  /**
    * Returns an array of {@link FlowNetwork.Edge} of all the edges in the flow
    * network.
    *
@@ -542,19 +564,19 @@ public final class FlowNetwork {
   /**
    * Returns the edges for the specified vertex.
    *
-   * @param vertex the vertex whose edges is being retrieved
+   * @param u the vertex whose edges is being retrieved
    * @return the {@code Edge} array
    *
    * @throws IllegalArgumentException if the vertex is negative or greater than
    *                                  flow network length or doesn't exist in the
    *                                  flow network
    */
-  public Edge[] getEdges(int vertex) {
-    if (!hasVertex(vertex))
-      throw new IllegalArgumentException("Vertex " + vertex + " does not exist in flow network.");
+  public Edge[] getEdges(int u) {
+    if (!hasVertex(u))
+      throw new IllegalArgumentException("Vertex " + u + " does not exist in flow network.");
 
     Edge[] E = new Edge[vertices];
-    int i = 0, u = vertex, v, len = rows;
+    int i = 0, v, len = rows;
 
     // Iterate through each possible adjacent vertex v
     for (v = 0; v < len; v++) {

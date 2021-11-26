@@ -11,10 +11,10 @@ import data_structures.queues.Queue;
  * 3   while there is positive flow and a path from s to t
  * 4       send multiple flows in G using level graph until
  *             blocking flow is reached
- */
+ */ 
 
 /**
- * <h3>Dinic's {@code O(EV^2)}</h3>
+ * <h3>Dinic's {@code O(E V^2)}</h3>
  *
  * <p>
  * Main function of Dinics that runs in a DFS-like fashion, getting the residual

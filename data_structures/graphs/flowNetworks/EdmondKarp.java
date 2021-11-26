@@ -16,7 +16,7 @@ import data_structures.queues.Queue;
  */
 
 /**
- * <h3>Edmond-Karp Algorithm {@code O(VE^2)}</h3>
+ * <h3>Edmond-Karp Algorithm {@code O(V E^2)}</h3>
  *
  * <p>
  * Uses the Ford-Fulkerson method except, it uses the Breadth-first search
