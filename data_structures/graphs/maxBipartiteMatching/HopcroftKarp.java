@@ -146,7 +146,7 @@ public final class HopcroftKarp extends BipartiteMatchingAlgorithm {
     int[] matches = new int[n];
 
     for (int i = 0; i < n; i++)
-      matches[i] = VTS[i].pairU != NIL ? VTS[i].pairU : Graph.NIL;
+      matches[i] = VTS[i] != null && VTS[i].pairU != NIL ? VTS[i].pairU : Graph.NIL;
     return matches;
   }
 
@@ -166,6 +166,7 @@ public final class HopcroftKarp extends BipartiteMatchingAlgorithm {
 
   @SuppressWarnings("unchecked")
   private static <T> T run(boolean type, Graph G) {
+    int[] V = G.getVertices();
     int n = G.getRows();
     // Set the dummy vertex to the next possible vertex that doesn't exist in G
     NIL = n;
@@ -173,15 +174,15 @@ public final class HopcroftKarp extends BipartiteMatchingAlgorithm {
     Integer maxMatches = 0;
 
     // Initialize all pairs to the dummy vertex
-    for (int i = 0; i < n; i++)
-      VTS[i] = new Node(i);
+    for (int u : V)
+      VTS[u] = new Node(u);
 
     // Initialize dummy vertex
     VTS[n] = new Node(NIL);
 
     // While there is an augmenting path
     while (HP_BFS(G, VTS)) {
-      for (int u : G.getVertices()) {
+      for (int u : V) {
         if (VTS[u].pairU == NIL && HP_DFS(G, VTS, u))
           maxMatches++;
       }
@@ -199,12 +200,9 @@ public final class HopcroftKarp extends BipartiteMatchingAlgorithm {
    */
   private static boolean HP_BFS(Graph G, Node[] VTS) {
     Queue<Integer> Q = new Queue<>(G.getRows());
-    int[] vertices = G.getVertices();
-    int u, v;
 
     // Left side vertices - first layer (set distance as 0)
-    for (int i = 0; i < vertices.length; i++) {
-      u = vertices[i];
+    for (int u : G.getVertices()) {
       // If u is not matched (paired with dummy vertex)
       if (VTS[u].pairU == NIL) {
         // Set distance of u to 0 and add to queue
@@ -220,12 +218,12 @@ public final class HopcroftKarp extends BipartiteMatchingAlgorithm {
     VTS[NIL].distance = Integer.MAX_VALUE;
 
     while (!Q.isEmpty()) {
-      u = Q.dequeue();
+      int u = Q.dequeue();
       // If this node is not NIL and can provide a shorter path to dummy vertex
       if (VTS[u].distance < VTS[NIL].distance) {
         // For each adjacent vertex of u
         for (Graph.Edge edge : G.getEdges(u)) {
-          v = edge.getVertices()[1];
+          int v = edge.getVertices()[1];
           // If v is not considered so far; (v, pairV[v]) is not an explored edge
           if (VTS[VTS[v].pairV].distance == Integer.MAX_VALUE) {
             // Consider pair and add to queue

@@ -62,33 +62,26 @@ public final class BellmanFord extends SSSP {
   }
 
   private static Node[] _run(Graph G, int s) {
-    Node[] VTS = initSourceAll(G, s);
-    int[] V = G.getVertices();
-    int i, k, u, v, w, len;
+    Node[] VTS = initSource(G, s);
+    int u, v, w;
 
-    for (k = 0, len = V.length - 1; k < len; k++) {
-      for (i = 0; i < V.length; i++) {
-        u = V[i];
-        
-        for (Graph.Edge edge : G.getEdges(u)) {
-          v = edge.getVertices()[1];
-          w = edge.getWeight();
-
-          relax(VTS, u, v, w);
-        }
-      }
-    }
-
-    for (i = 0; i < V.length; i++) {
-      u = V[i];
-      
-      for (Graph.Edge edge : G.getEdges(u)) {
+    for (int i = 0, len = G.getNumVertices() - 1; i < len; i++) {
+      for (Graph.Edge edge : G.getEdges()) {
+        u = edge.getVertices()[0];
         v = edge.getVertices()[1];
         w = edge.getWeight();
 
-        if (VTS[v].distance > VTS[u].distance + w)
-          return null;
+        relax(VTS, u, v, w);
       }
+    }
+
+    for (Graph.Edge edge : G.getEdges()) {
+      u = edge.getVertices()[0];
+      v = edge.getVertices()[1];
+      w = edge.getWeight();
+
+      if (VTS[v].distance > VTS[u].distance + w)
+        return null;
     }
 
     return VTS;

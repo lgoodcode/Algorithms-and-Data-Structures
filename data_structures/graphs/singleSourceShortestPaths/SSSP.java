@@ -145,39 +145,9 @@ public class SSSP {
    * @return the {@code Node[]} containing the initialized vertices
    */
   protected static final Node[] initSource(Graph graph, int sourceVertex) {
-    int[] V = graph.getVertices();
-    Node[] VTS = new Node[V.length];
+    Node[] VTS = new Node[graph.getRows()];
 
-    for (int i = 0; i < V.length; i++) {
-      VTS[i] = new Node(V[i]);
-
-      if (V[i] == sourceVertex)
-        VTS[i].distance = 0;
-    }
-
-    return VTS;
-  }
-
-  /**
-   * Initializes the source vertex for the SSSP algorithm by creating the array of
-   * the inner class {@code Node} for each vertex in the graph. It will set the
-   * source with a distance of {@code 0} to be the root.
-   *
-   * <p>
-   * Retrievs the array of all vertices in the graph, whether they exist in the
-   * graph or not to be able to quickly access them in the {@code Node[]} array
-   * with their vertex number as the index.
-   * </p>
-   *
-   * @param graph
-   * @param sourceVertex
-   * @return
-   */
-  protected static final Node[] initSourceAll(Graph graph, int sourceVertex) {
-    int u, V = graph.getRows();
-    Node[] VTS = new Node[V];
-
-    for (u = 0; u < V; u++) {
+    for (int u : graph.getVertices()) {
       VTS[u] = new Node(u);
 
       if (u == sourceVertex)

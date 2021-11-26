@@ -78,23 +78,22 @@ public final class DFS_Stack {
   }
 
   private static Node[] _run(Graph G, int s) {
-    int[] V = G.getVertices();
-    Node[] VTS = new Node[V.length];
-    Stack<Integer> S = new Stack<>(V.length);
-    int i, u, v, time = 0;
+    Node[] VTS = new Node[G.getRows()];
+    Stack<Integer> S = new Stack<>(G.getRows());
+    int time = 0;
 
-    for (i = 0; i < V.length; i++)
-      VTS[i] = new Node(V[i]);
+    for (int u : G.getVertices())
+      VTS[u] = new Node(u);
 
     S.push(s);
 
     while (!S.isEmpty()) {
-      u = S.pop();
+      int u = S.pop();
       VTS[u].distance = ++time;
       VTS[u].color = GRAY;
 
       for (Graph.Edge edge : G.getEdges(u)) {
-        v = edge.getVertices()[1];
+        int v = edge.getVertices()[1];
 
         if (!VTS[v].visited()) {
           VTS[v].predecessor = u;

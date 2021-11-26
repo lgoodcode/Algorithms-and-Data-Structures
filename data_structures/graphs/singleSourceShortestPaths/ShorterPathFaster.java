@@ -64,10 +64,10 @@ public class ShorterPathFaster extends SSSP {
   }
 
   private static Node[] _run(Graph G, int s) {
-    int[] V = G.getVertices();
-    Queue<Integer> Q = new Queue<>(V.length);
-    Node[] VTS = initSourceAll(G, s);
-    int i, n = 0, u, v, w;
+    int rows = G.getRows(), loop = rows * rows;
+    Queue<Integer> Q = new Queue<>(rows);
+    Node[] VTS = initSource(G, s);
+    int n = 0, u, v, w;
 
     Q.enqueue(s);
 
@@ -84,7 +84,7 @@ public class ShorterPathFaster extends SSSP {
           VTS[v].predecessor = u;
 
           // Checks for infinite loop
-          if (++n > V.length * V.length)
+          if (++n > loop)
             return null;
           // Enqueue v if it doesn't already exist in the queue
           if (!Q.has(v))
@@ -93,20 +93,17 @@ public class ShorterPathFaster extends SSSP {
       }
     }
 
-    for (i = 0; i < V.length; i++) {
-      u = V[i];
-      
-      for (Graph.Edge edge : G.getEdges(u)) {
-        v = edge.getVertices()[1];
-        w = edge.getWeight();
+    for (Graph.Edge edge : G.getEdges()) {
+      u = edge.getVertices()[0];
+      v = edge.getVertices()[1];
+      w = edge.getWeight();
 
-        // If either vertex is unreachable (distance = Infinity), continue
-        // to check next vertex to prevent addition overflow
-        if (VTS[v].distance == Graph.NIL || VTS[u].distance == Graph.NIL)
-          continue;
-        if (VTS[v].distance > VTS[u].distance + w)
-          return null;
-      }
+      // If either vertex is unreachable (distance = Infinity), continue
+      // to check next vertex to prevent addition overflow
+      if (VTS[v].distance == Graph.NIL || VTS[u].distance == Graph.NIL)
+        continue;
+      if (VTS[v].distance > VTS[u].distance + w)
+        return null;
     }
 
     return VTS;

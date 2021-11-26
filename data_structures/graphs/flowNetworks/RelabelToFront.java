@@ -98,28 +98,24 @@ public final class RelabelToFront extends PushRelabelAlgorithm {
   }
 
   private static int computeMaxFlow(FlowNetwork G, int s, int t) {
-    int[] V = G.getVertices();
     Node[] VTS = new Node[G.getRows()];
     LinkedList<Integer> L = new LinkedList<>();
     LinkedList.Node<Integer> U;
-    int u, oldHeight;
+    int oldHeight;
 
     // Initialize the nodes, their neighbor list, and the main linkedlist
-    for (u = 0; u < VTS.length; u++) {
-      // Only initialize a node for a vertex that exists
-      if (u < V.length && V[u] == u) {
-        VTS[u] = new Node(u);
+    for (int u : G.getVertices()) {
+      VTS[u] = new Node(u);
 
-        if (u != s && u != t) {
-          // Initialize the neighbor list of u with adjacent vertices v
-          for (int v : G.getAdjacentVertices(u))
-            VTS[u].neighbors.insert(v);
+      if (u != s && u != t) {
+        // Initialize the neighbor list of u with adjacent vertices v
+        for (int v : G.getAdjacentVertices(u))
+          VTS[u].neighbors.insert(v);
 
-          VTS[u].current = VTS[u].neighbors.getHead();
+        VTS[u].current = VTS[u].neighbors.getHead();
 
-          // L = G.V - {s, t}
-          L.insert(u);
-        }
+        // L = G.V - {s, t}
+        L.insert(u);
       }
     }
 
@@ -127,7 +123,7 @@ public final class RelabelToFront extends PushRelabelAlgorithm {
 
     U = L.getHead();
     while (U != null) {
-      u = U.getItem();
+      int u = U.getItem();
       oldHeight = VTS[u].height;
       discharge(G, VTS, u);
       // If vertex was relabeled, place it at the front of the list and start again

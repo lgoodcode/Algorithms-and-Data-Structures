@@ -94,43 +94,35 @@ public final class TopologicalSort {
    *                                  weighted and directed, or the start vertex
    *                                  is invalid
    */
-  public static LinkedList<Node> run(Graph graph, int startVertex) {
+  public static Object[] run(Graph graph, int startVertex) {
     if (!graph.isDirected() && !graph.isWeighted())
       throw new IllegalArgumentException("The algorithm can only run on a directed weighted graph.");
     graph.checkVertex(startVertex);
     return _run(graph, startVertex);
   }
 
-  private static LinkedList<Node> _run(Graph G, int s) {
-    int u, V = G.getRows();
-    int[] time = { 0 };
-    Node[] VTS = new Node[V];
-    LinkedList<Node> L = new LinkedList<>();
+  private static Object[] _run(Graph G, int s) {
+    LinkedList<Integer> L = new LinkedList<>();
+    Node[] VTS = new Node[G.getRows()];
+    int[] V = G.getVertices(), time = { 0 };
 
-    for (u = 0; u < V; u++)
+    for (int u : V)
       VTS[u] = new Node(u);
 
-    for (u = 0; u < V; u++) {
-      if (VTS[u].color == WHITE)
+    for (int u : V) {
+      if (!VTS[u].visited())
         visit(G, VTS, L, u, time);
     }
 
-    return L;
+    return L.toArray();
   }
 
-  private static void visit(Graph G, Node[] VTS, LinkedList<Node> L, int u, int[] time) {
-    // If vertex doesn't exist in the graph, don't check for edges
-    if (!G.hasVertex(u))
-      return;
-
+  private static void visit(Graph G, Node[] VTS, LinkedList<Integer> L, int u, int[] time) {
     VTS[u].distance = ++time[0];
     VTS[u].color = GRAY;
 
-    Graph.Edge[] edges = G.getEdges(u);
-    int i, v;
-
-    for (i = 0; i < edges.length; i++) {
-      v = edges[i].getVertices()[1];
+    for (Graph.Edge edge : G.getEdges(u)) {
+      int v = edge.getVertices()[1];
 
       if (!VTS[v].visited()) {
         VTS[v].predecessor = u;
@@ -139,7 +131,7 @@ public final class TopologicalSort {
     }
 
     VTS[u].finish = ++time[0];
-    L.insert(VTS[u]);
+    L.insert(u);
   }
 
 }

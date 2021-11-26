@@ -102,21 +102,19 @@ public final class Kruskal {
 
   @SuppressWarnings("unchecked")
   private static Edge[] _run(Graph G) {
+    DisjointSet<Integer>[] S = (DisjointSet<Integer>[]) new DisjointSet<?>[G.getRows()];
     Edge[] E = G.getEdges(), A = new Edge[E.length];
-    int[] vertices, V = G.getVertices();
-    DisjointSet<Integer>[] S = (DisjointSet<Integer>[]) new DisjointSet<?>[V.length];
-    int i, j, u, v;
+    int i, j;
 
     // Sort the edges by weight
     QuickSort.sort(E, compare);
 
-    for (i = 0; i < V.length; i++)
-      S[i] = new DisjointSet<Integer>(V[i]);
+    for (int u : G.getVertices())
+      S[u] = new DisjointSet<Integer>(u);
 
     for (i = 0, j = 0; i < E.length; i++) {
-      vertices = E[i].getVertices();
-      u = vertices[0];
-      v = vertices[1];
+      int u = E[i].getVertices()[0];
+      int v = E[i].getVertices()[1];
 
       if (findSet(S[u]) != findSet(S[v])) {
         A[j++] = E[i];

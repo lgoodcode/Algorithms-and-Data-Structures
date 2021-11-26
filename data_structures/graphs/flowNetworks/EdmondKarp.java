@@ -101,9 +101,9 @@ public final class EdmondKarp extends MaxFlowAlgorithm {
     Node[] VTS = new Node[network.getRows()];
     int maxFlow = 0;
 
-    // Initialize nodes
-    for (int i = 0; i < G.length; i++)
-      VTS[i] = new Node(i);
+    // Initialize nodes for vertices that exist
+    for (int v : network.getVertices())
+      VTS[v] = new Node(v);
 
     // While there is a path p from source to sink in residual network Gf that can
     // be augmented
@@ -130,8 +130,10 @@ public final class EdmondKarp extends MaxFlowAlgorithm {
 
     // Reset nodes to unvisited
     for (Node node : VTS) {
-      node.visited = false;
-      node.predecessor = NIL;
+      if (node != null) {
+        node.visited = false;
+        node.predecessor = NIL;
+      }
     }
 
     VTS[s].visited = true;
@@ -165,8 +167,8 @@ public final class EdmondKarp extends MaxFlowAlgorithm {
     StringBuilder sb = new StringBuilder();
     int flow = 0;
 
-    for (int i = 0; i < G.length; i++)
-      VTS[i] = new Node(i);
+    for (int u : network.getVertices())
+      VTS[u] = new Node(u);
 
     while (EK_BFS(network, VTS, s, t)) {
       // Find the minimum residual capacity of all edges from s to t along path p
@@ -187,8 +189,8 @@ public final class EdmondKarp extends MaxFlowAlgorithm {
     LinkedList<Integer> L = new LinkedList<>();
     int flow = 0;
 
-    for (int i = 0; i < G.length; i++)
-      VTS[i] = new Node(i);
+    for (int u : network.getVertices())
+      VTS[u] = new Node(u);
 
     while (EK_BFS(network, VTS, s, t)) {
       flow = arrayResidualCapacity(G, VTS, L, Integer.MAX_VALUE, t);

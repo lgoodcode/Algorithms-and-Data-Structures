@@ -108,9 +108,9 @@ public final class FordFulkerson extends MaxFlowAlgorithm {
     Node[] VTS = new Node[network.getRows()];
     int maxFlow = 0;
 
-    // Initialize nodes
-    for (int i = 0; i < G.length; i++)
-      VTS[i] = new Node(i);
+    // Initialize nodes for vertices that exist
+    for (int v : network.getVertices())
+      VTS[v] = new Node(v);
 
     // While there is a path p from source to sink in residual network Gf that can
     // be augmented
@@ -152,10 +152,9 @@ public final class FordFulkerson extends MaxFlowAlgorithm {
 
   private static void FF_DFS_visit(FlowNetwork G, Node[] VTS, int u) {
     VTS[u].visited = true;
-    int v;
 
     for (FlowNetwork.Edge edge : G.getEdges(u)) {
-      v = edge.getVertices()[1];
+      int v = edge.getVertices()[1];
 
       // Find edges with a positive residual capacity: the maximum amount of flow
       // that can be added to each edge in the augmenting path
@@ -175,8 +174,8 @@ public final class FordFulkerson extends MaxFlowAlgorithm {
     int flow = 0;
 
     // Initialize nodes
-    for (int i = 0; i < G.length; i++)
-      VTS[i] = new Node(i);
+    for (int u : network.getVertices())
+      VTS[u] = new Node(u);
 
     // While there is a path p from source to sink in residual network Gf that can
     // be augmented
@@ -200,8 +199,8 @@ public final class FordFulkerson extends MaxFlowAlgorithm {
     int flow = 0;
 
     // Initialize nodes
-    for (int i = 0; i < G.length; i++)
-      VTS[i] = new Node(i);
+    for (int u : network.getVertices())
+      VTS[u] = new Node(u);
 
     // While there is a path p from source to sink in residual network Gf that can
     // be augmented

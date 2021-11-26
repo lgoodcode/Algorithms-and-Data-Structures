@@ -71,17 +71,17 @@ public final class BipartiteDFS extends BipartiteMatchingAlgorithm {
   private static <T> T run(boolean type, Graph G) {
     int maxMatches = 0, n = G.getRows();
     Node[] VTS = new Node[n];
-    int[] M = new int[n];
+    int[] V = G.getVertices(), M = new int[n];
 
     // Initialize matches of each vertex to NIL
     fill(M, Graph.NIL);
 
     // Initialize nodes to unvisited
-    for (int u = 0; u < n; u++)
+    for (int u : V)
       VTS[u] = new Node(u);
 
     // For every vertex u of set L of G
-    for (int u : G.getVertices()) {
+    for (int u : V) {
       // Find a match for a vertex v of set R of G
       if (!VTS[u].visited() && findMatch(G, VTS, M, n, u))
         maxMatches++;
@@ -91,17 +91,15 @@ public final class BipartiteDFS extends BipartiteMatchingAlgorithm {
   }
 
   private static boolean findMatch(Graph G, Node[] VTS, int[] M, int n, int u) {
-    int v;
-
     for (Graph.Edge edge : G.getEdges(u)) {
-      v = edge.getVertices()[1];
+      int v = edge.getVertices()[1];
 
       if (!VTS[v].visited()) {
         VTS[v].color = GRAY;
 
         if (M[v] == Graph.NIL || findMatch(G, VTS, M, n, v)) {
-          M[u] = v;
           VTS[u].color = GRAY;
+          M[u] = v;
           return true;
         }
       }

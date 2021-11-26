@@ -137,9 +137,9 @@ public final class Dinic extends MaxFlowAlgorithm {
     Node[] levels = new Node[G.getRows()];
     int maxFlow = 0;
 
-    // Initialize nodes
-    for (int i = 0, n = G.getRows(); i < n; i++)
-      levels[i] = new Node(i);
+    // Initialize nodes for vertices that exist
+    for (int v : G.getVertices())
+      levels[v] = new Node(v);
 
     while (D_BFS(G, levels, s, t))
       maxFlow += sendFlow(G, levels, Integer.MAX_VALUE, s, t);
@@ -171,13 +171,9 @@ public final class Dinic extends MaxFlowAlgorithm {
     if (u == t)
       return flow;
 
-    int[] vertices;
     int c, f, v, currentFlow, cfP;
     for (FlowNetwork.Edge edge : G.getEdges(u)) {
-      // Get the vertices to ensure we are setting v to the adjacent vertex
-      // because of the reversed edges, which could set v == u
-      vertices = edge.getVertices();
-      v = vertices[1] == u ? vertices[0] : vertices[1];
+      v = edge.getVertices()[1];
       c = edge.getCapacity();
       f = edge.getFlow();
 
@@ -223,7 +219,8 @@ public final class Dinic extends MaxFlowAlgorithm {
 
     // Reset levels
     for (Node node : L)
-      node.level = -1;
+      if (node != null)
+        node.level = -1;
 
     L[s].level = 0;
     Q.enqueue(s);
@@ -251,8 +248,8 @@ public final class Dinic extends MaxFlowAlgorithm {
     StringBuilder sb = new StringBuilder();
     int flow = 0;
 
-    for (int i = 0, n = G.getRows(); i < n; i++)
-      levels[i] = new Node(i);
+    for (int u : G.getVertices())
+      levels[u] = new Node(u);
 
     while (D_BFS(G, levels, s, t)) {
       flow = sendFlowStringPath(G, levels, sb, Integer.MAX_VALUE, s, t);
@@ -269,11 +266,9 @@ public final class Dinic extends MaxFlowAlgorithm {
     if (u == t)
       return flow;
 
-    int[] vertices;
     int c, f, v, currentFlow, cfP;
     for (FlowNetwork.Edge edge : G.getEdges(u)) {
-      vertices = edge.getVertices();
-      v = vertices[1] == u ? vertices[0] : vertices[1];
+      v = edge.getVertices()[1];
       c = edge.getCapacity();
       f = edge.getFlow();
 
@@ -301,8 +296,8 @@ public final class Dinic extends MaxFlowAlgorithm {
     LinkedList<Integer> L = new LinkedList<>();
     int flow = 0;
 
-    for (int i = 0, n = G.getRows(); i < n; i++)
-      levels[i] = new Node(i);
+    for (int u : G.getVertices())
+      levels[u] = new Node(u);
 
     while (D_BFS(G, levels, s, t)) {
       flow = sendFlowArrayPath(G, levels, L, Integer.MAX_VALUE, s, t);
@@ -321,11 +316,9 @@ public final class Dinic extends MaxFlowAlgorithm {
     if (u == t)
       return flow;
 
-    int[] vertices;
     int c, f, v, currentFlow, cfP;
     for (FlowNetwork.Edge edge : G.getEdges(u)) {
-      vertices = edge.getVertices();
-      v = vertices[1] == u ? vertices[0] : vertices[1];
+      v = edge.getVertices()[1];
       c = edge.getCapacity();
       f = edge.getFlow();
 

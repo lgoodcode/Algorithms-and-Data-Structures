@@ -1,7 +1,6 @@
 package data_structures.graphs.singleSourceShortestPaths;
 
 import data_structures.graphs.Graph;
-import data_structures.linkedLists.LinkedList;
 import data_structures.graphs.TopologicalSort;
 
 /**
@@ -60,18 +59,16 @@ public final class DAGShortestPath extends SSSP {
   }
 
   private static Node[] _run(Graph G, int s) {
-    Node[] VTS = initSourceAll(G, s);
-    LinkedList<TopologicalSort.Node> L = TopologicalSort.run(G, s);
-    int u, v, w;
+    Object[] V = TopologicalSort.run(G, s);
+    Node[] VTS = initSource(G, s);
+    int v, w;
 
-    for (TopologicalSort.Node node : L.iterable()) {
-      u = node.getVertex();
-      
-      for (Graph.Edge edge : G.getEdges(u)) {
+    for (Object u : V) {
+      for (Graph.Edge edge : G.getEdges((int) u)) {
         v = edge.getVertices()[1];
         w = edge.getWeight();
 
-        relax(VTS, u, v, w);
+        relax(VTS, (int) u, v, w);
       }
     }
 

@@ -45,8 +45,8 @@ import data_structures.heaps.FibonacciHeap;
  * </p>
  *
  * <p>
- * It also iterates for {@code |V| - 1} times, removing all but one vertex and
- * will still give the same solution.
+ * This is modified to iterate for {@code |V| - 1} times of the queue, removing
+ * all but one vertex and will still give the same solution.
  * </p>
  *
  * <hr/>
@@ -97,16 +97,15 @@ public final class Dijkstra extends SSSP {
   }
 
   private static Node[] _run(Graph G, int s) {
-    int[] V = G.getVertices();
-    Node[] VTS = initSourceAll(G, s);
     FibonacciHeap<Node> Q = new FibonacciHeap<>((x, y) -> x.distance < y.distance);
-    int i, u, v, w;
+    Node[] VTS = initSource(G, s);
+    int v, w;
 
-    for (i = 0; i < V.length; i++)
-      Q.insert(VTS[V[i]]);
+    for (int u : G.getVertices())
+      Q.insert(VTS[u]);
 
     while (Q.size() > 1) {
-      u = Q.extractMin().getVertex();
+      int u = Q.extractMin().getVertex();
 
       for (Graph.Edge edge : G.getEdges(u)) {
         v = edge.getVertices()[1];

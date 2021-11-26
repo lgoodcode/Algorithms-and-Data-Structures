@@ -1,7 +1,7 @@
 package data_structures.graphs.__tests__;
 
 import static org.junit.Assert.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 import org.junit.jupiter.api.*;
 
@@ -11,6 +11,7 @@ import data_structures.graphs.TopologicalSort;
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 public class TopologicalSort_Test {
   Graph G = new Graph(9, true, true);
+  Integer[] sorted = { 7, 8, 0, 1, 2, 3, 4 };
 
   @BeforeEach
   void setup() {
@@ -24,6 +25,7 @@ public class TopologicalSort_Test {
     G.addEdge(2, 4, 2);
     G.addEdge(4, 3, 6);
     G.addEdge(4, 0, 7);
+    G.addEdge(7, 8, 4);
   }
 
   @Test
@@ -33,6 +35,6 @@ public class TopologicalSort_Test {
 
   @Test
   void sort() {
-    assertDoesNotThrow(() -> TopologicalSort.run(G, 0));
+    assertArrayEquals(sorted, TopologicalSort.run(G, 0));
   }
 }

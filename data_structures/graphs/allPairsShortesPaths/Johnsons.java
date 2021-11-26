@@ -148,37 +148,37 @@ public final class Johnsons extends ASPS {
     int[][] D;
     SSSP.Node[] VTS;
     // Set s, the new vertex, to the number of rows in the graph
-    int s = n, i, j, u, v;
+    int s = n, i, j, v;
 
     // Add the new edge from the new vertex to all vertices with 0 weight
-    for (i = 0; i < V.length; i++)
-      T.addEdge(s, V[i], 0);
+    for (int u : V)
+      T.addEdge(s, u, 0);
 
     // Check if the graph contains a negative weight cycle
     if ((VTS = ShorterPathFaster.run(T, s)) == null)
       return null;
 
     // Set h(v) to the value of S(s, v) computed by the Bellman-Ford algorithm
-    for (i = 0; i < n; i++)
-      h[i] = VTS[i].distance;
+    for (int u : V)
+      h[u] = VTS[u].distance;
 
     for (Graph.Edge edge : G.getEdges()) {
       vertices = edge.getVertices();
-      u = vertices[0];
+      int u = vertices[0];
       v = vertices[1];
 
       // w'(u, v) = w(u, v) + h(u) - h(v)
       G.setEdge(u, v, edge.getWeight() + h[u] - h[v]);
     }
 
+    // Initialize matrix D to hold results of Dijkstra's algorithm
     D = new int[n][n];
-
+    
     for (i = 0; i < n; i++)
       fill(D[i], Graph.NIL);
 
     // Run Dijkstra(G, w', u) to compute S'(u, v) for all u and v of G.V
-    for (i = 0; i < V.length; i++) {
-      u = V[i];
+    for (int u : V) {
       VTS = Dijkstra.run(G, u);
 
       for (j = 0; j < V.length; j++) {
@@ -216,20 +216,20 @@ public final class Johnsons extends ASPS {
     int[][] D;
     SSSP.Node[] VTS;
     SSSP.Node[][] P = new SSSP.Node[n][];
-    int s = n, i, j, u, v;
+    int s = n, i, j, v;
 
-    for (i = 0; i < V.length; i++)
-      T.addEdge(s, V[i], 0);
+    for (int u : V)
+      T.addEdge(s, u, 0);
 
     if ((VTS = ShorterPathFaster.run(T, s)) == null)
       return null;
 
-    for (i = 0; i < n; i++)
-      h[i] = VTS[i].distance;
+    for (int u : V)
+      h[u] = VTS[u].distance;
 
     for (Graph.Edge edge : G.getEdges()) {
       vertices = edge.getVertices();
-      u = vertices[0];
+      int u = vertices[0];
       v = vertices[1];
 
       G.setEdge(u, v, edge.getWeight() + h[u] - h[v]);
@@ -240,8 +240,7 @@ public final class Johnsons extends ASPS {
     for (i = 0; i < n; i++)
       fill(D[i], Graph.NIL);
 
-    for (i = 0; i < V.length; i++) {
-      u = V[i];
+    for (int u : V) {
       VTS = Dijkstra.run(G, u);
       // Sets this vertex index to the results of Dijkstra's algorithm to
       // compute path with this vertex as the source.

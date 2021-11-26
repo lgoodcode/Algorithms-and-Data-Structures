@@ -155,12 +155,12 @@ public final class DFS {
 
   private static Node[] _run(Graph G, int s) {
     Node[] VTS = new Node[G.getRows()];
-    int[]  time = { 0 };
+    int[] V = G.getVertices(), time = { 0 };
 
-    for (int i = 0, len = G.getRows(); i < len; i++)
-      VTS[i] = new Node(i);
+    for (int u : V)
+      VTS[u] = new Node(u);
 
-    for (int u : G.getVertices()) {
+    for (int u : V) {
       if (!VTS[u].visited())
         visit(G, VTS, u, time);
     }
@@ -169,13 +169,11 @@ public final class DFS {
   }
 
   private static void visit(Graph G, Node[] VTS, int u, int[] time) {
-    int v;
-
     VTS[u].distance = ++time[0];
     VTS[u].color = GRAY;
 
     for (Graph.Edge edge : G.getEdges(u)) {
-      v = edge.getVertices()[1];
+      int v = edge.getVertices()[1];
 
       if (!VTS[v].visited()) {
         VTS[v].predecessor = u;

@@ -351,6 +351,21 @@ public final class Graph {
   }
 
   /**
+   * Returns an array with a length of the total number of possible vertices in
+   * the graph and each element for the vertex contains the vertex index if the
+   * vertex exists or {@code -1} if not.
+   *
+   * @return the array of vertices
+   */
+  public int[] getVerticesAll() {
+    int[] V = new int[rows];
+
+    for (int i = 0; i < V.length; i++)
+      V[i] = G[i] != null ? i : -1;
+    return V;
+  }
+
+  /**
    * Returns an array of {@link Graph.Edge} of all the edges in the graph. When
    * initializing the edge array, will set length to twice the number of edges
    * contained in the graph if it isn't directed since the edges will point in
@@ -647,7 +662,7 @@ public final class Graph {
   private static String printPathAux(Vertex[] N, int u, int v, String str) {
     if (u == v)
       return str == null ? null : str + u;
-    else if (N[v].predecessor == -1)
+    else if (N[v] == null || N[v].predecessor == -1)
       return null;
     String s = printPathAux(N, u, N[v].predecessor, str);
     return s == null ? null : s + " -> " + v;
@@ -722,7 +737,7 @@ public final class Graph {
   private static void arrayPathAux(Vertex[] N, int u, int v, Queue<Integer> Q) {
     if (u == v)
       Q.enqueue(u);
-    else if (N[v].predecessor == -1)
+    else if (N[v] == null || N[v].predecessor == -1)
       Q.enqueue(-1);
     else {
       arrayPathAux(N, u, N[v].predecessor, Q);

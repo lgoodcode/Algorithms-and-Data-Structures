@@ -105,22 +105,20 @@ public final class Prim {
   }
 
   private static Node[] _run(Graph G, int r) {
-    int[] V = G.getVertices();
-    Node[] VTS = new Node[V.length];
+    Node[] VTS = new Node[G.getRows()];
     FibonacciHeap<Node> Q = new FibonacciHeap<>(compare);
-    int i, u, v, w;
+    int v, w;
 
-    for (i = 0; i < V.length; i++) {
-      u = V[i];
-      VTS[i] = new Node(u);
-      Q.insert(VTS[i]);
+    for (int u : G.getVertices()) {
+      VTS[u] = new Node(u);
+      Q.insert(VTS[u]);
 
       if (u == r)
-        VTS[i].distance = 0;
+        VTS[u].distance = 0;
     }
 
     while (!Q.isEmpty()) {
-      u = Q.extractMin().getVertex();
+      int u = Q.extractMin().getVertex();
       
       for (Graph.Edge edge : G.getEdges(u)) {
         v = edge.getVertices()[1];

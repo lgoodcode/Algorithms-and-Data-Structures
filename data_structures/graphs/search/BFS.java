@@ -85,12 +85,12 @@ public final class BFS {
   /**
    * Color constant used to flag a vertex as "undiscovered"
    */
-  private static final int WHITE = 0;
+  private static final boolean WHITE = false;
 
   /**
    * Color constant used to flag a vertex as "discovered"
    */
-  private static final int GRAY = 1;
+  private static final boolean GRAY = true;
 
   /**
    * Vertex node of the Breadth-first Search. Used to hold the attributes of BFS.
@@ -99,14 +99,18 @@ public final class BFS {
     /**
      * The status of the vertex, either undiscovered "WHITE" or discovered "GRAY".
      */
-    private int color;
+    protected boolean color;
 
     /**
      * Constructs an empty basic BFS node.
      */
-    private Node(int vertex) {
+    protected Node(int vertex) {
       super(vertex);
       color = WHITE;
+    }
+
+    public boolean visited() {
+      return color == GRAY;
     }
   }
 
@@ -132,14 +136,12 @@ public final class BFS {
   }
 
   private static Node[] _run(Graph G, int s) {
-    int[] V = G.getVertices();
-    Node[] VTS = new Node[V.length];
-    Queue<Integer> Q = new Queue<>(V.length);
-    int i, u, v;
+    Node[] VTS = new Node[G.getRows()];
+    Queue<Integer> Q = new Queue<>(G.getRows());
 
     // Initialize BFS vertex nodes
-    for (i = 0; i < V.length; i++)
-      VTS[i] = new Node(V[i]);
+    for (int u : G.getVertices())
+      VTS[u] = new Node(u);
 
     // Initialize starting vertex as discovered (GRAY), self (0), root (-1)
     VTS[s].color = GRAY;
@@ -148,12 +150,12 @@ public final class BFS {
     Q.enqueue(s);
 
     while (!Q.isEmpty()) {
-      u = Q.dequeue();
+      int u = Q.dequeue();
       
       for (Graph.Edge edge : G.getEdges(u)) {
-        v = edge.getVertices()[1];
+        int v = edge.getVertices()[1];
 
-        if (VTS[v].color == WHITE) {
+        if (!VTS[v].visited()) {
           VTS[v].color = GRAY;
           VTS[v].distance = VTS[u].distance + 1;
           VTS[v].predecessor = u;

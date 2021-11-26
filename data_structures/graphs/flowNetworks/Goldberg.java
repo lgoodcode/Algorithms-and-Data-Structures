@@ -44,8 +44,9 @@ public final class Goldberg extends PushRelabelAlgorithm {
     Node[] VTS = new Node[G.getRows()];
     int u;
 
-    for (int i = 0; i < VTS.length; i++)
-      VTS[i] = new Node(i);
+    // Initialize nodes for vertices that exist
+    for (int v : G.getVertices())
+      VTS[v] = new Node(v);
 
     initializePreflow(G, VTS, s);
     // While there is an overflowing vertex
