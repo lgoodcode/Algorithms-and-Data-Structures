@@ -41,9 +41,13 @@ public final class Goldberg extends PushRelabelAlgorithm {
   }
 
   private static int computeMaxFlow(FlowNetwork G, int s, int t) {
-    Node[] VTS = initializePreflow(G, s);
+    Node[] VTS = new Node[G.getRows()];
     int u;
 
+    for (int i = 0; i < VTS.length; i++)
+      VTS[i] = new Node(i);
+
+    initializePreflow(G, VTS, s);
     // While there is an overflowing vertex
     while ((u = overflowingVertex(G, VTS, s, t)) != -1) {
       for (int v : G.getAdjacentVertices(u)) {

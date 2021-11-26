@@ -124,23 +124,14 @@ public class PushRelabelAlgorithm {
    * push/relabel operations.
    * </p>
    * 
-   * <p>
-   * Normally, the {@code Node[]} is already initialized and passed in but, that
-   * is done here instead for a complete initialization.
-   * </p>
-   * 
    * @param network the flow network
    * @param s       the source
    * @return the vertex nodes with the initialized preflow for the source
    *         {@code s}
    */
-  protected static Node[] initializePreflow(FlowNetwork network, int s) {
+  protected static Node[] initializePreflow(FlowNetwork network, Node[] VTS, int s) {
     FlowNetwork.Edge[][] G = network.getAdjacencyMatrix();
-    Node[] VTS = new Node[network.getRows()];
     int c, v;
-
-    for (int i = 0; i < VTS.length; i++)
-      VTS[i] = new Node(i);
 
     VTS[s].height = network.getNumVertices() - 2;
 
@@ -244,4 +235,5 @@ public class PushRelabelAlgorithm {
         return u;
     return -1;
   }
+
 }
