@@ -40,6 +40,27 @@ public final class Goldberg extends PushRelabelAlgorithm {
     return computeMaxFlow(new FlowNetwork(network), source, sink);
   }
 
+  /**
+   * Computes the residual network {@code Gf} as a matrix where the dimensions the
+   * {@code u} and {@code v} vertices of the edges in the network. The value is
+   * the residual capacity of each edge. After running the Push-Relabel algorithm
+   * and now has the maximum flow, initializes the residual network with the
+   * residual capacities of each edge.
+   *
+   * @param network the flow network to compute the residual network
+   * @param source  the source vertex
+   * @param sink    the sink vertex
+   * @return the residual network matrix
+   */
+  public static int[][] residualGraph(FlowNetwork network, int source, int sink) {
+    network.checkVertex(source);
+    network.checkVertex(sink);
+
+    if (source == sink)
+      return null;
+    return computeResidualGraph(new FlowNetwork(network), source, sink);
+  }
+
   private static int computeMaxFlow(FlowNetwork G, int s, int t) {
     Node[] VTS = new Node[G.getRows()];
     int u;
@@ -62,5 +83,52 @@ public final class Goldberg extends PushRelabelAlgorithm {
     }
 
     return VTS[t].excess;
+  }
+
+  /**
+   * Computes the residual network {@code Gf} as a matrix where the dimensions the
+   * {@code u} and {@code v} vertices of the edges in the network. The value is
+   * the residual capacity of each edge. After running the Edmond-Karp algorithm
+   * and now the the residual capacities of each edge and then will use that to
+   * compare to the original flow network.
+   *
+   * @param network the flow network to compute the residual network
+   * @param s       the source vertex
+   * @param t       the sink vertex
+   * @return the residual network matrix
+   */
+  private static int[][] computeResidualGraph(FlowNetwork network, int s, int t) {
+    FlowNetwork.Edge[][] G = network.getAdjacencyMatrix();
+    int n = network.getRows();
+    Node[] VTS = new Node[n];
+    int[][] Gf = new int[n][];
+    int[] V = network.getVertices();
+    int i, u;
+
+    // Initialize nodes for vertices that exist
+    for (int v : V)
+      VTS[v] = new Node(v);
+
+    initializePreflow(network, VTS, s);
+    // While there is an overflowing vertex
+    while ((u = overflowingVertex(network, VTS, s, t)) != -1) {
+      for (int v : network.getAdjacentVertices(u)) {
+        // If the overflowing vertex has a possible push operation
+        if (VTS[u].height == VTS[v].height + 1)
+          push(network, VTS, u, v);
+        // Otherwise, relabel the vertex until we can push the excess flow
+        else
+          relabel(network, VTS, u);
+      }
+    }
+
+    for (i = 0; i < V.length; i++) {
+      u = V[i];
+      Gf[u] = new int[n];
+      for (int v : network.getAdjacentVertices(u))
+        Gf[u][v] = G[u][v].getCapacity() - G[u][v].getFlow();
+    }
+
+    return Gf;
   }
 }

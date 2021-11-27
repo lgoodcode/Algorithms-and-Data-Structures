@@ -96,6 +96,27 @@ public final class EdmondKarp extends MaxFlowAlgorithm {
     return computeMaxFlowArray(new FlowNetwork(network), source, sink);
   }
 
+  /**
+   * Computes the residual network {@code Gf} as a matrix where the dimensions the
+   * {@code u} and {@code v} vertices of the edges in the network. The value is
+   * the residual capacity of each edge. After running the Edmond-Karp algorithm
+   * and now has the maximum flow, initializes the residual network with the
+   * residual capacities of each edge.
+   *
+   * @param network the flow network to compute the residual network
+   * @param source  the source vertex
+   * @param sink    the sink vertex
+   * @return the residual network matrix
+   */
+  public static int[][] residualGraph(FlowNetwork network, int source, int sink) {
+    network.checkVertex(source);
+    network.checkVertex(sink);
+
+    if (source == sink)
+      return null;
+    return computeResidualGraph(new FlowNetwork(network), source, sink);
+  }
+
   private static int computeMaxFlow(FlowNetwork network, int s, int t) {
     FlowNetwork.Edge[][] G = network.getAdjacencyMatrix();
     Node[] VTS = new Node[network.getRows()];
@@ -202,6 +223,28 @@ public final class EdmondKarp extends MaxFlowAlgorithm {
     }
 
     return P.getArrayPaths();
+  }
+
+  private static int[][] computeResidualGraph(FlowNetwork network, int s, int t) {
+    int n = network.getRows();
+    FlowNetwork.Edge[][] G = network.getAdjacencyMatrix();
+    Node[] VTS = new Node[n];
+    int[][] Gf = new int[n][];
+    int[] V = network.getVertices();
+
+    for (int v : V)
+      VTS[v] = new Node(v);
+
+    while (EK_BFS(network, VTS, s, t))
+      residualCapacity(G, VTS, Integer.MAX_VALUE, t);
+
+    for (int u : V) {
+      Gf[u] = new int[n];
+      for (int v : network.getAdjacentVertices(u))
+        Gf[u][v] = G[u][v].getCapacity() - G[u][v].getFlow();
+    }
+
+    return Gf;
   }
 
   /**
