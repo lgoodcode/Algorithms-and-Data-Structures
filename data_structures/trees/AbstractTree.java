@@ -75,9 +75,9 @@ public abstract class AbstractTree<K, V> {
   protected int modCount;
 
   // Enumeration/iteration constants
-  private int KEYS = 0;
-  private int VALUES = 1;
-  private int ENTRIES = 2;
+  private final int KEYS = 0;
+  private final int VALUES = 1;
+  private final int ENTRIES = 2;
 
   /**
    * Creates an empty, tree, using the specified compare function to determine

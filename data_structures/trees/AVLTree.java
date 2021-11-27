@@ -40,13 +40,12 @@ public final class AVLTree<K, V> extends AbstractTree<K, V> {
   /**
    * Constant used for {@link #retracing()} in {@link #insert()} with a key.
    */
-  private final int INSERT = 0;
+  private final boolean INSERT = false;
 
   /**
    * Constant used for {@link #retracing()} in {@link #delete()} without a key.
    */
-  private final int DELETE = 1;
-
+  private final boolean DELETE = true;
 
   /**
    * Creates an empty, BinaryTree, using the specified compare function to
@@ -219,7 +218,7 @@ public final class AVLTree<K, V> extends AbstractTree<K, V> {
    * @param key the key of the newly inserted node
    * @param z   the newly inserted node
    */
-  private void retracing(int type, Node<K, V> node, K key) {
+  private void retracing(boolean type, Node<K, V> node, K key) {
     Node<K, V> g, n, x = node.parent;
 
     for (int b; x != null; node = x, x = node.parent) {

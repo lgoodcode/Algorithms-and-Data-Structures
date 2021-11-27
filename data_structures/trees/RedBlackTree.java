@@ -42,30 +42,15 @@ import java.util.function.Consumer;
  */
 public final class RedBlackTree<K, V> extends AbstractTree<K, V> {
   public static class RBNode<T, E> extends Node<T, E> {
-    RBNode<T, E> parent;
-    RBNode<T, E> left;
-    RBNode<T, E> right;
+    private RBNode<T, E> parent;
+    private RBNode<T, E> left;
+    private RBNode<T, E> right;
 
     /**
      * Used to determine the type of {@code RedBlackTreeNode}. The two types are
-     * {@code Black (0)} and {@code Red (1)}.
+     * {@code Black (false)} and {@code Red (true)}.
      */
-    int color = 0;
-
-    /**
-     * Since the {@code RedBlackTree} may need to check the parent of a parent of a
-     * node and/or the color of that node, which may not even exist, it requires a
-     * circular structure {@code NIL} value which will hold pointers to itself and a
-     * default color of {@code Black}.
-     *
-     * <p>
-     * This is a static property which is used to initialize the
-     * {@code RedBlackTree} {@code NIL} value so it is only instantiated once as a
-     * constant and then referenced throughout the data struture to reduce memory
-     * usage.
-     * </p>
-     */
-    static final RBNode<?, ?> NIL = new RedBlackTree.RBNode<>();
+    private boolean color;
 
     /**
      * Creates a tree node with the specified key and value. It initializes the
@@ -78,7 +63,7 @@ public final class RedBlackTree<K, V> extends AbstractTree<K, V> {
      *
      * @throws IllegalArgumentException if the key or value is {@code null} or blank
      */
-    RBNode(T key, E value) {
+    private RBNode(T key, E value) {
       super(key, value);
       parent = left = right = new RBNode<>();
     }
@@ -89,7 +74,7 @@ public final class RedBlackTree<K, V> extends AbstractTree<K, V> {
      * {@code RedBlackTreeNode} to prevent errors from occuring and for the tree to
      * perform its operations.
      */
-    RBNode() {
+    private RBNode() {
       parent = left = right = this;
     }
 
@@ -104,13 +89,27 @@ public final class RedBlackTree<K, V> extends AbstractTree<K, V> {
       return getKey() == null;
     }
 
+    private boolean isBlack() {
+      return color == BLACK;
+    }
+
+    private boolean isRed() {
+      return color == RED;
+    }
+
   }
 
   /**
    * The sentinel {@code NIL}.
-   */
-  @SuppressWarnings("unchecked")
-  private final RBNode<K, V> NIL = (RBNode<K, V>) RBNode.NIL;
+   * 
+   * <p>
+   * Since the {@code RedBlackTree} may need to check the parent of a parent of a
+   * node and/or the color of that node, which may not even exist, it requires a
+   * circular structure {@code NIL} value which will hold pointers to itself and a
+   * default color of {@code Black}.
+   * </p>
+   */  
+  private final RBNode<K, V> NIL = new RBNode<K, V>();
 
   /**
    * The root of the tree which is initially the {@code NIL} sentinel.
@@ -118,8 +117,8 @@ public final class RedBlackTree<K, V> extends AbstractTree<K, V> {
   private RBNode<K, V> root;
 
   // Color constants
-  private final int BLACK = 0;
-  private final int RED = 1;
+  private static final boolean BLACK = false;
+  private static final boolean RED = true;
 
   /**
    * Creates an empty, BinaryTree, using the specified compare function to
@@ -296,7 +295,7 @@ public final class RedBlackTree<K, V> extends AbstractTree<K, V> {
   private void insertFixup(RBNode<K, V> z) {
     RBNode<K, V> y;
 
-    while (z.parent.color == RED) {
+    while (z.parent.isRed()) {
       if (z.parent == z.parent.parent.left) {
         y = z.parent.parent.right;
         /**
@@ -307,7 +306,7 @@ public final class RedBlackTree<K, V> extends AbstractTree<K, V> {
          * and we can color z.p.p red, therby maintaining property 5. The while loop is
          * repeated with z.p.p as the new node z.
          */
-        if (y.color == RED) {
+        if (y.isRed()) {
           z.parent.color = BLACK;
           y.color = BLACK;
           z.parent.parent.color = RED;
@@ -344,7 +343,7 @@ public final class RedBlackTree<K, V> extends AbstractTree<K, V> {
          */
         y = z.parent.parent.left;
 
-        if (y.color == RED) {
+        if (y.isRed()) {
           z.parent.color = BLACK;
           y.color = BLACK;
           z.parent.parent.color = RED;
@@ -508,7 +507,7 @@ public final class RedBlackTree<K, V> extends AbstractTree<K, V> {
     size--;
 
     RBNode<K, V> x, y = (RBNode<K, V>) node, _node = y;
-    int y_color = y.color;
+    boolean y_color = y.color;
 
     if (_node.left.isNIL()) {
       x = _node.right;
@@ -568,7 +567,7 @@ public final class RedBlackTree<K, V> extends AbstractTree<K, V> {
   private void deleteFixup(RBNode<K, V> node) {
     RBNode<K, V> w;
 
-    while (node != root && node.color == BLACK) {
+    while (node != root && node.isBlack()) {
       if (node == node.parent.left) {
         w = node.parent.right;
         /**
@@ -579,7 +578,7 @@ public final class RedBlackTree<K, V> extends AbstractTree<K, V> {
          * properties. The new sibling of x, which is one of w's children prior to the
          * rotation, is now black, and thus converted case 1 into case 2, 3, or 4.
          */
-        if (w.color == RED) {
+        if (w.isRed()) {
           w.color = BLACK;
           node.parent.color = RED;
           leftRotate(node.parent);
@@ -599,7 +598,7 @@ public final class RedBlackTree<K, V> extends AbstractTree<K, V> {
          * and the loop terminates when it tests the loop condition. We then color the
          * new node x (singly) black at the very end.
          */
-        if (w.left.color == BLACK && w.right.color == BLACK) {
+        if (w.left.isBlack() && w.right.isBlack()) {
           w.color = RED;
           node = node.parent;
         } else {
@@ -612,12 +611,13 @@ public final class RedBlackTree<K, V> extends AbstractTree<K, V> {
            * new sibling w of x is now a black node with a red right child, transforming
            * case 3 into case 4
            */
-          if (w.right.color == BLACK) {
+          if (w.right.isBlack()) {
             w.left.color = BLACK;
             w.color = RED;
             rightRotate(w);
             w = node.parent.right;
           }
+          
           /**
            * Case 4: x's sibling w is black, and w's right child is red
            *
@@ -635,17 +635,17 @@ public final class RedBlackTree<K, V> extends AbstractTree<K, V> {
       } else {
         w = node.parent.left;
 
-        if (w.color == RED) {
+        if (w.isRed()) {
           w.color = BLACK;
           node.parent.color = RED;
           rightRotate(node.parent);
           w = node.parent.left;
         }
-        if (w.right.color == BLACK && w.left.color == BLACK) {
+        if (w.right.isBlack() && w.left.isBlack()) {
           w.color = RED;
           node = node.parent;
         } else {
-          if (w.left.color == BLACK) {
+          if (w.left.isBlack()) {
             w.right.color = BLACK;
             w.color = RED;
             leftRotate(w);
