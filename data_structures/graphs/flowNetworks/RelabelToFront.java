@@ -1,6 +1,19 @@
 package data_structures.graphs.flowNetworks;
 
 import data_structures.linkedLists.LinkedList;
+import data_structures.queues.Queue;
+
+/**
+ * Relabel-To-Front-Queue(G, s, t)
+ * 1   Initialize-Preflow(G, s)
+ * 2   Q = u of G.V - {s, t} where u.e > 0
+ * 3   while Q.size > 1
+ * 4       old-height = u.h
+ * 5       Discharge(u)
+ * 6       if (u.h > old-height)
+ * 7           Q.enqueue(u)
+ * 8   return e(t)
+ */
 
 /**
  * Relabel-To-Front(G, s, t)
@@ -97,13 +110,112 @@ public final class RelabelToFront extends PushRelabelAlgorithm {
     return computeMaxFlow(new FlowNetwork(network), source, sink);
   }
 
+  /**
+   * This implementation of the Relabel-to-Front algorithm still satisfies the
+   * FIFO selection rule for the overflowing vertices. Rather than using a
+   * linkedlist to hold the vertices, and placing the vertex at the start of the
+   * list and starting over, it uses a queue.
+   * 
+   * <p>
+   * Using a queue allows the initial overflowing vertices to be queued and then
+   * enqueues any vertices {@code v} where excess flow was "Pushed onto" and the
+   * vertex {@code u} when relabeled.
+   * </p>
+   * 
+   * <p>
+   * Another modification: instead of using {@code while(!Q.isEmpty())} the
+   * condition {@code while(Q.size() > 1)} works because the last vertex that
+   * would exist in the queue before the algorithm finishes is the source vertex
+   * {@code s} which cannot be discharged from. This is due to the preflow
+   * initialization from the source to the adjacent vertices, where it already has
+   * discharged the maximum flow.
+   * </p>
+   * 
+   * @param G the flow network
+   * @param s the source vertex
+   * @param t the sink vertex
+   * @return the maximum flow from the source to the sink
+   */
   private static int computeMaxFlow(FlowNetwork G, int s, int t) {
+    Node[] VTS = new Node[G.getRows()];
+    Queue<Integer> Q = new Queue<>(G.getRows());
+    int[] V = G.getVertices();
+    int oldHeight;
+
+    for (int u : V)
+      VTS[u] = new Node(u);
+    
+    initializePreflow(G, VTS, s);
+
+    for (int u : V)
+      if (u != s && u != t && VTS[u].excess > 0)
+        Q.enqueue(u);
+    
+    while (Q.size() > 1) {
+      int u = Q.dequeue();
+
+      if (u != s && u != t) {
+        oldHeight = VTS[u].height;
+        discharge(G, VTS, Q, u);
+
+        if (VTS[u].height > oldHeight && !Q.has(u))  
+          Q.enqueue(u); 
+      }
+    }
+
+    return VTS[t].excess;   
+  }
+
+  /**
+   * Discharge-Queue(Q, u)
+   * 1   while u.e > 0
+   * 2      for each edge of (u, v) of G.E
+   * 3          if cf(u, v) > 0 and u.h == u.v + 1  
+   * 4              Push(u, v)
+   * 5              Q.enqueue(v)
+   * 6          else Relabel(u)
+   */
+
+  /**
+   * Discharges excess flow from the overflowing vertex {@code u} with the Queue
+   * implementation. While the vertex is overflowing, iterate t rough each edge
+   * adjacent to {@code u} and find an edge with positiv residual capacity, where
+   * there is possible flow to push to, and pus it to vertex {@code v} and add it
+   * to the queue. Otherwise, relabel the overflowing vertex.
+   * 
+   * @param network the flow network
+   * @param VTS     the Relabel-to-Front nodes
+   * @param Q       the queue holding the overflowing vertices
+   * @param u       the overflowing vertex to push excess flow from
+   */
+  private static void discharge(FlowNetwork network, Node[] VTS, Queue<Integer> Q, int u) {
+    while(VTS[u].excess > 0) {
+      for (FlowNetwork.Edge edge : network.getEdges(u)) {
+        int f = edge.getFlow();
+        int c = edge.getCapacity();
+        int v = edge.getVertices()[1];
+
+        if (c > f && VTS[u].height == VTS[v].height + 1) {
+          push(network, VTS, u, v);
+
+          if (!Q.has(v))
+            Q.enqueue(v);
+        }
+        else
+          relabel(network, VTS, u);
+      }
+    }
+  }
+
+  @SuppressWarnings("unused")
+  private static int computeMaxFlowOriginal(FlowNetwork G, int s, int t) {
     Node[] VTS = new Node[G.getRows()];
     LinkedList<Integer> L = new LinkedList<>();
     LinkedList.Node<Integer> U;
     int oldHeight;
 
     // Initialize the nodes, their neighbor list, and the main linkedlist
+    // all in one loop instead of two seperate for-loops
     for (int u : G.getVertices()) {
       VTS[u] = new Node(u);
 
@@ -125,7 +237,7 @@ public final class RelabelToFront extends PushRelabelAlgorithm {
     while (U != null) {
       int u = U.getItem();
       oldHeight = VTS[u].height;
-      discharge(G, VTS, u);
+      dischargeOriginal(G, VTS, u);
       // If vertex was relabeled, place it at the front of the list and start again
       if (VTS[u].height > oldHeight) {
         L.remove(U);
@@ -174,7 +286,8 @@ public final class RelabelToFront extends PushRelabelAlgorithm {
    * @param VTS     the Relabel-to-Front nodes
    * @param u       the overflowing vertex
    */
-  protected static void discharge(FlowNetwork network, Node[] VTS, int u) {
+  @SuppressWarnings("unused")
+  private static void dischargeOriginal(FlowNetwork network, Node[] VTS, int u) {
     LinkedList.Node<Integer> V;
     int v;
 
