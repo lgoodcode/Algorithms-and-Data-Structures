@@ -221,9 +221,7 @@ public final class HopcroftKarp extends BipartiteMatchingAlgorithm {
       int u = Q.dequeue();
       // If this node is not NIL and can provide a shorter path to dummy vertex
       if (VTS[u].distance < VTS[NIL].distance) {
-        // For each adjacent vertex of u
-        for (Graph.Edge edge : G.getEdges(u)) {
-          int v = edge.getVertices()[1];
+        for (int v : G.getAdjacentVertices(u)) {
           // If v is not considered so far; (v, pairV[v]) is not an explored edge
           if (VTS[VTS[v].pairV].distance == Integer.MAX_VALUE) {
             // Consider pair and add to queue
@@ -266,10 +264,7 @@ public final class HopcroftKarp extends BipartiteMatchingAlgorithm {
     if (u == NIL)
       return true;
 
-    int v;
-    for (Graph.Edge edge : G.getEdges(u)) {
-      v = edge.getVertices()[1];
-
+    for (int v : G.getAdjacentVertices(u)) {
       // If pairV[v] has a shorter distance than the current pair for u
       // and doesn't already have a pair that is shorter
       if (VTS[VTS[v].pairV].distance == VTS[u].distance + 1 && HP_DFS(G, VTS, VTS[v].pairV)) {

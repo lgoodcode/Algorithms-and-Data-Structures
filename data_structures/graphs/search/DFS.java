@@ -172,9 +172,7 @@ public final class DFS {
     VTS[u].distance = ++time[0];
     VTS[u].color = GRAY;
 
-    for (Graph.Edge edge : G.getEdges(u)) {
-      int v = edge.getVertices()[1];
-
+    for (int v : G.getAdjacentVertices(u)) {
       if (!VTS[v].visited()) {
         VTS[v].predecessor = u;
         visit(G, VTS, v, time);

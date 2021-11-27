@@ -190,8 +190,8 @@ public final class Scaling extends MaxFlowAlgorithm {
     int C = 0, K, flow = 0;
 
     // Initialize nodes
-    for (int i = 0; i < G.length; i++)
-      VTS[i] = new Node(i);
+    for (int u : network.getVertices())
+      VTS[u] = new Node(u);
 
     // Find the C, the maximum capacity of the flow network
     for (FlowNetwork.Edge edge : network.getEdges())

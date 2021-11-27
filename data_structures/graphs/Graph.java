@@ -351,18 +351,24 @@ public final class Graph {
   }
 
   /**
-   * Returns an array with a length of the total number of possible vertices in
-   * the graph and each element for the vertex contains the vertex index if the
-   * vertex exists or {@code -1} if not.
-   *
-   * @return the array of vertices
+   * Returns an array of the adjacent vertices of the specified vertex.
+   * 
+   * @param u the vertex whose adjacent vertices is needed
+   * @return the adjacent vertices
+   * 
+   * @throws IllegalArgumentException if the vertex doesn't exist in the graph
    */
-  public int[] getVerticesAll() {
-    int[] V = new int[rows];
+  public int[] getAdjacentVertices(int u) {
+    if (!hasVertex(u))
+      throw new IllegalArgumentException("Vertex " + u + " does not exist in graph.");
 
-    for (int i = 0; i < V.length; i++)
-      V[i] = G[i] != null ? i : -1;
-    return V;
+    int[] V = new int[rows];
+    int i, j, len;
+
+    for (i = 0, j = 0, len = rows; i < len; i++)
+      if (G[u][i] != Graph.NIL)
+        V[j++] = i;
+    return copyOf(V, j);
   }
 
   /**

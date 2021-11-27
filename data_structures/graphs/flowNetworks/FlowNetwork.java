@@ -513,21 +513,6 @@ public final class FlowNetwork {
         V[j++] = i;
     return copyOf(V, j);
   }
-
-  /**
-   * Returns an array with a length of the total number of possible vertices in
-   * the flow network and each element for the vertex contains the vertex index if
-   * the vertex exists or {@code -1} if not.
-   *
-   * @return the array of vertices
-   */
-  public int[] getVerticesAll() {
-    int[] V = new int[rows];
-
-    for (int i = 0; i < V.length; i++)
-      V[i] = G[i] != null ? i : -1;
-    return V;
-  }
   
   /**
    * Returns an array of the adjacent vertices of the specified vertex.

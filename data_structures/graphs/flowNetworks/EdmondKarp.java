@@ -144,7 +144,6 @@ public final class EdmondKarp extends MaxFlowAlgorithm {
 
       for (FlowNetwork.Edge edge : G.getEdges(u)) {
         v = edge.getVertices()[1];
-
         // Find edges with a positive residual capacity: the maximum amount of flow
         // that can be added to each edge in the augmenting path
         // (0 < f < c for all (u, v) in path p)

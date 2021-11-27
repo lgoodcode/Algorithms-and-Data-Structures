@@ -230,7 +230,6 @@ public final class Dinic extends MaxFlowAlgorithm {
 
       for (FlowNetwork.Edge edge : G.getEdges(u)) {
         v = edge.getVertices()[1];
-
         // Find edges with no level and has a positive residual capacity
         if (L[v].level < 0 && edge.getFlow() < edge.getCapacity()) {
           L[v].level = L[u].level + 1;

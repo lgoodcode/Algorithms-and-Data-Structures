@@ -91,9 +91,7 @@ public final class BipartiteDFS extends BipartiteMatchingAlgorithm {
   }
 
   private static boolean findMatch(Graph G, Node[] VTS, int[] M, int n, int u) {
-    for (Graph.Edge edge : G.getEdges(u)) {
-      int v = edge.getVertices()[1];
-
+    for (int v : G.getAdjacentVertices(u)) {
       if (!VTS[v].visited()) {
         VTS[v].color = GRAY;
 

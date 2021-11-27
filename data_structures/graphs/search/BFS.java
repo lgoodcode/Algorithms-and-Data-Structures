@@ -143,7 +143,6 @@ public final class BFS {
     for (int u : G.getVertices())
       VTS[u] = new Node(u);
 
-    // Initialize starting vertex as discovered (GRAY), self (0), root (-1)
     VTS[s].color = GRAY;
     VTS[s].distance = 0;
 
@@ -152,9 +151,7 @@ public final class BFS {
     while (!Q.isEmpty()) {
       int u = Q.dequeue();
       
-      for (Graph.Edge edge : G.getEdges(u)) {
-        int v = edge.getVertices()[1];
-
+      for (int v : G.getAdjacentVertices(u)) {
         if (!VTS[v].visited()) {
           VTS[v].color = GRAY;
           VTS[v].distance = VTS[u].distance + 1;

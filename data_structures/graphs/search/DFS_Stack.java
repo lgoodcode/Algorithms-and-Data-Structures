@@ -92,9 +92,7 @@ public final class DFS_Stack {
       VTS[u].distance = ++time;
       VTS[u].color = GRAY;
 
-      for (Graph.Edge edge : G.getEdges(u)) {
-        int v = edge.getVertices()[1];
-
+      for (int v : G.getAdjacentVertices(u)) {
         if (!VTS[v].visited()) {
           VTS[v].predecessor = u;
           S.push(v);
