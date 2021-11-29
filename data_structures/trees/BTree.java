@@ -92,27 +92,27 @@ public final class BTree<K, V> {
     /**
      * The child {@code BTreeNodes}.
      */
-    BTreeNode<K, V>[] children;
+    private BTreeNode<K, V>[] children;
 
     /**
      * The number of keys currently stored under this node.
      */
-    int count;
+    private int count;
 
     /**
      * Whether this node is a leaf or internal node.
      */
-    boolean leaf;
+    private boolean leaf;
 
     /**
      * The actual keys
      */
-    K[] keys;
+    private K[] keys;
 
     /**
      * The values
      */
-    V[] values;
+    private V[] values;
 
     /**
      * Constructs an empty {@code BTreeNode} with the specified {@code t},
@@ -125,7 +125,7 @@ public final class BTree<K, V> {
      *                                  {@code 2}
      */
     @SuppressWarnings("unchecked")
-    BTreeNode(int t) {
+    private BTreeNode(int t) {
       if (t < 1)
         throw new IllegalArgumentException("Minimum degree must be >= 2");
 
@@ -385,6 +385,9 @@ public final class BTree<K, V> {
     return root;
   }
 
+  /**
+   * Removes all the elements from the tree by dereferencing the root.
+   */
   public void clear() {
     root = new BTreeNode<K, V>(t);
     size = 0;
@@ -422,7 +425,7 @@ public final class BTree<K, V> {
     z.leaf = y.leaf;
     // Give new node z the largest t - 1 keys of y
     z.count = t - 1;
-    for (j=0, len = t - 1; j < len; j++) {
+    for (j = 0, len = t - 1; j < len; j++) {
       z.keys[j] = y.keys[j + t];
       z.values[j] = y.values[j + t];
     }
@@ -431,7 +434,7 @@ public final class BTree<K, V> {
     // contain children. Loop through, copying the t - 1 largest children
     // from y to the new node z and remove them from y
     if (!y.leaf) {
-      for (j=0; j < t; j++)
+      for (j = 0; j < t; j++)
         z.children[j] = y.children[j + t];
       y.removeChildren(j);
     }
@@ -471,28 +474,32 @@ public final class BTree<K, V> {
    * @param value the value to insert
    */
   private void insertNonfull(BTreeNode<K, V> node, K key, V value) {
-    int i = node.count - 1;
+    int i = 0;
 
     // If the node is a leaf, move the current keys up one until we reach a
     // position where the key is greater than a key
     if (node.leaf) {
-      while (i >= 0 && isLessThan(key, node.keys[i])) {
-        node.keys[i + 1] = node.keys[i];
-        node.values[i + 1] = node.values[i];
-        i--;
+      while (node.keys[i] != null && isLessThan(node.keys[i], key))
+        i++;
+
+      // If the new key is less than any of the current keys, we will
+      // shift up the keys, up to the index of where the new key goes
+      for (int j = node.count; j > i; j--) {
+        node.keys[j] = node.keys[j - 1];
+        node.values[j] = node.values[j - 1];
       }
 
-      // Inserts the key/value into its position and adjust key count
-      node.keys[i + 1] = key;
-      node.values[i + 1] = value;
-      node.count = node.count + 1;
+      // Inserts the key/value into it position and adjust key count
+      node.keys[i] = key;
+      node.values[i] = value;
+      node.count++;
       // Disk-Write(node)
     }
 
     // Node is an internal node, so 'i' will be the index of the child to
     // insert into
     else {
-      while (i < node.count && isLessThan(node.keys[i], key))
+      while (node.keys[i] != null && isLessThan(node.keys[i], key))
         i++;
 
       // Disk-Read([i])
@@ -1180,8 +1187,8 @@ public final class BTree<K, V> {
       node.removeChildren(j);
 
       // Adjust key count and remove k from x
-      node.shiftKeys(i, node.count);
       node.count--;
+      node.shiftKeys(i, node.count);
       node.removeKeys(node.count);
 
       // Recursively delete key from the newly merged node y
@@ -1319,7 +1326,7 @@ public final class BTree<K, V> {
 
         // If the t-1 key nodes aren't leaves, merge the children too
         if (!z.leaf) {
-          for (j = 0, k = y.count - 1; j <= z.count; j++)
+          for (j = 0, k = y.count - z.count; j <= z.count; j++)
             y.children[j + k] = z.children[j];
         }
 
@@ -1561,8 +1568,6 @@ public final class BTree<K, V> {
 
     /**
      * Returns the next element if it has one to provide.
-     * 
-     * TODO: need to fix next item once a removal occurs
      *
      * @return the next element
      * @throws ConcurrentModificationException if the list was modified during
@@ -1639,7 +1644,7 @@ public final class BTree<K, V> {
       // Synchronized block to lock the tree object while removing entry
       synchronized (BTree.this) {
         BTree.this.delete(lastNode, lastKey);
-        expectedModCount = modCount;
+        expectedModCount++;
         lastKey = null;
 
         // Key removed from node, decrement index to continue to next element

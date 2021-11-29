@@ -292,19 +292,20 @@ public class BTree_Test {
   @Nested
   class Many_Insertions {
 
-    @Test
-    void insertions() {
-      tree = new BTree<>();
+    @ParameterizedTest
+    @ValueSource(ints = { 2, 3, 4 })
+    void insertions_with_varying_degree(int degree) {
+      tree = new BTree<>(degree);
 
-      tree.insert(1, "one");
       tree.insert(2, "two");
+      tree.insert(1, "one");
       tree.insert(3, "three");
       tree.insert(4, "four");
       tree.insert(5, "five");
       tree.insert(6, "six");;
+      tree.insert(9, "nine");
       tree.insert(7, "seven");
       tree.insert(8, "eight");
-      tree.insert(9, "nine");
       tree.insert(10, "ten");
       tree.insert(110, "110");
       tree.insert(120, "120");
