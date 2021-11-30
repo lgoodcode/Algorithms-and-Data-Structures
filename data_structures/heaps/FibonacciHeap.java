@@ -695,9 +695,6 @@ public final class FibonacciHeap<T> implements java.io.Serializable {
     // Write out size
     stream.writeInt(size);
 
-    if (isEmpty())
-      return;
-
     // Write out all elements. Iteration is required because the lambda block for
     // recursive walk won't delegate the IOException
     for (T item : iterable())

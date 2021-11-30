@@ -363,9 +363,6 @@ public final class MinHeap<T> implements java.io.Serializable {
     // Write out size
     stream.writeInt(size);
 
-    if (isEmpty())
-      return;
-
     // Write out all elements
     for (int i = 0, len = size; i < len; i++)
       stream.writeObject(heap[i]);
