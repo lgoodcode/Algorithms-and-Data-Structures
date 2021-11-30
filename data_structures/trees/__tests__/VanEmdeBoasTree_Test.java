@@ -2,14 +2,18 @@ package data_structures.trees.__tests__;
 
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import data_structures.trees.VanEmdeBoasTree;
 
@@ -20,7 +24,12 @@ public class VanEmdeBoasTree_Test {
 
   @Test
   void is_instantiated() {
-    tree  = new VanEmdeBoasTree<>(size);
+    new VanEmdeBoasTree<>(size);
+  }
+
+  @Test
+  void throws_on_bad_universe_size() {
+    assertThrows(IllegalArgumentException.class, () -> new VanEmdeBoasTree<>(10));
   }
 
   @Nested 
@@ -87,55 +96,37 @@ public class VanEmdeBoasTree_Test {
       assertThrows(NoSuchElementException.class, () -> tree.successor(2));
     }
 
-    // @Test
-    // void empty_tree_string() {
-    //   assertEquals("{}", tree.toString());
-    // }
+    @Test
+    void empty_tree_string() {
+      assertEquals("{}", tree.toString());
+    }
 
-    // @Test
-    // void delete_throws() {
-    //   assertThrows(IllegalArgumentException.class, () -> tree.delete(null));
-    // }
+    @Test
+    void empty_array() {
+      assertArrayEquals(new Object[0], tree.toArray());
+    }
 
-    // @ParameterizedTest
-    // @NullAndEmptySource
-    // @ValueSource(strings = { " ", "  ", "\t", "\n" })
-    // void insert_throws_on_bad_keys(String key) {
-    //   tree2 = new AVLTree<>();
+    @ParameterizedTest
+    @ValueSource(ints = { -1, 8 })
+    void insert_throws_on_bad_keys(int key) {
+      assertThrows(IllegalArgumentException.class, () -> tree.insert(key, 1));
+    }
 
-    //   assertThrows(IllegalArgumentException.class, () -> tree2.insert(key, "test"));
-    // }
+    @Test
+    void keys_is_empty() {
+      Iterator<Integer> keys = tree.keysIterator();
+      assertFalse(keys.hasNext());
+      assertThrows(NoSuchElementException.class, () -> keys.next());
+      assertThrows(IllegalStateException.class, () -> keys.remove());
+    }
 
-    // @ParameterizedTest
-    // @NullAndEmptySource
-    // @ValueSource(strings = { " ", "  ", "\t", "\n" })
-    // void insert_throws_on_bad_values(String value) {
-    //   assertThrows(IllegalArgumentException.class, () -> tree.insert(1, value));
-    // }
-
-    // @Test
-    // void keys_is_empty() {
-    //   Iterator<Integer> keys = tree.keysIterator();
-    //   assertFalse(keys.hasNext());
-    //   assertThrows(NoSuchElementException.class, () -> keys.next());
-    //   assertThrows(IllegalStateException.class, () -> keys.remove());
-    // }
-
-    // @Test
-    // void values_is_empty() {
-    //   Iterator<String> values = tree.valuesIterator();
-    //   assertFalse(values.hasNext());
-    //   assertThrows(NoSuchElementException.class, () -> values.next());
-    //   assertThrows(IllegalStateException.class, () -> values.remove());
-    // }
-
-    // @Test
-    // void entries_is_empty() {
-    //   Iterator<AVLTree.Node<Integer, String>> entries = tree.entriesIterator();
-    //   assertFalse(entries.hasNext());
-    //   assertThrows(NoSuchElementException.class, () -> entries.next());
-    //   assertThrows(IllegalStateException.class, () -> entries.remove());
-    // }
+    @Test
+    void values_is_empty() {
+      Iterator<Integer> values = tree.valuesIterator();
+      assertFalse(values.hasNext());
+      assertThrows(NoSuchElementException.class, () -> values.next());
+      assertThrows(IllegalStateException.class, () -> values.remove());
+    }
 
   }
 
@@ -257,165 +248,223 @@ public class VanEmdeBoasTree_Test {
       tree.delete(0);
     } 
 
-    // @Test
-    // void postorderTreeWalk() {
-    //   StringBuilder str = new StringBuilder();
-    //   tree.postorderTreeWalk((node) -> 
-    //     str.append(node.toString() + "\n"));
-      
-    //   assertEquals(
-    //         "1 -> one\n"
-    //       + "3 -> three\n"
-    //       + "5 -> five\n"
-    //       + "4 -> four\n"
-    //       + "2 -> two\n",
-    //     str.toString());
-    // }
+    @Test
+    void preorderTreeWalk() {
+      StringBuilder sb = new StringBuilder("[");
 
-    // @Test
-    // void keys() {
-    //   Iterator<Integer> keys = tree.keysIterator();
-    //   assertTrue(keys.hasNext());
-    //   assertEquals(1, keys.next());
-    //   assertEquals(2, keys.next());
-    //   assertEquals(3, keys.next());
-    //   assertEquals(4, keys.next());
-    //   assertEquals(5, keys.next());
-    //   assertFalse(keys.hasNext());
-    //   assertThrows(NoSuchElementException.class, () -> keys.next());
-    // }
+      tree.preorderTreeWalk((el) -> sb.append(el.toString() + ", "));
 
-    // @Test
-    // void values() {
-    //   Iterator<String> values = tree.valuesIterator();
-    //   assertTrue(values.hasNext());
-    //   assertEquals("one", values.next());
-    //   assertEquals("two", values.next());
-    //   assertEquals("three", values.next());
-    //   assertEquals("four", values.next());
-    //   assertEquals("five", values.next());
-    //   assertFalse(values.hasNext());
-    //   assertThrows(NoSuchElementException.class, () -> values.next());
-    // }
+      assertEquals("[7, 6, 5, 4, 3, 2, 1, 0]", sb.substring(0, sb.length() - 2) + "]");
+    }
 
-    // @Test
-    // void entries() {
-    //   Iterator<AVLTree.Node<Integer, String>> entries = tree.entriesIterator();
-    //   assertTrue(entries.hasNext());
-    //   assertEquals("one", entries.next().getValue());
-    //   assertEquals("two", entries.next().getValue());
-    //   assertEquals("three", entries.next().getValue());
-    //   assertEquals("four", entries.next().getValue());
-    //   assertEquals("five", entries.next().getValue());
-    //   assertFalse(entries.hasNext());
-    //   assertThrows(NoSuchElementException.class, () -> entries.next());
-    // }
+    @Test
+    void preorderTreeWalk_with_keys() {
+      StringBuilder sb = new StringBuilder("{\n");
 
-    // @Test
-    // void iterator_remove() {
-    //   Iterator<Integer> keys = tree.keysIterator();
-    //   assertTrue(keys.hasNext());
-    //   assertThrows(IllegalStateException.class, () -> keys.remove());
-    //   assertEquals(1, keys.next());
-    //   assertEquals(2, keys.next());
-    //   assertDoesNotThrow(() -> keys.remove());
-    //   assertFalse(tree.hasKey(2));
-    //   assertThrows(IllegalStateException.class, () -> keys.remove());
-    //   assertEquals(3, keys.next());
-    //   assertEquals(4, keys.next());
-    //   assertEquals(5, keys.next());
-    //   assertFalse(keys.hasNext());
-    //   assertThrows(NoSuchElementException.class, () -> keys.next());
-    //   assertEquals(4, tree.size());
-    // }
+      tree.preorderTreeWalk((k, el) -> sb.append("\s\s" + k + " -> " + el.toString() + ",\n"));
 
-    // @Test
-    // void to_string() {
-    //   assertEquals("{\n"
-    //       + "\s\s\"1 -> one\",\n"
-    //       + "\s\s\"2 -> two\",\n"
-    //       + "\s\s\"3 -> three\",\n"
-    //       + "\s\s\"4 -> four\",\n"
-    //       + "\s\s\"5 -> five\",\n"
-    //       + "}",
-    //     tree.toString());
-    // }
+      assertEquals("{\n"
+      + "\s\s7 -> 7,\n"
+      + "\s\s6 -> 6,\n"
+      + "\s\s5 -> 5,\n"
+      + "\s\s4 -> 4,\n"
+      + "\s\s3 -> 3,\n"
+      + "\s\s2 -> 2,\n"
+      + "\s\s1 -> 1,\n"
+      + "\s\s0 -> 0\n"
+      + "}",
+      sb.substring(0, sb.length() - 2) + "\n}");
+    }
+
+    @Test
+    void keys() {
+      Iterator<Integer> keys = tree.keysIterator();
+      assertTrue(keys.hasNext());
+      assertEquals(0, keys.next());
+      assertEquals(1, keys.next());
+      assertEquals(2, keys.next());
+      assertEquals(3, keys.next());
+      assertEquals(4, keys.next());
+      assertEquals(5, keys.next());
+      assertEquals(6, keys.next());
+      assertEquals(7, keys.next());
+      assertFalse(keys.hasNext());
+      assertThrows(NoSuchElementException.class, () -> keys.next());
+    }
+
+    @Test
+    void values() {
+      Iterator<Integer> values = tree.valuesIterator();
+      assertTrue(values.hasNext());
+      assertEquals(0, values.next());
+      assertEquals(1, values.next());
+      assertEquals(2, values.next());
+      assertEquals(3, values.next());
+      assertEquals(4, values.next());
+      assertEquals(5, values.next());
+      assertEquals(6, values.next());
+      assertEquals(7, values.next());
+      assertFalse(values.hasNext());
+      assertThrows(NoSuchElementException.class, () -> values.next());
+    }
+
+    @Test
+    void iterator_remove() {
+      Iterator<Integer> keys = tree.keysIterator();
+      assertTrue(keys.hasNext());
+      assertThrows(IllegalStateException.class, () -> keys.remove());
+      assertEquals(0, keys.next());
+      assertEquals(1, keys.next());
+      assertEquals(2, keys.next());
+      assertDoesNotThrow(() -> keys.remove());
+      assertFalse(tree.member(2));
+      assertThrows(IllegalStateException.class, () -> keys.remove());
+      assertEquals(3, keys.next());
+      assertEquals(4, keys.next());
+      assertEquals(5, keys.next());
+      assertEquals(6, keys.next());
+      assertEquals(7, keys.next());
+      assertFalse(keys.hasNext());
+      assertThrows(NoSuchElementException.class, () -> keys.next());
+      assertEquals(7, tree.size());
+    }
+
+    @Test
+    void toString_full() {
+      assertEquals("{\n"
+          + "\s\s0 -> 0,\n"
+          + "\s\s1 -> 1,\n"
+          + "\s\s2 -> 2,\n"
+          + "\s\s3 -> 3,\n"
+          + "\s\s4 -> 4,\n"
+          + "\s\s5 -> 5,\n"
+          + "\s\s6 -> 6,\n"
+          + "\s\s7 -> 7\n"
+          + "}",
+        tree.toString());
+    }
+
+    @Test
+    void toString_partial() {
+      tree.delete(2);
+      tree.delete(3);
+
+      assertEquals("{\n"
+          + "\s\s0 -> 0,\n"
+          + "\s\s1 -> 1,\n"
+          + "\s\s4 -> 4,\n"
+          + "\s\s5 -> 5,\n"
+          + "\s\s6 -> 6,\n"
+          + "\s\s7 -> 7\n"
+          + "}",
+        tree.toString());
+    }
+
+    @Test
+    void toArray() {
+      Object[] arr = { 0, 1, 2, 3, 4, 5, 6, 7 };
+      assertArrayEquals(arr, tree.toArray());
+    }
 
   }
 
   @Nested
   class Many_Insertions {
 
-    // @Test
-    // void insertions() {
-    //   tree = new AVLTree<>();
+    @Test
+    void insertions() {
+      VanEmdeBoasTree<String> tree = new VanEmdeBoasTree<>(32);
 
-    //   tree.insert(1, "one");
-    //   tree.insert(2, "two");
-    //   tree.insert(3, "three");
-    //   tree.insert(4, "four");
-    //   tree.insert(5, "five");
-    //   tree.insert(6, "six");
-    //   tree.insert(7, "seven");
-    //   tree.insert(8, "eight");
-    //   tree.insert(9, "nine");
-    //   tree.insert(10, "ten");
-    //   tree.insert(110, "eleven");
-    //   tree.insert(120, "twelve");
-    //   tree.insert(13, "thirteen");
-    //   tree.insert(14, "fourteen");
-    //   tree.insert(15, "fifteen");
-    //   tree.insert(16, "sixteen");
-    //   tree.insert(17, "seventeen");
-    //   tree.insert(18, "eighteen");
-    //   tree.insert(19, "nineteen");
-    //   tree.insert(20, "twenty");
+      tree.insert(1, "one");
+      tree.insert(3, "three");
+      tree.insert(4, "four");
+      tree.insert(5, "five");
+      tree.insert(6, "six");;
+      tree.insert(9, "nine");
+      tree.insert(7, "seven");
+      tree.insert(8, "eight");
+      tree.insert(10, "ten");
+      tree.insert(11, "11");
+      tree.insert(12, "12");
+      tree.insert(13, "thirteen");
+      tree.insert(14, "fourteen");
+      tree.insert(15, "fifteen");
+      tree.insert(2, "two");
+      tree.insert(16, "sixteen");
+      tree.insert(17, "seventeen");
+      tree.insert(18, "eighteen");
+      tree.insert(19, "nineteen");
+      tree.insert(20, "twenty");
 
-    //   assertNotNull(tree.get(1));
-    //   assertNotNull(tree.get(2));
-    //   assertNotNull(tree.get(3));
-    //   assertNotNull(tree.get(4));
-    //   assertNotNull(tree.get(5));
-    //   assertNotNull(tree.get(6));
-    //   assertNotNull(tree.get(7));
+      assertEquals("one", tree.get(1));
+      assertEquals("two", tree.get(2));
+      assertEquals("three", tree.get(3));
+      assertEquals("four", tree.get(4));
+      assertEquals("five", tree.get(5));
+      assertEquals("six", tree.get(6));
+      assertEquals("seven", tree.get(7));
 
-    //   tree.delete(3);
-    //   tree.delete(4);
+      tree.delete(3);
+      tree.delete(4);
 
-    //   assertNotNull(tree.get(8));
-    //   assertNotNull(tree.get(9));
-    //   assertNotNull(tree.get(10));
-    //   assertNotNull(tree.get(110));
-    //   assertNotNull(tree.get(120));
-    //   assertNotNull(tree.get(13));
-    //   assertNotNull(tree.get(14));
-    //   assertNotNull(tree.get(15));
-    //   assertNotNull(tree.get(16));
+      assertEquals("eight", tree.get(8));
+      assertEquals("nine", tree.get(9));
+      assertEquals("ten", tree.get(10));
+      assertEquals("11", tree.get(11));
+      assertEquals("12", tree.get(12));
+      assertEquals("thirteen", tree.get(13));
+      assertEquals("fourteen", tree.get(14));
+      assertEquals("fifteen", tree.get(15));
+      assertEquals("sixteen", tree.get(16));
 
-    //   tree.delete(110);
-    //   tree.delete(14);
+      tree.delete(11);
+      tree.delete(14);
 
-    //   assertNotNull(tree.get(17));
-    //   assertNotNull(tree.get(18));
-    //   assertNotNull(tree.get(19));
-    //   assertNotNull(tree.get(20));
+      assertEquals("seventeen", tree.get(17));
+      assertEquals("eighteen", tree.get(18));
+      assertEquals("nineteen", tree.get(19));
+      assertEquals("twenty", tree.get(20));
 
-    //   assertNotNull(tree.get(1));
-    //   assertNotNull(tree.get(2));
-    //   assertNotNull(tree.get(5));
-    //   assertNotNull(tree.get(6));
-    //   assertNotNull(tree.get(7));    
-    //   assertNotNull(tree.get(8));
-    //   assertNotNull(tree.get(9));
-    //   assertNotNull(tree.get(10));
-    //   assertNotNull(tree.get(120));
-    //   assertNotNull(tree.get(13));
-    //   assertNotNull(tree.get(15));
-    //   assertNotNull(tree.get(16));
-    //   assertNotNull(tree.get(17));
-    //   assertNotNull(tree.get(18));
-    //   assertNotNull(tree.get(19));
-    //   assertNotNull(tree.get(20));
-    // }
+      assertEquals("one", tree.get(1));
+      assertEquals("two", tree.get(2));
+      assertEquals("five", tree.get(5));
+      assertEquals("six", tree.get(6));
+      assertEquals("seven", tree.get(7));    
+      assertEquals("eight", tree.get(8));
+      assertEquals("nine", tree.get(9));
+      assertEquals("ten", tree.get(10));
+      assertEquals("12", tree.get(12));
+      assertEquals("thirteen", tree.get(13));
+      assertEquals("fifteen", tree.get(15));
+      assertEquals("sixteen", tree.get(16));
+      assertEquals("seventeen", tree.get(17));
+      assertEquals("eighteen", tree.get(18));
+      assertEquals("nineteen", tree.get(19));
+      assertEquals("twenty", tree.get(20));
+
+      tree.delete(5);
+      tree.delete(1);
+      tree.delete(20);
+      tree.delete(13);
+      tree.delete(9);
+      tree.delete(6);
+
+      assertEquals("two", tree.get(2));
+      assertEquals("seven", tree.get(7));    
+      assertEquals("eight", tree.get(8));
+      assertEquals("ten", tree.get(10));
+      assertEquals("12", tree.get(12));
+      assertEquals("fifteen", tree.get(15));
+      assertEquals("sixteen", tree.get(16));
+      assertEquals("seventeen", tree.get(17));
+      assertEquals("eighteen", tree.get(18));
+      assertEquals("nineteen", tree.get(19));
+
+      tree.insert(3, "three");
+      tree.insert(4, "four");
+
+      assertEquals("three", tree.get(3));
+      assertEquals("four", tree.get(4));
+    }
   }
 }
