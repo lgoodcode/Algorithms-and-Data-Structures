@@ -6,6 +6,7 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -69,6 +70,11 @@ public class AVLTree_Test {
     @Test
     void empty_tree_string() {
       assertEquals("{}", tree.toString());
+    }
+
+    @Test
+    void empty_array() {
+      assertArrayEquals(new Object[0], tree.toArray());
     }
 
     @Test
@@ -259,14 +265,20 @@ public class AVLTree_Test {
     }
 
     @Test
+    void toArray() {
+      Object[] arr = { "one", "two", "three", "four", "five" };
+      assertArrayEquals(arr, tree.toArray());
+    }
+
+    @Test
     void to_string() {
       assertEquals("{\n"
-          + "\s\s\"1 -> one\",\n"
-          + "\s\s\"2 -> two\",\n"
-          + "\s\s\"3 -> three\",\n"
-          + "\s\s\"4 -> four\",\n"
-          + "\s\s\"5 -> five\",\n"
-          + "}",
+          + "\s\s1 -> one,\n"
+          + "\s\s2 -> two,\n"
+          + "\s\s3 -> three,\n"
+          + "\s\s4 -> four,\n"
+          + "\s\s5 -> five"
+          + "\n}",
         tree.toString());
     }
 

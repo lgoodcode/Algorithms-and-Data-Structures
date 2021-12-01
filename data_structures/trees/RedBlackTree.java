@@ -101,14 +101,14 @@ public final class RedBlackTree<K, V> extends AbstractTree<K, V> {
 
   /**
    * The sentinel {@code NIL}.
-   * 
+   *
    * <p>
    * Since the {@code RedBlackTree} may need to check the parent of a parent of a
    * node and/or the color of that node, which may not even exist, it requires a
    * circular structure {@code NIL} value which will hold pointers to itself and a
    * default color of {@code Black}.
    * </p>
-   */  
+   */
   private final RBNode<K, V> NIL = new RBNode<K, V>();
 
   /**
@@ -246,32 +246,44 @@ public final class RedBlackTree<K, V> extends AbstractTree<K, V> {
     checkValue(value);
     checkDuplicate(key);
 
+    if (root.isNIL())
+      root = new RBNode<>(key, value);
+    else
+      insertRecursive(root, root, new RBNode<>(key, value));
+
     size++;
+    modCount++;
+  }
 
-    RBNode<K, V> x = root;
-    RBNode<K, V> y = NIL;
-    RBNode<K, V> z = new RBNode<>(key, value);
-
-    while (!x.isNIL()) {
-      y = x;
-
-      if (isLessThan(z, x))
-        x = x.left;
+  /**
+   * Recursively inserts the new node by keeping a reference of the parent node of
+   * the current node. This is so once we reach a leaf, where the left or right of
+   * the parent node is {@code NIL}, we need a reference to it to insert it as
+   * the left or right.
+   *
+   * @param p the parent node of {@code y}
+   * @param x the current node to determine where new node {@code z} is placed
+   * @param y the new node to insert
+   */
+  private void insertRecursive(RBNode<K, V> p, RBNode<K, V> x, RBNode<K, V> y) {
+    if (!x.isNIL()) {
+      if (isLessThan(y, x))
+        insertRecursive(x, x.left, y);
       else
-        x = x.right;
+        insertRecursive(x, x.right, y);
+    }
+    else {
+      y.parent = p;
+
+      if (isLessThan(y, p))
+        p.left = y;
+      else
+        p.right = y;
+
+      y.color = RED;
+      insertFixup(y);
     }
 
-    z.parent = y;
-
-    if (y.isNIL())
-      root = z;
-    else if (isLessThan(z, y))
-      y.left = z;
-    else
-      y.right = z;
-
-    z.color = RED;
-    insertFixup(z);
   }
 
   /**
@@ -504,7 +516,6 @@ public final class RedBlackTree<K, V> extends AbstractTree<K, V> {
   public synchronized <TreeNode extends Node<K, V>> void deleteNode(TreeNode node) {
     checkNode(node);
     checkType(node);
-    size--;
 
     RBNode<K, V> x, y = (RBNode<K, V>) node, _node = y;
     boolean y_color = y.color;
@@ -537,6 +548,9 @@ public final class RedBlackTree<K, V> extends AbstractTree<K, V> {
 
     if (y_color == BLACK)
       deleteFixup(y);
+
+    size--;
+    modCount++;
   }
 
   /**
@@ -617,7 +631,7 @@ public final class RedBlackTree<K, V> extends AbstractTree<K, V> {
             rightRotate(w);
             w = node.parent.right;
           }
-          
+
           /**
            * Case 4: x's sibling w is black, and w's right child is red
            *

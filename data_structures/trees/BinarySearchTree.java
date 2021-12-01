@@ -80,6 +80,12 @@ public final class BinarySearchTree<K, V> extends AbstractTree<K, V> {
   /**
    * {@inheritDoc}
    *
+   * <p>
+   * This is the recursive implementation. The base case is if the root is
+   * {@code null}, which we simply set the new node as the root. Otherwise, we set
+   * the parent and current node as root and insert the new node.
+   * </p>
+   *
    * @throws IllegalArgumentException {@inheritDoc}
    */
   public synchronized void insert(K key, V value) {
@@ -87,29 +93,42 @@ public final class BinarySearchTree<K, V> extends AbstractTree<K, V> {
     checkValue(value);
     checkDuplicate(key);
 
-    Node<K, V> x = root;
-    Node<K, V> y = null;
-    Node<K, V> z = new Node<>(key, value);
-
-    while (x != null) {
-      y = x;
-
-      if (isLessThan(z, x))
-        x = x.left;
-      else
-        x = x.right;
-    }
-
-    z.parent = y;
-
-    if (y == null)
-      root = z;
-    else if (isLessThan(z, y))
-      y.left = z;
+    if (root == null)
+      root = new Node<K, V>(key, value);
     else
-      y.right = z;
+      insertRecursive(root, root, new Node<K, V>(key, value));
 
     size++;
+    modCount++;
+  }
+
+  /**
+   * Recursively inserts the new node by keeping a reference of the parent node of
+   * the current node. This is so once we reach a leaf, where the left or right of
+   * the parent node is {@code null}, we need a reference to it to insert it as
+   * the left or right.
+   *
+   * @param p the parent node of {@code y}
+   * @param x the current node to determine where new node {@code z} is placed
+   * @param y the new node to insert
+   */
+  private void insertRecursive(Node<K, V> p, Node<K, V> x, Node<K, V> y) {
+    if (x != null) {
+      if (isLessThan(y, x))
+        insertRecursive(x, x.left, y);
+      else
+        insertRecursive(x, x.right, y);
+    }
+    else {
+      y.parent = p;
+
+      if (isLessThan(y, p))
+        p.left = y;
+      else
+        p.right = y;
+    }
+
+
   }
 
   /**
@@ -284,6 +303,7 @@ public final class BinarySearchTree<K, V> extends AbstractTree<K, V> {
     }
 
     size--;
+    modCount++;
   }
 
   /**

@@ -647,6 +647,34 @@ public abstract class AbstractTree<K, V> {
   }
 
   /**
+   * Returns an array containing all of the elements in this queue in proper
+   * sequence (from first to last element).
+   *
+   * <p>
+   * The returned array will be "safe" in that no references to it are maintained
+   * by this queue. (In other words, this method must allocate a new array). The
+   * caller is thus free to modify the returned array.
+   * </p>
+   *
+   * <p>
+   * This method acts as bridge between array-based and collection-based APIs.
+   * </p>
+   *
+   * @return an array containing all of the elements in this queue in proper
+   *         sequence
+   */
+  public final Object[] toArray() {
+    if(isEmpty())
+      return new Object[0];
+
+    Queue<V> Q = new Queue<>(size);
+
+    inorderTreeWalk(node -> Q.enqueue(node.value));
+
+    return Q.toArray();
+  }
+
+  /**
    * Implemntation that uses the {@link #inorderTreeWalk(Consumer)} traversal to
    * create a string of all the {@code TreeNode} entries in the tree in order by
    * key.
@@ -659,9 +687,9 @@ public abstract class AbstractTree<K, V> {
 
     StringBuilder sb = new StringBuilder("{\n");
 
-    inorderTreeWalk((Node<K, V> x) -> sb.append("\s\s\"" + x.toString() + "\",\n"));
+    inorderTreeWalk((node) -> sb.append("\s\s" + node.toString() + ",\n"));
 
-    return sb.toString() + "}";
+    return sb.substring(0, sb.length() - 2) + "\n}";
   }
 
   /**
@@ -810,7 +838,7 @@ public abstract class AbstractTree<K, V> {
       synchronized (AbstractTree.this) {
         // Pass the current index to remove the last item
         AbstractTree.this.deleteNode(last);
-        expectedModCount = modCount;
+        expectedModCount++;
         last = null;
       }
     }

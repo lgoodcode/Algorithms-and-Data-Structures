@@ -195,9 +195,8 @@ public final class AVLTree<K, V> extends AbstractTree<K, V> {
    *
    * <p>
    * This is used in the {@link #insert()} and {@link #deleteNode()} processes.
-   * Because the {@code insert()} method uses a key, the parameter is placed at
-   * the end and when used it for {@code delete()} it simply sets the value to
-   * {@code null}
+   * Because the {@code insert()} method uses a key, it holds a reference for the
+   * key. The {@code deleteNode()} method won't use it though.
    * </p>
    *
    * <p>
@@ -215,11 +214,11 @@ public final class AVLTree<K, V> extends AbstractTree<K, V> {
    * x - The parent of the current node z
    * b - The balance factor of node x
    *
-   * @param key the key of the newly inserted node
-   * @param z   the newly inserted node
+   * @param node the newly inserted node or the node to remove
    */
-  private void retracing(boolean type, Node<K, V> node, K key) {
+  private void retracing(boolean type, Node<K, V> node) {
     Node<K, V> g, n, x = node.parent;
+    K key = node.key;
 
     for (int b; x != null; node = x, x = node.parent) {
       b = balanceFactor(x);
@@ -312,30 +311,42 @@ public final class AVLTree<K, V> extends AbstractTree<K, V> {
     checkValue(value);
     checkDuplicate(key);
 
-    size++;
-
-    Node<K, V> z = new Node<>(key, value);
-    Node<K, V> y = null;
-    Node<K, V> q = root;
-
-    while (q != null) {
-      y = q;
-
-      if (isLessThan(z, q))
-        q = q.left;
-      else
-      q = q.right;
-    }
-
-    z.parent = y;
-    if (y == null)
-      root = z;
-    else if (isLessThan(z, y))
-      y.left = z;
+    if (root == null)
+      root = new Node<>(key, value);
     else
-      y.right = z;
+      insertRecursive(root, root, new Node<>(key, value));
 
-    retracing(INSERT, z, key);
+    size++;
+    modCount++;
+  }
+
+  /**
+   * Recursively inserts the new node by keeping a reference of the parent node of
+   * the current node. This is so once we reach a leaf, where the left or right of
+   * the parent node is {@code null}, we need a reference to it to insert it as
+   * the left or right.
+   *
+   * @param p the parent node of {@code y}
+   * @param x the current node to determine where new node {@code z} is placed
+   * @param y the new node to insert
+   */
+  private void insertRecursive(Node<K, V> p, Node<K, V> x, Node<K, V> y) {
+    if (x != null) {
+      if (isLessThan(y, x))
+        insertRecursive(x, x.left, y);
+      else
+        insertRecursive(x, x.right, y);
+    }
+    else {
+      y.parent = p;
+
+      if (isLessThan(y, p))
+        p.left = y;
+      else
+        p.right = y;
+
+      retracing(INSERT, y);
+    }
   }
 
   /**
@@ -435,7 +446,6 @@ public final class AVLTree<K, V> extends AbstractTree<K, V> {
   public synchronized <TreeNode extends Node<K, V>> void deleteNode(TreeNode node) {
     checkNode(node);
     checkType(node);
-    size--;
 
     Node<K, V> y, _node = (Node<K, V>) node;
 
@@ -456,7 +466,10 @@ public final class AVLTree<K, V> extends AbstractTree<K, V> {
       y.left.parent = y;
     }
 
-    retracing(DELETE, _node, null);
+    retracing(DELETE, _node);
+
+    size--;
+    modCount++;
   }
 
   /**

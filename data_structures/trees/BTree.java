@@ -88,7 +88,7 @@ import data_structures.queues.Queue;
  * </p>
  */
 public final class BTree<K, V> {
-  public static class BTreeNode<K, V> {
+  public static final class BTreeNode<K, V> {
     /**
      * The child {@code BTreeNodes}.
      */
@@ -137,12 +137,20 @@ public final class BTree<K, V> {
       leaf = true;
     }
 
+    public K[] getKeys() {
+      return keys;
+    }
+
     public K getMinKey() {
       return keys[0];
     }
 
     public K getMaxKey() {
       return count > 0 ? keys[count - 1] : null;
+    }
+
+    public V[] getValues() {
+      return values;
     }
 
     public V getMinValue() {
@@ -1356,6 +1364,12 @@ public final class BTree<K, V> {
    * Begins traversal from the supplied {@code BTreeNode} and performs an action
    * through side-effects.
    * </p>
+   * 
+   * <p>
+   * Iterates up to the {@code count} property, which is the number of keys. The
+   * keys act as a median split between the keys in the children, therefore, the
+   * node contains {@code count + 1} children.
+   * </p>
    *
    * @param node     the node to start traversing from
    * @param callback the function with the given action to perform on each
@@ -1364,7 +1378,7 @@ public final class BTree<K, V> {
   public void walk(BTreeNode<K, V> node, Consumer<BTreeNode<K, V>> callback) {
     if (node != null) {
       if (!node.leaf) {
-        for (int i=0; i < node.children.length; i++) {
+        for (int i = 0; i <= node.count; i++) {
           if (node.children[i] != null)
             walk(node.children[i], callback);
         }
@@ -1388,6 +1402,37 @@ public final class BTree<K, V> {
   }
 
   /**
+   * Returns an array containing all of the elements in this queue in proper
+   * sequence (from first to last element).
+   *
+   * <p>
+   * The returned array will be "safe" in that no references to it are maintained
+   * by this queue. (In other words, this method must allocate a new array). The
+   * caller is thus free to modify the returned array.
+   * </p>
+   *
+   * <p>
+   * This method acts as bridge between array-based and collection-based APIs.
+   * </p>
+   *
+   * @return an array containing all of the elements in this queue in proper
+   *         sequence
+   */
+  public Object[] toArray() {
+    if (isEmpty())
+      return new Object[0];
+      
+    Queue<V> Q = new Queue<>(size);
+
+    walk((node) -> {
+      for (int i = 0; i < node.count; i++)
+        Q.enqueue(node.values[i]);
+    });
+
+    return Q.toArray();
+  }
+
+  /**
    * Implemntation that uses the {@link #walk(Consumer)} traversal to create a
    * string of all the {@code BTreeNode} entries in the tree in order by key.
    *
@@ -1400,12 +1445,11 @@ public final class BTree<K, V> {
     StringBuilder sb = new StringBuilder("{\n");
 
     walk((BTreeNode<K, V> node) -> {
-      for (int i=0; i < node.keys.length; i++)
-        if (node.keys[i] != null)
-          sb.append("\s\s\"" + node.keys[i] + " -> " + node.values[i] + "\",\n");
+      for (int i = 0; i < node.count; i++)
+        sb.append("\s\s" + node.keys[i] + " -> " + node.values[i] + ",\n");
     });
 
-    return sb.toString() + "}";
+    return sb.substring(0, sb.length() - 2) + "\n}";
   }
 
   /**
@@ -1413,30 +1457,27 @@ public final class BTree<K, V> {
    * {@code BTreeNode} and index pair. Is used in the {@link BTree#predecessor()}
    * and {@link BTree#successor()} methods to retrieve the key and value.
    */
-  protected class Pair {
-    BTreeNode<K, V> node;
-    int index;
+  public final class Pair {
+    private BTreeNode<K, V> node;
+    private int index;
 
-    Pair(BTreeNode<K, V> node, int index) {
+    private Pair(BTreeNode<K, V> node, int index) {
       this.node = node;
       this.index = index;
     }
 
-    BTreeNode<K, V> getNode() {
+    public BTreeNode<K, V> getNode() {
       return node;
     }
 
-    K getKey() {
+    public K getKey() {
       return node.keys[index];
     }
 
-    V getValue() {
+    public V getValue() {
       return node.values[index];
     }
 
-    int getIndex() {
-      return index;
-    }
   }
 
   /**
@@ -1521,7 +1562,7 @@ public final class BTree<K, V> {
      *
      * @param type the type of object to enumerate
      */
-    private Itr(int type) {
+    Itr(int type) {
       this.type = type;
       nodes = new Queue<>(BTree.this.size);
 
