@@ -1,62 +1,66 @@
 package data_structures.tries;
 
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+
 import data_structures.hashtables.DoubleHashing;
 
 public final class TrieHash<T> extends AbstractTrie<T> {
-  public static class HashNode<T> extends Node<T> {
+  private static class Node<T> extends AbstractNode<T> {
     /**
-     * The hashtable containing the child {@code TrieHashNodes}.
+     * The hashtable containing the child nodes.
      */
-    DoubleHashing<Character, HashNode<T>> children;
+    DoubleHashing<Character, Node<T>> children;
 
     /**
-     * The parent {@code TrieHashNode} used for tracing up to the root.
+     * The parent {@code TrieNode}. Used for tracing up to the root.
      */
-    HashNode<T> parent;
+    Node<T> parent;
 
     /**
-     * Initializes an empty node with the specified key. The key is used for the
-     * hashtable to map the node and identify what words it could contain.
+     * Initializes an empty node with the specified key. The key is used to
+     * determine what position the node is in and what words it could contain.
      *
-     * @param key    the to set the node with
-     * @param parent the parent {@code HashNode} that this new child node will be
-     *               placed under for tracing up in the {@link Trie#getPrefix()}
-     *               method.
+     * @param key    the character key
+     * @param parent the parent node that this new child node will be placed under.
      */
-    HashNode(char key, HashNode<T> parent) {
-      super(key, parent);     
-      children = new DoubleHashing<Character, HashNode<T>>();
+    Node(char key, Node<T> parent) {
+      this.key = key;
+      this.parent = parent;
+      hasWord = false;
+      children = new DoubleHashing<Character, Node<T>>(26);
     }
 
     /**
-     * Initializes the root node with no key or value.
+     * Default constructor used for the root {@code TrieNode}.
      */
-    HashNode() {
+    Node() {
       super();
-      children = new DoubleHashing<Character, HashNode<T>>();
+      children = new DoubleHashing<Character, Node<T>>(26);
+    }
+
+    public Node<T> getParent() {
+      return parent;
     }
 
     /**
-     * Returns the child {@code TrieNode} for the given character.
+     * Returns the child node for the given character key.
      *
-     * @param c the character of the child to get
-     * @return the child node
+     * @param c the character key of the child to get
+     * @return the child node or {@code null} if none
      */
-    @SuppressWarnings("unchecked")
-    protected HashNode<T> getChild(char c) {
+    public Node<T> getChild(char c) {
       return children.get(c);
     }
 
     /**
-     * Sets a new child {@code TrieNode} for the specified character index.
+     * Sets a new child node for the specified character key.
      *
-     * @param <TrieNode> a subclass of {@link AbstractTrieNode}
-     * @param c the character index slot to insert the new child
-     * @param child the new {@TrieNode} child
+     * @param c     the character key to insert the new child
+     * @param child the new child node
      */
-    @SuppressWarnings("unchecked")
-    public <TrieNode extends Node<T>> void setChild(char c, TrieNode child) {
-      children.insert(c, (HashNode<T>) child);
+    public void setChild(char c, TrieNode<T> child) {
+      children.insert(c, (Node<T>) child);
     }
 
     /**
@@ -65,54 +69,47 @@ public final class TrieHash<T> extends AbstractTrie<T> {
      *
      * @param c the character key of the node to remove
      */
-    protected void removeChild(char c) {
+    public void removeChild(char c) {
       children.remove(c);
     }
 
     /**
-     * Gets the array of {@TrieNode} children. Used for iterating for the
-     * {@code Trie.toString()}.
+     * Gets the array of {@TrieNode} children nodes.
      *
-     * @param <TrieNode> a subclass of {@link AbstractTrieNode}
-     * @return the children
+     * @return the children nodes.
      */
     @SuppressWarnings("unchecked")
-    protected <TrieNode extends Node<T>> TrieNode[] getChildren() {
-      Iterable<HashNode<T>> itr = children.values();
-      HashNode<T>[] nodes = (HashNode<T>[]) new HashNode<?>[children.size()];
+    public Node<T>[] getChildren() {
+      Node<T>[] nodes = (Node<T>[]) new Node<?>[children.size()];
+      Iterable<Node<T>> itr = children.values();
       int idx = 0;
 
-      for (HashNode<T> node : itr)
+      for (Node<T> node : itr)
         nodes[idx++] = node;
-      return (TrieNode[]) nodes;
+      return nodes;
     }
   }
 
   /**
-   * The root node of the trie that will hold no value.
+   * The root node of the {@code Trie}. Will hold no value, just child nodes.
    */
-  private HashNode<T> root;
+  private Node<T> root;
 
   /**
    * Creates a new, empty, trie, with the root initialized to a {@code TrieNode}
    * that has a slot for each letter of the alphabet (26).
    */
   public TrieHash() {
-    root = new HashNode<T>();
+    root = new Node<T>();
   }
 
   /**
    * {@inheritDoc}
-   *
-   * @param <TrieNode> {@link Abstract.Node} subclass
-   * @throws NullPointerException {@inheritDoc}
-   * @throws IllegalArgumentException {@inheritDoc}
    */
-  protected <TrieNode extends AbstractTrie.Node<T>> void checkNode(TrieNode node) {
-    if (node == null)
-      throw new NullPointerException("TrieNode cannot be null.");
-    if (node.getClass() != HashNode.class)
-      throw new IllegalArgumentException("Node must be an instance of Trie.HashNode");
+  public void clear() {
+    root = new Node<T>();
+    size = 0;
+    modCount++;
   }
 
   /**
@@ -120,56 +117,53 @@ public final class TrieHash<T> extends AbstractTrie<T> {
    *
    * @throws IllegalArgumentException {@inheritDoc}
    */
-  @Override
   public synchronized void insert(String word, T value) {
     checkWord(word);
     checkValue(value);
 
-    String currentWord = parseWord(word);
-    HashNode<T> child, newChild, node = root;
-    char currChar;
+    insertRecursive(root, parseWord(word), value);
 
     size++;
+    modCount++;
+  }
 
-    while (currentWord.length() > 0) {
-      currChar = currentWord.charAt(0);
-      child = node.getChild(currChar);
-      node.hasWord = true;
-
-      if (child != null)
-        node = child;
-      else {
-        newChild = new HashNode<T>(currChar, node);
-        node.setChild(currChar, newChild);
-        node = newChild;
-      }
-
-      currentWord = currentWord.substring(1);
+  private synchronized void insertRecursive(Node<T> node, String word, T value) {
+    if (word.length() == 0) {
+      node.value = value;
+      return;
     }
 
-    node.value = value;
+    char c = word.charAt(0);
+    Node<T> child = node.getChild(c);
+    node.hasWord = true;
+
+    if (child == null) {
+      child = new Node<T>(c, node);
+      node.setChild(c, child);
+    }
+
+    insertRecursive(child, word.substring(1), value);
   }
 
   /**
    * {@inheritDoc}
+   *
+   * @throws IllegalArgumentException {@inheritDoc}
    */
-  @SuppressWarnings("unchecked")
-  public HashNode<T> search(String word) {
-    String currentWord = parseWord(word);
-    HashNode<T> node = root;
+  protected Node<T> search(String word) {
+    checkWord(word);
 
-    if (currentWord.isBlank())
+    if (isEmpty())
+      return null;
+    return searchRecursive(root, parseWord(word));
+  }
+
+  private Node<T> searchRecursive(Node<T> node, String word) {
+    if (node == null || (!node.hasWord && !node.isWord()))
+      return null;
+    if (word.length() == 0)
       return node;
-
-    while (currentWord.length() > 0) {
-      if (node == null || !node.hasWord)
-        return null;
-
-      node = node.getChild(currentWord.charAt(0));
-      currentWord = currentWord.substring(1);
-    }
-
-    return node;
+    return searchRecursive(node.getChild(word.charAt(0)), word.substring(1));
   }
 
   /**
@@ -178,37 +172,94 @@ public final class TrieHash<T> extends AbstractTrie<T> {
    * @throws IllegalArgumentException {@inheritDoc}
    */
   public synchronized void delete(String word) {
-    checkWord(word);
-
-    HashNode<T> parent, node = search(word);
-    boolean hasWord = false;
+    Node<T> node = search(word);
 
     if (node == null)
       return;
 
-    size--;
     node.value = null;
 
-    for (parent = node.parent; parent != null; node = parent, parent = node.parent) {
-      if (node.children.isEmpty() && !node.isWord())
-        parent.removeChild(node.key);
+    // If node doesn't contain a child with a word, remove it and start
+    // the cleanup from the parent node
+    if (!node.hasWord) {
+      node.parent.removeChild(node.key);
+      deleteCleanup(node.parent);
+    }
+    else
+      deleteCleanup(node);
 
-      for (HashNode<T> child : node.children.values()) {
-        if (child.hasWord || child.isWord()) {
-          hasWord = true;
-          break;
-        }
+    size--;
+    modCount++;
+  }
 
-        if (hasWord)
-          break;
-        else if (!hasWord && node.isWord()) {
-          node.hasWord = false;
-          break;
-        }
-        else
-          parent.removeChild(node.key);
+  /**
+   * Performs the checks on the node to determine if it contains any child node
+   * with a word or if it is a word itself. If it contains a child that contains
+   * child nodes with a word, or is a word itself, it stops the process since the
+   * node cannot be removed. If it doesn't contain any child nodes but is a word,
+   * it will set the {@code hasWord} flag to {@code false} and stop. If the node
+   * doesn't contain any child nodes with a word and isn't a word, we remove it
+   * and continue the process up the with the parent.
+   *
+   * @param node the node to perform the cleanup on
+   */
+  private synchronized void deleteCleanup(Node<T> node) {
+    boolean hasWord = false;
+
+    for (Node<T> child : node.getChildren()) {
+      if (child != null && (child.hasWord || child.isWord())) {
+        hasWord = true;
+        break;
       }
     }
+
+    if (!hasWord) {
+      if (node.isWord())
+        node.hasWord = false;
+      else {
+        node.parent.removeChild(node.key);
+        deleteCleanup(node.parent);
+      }
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @throws NullPointerException {@inheritDoc}
+   */
+  protected String getPrefix(TrieNode<T> node) {
+    checkNode(node);
+    return getPrefixRecursive((Node<T>) node, "");
+  }
+
+  protected String getPrefixRecursive(TrieNode<T> node, String prefix) {
+    if (node.isRoot())
+      return prefix;
+    return getPrefixRecursive(node.getParent(), node.getKey() + prefix);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public void walk(Consumer<TrieNode<T>> callback) {
+    if (!isEmpty())
+      walk(root, callback);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public void walk(BiConsumer<TrieNode<T>, String> callback) {
+    if (!isEmpty())
+      walk(root, "", callback);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public String[] findWords() {
+    return isEmpty() ? new String[0] : findWords(root, "");
   }
 
 }

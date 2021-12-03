@@ -24,8 +24,6 @@ import data_structures.tries.Trie;
 public class Trie_Test {
   Trie<Integer> trie;
   Trie<String> trie2;
-  Trie.Node<Integer> node;
-  Trie.Node<String> node2;
 
   @Nested
   class When_New {
@@ -53,26 +51,19 @@ public class Trie_Test {
     }
 
     @Test
-    void empty_trie_string() {
+    void empty_array() {
+      assertArrayEquals(new Object[0], trie.toArray());
+    }
+
+    @Test
+    void empty_string() {
       assertEquals("{}", trie.toString());
     }
 
     @Test
-    void getPrefix_throws_on_null() {
-      assertThrows(NullPointerException.class, () -> trie.getPrefix(null));
-    }
-
-    @Test
-    void getPrefix() {
-      trie.insert("one", 1);
-      assertEquals("one", trie.getPrefix(trie.search("one")));
-    }
-
-    @Test
-    void findWords_is_null() {
-      assertNull(trie.findWords());
-      assertNull(trie.findWords(""));
-      assertNull(trie.findWords("a"));
+    void findWords_is_empty() {
+      assertArrayEquals(new String[0], trie.findWords());
+      assertArrayEquals(new String[0], trie.findWords("a"));
     }
 
     @ParameterizedTest
@@ -85,7 +76,7 @@ public class Trie_Test {
     }
 
     @Test
-    void keys_is_empty() {
+    void words_is_empty() {
       Iterator<String> words = trie.wordsIterator();
       assertFalse(words.hasNext());
       assertThrows(NoSuchElementException.class, () -> words.next());
@@ -100,13 +91,6 @@ public class Trie_Test {
       assertThrows(IllegalStateException.class, () -> values.remove());
     }
 
-    @Test
-    void entries_is_empty() {
-      Iterator<Trie.Node<Integer>> entries = trie.entriesIterator();
-      assertFalse(entries.hasNext());
-      assertThrows(NoSuchElementException.class, () -> entries.next());
-      assertThrows(IllegalStateException.class, () -> entries.remove());
-    }
   }
 
   @Nested
@@ -141,10 +125,10 @@ public class Trie_Test {
     }
 
     @Test
-    void search() {
-      node = trie.search("four");
-
-      assertEquals(4, node.getValue());
+    void clear() {
+      trie.clear();
+      assertEquals(0, trie.size());
+      assertTrue(trie.isEmpty());
     }
 
     @Test
@@ -154,6 +138,12 @@ public class Trie_Test {
       assertEquals(7, trie.size());
       assertNull(trie.get("one"));
       assertFalse(trie.hasWord("one"));
+    }
+
+    @Test
+    void findWords() {
+      String[] arr = { "five", "four" };
+      assertArrayEquals(arr, trie.findWords("f"));
     }
 
     @Test
@@ -189,22 +179,6 @@ public class Trie_Test {
     }
 
     @Test
-    void entries() {
-      Iterator<Trie.Node<Integer>> entries = trie.entriesIterator();
-      assertTrue(entries.hasNext());
-      assertEquals(8, entries.next().getValue());
-      assertEquals(7, entries.next().getValue());
-      assertEquals(6, entries.next().getValue());
-      assertEquals(5, entries.next().getValue());
-      assertEquals(4, entries.next().getValue());
-      assertEquals(1, entries.next().getValue());
-      assertEquals(3, entries.next().getValue());
-      assertEquals(2, entries.next().getValue());
-      assertFalse(entries.hasNext());
-      assertThrows(NoSuchElementException.class, () -> entries.next());
-    }
-
-    @Test
     void iterator_remove() {
       Iterator<Integer> values = trie.valuesIterator();
       assertTrue(values.hasNext());
@@ -224,18 +198,24 @@ public class Trie_Test {
       assertThrows(NoSuchElementException.class, () -> values.next());
       assertEquals(7, trie.size());
     }
+
+    @Test
+    void toArray() {
+      Object[] arr = { 8, 7, 6, 5, 4, 1, 3, 2 };
+      assertArrayEquals(arr, trie.toArray());
+    }
     
     @Test
     void to_string() {
       assertEquals("{\n"
-          + "\s\s\"boar -> 8\",\n"
-          + "\s\s\"boars -> 7\",\n"
-          + "\s\s\"boats -> 6\",\n"
-          + "\s\s\"five -> 5\",\n"
-          + "\s\s\"four -> 4\",\n"
-          + "\s\s\"one -> 1\",\n"
-          + "\s\s\"three -> 3\",\n"
-          + "\s\s\"two -> 2\",\n"
+          + "\s\sboar -> 8,\n"
+          + "\s\sboars -> 7,\n"
+          + "\s\sboats -> 6,\n"
+          + "\s\sfive -> 5,\n"
+          + "\s\sfour -> 4,\n"
+          + "\s\sone -> 1,\n"
+          + "\s\sthree -> 3,\n"
+          + "\s\stwo -> 2\n"
           + "}",
         trie.toString());
     }
@@ -271,7 +251,6 @@ public class Trie_Test {
     void findWords() {
       String[] words = { "boa", "boar", "boat", "boats" };
       assertArrayEquals(words, trie.findWords("boa"));
-      assertArrayEquals(words, trie.findWords(""));
       assertArrayEquals(words, trie.findWords());
     }
   }
@@ -303,6 +282,12 @@ public class Trie_Test {
       trie.insert("eighteen", 18);
       trie.insert("nineteen", 19);
       trie.insert("twenty", 20);
+
+      String[] arr = { "seven", "seventeen", "six", "sixteen" };
+      assertArrayEquals(arr, trie.findWords("s"));
+
+      assertArrayEquals(new String[0], trie.findWords("sh"));
+
 
       assertNotNull(trie.get("one"));
       assertNotNull(trie.get("two"));
