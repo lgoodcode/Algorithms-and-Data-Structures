@@ -12,6 +12,8 @@ public interface TrieNode<T> {
 
   T getValue();
 
+  void setValue(T value);
+
   TrieNode<T> getParent();
 
   /**
@@ -21,6 +23,8 @@ public interface TrieNode<T> {
    * @return if the node has a child node with a word
    */
   boolean hasWord();
+
+  void setHasWord(boolean hasWord);
 
   /**
    * Determines whether the current node is a word with a corresponding value.
