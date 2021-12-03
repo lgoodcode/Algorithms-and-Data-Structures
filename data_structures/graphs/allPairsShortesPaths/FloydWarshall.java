@@ -108,7 +108,7 @@ public final class FloydWarshall extends ASPS {
    * Runs the Floyd Warshall algorithm on the specified graph, which will find all
    * the shortest paths possible for all vertices to all vertices with the least
    * weight. Will produce a table of the weights from vertex to vertex or
-   * {@link Graph.NIL} which is {@code Infinity} to represent not possible path
+   * {@link Graph#NIL} which is {@code Infinity} to represent not possible path
    * since {@code null} cannot be used for primitive values.
    *
    * @param graph the graph matrix to run the algorithm on

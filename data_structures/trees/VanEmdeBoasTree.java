@@ -1077,10 +1077,12 @@ public final class VanEmdeBoasTree<T> {
         throw new IllegalStateException("Tree Enumerator. No last item.");
       if (modCount != expectedModCount)
         throw new ConcurrentModificationException();
-      // Pass the key of the last returned element to remove
-      VanEmdeBoasTree.this.delete(last);
-      expectedModCount++;;
-      last = -1;
+      
+      synchronized (VanEmdeBoasTree.this) {
+        delete(last);
+        expectedModCount++;;
+        last = -1;
+      }
     }
   }
 
