@@ -246,6 +246,33 @@ public final class Graph {
         throw new IllegalCallerException("This edge is not part of a weighted graph.");
       return w;
     }
+
+    /**
+     * Converts the edge into an array to be accessed publicly outside the
+     * implementing code. The array will consist of the {@code u} and {@code v}
+     * vertices as the {@code 0} and {@code 1}, respectively. If the graph is
+     * weighted, it will have the weight as the third value of the array, {@code 2}.
+     * 
+     * @return the edge in an {@code Integer} array.
+     */
+    public Integer[] toArray() {
+      if (!weighted) {
+        Integer[] arr = { u, v };
+        return arr;
+      }
+
+      Integer[] arr = { u, v, w };
+      return arr;
+    }
+
+    /**
+     * Prints the edge in the normal graph format.
+     * 
+     * @return the edge string
+     */
+    public String toString() {
+      return "(" + u + ", " + v + ")";
+    }
   }
 
   /**

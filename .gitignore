@@ -4,5 +4,8 @@
 # Ignore compiled java class files
 **/*.class
 
+# Ignore incompleted files (prefixed with two underscores)
+**/__*.*
+
 # Ignore personal notes
 notes.md
