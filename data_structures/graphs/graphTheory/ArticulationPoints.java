@@ -156,7 +156,7 @@ public final class ArticulationPoints {
     V[u].visited = true;
     // Vertex u is now discovered, its earliest discovered vertex it is connected
     // to is itself; discoverty time is equal to u.low
-    V[u].disc = V[u].low = ++time[0];
+    V[u].disc = V[u].low = time[0]++;
 
     for (int v : G.getAdjacentVertices(u)) {
       if (!V[v].visited) {

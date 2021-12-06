@@ -156,18 +156,26 @@ public final class Graph {
 
   /**
    * Returns the transpose of the current graph, which is all the edges reversed.
+   * If will also ensure vertices that don't have edges are added as well.
    *
    * @return the transpose of the graph
    */
   public Graph transpose() {
     Graph G = new Graph(rows, directed, weighted);
+    Graph.Edge[] edges;
+    Graph.Edge edge;
     int v;
 
     for (int u : getVertices()) {
-      for (Edge edge : getEdges(u)) {
-        v = edge.getVertices()[1];
+      edges = getEdges(u);
 
-        if (!G.hasEdge(u, v)) {
+      if (edges.length== 0)
+        addVertex(u);
+      else {
+        for (int i = 0; i < edges.length; i++) {
+          edge = edges[i];
+          v = edge.getVertices()[1];
+
           if (weighted)
             G.addEdge(v, u, edge.getWeight());
           else

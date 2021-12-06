@@ -85,10 +85,11 @@ public final class BiconnectedComponent {
    * @param u     the current vertex
    */
   private static void BCC_DFS(Graph G, Node[] V, LinkedList<Object[]> BCC,
-Stack<Graph.Edge> edges, int[] time, int u) {
+    Stack<Graph.Edge> edges, int[] time, int u) 
+  {
     int child = 0;
     V[u].visited = true;
-    V[u].disc = V[u].low = ++time[0];
+    V[u].disc = V[u].low = time[0]++;
 
     for (int v : G.getAdjacentVertices(u)) {
       Graph.Edge edge = G.getEdge(u, v);
