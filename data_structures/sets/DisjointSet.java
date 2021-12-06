@@ -125,7 +125,7 @@ public final class DisjointSet<T> {
 
   /**
    * Links together two disjoint-set trees. Makes the disjoint-set with the larger
-   * rank the parent of the two. If their ranks are equal, it will make the second
+   * rank the parent of the two. If their ranks are equal, it will make the first
    * set the parent and increase its rank to distinguish it as the parent of the
    * two.
    * 
@@ -143,10 +143,10 @@ public final class DisjointSet<T> {
     if (set1.rank > set2.rank)
       set2.parent = set1;
     else {
-      set1.parent = set2;
+      set2.parent = set1;
 
       if (set1.rank == set2.rank)
-        set2.rank++;
+        set1.rank++;
     }
   }
 

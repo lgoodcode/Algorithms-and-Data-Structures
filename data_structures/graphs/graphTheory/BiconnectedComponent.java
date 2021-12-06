@@ -5,8 +5,10 @@ import data_structures.linkedLists.LinkedList;
 import data_structures.stacks.Stack;
 
 /**
- * <i><b>Biconnected Component</b></i>: A maximal set of edges such that any two
- * edges in the set lie on a common simple cycle.
+ * <i><b>Biconnected Component - </b></i>A maximal set of edges such that any two
+ * edges in the set lie on a common simple cycle. Simply put; a connected
+ * component that consists of at least two edges where even with the removal of
+ * any vertex, all vertices are still reachable from any vertex.
  *
  * <p>
  * A graph is Biconnected if:

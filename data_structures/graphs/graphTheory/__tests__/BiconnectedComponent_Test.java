@@ -68,7 +68,7 @@ public class BiconnectedComponent_Test {
   }
 
   @Test
-  void BiconnectedComponent() {
+  void biconnectedComponent() {
     assertArrayEquals(BCC, BiconnectedComponent.compute(G));
   }
 }
