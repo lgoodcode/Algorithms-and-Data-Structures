@@ -16,10 +16,10 @@ import data_structures.sets.DisjointSet;
  * form a connected component, where they are all reachable from each other.
  * </p>
  */
-public final class ConnectedComponent extends GraphTheory {
-  // Prevent this class from being instantiated
+public final class ConnectedComponent {
+  // Prevent this algorithm from being instantiated
   public ConnectedComponent() {
-    super();
+    throw new NoClassDefFoundError("Cannot instantiate this class.");
   }
 
   public static Object[] compute(Graph graph) {

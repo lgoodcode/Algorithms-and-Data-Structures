@@ -19,10 +19,19 @@ import data_structures.stacks.Stack;
  * </ul>
  * </p>
  */
-public final class BiconnectedComponent extends GraphTheory {
+public final class BiconnectedComponent {
+  private static class Node {
+    int disc;
+    int low;
+    int parent;
+    boolean visited;
+
+    Node() {}
+  }
+
   // Prevent this class from being instantiated
   public BiconnectedComponent() {
-    super();
+    throw new NoClassDefFoundError("Cannot instantiate this class.");
   }
 
   /**

@@ -1,7 +1,7 @@
 package data_structures.graphs.graphTheory;
 
 import data_structures.graphs.Graph;
-import data_structures.queues.Queue;
+import data_structures.linkedLists.LinkedList;
 
 /**
  * <h3>Articulation Points {@code O(V + E)}</h3>
@@ -9,7 +9,7 @@ import data_structures.queues.Queue;
  * <p>
  * <i><b>Articulation Points</b></i>: A vertex whose removal diconnects
  * {@code G}. More so, if removed, and all the edges associated with it results
- * in the increase of the number of <i>connected components</i>. They represent
+ * in the increase of the number of <i>Connected Components</i>. They represent
  * vulnerabilities in a network because if that single point is removed then the
  * graph is no longer connected and there is no reachable path between all
  * points.
@@ -72,10 +72,49 @@ import data_structures.queues.Queue;
  * }</i>
  * </p>
  */
-public final class ArticulationPoints extends GraphTheory {
-  // Prevent this class from being instantiated
+public final class ArticulationPoints {
+  /**
+   * The node used to hold the attributes of the vertices for the algorithms.
+   */
+  private static class Node {
+    /**
+     * Whether the vertex has been visited through the DFS call yet.
+     */
+    boolean visited;
+
+    /**
+     * The time the vertex was discovered (how many vertices it took to reach this
+     * one).
+     */
+    int disc;
+
+    /**
+     * The time of the earliest discovered vertex to where any vertices under the
+     * subtree of this vertex has a back edge.
+     */
+    int low;
+
+    /**
+     * The parent vertex to reach this vertex.
+     */
+    int parent;
+
+    /**
+     * Whether this vertex has been marked as an Articulation Point or not to
+     * prevent duplicates being added in the queue to return an array of distinct
+     * vertices.
+     */
+    boolean AP;
+
+    Node() {
+      low = Integer.MAX_VALUE;
+      parent = Graph.NIL;
+    }
+  }
+  
+  // Prevent this algorithm from being instantiated
   public ArticulationPoints() {
-    super();
+    throw new NoClassDefFoundError("Cannot instantiate this class.");
   }
 
   /**
@@ -86,7 +125,7 @@ public final class ArticulationPoints extends GraphTheory {
    */
   public static Object[] compute(Graph graph) {
     Node[] V = new Node[graph.getRows()];
-    Queue<Integer> AP = new Queue<>(graph.getNumVertices());
+    LinkedList<Integer> AP = new LinkedList<>();
     int[] time = {0};
 
     for (int u : graph.getVertices())
@@ -107,11 +146,11 @@ public final class ArticulationPoints extends GraphTheory {
    *
    * @param G    the graph
    * @param V    the array of nodes holding the attributes
-   * @param AP   the queue to add the AP vertices
+   * @param AP   the linkedlist to add the AP vertices
    * @param time the current time for vertices visited
    * @param u    the current vertex
    */
-  private static void AP_DFS(Graph G, Node[] V, Queue<Integer> AP, int[] time, int u) {
+  private static void AP_DFS(Graph G, Node[] V, LinkedList<Integer> AP, int[] time, int u) {
     // Counts the number of children of vertex u
     int child = 0;
     V[u].visited = true;
@@ -129,7 +168,7 @@ public final class ArticulationPoints extends GraphTheory {
         AP_DFS(G, V, AP, time, v);
         // When DFS returns, v.low will have the discovery time of the earliest
         // discovered vertex that can be reached from any vertex in the subtree
-        // rooted at v. So, set it u.low to the minimum of itself and v.low
+        // rooted at v. So, set u.low to the minimum of itself and v.low
         V[u].low = Math.min(V[u].low, V[v].low);
         // u is an AP if: u is the root (no parent) with more than one child
         // OR if u is not the root and vertex v's earliest discovered vertex
@@ -141,7 +180,7 @@ public final class ArticulationPoints extends GraphTheory {
           // it and add to queue to prevent duplicates
           if (!V[u].AP) {
             V[u].AP = true;
-            AP.enqueue(u);
+            AP.insertLast(u);
           }
         }
       }
